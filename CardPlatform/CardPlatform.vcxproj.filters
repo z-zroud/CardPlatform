@@ -1,0 +1,329 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{70906482-851e-4783-bf0d-fc4c2527da04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Icon">
+      <UniqueIdentifier>{b6c3c5c2-b21d-43df-b05e-9433e88a08d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DP">
+      <UniqueIdentifier>{75350a6f-8499-4e99-8634-379bb51cf9b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util">
+      <UniqueIdentifier>{384988cf-689c-43fd-b37b-1e7cb60cc1d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Personalization">
+      <UniqueIdentifier>{d098fab8-b1b5-4989-a8e5-0b2f15514459}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CardCheck">
+      <UniqueIdentifier>{ca9bbaa9-c1a7-4e00-a026-7c2a7366ab6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DP">
+      <UniqueIdentifier>{3bfe43d2-2064-442d-9060-008b74f4838f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CardCheck">
+      <UniqueIdentifier>{d3cd3a2e-c5c0-4061-b547-616c0315db67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Personalization">
+      <UniqueIdentifier>{6e53743c-5ffe-43df-8ba1-a7b56eff09ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{a7702a72-2268-4d01-b5e3-7a0c6595fb44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DP\YLDP">
+      <UniqueIdentifier>{b1866407-f1df-4905-9108-22280ebea0bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DP\GEDP">
+      <UniqueIdentifier>{7284c0ce-f8e8-421c-b81c-972b811d0944}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DP\HTDP">
+      <UniqueIdentifier>{608c9a10-d707-4797-bdb9-51cec82c2a9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DP\GEDP">
+      <UniqueIdentifier>{7b3967e7-6e28-4ef6-871e-c636a69af8b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DP\HTDP">
+      <UniqueIdentifier>{5f4d23a2-6a59-42da-adfc-87424b6b72ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DP\YLDP">
+      <UniqueIdentifier>{5528e378-c3fc-4412-9bf4-8ba6645f70c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tool">
+      <UniqueIdentifier>{64dc431d-eabb-43be-877b-0339512686cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tool">
+      <UniqueIdentifier>{760d33e1-1532-4ede-b8bf-3f33f3a33e76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\MainUI">
+      <UniqueIdentifier>{33d47dee-908b-417a-89f2-68f66613d148}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MainUI">
+      <UniqueIdentifier>{f88fc9d9-eef2-4108-b995-6e5551628233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Util\Sqlite3">
+      <UniqueIdentifier>{12f6e961-8bff-4083-8d77-e1f566f82e1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util\Sqlite3">
+      <UniqueIdentifier>{0fd2cfbf-bf5f-4348-89b0-b49616566b87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Interface">
+      <UniqueIdentifier>{310d02be-0f38-4bc0-a535-25ba77527fa0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CardCheck\TouchTransaction">
+      <UniqueIdentifier>{f45e9161-dfee-4c82-ae68-d906ab52b89e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CardCheck\UntouchTransaction">
+      <UniqueIdentifier>{ecd26fb6-d4eb-4637-80c3-57c1f110b70a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CardCheck\qPBOC">
+      <UniqueIdentifier>{5f4fa356-9992-4290-9070-6fac938e4c5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CardCheck\EC">
+      <UniqueIdentifier>{0b3c84ab-f008-46fd-a751-d87dabc642eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CardCheck\EC">
+      <UniqueIdentifier>{f2818140-9bf4-4e03-a2cf-662c7ef23b5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CardCheck\qPBOC">
+      <UniqueIdentifier>{97ec43ae-8ca7-4155-b79a-200dd17ab843}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CardCheck\UntouchTransaction">
+      <UniqueIdentifier>{f0db19fa-870a-4096-904d-ee8ff386cba5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CardCheck\TouchTransaction">
+      <UniqueIdentifier>{435b5d5a-f17c-4d94-9571-7b233f86240c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\MainFrameDlg.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\TreeViewNav.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\Sqlite3\shell.c">
+      <Filter>Source Files\Util\Sqlite3</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\Sqlite3\sqlite3.c">
+      <Filter>Source Files\Util\Sqlite3</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\IniParaser.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\Log.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\SHA1.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\StringParaser.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\TLVParaser.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Personalization\InstallCfg.cpp">
+      <Filter>Source Files\Personalization</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\EnumToString.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\Converter.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DP\DPParaser.cpp">
+      <Filter>Source Files\DP</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DP\GEDP\GEDPParaser.cpp">
+      <Filter>Source Files\DP\GEDP</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DP\YLDP\YLDPParaser.cpp">
+      <Filter>Source Files\DP\YLDP</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\PCSC.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\KeyGenerator.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\APDU.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CardCheck\qPBOC\QPBOC.cpp">
+      <Filter>Source Files\CardCheck\qPBOC</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CardCheck\TouchTransaction\EMV.cpp">
+      <Filter>Source Files\CardCheck\TouchTransaction</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CardCheck\TouchTransaction\PBOC.cpp">
+      <Filter>Source Files\CardCheck\TouchTransaction</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Factory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\ModifyKmcUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\DialogBuilderCallbackEx.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\PersonalizationUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CardCheck\Terminal.cpp">
+      <Filter>Source Files\CardCheck</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CardCheck\CommTransaction.cpp">
+      <Filter>Source Files\CardCheck</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\MainFrameDlg.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\TreeViewNav.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Sqlite3\sqlite3.h">
+      <Filter>Header Files\Util\Sqlite3</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Sqlite3\sqlite3ext.h">
+      <Filter>Header Files\Util\Sqlite3</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Des0.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\IniParaser.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Log.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\SHA1.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\SM.hpp">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\StringParaser.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\TLVParaser.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\APDU.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\KeyGenerator.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\CardBase.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\IAPDU.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\IDPParser.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\IKeyGenerator.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\IPCSC.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\PCSC.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\qPBOC\QPBOC.h">
+      <Filter>Header Files\CardCheck\qPBOC</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\TouchTransaction\EMV.h">
+      <Filter>Header Files\CardCheck\TouchTransaction</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\TouchTransaction\PBOC.h">
+      <Filter>Header Files\CardCheck\TouchTransaction</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Personalization\InstallCfg.h">
+      <Filter>Header Files\Personalization</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Converter.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DP\DPParaser.h">
+      <Filter>Header Files\DP</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DP\GEDP\GEDPParser.h">
+      <Filter>Header Files\DP\GEDP</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DP\YLDP\YLDPParaser.h">
+      <Filter>Header Files\DP\YLDP</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\InterfaceInstance.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\ModifyKmcUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\IDialogBuilderCallbackEx.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\Tag.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\PersonaliztionUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\Terminal.h">
+      <Filter>Header Files\CardCheck</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\CommTransaction.h">
+      <Filter>Header Files\CardCheck</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Interface\ICommTransaction.h">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="UI\MainFrame.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\TreeViewNav.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\FileMenu.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\PersonalizationAddConfig.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\Personalization.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\ModifyKMCTool.xml">
+      <Filter>UI</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>

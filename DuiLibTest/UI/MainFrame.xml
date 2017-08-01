@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window size="1200,700" caption="0,0,0,20" roundcorner="5,5,5,5" sizebox="4,4,4,4" mininfo="600,320">
+      <Font shared="true" id="0" name="幼圆" size="12" default="true" />
+	<Font shared="true" id="1" name="幼圆" size="14" default="true" />
+	<Font shared="true" id="2" name="微软雅黑" size="18" />	
+	<Font shared="true" id="3" name="微软雅黑" size="20"/>
+      <Default name="Menu" value="bordersize=&quot;1&quot; bordercolor=&quot;#FFB5B5B5&quot; inset=&quot;3,4,3,4&quot; itemtextpadding=&quot;35,0,0,0&quot; bkcolor=&quot;#FFFFFFFE&quot; itemselectedbkcolor=&quot;#FFB5B5B5&quot;"/>
+      <VerticalLayout>
+            <!--标题栏-->
+            <HorizontalLayout height="30" inset="0,2,0,0">
+                  <HorizontalLayout>
+			</HorizontalLayout>
+			<HorizontalLayout width="120">
+				<Button float="true" pos="0,0,40,30" name="minbtn" bordersize="0"  normalimage="Icon/min.png" />
+                        <Button float="true" pos="40,0,80,30" name="restorebtn" visible="false" bordersize="0"  normalimage="Icon/restore_10.png" />
+                        <Button float="true" pos="40,0,80,30" name="maxbtn" bordersize="0"  normalimage="Icon/max_10.png" />
+				<Button float="true" pos="80,0,120,30" name="closebtn" bordersize="0" normalimage="Icon/close_10.png" />
+			</HorizontalLayout>
+		</HorizontalLayout>
+           <!--菜单栏-->
+            <HorizontalLayout name="sysMenuPanel" height="30" bordersize="0,0,0,2">
+                  <Button name="btnFile" text="文件" float="true" pos="0,0,50,30" bordersize="0" widht="50" height="28"/>
+                  <Button name="btnEdit" text="编辑" float="true" pos="50,0,100,30"  bordersize="0"  widht="50" height="28"/>
+                  <Button name="btnView" text="视图" float="true" pos="100,0,150,30" bordersize="0"   widht="50" height="28"/>
+                  <Button name="btnProject" text="项目" float="true" pos="150,0,200,30" bordersize="0"  widht="50" height="28"/>
+            </HorizontalLayout>
+            <!--客户区-->
+            <HorizontalLayout name="clientContainer" maxwidth="1200" maxheight="700">
+                  <HorizontalLayout name="treeViewMenuContainer" bordersize="0,0,2,2" sepwidth="5" sepimm="true" minwidth="50" maxwidth="300" width="200">
+                        <TreeViewNav name="treeViewNav"/>
+                  </HorizontalLayout>
+                  <VerticalLayout>
+                        <VerticalLayout name="mainPanelContainer" >
+                              <Button name="btnTest" text="OK" float="true" pos="10,10,70,40" width="70"/>
+                              <Combo name="comTest" float="true" pos="10,50,200,70" width="190" height="20" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png" />
+                              <!--Button name="btnTest2" float="true" pos="10,100,70,120" bkcolor="FFB3B3B3" width="16" height="16" normalimage="Icon/down_arrow.png"/-->
+                        </VerticalLayout>
+                        <VerticalLayout name="outputPanelContainer" minheight="50" height="200" sepheight="-5" sepimm="true"/>
+                  </VerticalLayout>
+            </HorizontalLayout>
+      </VerticalLayout>
+</Window>
