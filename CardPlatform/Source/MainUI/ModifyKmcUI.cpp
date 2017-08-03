@@ -49,7 +49,7 @@ void CModifyKmcUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	{
 		if (name == _T("btnModify"))
 		{
-			xxx = m_pNewDiv->GetCurItemString();
+			//xxx = m_pNewDiv->GetCurItemString();
 		}
 	}
 	else if (msg.sType == DUI_MSGTYPE_ITEMCLICK)

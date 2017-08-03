@@ -4,7 +4,7 @@
 	<Font shared="true" id="1" name="幼圆" size="14" default="true" />
 	<Font shared="true" id="2" name="微软雅黑" size="18" />	
 	<Font shared="true" id="3" name="微软雅黑" size="20"/>
-      <VerticalLayout name="root">
+      <VerticalLayout name="root" bkcolor="#FFFFFFFF">
             <!--标题栏-->
             <HorizontalLayout height="30" inset="0,2,0,0">
                   <HorizontalLayout>
