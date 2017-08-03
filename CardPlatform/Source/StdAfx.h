@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <winscard.h>
 #include "..\resource.h"
+#include "Interface\Tag.h"
 #include "..\..\DuiLib_R\UIlib.h"
 
 using namespace DuiLib;

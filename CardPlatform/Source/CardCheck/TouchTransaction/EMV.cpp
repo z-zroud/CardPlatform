@@ -6,34 +6,9 @@
 #include "Util\SHA1.h"
 #include "Util\SM.hpp"
 #include "Util\Converter.h"
+#include "Util\Base.h"
 #include "..\Terminal.h"
 
-//将字符串型十六进制转为整形
-int ctoi(char c)
-{
-	switch (toupper(c))
-	{
-	case '0':		return 0;
-	case '1':		return 1;
-	case '2':		return 2;
-	case '3':		return 3;
-	case '4':		return 4;
-	case '5':		return 5;
-	case '6':		return 6;
-	case '7':		return 7;
-	case '8':		return 8;
-	case '9':		return 9;
-	case 'A':		return 10;
-	case 'B':		return 11;
-	case 'C':		return 12;
-	case 'D':		return 13;
-	case 'E':		return 14;
-	case 'F':		return 15;
-	default:		return -1;
-	}
-
-	return -1;
-}
 
 
 EMV::EMV(IPCSC* reader)
@@ -59,428 +34,6 @@ EMV::~EMV()
 		delete m_parser;
 }
 
-string EMV::GenTransDate()
-{
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-	char szTransDate[32] = { 0 };	//交易日期
-	sprintf_s(szTransDate, 32, "%02d%02d%02d", st.wYear, st.wMonth, st.wDay);
-
-	return string(szTransDate).substr(2);
-}
-
-string EMV::GenTransTime()
-{
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-	char szTransDate[32] = { 0 };	//交易日期
-	sprintf_s(szTransDate, 32, "%02d%02d%02d", st.wHour, st.wMinute, st.wSecond);
-
-	return string(szTransDate);
-}
-
-string EMV::GetResult(unsigned char SW1, unsigned char SW2)
-{
-	char temp[5] = { 0 };
-	sprintf_s(temp, 5, "%02X%02X", SW1, SW2);
-
-	return string(temp);
-}
-
-//格式化输出响应数据
-void EMV::FormatOutputResponse(PBCD_TLV entities, int num)
-{
-	for (int i = 0; i < num; i++)
-	{
-		if (entities[i].isTemplate)
-		{
-			FormatOutputResponse(entities[i].subTLVEntity, entities[i].subTLVnum);
-		}
-		else {
-			Log->Info("[%s]=%s", entities[i].Tag, entities[i].Value);
-		}
-	}
-}
-
-
-//查找指定Tag值
-string EMV::FindTagValue(const string tag, PBCD_TLV entities, int num)
-{
-	for (int i = 0; i < num; i++)
-	{
-		if (entities[i].isTemplate)
-		{
-			return FindTagValue(tag, entities[i].subTLVEntity, entities[i].subTLVnum);
-		}
-        else {
-            if (tag == string((char*)entities[i].Tag))
-            {
-                return string((char*)entities[i].Value);
-            }
-        }
-    }
-
-    return "";
-}
-
-//查找已获取的Tag值
-string EMV::FindTagValue(const string tag)
-{
-    for (auto s : m_Tags)
-    {
-        if (tag == s.first)
-            return s.second;
-    }
-
-    return "";
-}
-
-//保存tag值
-void EMV::SaveTag(PBCD_TLV entites, int num)
-{
-    for (int i = 0; i < num; i++)
-    {
-        if (entites[i].isTemplate)
-        {
-            SaveTag(entites[i].subTLVEntity, entites[i].subTLVnum);
-        }
-        else
-        {
-            auto it = m_Tags.find((char*)entites[i].Tag);
-            if (it != m_Tags.end())
-            {
-                it->second = string((char*)entites[i].Value);
-            }
-            else {
-                m_Tags.insert(make_pair<string, string>(string((char*)entites[i].Tag), string((char*)entites[i].Value)));
-            }
-        }
-    }
-}
-
-void EMV::SaveTag(string tag, string value)
-{
-    auto it = m_Tags.find(tag);
-    if (it != m_Tags.end())
-    {
-        it->second = value;
-    }
-    else {
-        m_Tags.insert(make_pair<string, string>(string(tag), string(value)));
-    }
-}
-
-void EMV::ParseAFL(string strAFL, vector<AFL> &output)
-{
-    if (strAFL.length() % 8 != 0)
-    {
-        return;		//每个AFL占用4个字节，也就是8个BCD码
-    }
-    //int aflCount = AFL.length() / 8;
-    for (unsigned int i = 0; i < strAFL.length(); i += 8)
-    {
-        AFL afl;
-
-        afl.SFI = ((ctoi(strAFL[i]) & 0x0F) << 1) + (ctoi(strAFL[i + 1]) && 0x08);
-        string strStartRecord = strAFL.substr(i + 2, 2);
-        string strEndRecord = strAFL.substr(i + 4, 2);
-        string strNeedValidate = strAFL.substr(i + 6, 2);
-        int nStartRecord = stoi(strStartRecord, 0, 16);
-        int nEndRecord = stoi(strEndRecord, 0, 16);
-        int nNeedValidate = stoi(strNeedValidate, 0, 16);
-
-        for (int k = nStartRecord; k <= nEndRecord; k++)
-        {
-            afl.nReadRecord = k;
-            if (nNeedValidate >= k)
-            {
-                afl.bNeedValidate = true;
-            }
-            else {
-                afl.bNeedValidate = false;
-            }
-
-            output.push_back(afl);
-        }
-    }
-}
-
-//PSE选择
-string EMV::SelectPSE(APP_TYPE appType)
-{
-    APDU_RESPONSE response;
-
-    memset(&response, 0, sizeof(response));
-    if(appType == APP_PSE)  //执行PSE应用
-    {
-        if (!m_pAPDU->SelectPSECommand(response))
-        {
-            Log->Error("执行 select PSE 失败!");
-            return "";
-        }
-    }
-    else if (appType == APP_PPSE)   //执行PPSE应用
-    {
-        if (!m_pAPDU->SelectPPSECommand(response))
-        {
-            Log->Error("执行 select PSE 失败!");
-            return "";
-        }
-    }
-
-	if (response.SW1 == 0x90 && response.SW2 == 0x00)
-	{
-		BCD_TLV entities[32] = { 0 };
-		unsigned int entitiesCount = 0;
-
-		//解析响应数据
-		m_parser->TLVConstruct((unsigned char*)response.data, strlen(response.data), entities, entitiesCount);
-		
-		//格式化输出响应数据
-		FormatOutputResponse(entities, entitiesCount);
-		SaveTag(entities, entitiesCount);
-        if (appType == APP_PSE)
-        {
-            //根据FCI中的目录文件SFI读目录文件
-            string SFI = FindTagValue("88", entities, entitiesCount);
-            if (SFI.empty())
-            {
-                Log->Error("找不到短文件标识符");
-                return "";
-            }
-
-            //根据目录文件读指定目录
-            bool needContinue = true;
-            int recordNumber = 1;
-            while (needContinue)
-            {
-                BCD_TLV dirEntites[32] = { 0 };
-                unsigned int dirEntitiesCount = 0;
-                memset(&response, 0, sizeof(response));
-                char szRecordNumber[3] = { 0 };
-                sprintf_s(szRecordNumber, "%02X", recordNumber);
-                if (!m_pAPDU->ReadRecordCommand(SFI, szRecordNumber, response))
-                {
-                    Log->Error("执行 读命令失败");
-                    return "";
-                }
-                if (response.SW1 == 0x6A && response.SW2 == 0x83)
-                {
-                    break;
-                }
-                recordNumber++;
-                m_parser->TLVConstruct((unsigned char*)response.data, strlen(response.data), dirEntites, dirEntitiesCount);
-
-                //格式化输出响应数据
-                FormatOutputResponse(dirEntites, dirEntitiesCount);
-                SaveTag(dirEntites, dirEntitiesCount);
-            }
-        }
-		//返回AID
-		return FindTagValue("4F");
-	}
-	else if (response.SW1 == 0x6A && response.SW2 == 0x81)	//返回6A81
-	{
-		Log->Error("返回值[%s]: 卡片锁定或命令不支持! 终止交易", GetResult(response.SW1, response.SW2));
-		return false;
-	}
-	else if (response.SW1 == 0x6A && response.SW2 == 0x82) //返回6A82
-	{
-		Log->Warning("返回值[%s]: 卡片不存在PSE，可能卡片未执行个人化", GetResult(response.SW1, response.SW2));
-	}
-	else if (response.SW1 == 0x62 && response.SW2 == 0x83) //返回6283
-	{
-		Log->Warning("返回值[%s]: PSE锁定");
-	}
-	else {	
-		Log->Error("Select PSE unknown error");
-	}
-
-	return "";
-}
-
-
-//AID 选择
-bool EMV::SelectAID(const string &strAID)
-{
-	APDU_RESPONSE response;
-	
-	memset(&response, 0, sizeof(response));
-	if (!m_pAPDU->SelectApplicationCommand(strAID, response))
-		return false;
-
-	BCD_TLV entites[32] = { 0 };
-	unsigned int entitiesCount = 0;
-
-	m_parser->TLVConstruct((unsigned char*)response.data, strlen(response.data), entites, entitiesCount);
-
-	//格式化输出响应数据
-	FormatOutputResponse(entites, entitiesCount);
-	SaveTag(entites, entitiesCount);
-
-	return true;
-}
-
-
-//应用选择
-bool EMV::SelectApplication(APP_TYPE type, string app)
-{	
-	Log->Info("======================== 选择应用 开始 =================================");
-    switch (type)
-    {
-    case APP_PSE:
-        app = SelectPSE(APP_PSE);
-        break;
-    case APP_PPSE:
-        app = SelectPSE(APP_PPSE);
-        break;
-    }
-
-    return SelectAID(app);
-}
-
-//应用初始化
-bool EMV::InitilizeApplication(ENCRYPT_TYPE type)
-{
-	Log->Info("======================== 应用初始化 开始 =================================");
-	string PDOL = FindTagValue("9F38");
-	if (PDOL.empty())
-		return false;
-
-	BCD_TL tlEntities[32] = { 0 };
-	unsigned int tlEntitiesCount = 0;
-	m_parser->TLVConstruct((unsigned char*)PDOL.c_str(), PDOL.length(), tlEntities, tlEntitiesCount);
-
-	//构造PDOL响应数据字段
-	string data;
-	for (unsigned int i = 0; i < tlEntitiesCount; i++)
-	{
-        if (string((char*)tlEntities[i].tag) == "DF69")
-        {
-            if (type == ENCRYPT_DES)
-            {
-                data += "00";
-            }
-            else {
-                data += "01";
-            }
-        }
-        else {
-            string value = CTerminal::GetTerminalData((char*)tlEntities[i].tag);
-            if (value.empty())
-            {
-                return false;
-            }
-            data += value;
-        }
-	}
-
-	//发送GPO命令
-	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
-	if (!m_pAPDU->GPOCommand(data, response))
-	{
-		return false;
-	}
-	//解析响应数据
-	string responseData = string(response.data);
-	string AIP = responseData.substr(4, 4);
-	string AFL = responseData.substr(8);
-
-	//格式化输出响应数据
-	Log->Info("[82]=%s", AIP.c_str());
-	Log->Info("[94]=%s", AFL.c_str());
-
-	SaveTag("82", AIP);
-	SaveTag("94", AFL);
-
-	return true;
-}
-
-//读应用数据
-bool EMV::ReadApplicationData()
-{
-	Log->Info("======================== 读应用数据 开始 =================================");
-	//获取AFL
-	string strAFL = FindTagValue("94");
-	if (strAFL.empty())
-	{
-		return false;
-	}
-	//解析AFL
-	vector<AFL> vecAFL;
-	ParseAFL(strAFL, vecAFL);
-	int i = 1;
-	for (auto v : vecAFL)
-	{
-		//读取每条AFL记录
-		char szSFI[3] = { 0 };
-		sprintf_s(szSFI, "%02X", v.SFI);
-
-
-		APDU_RESPONSE response;
-		memset(&response, 0, sizeof(response));
-
-		char szReadRecord[3] = { 0 };
-		sprintf_s(szReadRecord, "%02X", v.nReadRecord);
-
-		if (!m_pAPDU->ReadRecordCommand(szSFI, szReadRecord, response))
-		{
-			return false;
-		}
-
-		if (v.bNeedValidate)
-		{
-			//保存静态签名数据
-			string sigData = response.data;
-
-			//判断长度字节的最高位是否为1，如果为1，则该字节为长度扩展字节，由下一个字节开始决定长度
-			if (ctoi(sigData[2]) & 0x08)
-			{
-				//最高位1
-				unsigned int lengthSize = 2 * ((sigData[2] & 0x07) * 8 + (sigData[3] & 0x0f));
-				m_staticApplicationData += sigData.substr(lengthSize + 4);
-
-			}
-			else
-			{
-				m_staticApplicationData += sigData.substr(4);
-			}
-		}
-
-		//解析tag
-		BCD_TLV entites[32] = { 0 };
-		unsigned int entitiesCount = 0;
-
-		m_parser->TLVConstruct((unsigned char*)response.data, strlen(response.data), entites, entitiesCount);
-		FormatOutputResponse(entites, entitiesCount);
-		SaveTag(entites, entitiesCount);
-	}
-
-	//获取标签列表
-	char* tagList[] = {
-		"9F51","9F52","9F53","9F54","9F56","9F57","9F58","9F59","9F5C","9F5D","9F72","9F75",
-		"9F76","9F4F","DF4F","9F17","9F79","9F77","9F78","DF62","DF63","DF77","DF79","9F6D",
-		"9F36","9F13","9F68","9F6B","DF20","DF21","DF22","DF23","DF25","DF26","DF27","DF50"
-	};
-	for (int i = 0; i < sizeof(tagList) / sizeof(char*); i++)
-	{
-		string value = ReadTag(tagList[i]);
-		BCD_TLV entites[32] = { 0 };
-		unsigned int entitiesCount = 0;
-		m_parser->TLVConstruct((unsigned char*)value.c_str(), value.length(), entites, entitiesCount);
-		if (entitiesCount == 1)
-		{
-			Log->Info("[%s]=%s", tagList[i], entites[0].Value);
-			//m_Tags.insert(make_pair<string, string>(string(tagList[i]), string((char*)entites[0].Value)));
-			SaveTag(tagList[i], (char*)entites[0].Value);
-		}
-		
-	}
-
-	return true;
-}
-
 //读取标签数据
 string EMV::ReadTag(const string tag)
 {
@@ -494,216 +47,6 @@ string EMV::ReadTag(const string tag)
 	}
 
 	return "";
-}
-
-//校验静态应用数据
-bool EMV::ValidateStaticApplicationData(string issuerPublicKey, ENCRYPT_TYPE encryptType)
-{
-	string signedStaticAppData = FindTagValue("93");
-	char recoveryData[2046] = { 0 };
-
-    Log->Info("Issuser Public Key: %s", issuerPublicKey.c_str());
-    Log->Info("static app data: %s", signedStaticAppData.c_str());
-
-    if (encryptType == ENCRYPT_TYPE::ENCRYPT_DES)
-    {
-        //解密签名的静态应用数据
-        RSA_STD((char*)issuerPublicKey.c_str(), "03", (char*)signedStaticAppData.c_str(), recoveryData);
-        int recoveryDataLen = strlen(recoveryData);
-        string strRecoveryData(recoveryData);
-
-        if (strRecoveryData.substr(0, 4) != "6A03" || strRecoveryData.substr(recoveryDataLen - 2, 2) != "BC")
-        {//如果恢复数据的开头不是"6A02"并且结尾不是"BC",认证失败
-            return false;
-        }
-        string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
-
-        //如果静态数据认证标签列表存在，并且其包含非“82”的标签，那么静态数据认证失败
-        string sigDataList = FindTagValue("9F4A");
-        if (!sigDataList.empty() && sigDataList != "82")
-        {
-            return false;
-        }
-
-        string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + m_staticApplicationData + FindTagValue("82");
-        Log->Info("Hash Input: [%s]", hashDataInput.c_str());
-
-        CSHA1 sha1;
-        string hashResult = sha1.GetBCDHash(hashDataInput);
-        if (hashResult == hashData)
-        {
-            return true;
-        }
-    }
-    else {
-        PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
-        if (DllPBOC_SM2_Verify)
-        {
-            string signedResult = signedStaticAppData.substr(6);
-            string needValidateData = signedStaticAppData.substr(0,6) + m_staticApplicationData + FindTagValue("82");
-            int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey.c_str(), (char*)needValidateData.c_str(), (char*)signedResult.c_str());
-            if (ret == SM_OK)
-            {
-                return true;
-            }
-        }
-    }
-
-	return false;
-}
-
-bool EMV::ValidateDynamicData(string ICCPublicKey, ENCRYPT_TYPE encryptType)
-{
-    string terminalData;
-    string DDOL = FindTagValue("9F49");
-    BCD_TL tlEntity[10] = { 0 };
-    unsigned int entitiesCount = 0;
-    m_parser->TLVConstruct((unsigned char*)DDOL.c_str(), DDOL.length(), tlEntity, entitiesCount);
-    for (unsigned int i = 0; i < entitiesCount; i++)
-    {
-        terminalData += CTerminal::GetTerminalData((char*)tlEntity[i].tag);
-    }
-	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
-
-	if (!m_pAPDU->InternalAuthCommand(terminalData, response))
-	{
-		return false;
-	}
-
-	//解析tag
-	string strResponse = response.data;
-    if (strResponse.empty())
-    {
-        Log->Error("动态签名失败,无法获取tag 9F4B");
-        return false;
-    }
-    //判断长度字节的最高位是否为1，如果为1，则该字节为长度扩展字节，由下一个字节开始决定长度
-    if (ctoi(strResponse[2]) & 0x08)
-    {
-        //最高位1
-        unsigned int lengthSize = 2 * ((strResponse[2] & 0x07) * 8 + (strResponse[3] & 0x0f));
-        SaveTag("9F4B", strResponse.substr(lengthSize + 4));
-        
-    }
-    else
-    {
-        SaveTag("9F4B", strResponse.substr(4));
-    }
-
-	string signedData = FindTagValue("9F4B");
-    Log->Debug("Dynamic data=[%s]", signedData.c_str());
-	char recoveryData[2046] = { 0 };
-    if (encryptType == ENCRYPT_DES)
-    {
-        //从动态签名数据中获取恢复数据
-        RSA_STD((char*)ICCPublicKey.c_str(), "03", (char*)signedData.c_str(), recoveryData);
-        string strRecoveryData = recoveryData;
-        int recoveryDataLen = strlen(recoveryData);
-        if (recoveryDataLen == 0)
-        {
-            Log->Error("动态签名失败，无法获取恢复数据");
-            return false;
-        }
-        string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
-        string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + terminalData;
-
-        CSHA1 sha1;
-        string hashResult = sha1.GetBCDHash(hashDataInput);
-        if (hashResult == hashData)
-        {
-            return true;
-        }
-    }
-    else {
-        PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
-        if (DllPBOC_SM2_Verify)
-        {
-            if (signedData.substr(0, 2) != "15")
-            {
-                return false;
-            }
-            int iccDynamicDataLen = stoi(signedData.substr(2, 2), 0, 16) * 2;
-            string iccDynamicData = signedData.substr(4, iccDynamicDataLen);
-            string signedResult = signedData.substr(4 + iccDynamicDataLen);
-            string needValidateData = signedData.substr(0, 4 + iccDynamicDataLen) + terminalData;
-            int ret = DllPBOC_SM2_Verify((char*)ICCPublicKey.c_str(), (char*)needValidateData.c_str(), (char*)signedResult.c_str());
-            if (ret == SM_OK)
-            {
-                return true;
-            }
-        }
-    }
-
-	return false;
-}
-
-//脱机数据认证
-bool EMV::OfflineDataAuth()
-{
-	Log->Info("======================== 脱机数据认证 开始 =================================");
-	//静态数据认证
-    string issuerPublicCert = FindTagValue("90");   //发卡行公钥证书
-    string caIndex = FindTagValue("8F");    //CA公钥索引 PKI
-    string issuerExponent = FindTagValue("9F32");   //发卡行公钥指数
-    string ipkRemainder = FindTagValue("92");   //发卡行公钥余项
-    string rid = FindTagValue("4F").substr(0,10);   //RID    
-   
-    IKeyGenerator *kg = new KeyGenerator();
-    string caPublicKey = kg->GenCAPublicKey(caIndex, rid);
-
-    string issuerPublicKey;
-    if (m_encryptType == ENCRYPT_TYPE::ENCRYPT_DES)
-    {
-        issuerPublicKey = kg->GenDesIssuerPublicKey(caPublicKey, issuerPublicCert, ipkRemainder, issuerExponent);
-    }
-    else {
-        issuerPublicKey = kg->GenSMIssuerPublcKey(caPublicKey, issuerPublicCert);
-    }
-
-	if (!ValidateStaticApplicationData(issuerPublicKey, m_encryptType))
-	{
-		Log->Info("SDA validate failed.");
-		return false;
-	}
-
-	Log->Info("SDA validate success.");
-
-
-    if (m_authType == AUTHENCATE_TYPE::AUTH_DDA)
-    {
-        //动态数据认证	
-        string iccPublicCert = FindTagValue("9F46");    //ICC公钥证书       
-        string signedData = m_staticApplicationData + FindTagValue("82");   //签名数据
-        string ICCPublicKey;
-        if (m_encryptType == ENCRYPT_TYPE::ENCRYPT_DES)
-        {
-            string iccRemainder = FindTagValue("9F48"); //ICC公钥余项
-            string iccExponent = FindTagValue("9F47");  //ICC公钥指数
-            ICCPublicKey = kg->GenDesICCpublicKey(issuerPublicKey, iccPublicCert, iccRemainder, signedData, issuerExponent);
-        }
-        else {
-            ICCPublicKey = kg->GenSMICCpublicKey(issuerPublicKey, iccPublicCert, signedData);
-        }
-
-        Log->Debug("ICC public key=[%s]", ICCPublicKey.c_str());
-
-        if (!ValidateDynamicData(ICCPublicKey, m_encryptType))
-        {
-            Log->Info("DDA validate failed.");
-            return false;
-        }
-        Log->Info("DDA validate success.");
-        return true;
-    }
-    else if (m_authType == AUTHENCATE_TYPE::AUTH_CDA)
-    {
-        //CDA认证
-        //...
-    }
-
-
-	return true;
 }
 
 //日期比较
@@ -751,8 +94,8 @@ bool EMV::HandleLimitation()
 {
 	Log->Info("======================== 处理限制 开始 =================================");
 	//检查生效日期
-	string effectDate = FindTagValue("5F25");
-	string transDate = GenTransDate();
+	string effectDate = GetTagValue("5F25");
+	string transDate = Base::GenTransDate();
 	if (!CompareDate(transDate, effectDate))
 	{
 		Log->Error("生效日期错误: 生效日期:[%s], 交易日期[%s]", effectDate.c_str(), transDate.c_str());
@@ -763,7 +106,7 @@ bool EMV::HandleLimitation()
 	}
 	
 	//检查失效日期
-	string expireDate = FindTagValue("5F24");
+	string expireDate = GetTagValue("5F24");
 	if (!CompareDate(expireDate, transDate))
 	{
 		Log->Error("失效日期错误: 失效日期:[%s],交易日期[%s]", expireDate.c_str(), transDate.c_str());
@@ -775,7 +118,7 @@ bool EMV::HandleLimitation()
 
 	//检查应用版本号
 	string termApplicationVersion = CTerminal::GetTerminalData("9F09");
-	string cardApplicationVersion = FindTagValue("9F08");
+	string cardApplicationVersion = GetTagValue("9F08");
 	if (termApplicationVersion != cardApplicationVersion)
 	{
 		Log->Info("应用版本号检查失败!卡片应用版本号:[%s],终端应用版本号:[%s]", cardApplicationVersion, termApplicationVersion);
@@ -787,7 +130,7 @@ bool EMV::HandleLimitation()
 
 
 	//检查AUC
-	string AUC = FindTagValue("9F07");
+	string AUC = GetTagValue("9F07");
 	ShowCardAUC(AUC);
 
 	return false;
@@ -874,7 +217,7 @@ bool EMV::CardHolderValidation()
 {
 	Log->Info("======================== 持卡人验证 开始 =================================");
 	CVM cvm;
-	string strCVM = FindTagValue("8E");
+	string strCVM = GetTagValue("8E");
 
 	//解析CMV值
 	cvm.X = strCVM.substr(0, 8);
@@ -948,10 +291,10 @@ bool EMV::TerminalRiskManagement()
 	}
 	
 	//频度检查
-	string lastOnlineATC = FindTagValue("9F13");
-	string ATC = FindTagValue("9F36");
-	string offlineTransFloorLimit = FindTagValue("9F23");
-	string offlineTransUpLimit = FindTagValue("9F14");
+	string lastOnlineATC = GetTagValue("9F13");
+	string ATC = GetTagValue("9F36");
+	string offlineTransFloorLimit = GetTagValue("9F23");
+	string offlineTransUpLimit = GetTagValue("9F14");
 
 	int nOfflineTransFloorLimit = stoi(offlineTransFloorLimit, 0, 16);
 	int nOfflineTransUpLimit = stoi(offlineTransUpLimit, 0, 16);
@@ -1005,7 +348,7 @@ void EMV::ParseGACResponseData(const string buffer)
 
 void EMV::ShowCardTransType()
 {
-	string cardTransType = FindTagValue("9F27");
+	string cardTransType = GetTagValue("9F27");
 	if (cardTransType.length() != 2)
 	{
 		return;
@@ -1052,7 +395,7 @@ bool EMV::CardActionAnalized(TERM_TRANS_TYPE type)
 	}
 	
 	/******************************** GAC 1 ******************************/
-	string CDOL1 = FindTagValue("8C");
+	string CDOL1 = GetTagValue("8C");
 	BCD_TL CDOL1tlEntities[32] = { 0 };
 	unsigned int CDOL1tlEntitiesCount = 0;
 	m_parser->TLVConstruct((unsigned char*)CDOL1.c_str(), CDOL1.length(), CDOL1tlEntities, CDOL1tlEntitiesCount);
@@ -1072,11 +415,11 @@ bool EMV::CardActionAnalized(TERM_TRANS_TYPE type)
 	m_parser->TLVConstruct((unsigned char*)response1.data, strlen(response1.data), entites, entitiesCount);
 
 	//格式化输出响应数据
-	FormatOutputResponse(entites, entitiesCount);
+	PrintTags(entites, entitiesCount);
 	SaveTag(entites, entitiesCount);
 
 	//分析GAC 卡片响应数据
-	ParseGACResponseData(FindTagValue("80"));
+	ParseGACResponseData(GetTagValue("80"));
 	ShowCardTransType();
 
 	return true;
@@ -1112,9 +455,9 @@ bool EMV::CompareIACAndTVR(string IAC, string strTVR)
 TERM_TRANS_TYPE EMV::GetTermAnanlizedResult()
 {
 	TERM_TRANS_TYPE type = TERM_TRANS_TYPE::TERM_TC;
-	string IACDefault = FindTagValue("9F0D");
-	string IACRejection = FindTagValue("9F0E");
-	string IACOnline = FindTagValue("9F0F");
+	string IACDefault = GetTagValue("9F0D");
+	string IACRejection = GetTagValue("9F0E");
+	string IACOnline = GetTagValue("9F0F");
 
 	if (IACDefault.empty())
 		IACDefault = "0000000000";
@@ -1234,7 +577,7 @@ string EMV::GetTVR()
 
 string EMV::GetPAN()
 {
-	string tag57 = FindTagValue("57");
+	string tag57 = GetTagValue("57");
 	int index = tag57.find('D');
 	if (index == string::npos)
 	{//未找到，直接返回空
@@ -1253,8 +596,8 @@ string EMV::GenARPC(string AC, string authCode)
 
 	KeyGenerator kg;
 	string sudkAuth;
-	string ATC = FindTagValue("9F36");
-	string cardSeq = FindTagValue("5F34");
+	string ATC = GetTagValue("9F36");
+	string cardSeq = GetTagValue("5F34");
 	string PAN = GetPAN();
 	if (!m_mdkAuth.empty())
 	{
@@ -1282,10 +625,10 @@ string EMV::GenARPC(string AC, string authCode)
 bool EMV::OnlineBussiness()
 {
 	Log->Info("======================== 联机处理 开始 =================================");
-	string CID = FindTagValue("9F27");		// 	密文信息数据
-	string ATC = FindTagValue("9F36");
-	string AC = FindTagValue("9F26");		//应用密文（AC）
-	string issuerApplicationData = FindTagValue("9F10");	//发卡行应用数据
+	string CID = GetTagValue("9F27");		// 	密文信息数据
+	string ATC = GetTagValue("9F36");
+	string AC = GetTagValue("9F26");		//应用密文（AC）
+	string issuerApplicationData = GetTagValue("9F10");	//发卡行应用数据
 	
 	APDU_RESPONSE response;
 	memset(&response, 0, sizeof(response));
@@ -1342,8 +685,8 @@ void EMV::ParseTransLog(const string buffer)
 bool EMV::DealIusserScript()
 {
 	//获取电子现金圈存日志入口
-	string logCashEntry = FindTagValue("DF4D");
-	string logEntry = FindTagValue("9F4D");
+	string logCashEntry = GetTagValue("DF4D");
+	string logEntry = GetTagValue("9F4D");
 
 	string cashSFI = logCashEntry.substr(0, 2);
 	int cashLogNum = stoi(logCashEntry.substr(2), 0, 16);
@@ -1400,7 +743,7 @@ bool EMV::EndTransaction()
 	}
 
 	/******************************** GAC 2 ******************************/
-	string CDOL2 = FindTagValue("8D");
+	string CDOL2 = GetTagValue("8D");
 	BCD_TL CDOL2tlEntities[32] = { 0 };
 	unsigned int CDOL2tlEntitiesCount = 0;
 	m_parser->TLVConstruct((unsigned char*)CDOL2.c_str(), CDOL2.length(), CDOL2tlEntities, CDOL2tlEntitiesCount);
@@ -1425,11 +768,11 @@ bool EMV::EndTransaction()
 	m_parser->TLVConstruct((unsigned char*)response.data, strlen(response.data), entites, entitiesCount);
 
 	//格式化输出响应数据
-	FormatOutputResponse(entites, entitiesCount);
+	PrintTags(entites, entitiesCount);
 	SaveTag(entites, entitiesCount);
 
 	//分析GAC 卡片响应数据
-	ParseGACResponseData(FindTagValue("80"));
+	ParseGACResponseData(GetTagValue("80"));
 	ShowCardTransType();
 
 

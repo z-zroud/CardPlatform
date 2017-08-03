@@ -46,15 +46,15 @@ public:
 
 public:
 	string SelectPSE(APP_TYPE appType);
-	bool SelectAID(const string &strAID);
-
+    bool SDA(string issuerPublicKey, ENCRYPT_TYPE encryptType);
+    bool DDA(string ICCPublicKey, ENCRYPT_TYPE encryptType);
 protected:
-	void	FormatOutputResponse(PBCD_TLV entities, int num);
-	string	FindTagValue(const string tag, PBCD_TLV entities, int num);
-	string	FindTagValue(const string tag);
+	void	PrintTags(PBCD_TLV entities, int num);
+	string	GetTagValue(const string tag, PBCD_TLV entities, int num);
+	string	GetTagValue(const string tag);
 	void	SaveTag(PBCD_TLV entites, int num);
 	void	SaveTag(string tag, string value);
-	void	ParseAFL(string strAFL, vector<AFL> &output);
+	void	ParaseAFL(string strAFL, vector<AFL> &output);
 	string	GetResult(unsigned char SW1, unsigned char SW2);
 
 protected:
@@ -62,8 +62,8 @@ protected:
 	IPCSC*		m_pReader;
 	IAPDU*		m_pAPDU;
 	TLVParaser* m_pParaser;
-	map<string, string> m_Tags;
-	TVR			m_tvr;
+	map<string, string> m_tags;
+
 
 	ENCRYPT_TYPE m_encryptType;
 	AUTHENCATE_TYPE m_authType;

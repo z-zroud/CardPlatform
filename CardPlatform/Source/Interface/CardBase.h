@@ -131,9 +131,9 @@ enum GACControlParam
 //应用文件定位器(AFL)
 struct AFL
 {
-	int SFI;
-	int nReadRecord;
-	bool bNeedValidate;
+	int SFI;                    //短文件标识符
+	int nRecordNo;              //记录号
+	bool bAcceptAuthencation;   //是否需要参与脱机数据认证
 };
 
 

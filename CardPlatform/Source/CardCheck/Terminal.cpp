@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "Terminal.h"
 #include "Interface\Tag.h"
-
+#include "Util\Base.h"
 
 string CTerminal::m_5F2A = _T("");
 string CTerminal::m_95 = _T("");
@@ -58,11 +58,7 @@ string CTerminal::Get9A()
 {
 	if (m_9A.empty())
 	{
-		SYSTEMTIME st;
-		GetLocalTime(&st);
-		char szTransDate[32] = { 0 };	//交易日期
-		sprintf_s(szTransDate, 32, "%02d%02d%02d", st.wYear, st.wMonth, st.wDay);
-		m_9A = string(szTransDate).substr(2);
+        m_9A = Base::GenTransDate();
 	}
 	return m_9A;
 }
@@ -100,12 +96,7 @@ string CTerminal::Get9F21()
 {
 	if (m_9F21.empty())
 	{
-		SYSTEMTIME st;
-		GetLocalTime(&st);
-		char szTransDate[32] = { 0 };	//交易日期
-		sprintf_s(szTransDate, 32, "%02d%02d%02d", st.wHour, st.wMinute, st.wSecond);
-
-		m_9F21 = string(szTransDate);
+        m_9F21 = Base::GenTransTime();
 	}
 	return m_9F21;
 }

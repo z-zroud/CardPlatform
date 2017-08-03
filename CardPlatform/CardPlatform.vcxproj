@@ -23,7 +23,6 @@
     <ClCompile Include="Source\CardCheck\qPBOC\QPBOC.cpp" />
     <ClCompile Include="Source\CardCheck\Terminal.cpp" />
     <ClCompile Include="Source\CardCheck\TouchTransaction\EMV.cpp" />
-    <ClCompile Include="Source\CardCheck\TouchTransaction\PBOC.cpp" />
     <ClCompile Include="Source\DP\DPParaser.cpp" />
     <ClCompile Include="Source\DP\GEDP\GEDPParaser.cpp" />
     <ClCompile Include="Source\DP\YLDP\YLDPParaser.cpp" />
@@ -38,6 +37,7 @@
     <ClCompile Include="Source\Personalization\InstallCfg.cpp" />
     <ClCompile Include="Source\StdAfx.cpp" />
     <ClCompile Include="Source\Util\APDU.cpp" />
+    <ClCompile Include="Source\Util\Base.cpp" />
     <ClCompile Include="Source\Util\Converter.cpp" />
     <ClCompile Include="Source\Util\EnumToString.cpp" />
     <ClCompile Include="Source\Util\IniParaser.cpp" />
@@ -56,7 +56,6 @@
     <ClInclude Include="Source\CardCheck\qPBOC\QPBOC.h" />
     <ClInclude Include="Source\CardCheck\Terminal.h" />
     <ClInclude Include="Source\CardCheck\TouchTransaction\EMV.h" />
-    <ClInclude Include="Source\CardCheck\TouchTransaction\PBOC.h" />
     <ClInclude Include="Source\DP\DPParaser.h" />
     <ClInclude Include="Source\DP\GEDP\GEDPParser.h" />
     <ClInclude Include="Source\DP\YLDP\YLDPParaser.h" />
@@ -77,6 +76,7 @@
     <ClInclude Include="Source\Personalization\InstallCfg.h" />
     <ClInclude Include="Source\StdAfx.h" />
     <ClInclude Include="Source\Util\APDU.h" />
+    <ClInclude Include="Source\Util\Base.h" />
     <ClInclude Include="Source\Util\Converter.h" />
     <ClInclude Include="Source\Util\Des0.h" />
     <ClInclude Include="Source\Util\IniParaser.h" />
