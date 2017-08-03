@@ -58,7 +58,7 @@ protected:
 	string	GetResult(unsigned char SW1, unsigned char SW2);
 
 protected:
-	string		m_staticApplicationData;
+	string		m_acceptAuthData;
 	IPCSC*		m_pReader;
 	IAPDU*		m_pAPDU;
 	TLVParaser* m_pParaser;

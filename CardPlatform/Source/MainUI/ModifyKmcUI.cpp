@@ -32,6 +32,9 @@ void CModifyKmcUI::InitDlg()
 	m_pNewKmc = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboNewKmc")));
 	m_pNewDiv = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboNewDiv")));
 
+	m_pNewDiv->AddString("111");
+	m_pNewDiv->AddString("222");
+
 }
 
 

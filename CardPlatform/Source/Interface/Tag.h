@@ -31,10 +31,15 @@
 #define Tag5F24		_T("5F24")		//应用失效日期
 #define Tag5F25		_T("5F25")		//应用生效日期
 #define Tag5F28		_T("5F28")		//发卡行国家代码
+#define Tag82		_T("82")
 #define Tag8F       _T("8F")
 #define Tag90       _T("90")
 #define Tag92       _T("92")
+#define Tag93		_T("93")
 #define Tag94       _T("94")        //AFL
 #define Tag9F26		_T("9F26")
 #define Tag9F32     _T("9F32")
 #define Tag9F38     _T("9F38")      //PDOL
+#define Tag9F46		_T("9F46")
+#define Tag9F47		_T("9F47")
+#define Tag9F48		_T("9F48")

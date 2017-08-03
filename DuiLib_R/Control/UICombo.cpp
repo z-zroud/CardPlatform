@@ -349,6 +349,15 @@ bool CComboUI::AddAt(CControlUI* pControl, int iIndex)
     return true;
 }
 
+bool CComboUI::AddString(LPCTSTR pstrText)
+{
+	CListLabelElementUI* pItem = new CListLabelElementUI;
+
+	pItem->SetText(pstrText);
+
+	return Add(pItem);
+}
+
 bool CComboUI::Remove(CControlUI* pControl)
 {
     int iIndex = GetItemIndex(pControl);

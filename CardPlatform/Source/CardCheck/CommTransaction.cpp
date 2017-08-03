@@ -207,7 +207,6 @@ string CommTransaction::SelectPSE(APP_TYPE appType)
 				Log->Error("找不到短文件标识符");
 				return "";
 			}
-
 			//根据目录文件读指定目录
 			bool needContinue = true;
 			int recordNumber = 1;
@@ -387,11 +386,11 @@ bool CommTransaction::InitilizeApplication()
             if (Tool::Converter::HexToInt(needSigData[2]) & 0x08)   //最高位1
             {                
                 unsigned int lengthSize = 2 * ((needSigData[2] & 0x07) * 8 + (needSigData[3] & 0x0f));
-                m_staticApplicationData += needSigData.substr(lengthSize + 4);
+				m_acceptAuthData += needSigData.substr(lengthSize + 4);
             }
             else
             {
-                m_staticApplicationData += needSigData.substr(4);
+				m_acceptAuthData += needSigData.substr(4);
             }
         }
 
@@ -410,7 +409,7 @@ bool CommTransaction::InitilizeApplication()
  //校验静态应用数据
  bool CommTransaction::SDA(string issuerPublicKey, ENCRYPT_TYPE encryptType)
  {
-     string signedStaticAppData = GetTagValue("93");
+     string signedStaticAppData = GetTagValue(Tag93);
      char recoveryData[2046] = { 0 };
 
      Log->Info("Issuser Public Key: %s", issuerPublicKey.c_str());
@@ -436,7 +435,7 @@ bool CommTransaction::InitilizeApplication()
              return false;
          }
 
-         string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + m_staticApplicationData + GetTagValue("82");
+         string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + m_acceptAuthData + GetTagValue("82");
          Log->Info("Hash Input: [%s]", hashDataInput.c_str());
 
          CSHA1 sha1;
@@ -451,7 +450,7 @@ bool CommTransaction::InitilizeApplication()
          if (DllPBOC_SM2_Verify)
          {
              string signedResult = signedStaticAppData.substr(6);
-             string needValidateData = signedStaticAppData.substr(0, 6) + m_staticApplicationData + GetTagValue("82");
+             string needValidateData = signedStaticAppData.substr(0, 6) + m_acceptAuthData + GetTagValue("82");
              int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey.c_str(), (char*)needValidateData.c_str(), (char*)signedResult.c_str());
              if (ret == SM_OK)
              {
@@ -581,13 +580,13 @@ bool CommTransaction::InitilizeApplication()
      if (m_authType == AUTHENCATE_TYPE::AUTH_DDA)
      {
          //动态数据认证	
-         string iccPublicCert = GetTagValue("9F46");    //ICC公钥证书       
-         string signedData = m_staticApplicationData + GetTagValue("82");   //签名数据
+         string iccPublicCert = GetTagValue(Tag9F46);    //ICC公钥证书       
+         string signedData = m_acceptAuthData + GetTagValue(Tag82);   //签名数据
          string ICCPublicKey;
          if (m_encryptType == ENCRYPT_TYPE::ENCRYPT_DES)
          {
-             string iccRemainder = GetTagValue("9F48"); //ICC公钥余项
-             string iccExponent = GetTagValue("9F47");  //ICC公钥指数
+             string iccRemainder = GetTagValue(Tag9F48); //ICC公钥余项
+             string iccExponent = GetTagValue(Tag9F47);  //ICC公钥指数
              ICCPublicKey = kg->GenDesICCpublicKey(issuerPublicKey, iccPublicCert, iccRemainder, signedData, issuerExponent);
          }
          else {

@@ -16,9 +16,7 @@
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbNewDiv" text="新DIV:" float="true" pos="170,0,230,28"/>
-                  <Combo name="comboNewDiv" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png">
-                        <ListLabelElement text="111" height="20" />
-                  </Combo>
+                  <Combo name="comboNewDiv" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
             </HorizontalLayout>
             <Control height="50" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
