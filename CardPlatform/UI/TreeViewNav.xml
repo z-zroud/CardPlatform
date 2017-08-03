@@ -19,15 +19,14 @@
 			</TreeNode>
 		</TreeNode>
 		<TreeNode name="persoTreeNode" text="个人化" height="33" itemattr="align=&quot;left&quot; font=&quot;2&quot;" folderattr="padding=&quot;0,8,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;"  >
-                  <TreeNode name="geOptionSettingNode" text="选项设置" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
-                  <TreeNode name="geDoConvertNode" text="个人化" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
-                  <TreeNode name="geAddConfigNode" text="增加配置" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="personOptionSettingNode" text="选项设置" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="doPersonalizationNode" text="个人化" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="personAddConfigNode" text="增加配置" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
 		</TreeNode>
 		<TreeNode name="cardCheckTreeNode" text="卡片检测" height="33" itemattr="align=&quot;left&quot; font=&quot;2&quot;" folderattr="padding=&quot;0,8,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;" >
-                  <TreeNode name="geOptionSettingNode" text="接触交易" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
-                  <TreeNode name="geDoConvertNode" text="非接触交易" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
-                  <TreeNode name="geAddConfigNode" text="电子现金交易" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
-                  <TreeNode name="geOptionSettingNode" text="qPBOC交易" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="ccScriptNode" text="脚本执行" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="ccCardCheckNode" text="卡片检测" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="ccExpandAppNode" text="扩展应用" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
 		</TreeNode>
 		<TreeNode name="toolTreeNode" text="常用工具" height="33" itemattr="align=&quot;left&quot; font=&quot;2&quot;" folderattr="padding=&quot;0,8,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;" >
 			<TreeNode name="cryptNode" text="加密/解密" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>

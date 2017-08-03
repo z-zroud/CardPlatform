@@ -45,6 +45,7 @@
                         <TabLayout name="mainPanelContainer" selectedid="0" bordersize="2,0,0,2">
                               <ModifyKmcUI />
                               <PersonalizationUI />
+                              <CardCheckUI />
                         </TabLayout>
                         <VerticalLayout name="outputPanelContainer" bordersize="2,0,0,0"  minheight="50" height="200" sepheight="-5" sepimm="true"/>
                   </VerticalLayout>

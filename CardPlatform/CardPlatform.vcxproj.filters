@@ -195,6 +195,9 @@
     <ClCompile Include="Source\CardCheck\CommTransaction.cpp">
       <Filter>Source Files\CardCheck</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\CardCheckUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -308,6 +311,9 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\CardCheckUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -326,6 +332,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\ModifyKMCTool.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\CardCheck.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

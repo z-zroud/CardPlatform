@@ -2,8 +2,9 @@
 #include "TreeViewNav.h"
 #include "IDialogBuilderCallbackEx.h"
 
-#define TAB_MODIFY_KMC		0
+#define TAB_MODIFY_KMC		    0
 #define TAB_DO_PERSONALIZATION	1
+#define TAB_CHARD_CHECK         2
 
 CTreeViewNav::CTreeViewNav(CPaintManagerUI* pPM)
 {
@@ -51,5 +52,8 @@ void CTreeViewNav::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 		else if (name == _T("kmcNode")) {
 			m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_MODIFY_KMC);
 		}
+        else if (name == _T("ccCardCheckNode")) {
+            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_CHARD_CHECK);
+        }
     }
 }
