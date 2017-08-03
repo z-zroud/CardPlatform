@@ -5,6 +5,7 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <winscard.h>
+#include "..\resource.h"
 #include "..\..\DuiLib_R\UIlib.h"
 
 using namespace DuiLib;

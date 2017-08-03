@@ -12,6 +12,7 @@ public:
 	~CommTransaction();
 
 public:
+    //需要实现ICommTransaction接口的基本功能
 	virtual bool SelectApplication();
 	virtual bool InitilizeApplication();
 	virtual bool ReadApplicationData();
@@ -39,6 +40,8 @@ public:
 	virtual void SetMdkEnc(const string &enc) { m_mdkEnc = enc; }
 
 public:
+
+    //子类需要扩展的功能列表
 	virtual bool SelectApplication(APP_TYPE type, string app = "") = 0;
 
 public:

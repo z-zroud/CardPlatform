@@ -305,6 +305,9 @@
     <ClInclude Include="Source\Interface\ICommTransaction.h">
       <Filter>Header Files\Interface</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -325,5 +328,15 @@
     <Xml Include="UI\ModifyKMCTool.xml">
       <Filter>UI</Filter>
     </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CardPlatform.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="UI\Icon\main.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
