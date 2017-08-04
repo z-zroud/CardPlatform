@@ -36,6 +36,7 @@
     <ClCompile Include="Source\MainUI\TreeViewNav.cpp" />
     <ClCompile Include="Source\Personalization\InstallCfg.cpp" />
     <ClCompile Include="Source\StdAfx.cpp" />
+    <ClCompile Include="Source\Tool\ModifyKmc.cpp" />
     <ClCompile Include="Source\Util\APDU.cpp" />
     <ClCompile Include="Source\Util\Base.cpp" />
     <ClCompile Include="Source\Util\Converter.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="Source\MainUI\TreeViewNav.h" />
     <ClInclude Include="Source\Personalization\InstallCfg.h" />
     <ClInclude Include="Source\StdAfx.h" />
+    <ClInclude Include="Source\Tool\ModifyKmc.h" />
     <ClInclude Include="Source\Util\APDU.h" />
     <ClInclude Include="Source\Util\Base.h" />
     <ClInclude Include="Source\Util\Converter.h" />

@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "MainFrameDlg.h"
 #include "IDialogBuilderCallbackEx.h"
-
+#include "Interface\InterfaceInstance.h"
 
 
 
@@ -27,6 +27,15 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
 void CMainFrame::InitWindow()
 {
 	m_tabLayout = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mainPanelContainer")));
+    m_pComboReader = static_cast<CComboUI*>(m_PaintManager.FindControl(_T("comboReaderList")));
+
+    IPCSC* pPCSC = GetPCSCInterface();
+    auto readers = pPCSC->GetAllReaders();
+    for (auto reader : readers)
+    {
+        m_pComboReader->AddString(reader);
+    }
+    m_pComboReader->SetCurSelected(0);
 }
 
 /************************************************************

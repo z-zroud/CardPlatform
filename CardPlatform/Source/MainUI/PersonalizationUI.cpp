@@ -35,30 +35,15 @@ void CPersonalizationUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	CDuiString name = msg.pSender->GetName();
 	if (msg.sType == _T("click"))
 	{
-		if (name == _T("TestBtn"))
+		if (name == _T("btnDoPerso"))   //开始个人化
 		{
 			MessageBox(NULL, _T(":Sub:您点击了测试按钮"), _T("按钮例子"), MB_OK);
-		}
-	}
-	else if (msg.sType == _T("selectchanged"))
-	{
-		if (name == _T("TestBtn"))
-		{
-			MessageBox(NULL, _T(":Sub:您点击了测试按钮"), _T("按钮例子"), MB_OK);
-		}
-	}
-	else if (msg.sType == DUI_MSGTYPE_ITEMDBCLICK)
-	{
-		if (name == _T("TestBtn"))
-		{
-			MessageBox(NULL, _T(":Sub:您点击了测试按钮"), _T("按钮例子"), MB_OK);
-		}
-	}
-	else if (msg.sType == DUI_MSGTYPE_ITEMCLICK)
-	{
-		if (name == _T("TestBtn"))
-		{
-			MessageBox(NULL, _T(":Sub:您点击了测试按钮"), _T("按钮例子"), MB_OK);
-		}
-	}
+        }
+        else if (name == _T("btnView")) {   //查看安装参数
+
+        }
+        else if (name == _T("btnScanFile")) {   //浏览配置文件
+
+        }
+	}	
 }

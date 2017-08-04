@@ -201,6 +201,9 @@
     <ClCompile Include="Source\Util\SqliteDB.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Tool\ModifyKmc.cpp">
+      <Filter>Source Files\Tool</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -319,6 +322,9 @@
     </ClInclude>
     <ClInclude Include="Source\Util\SqliteDB.h">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\ModifyKmc.h">
+      <Filter>Header Files\Tool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
