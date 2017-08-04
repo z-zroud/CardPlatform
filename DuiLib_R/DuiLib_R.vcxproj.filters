@@ -140,9 +140,6 @@
     <ClInclude Include="Control\UIDateTime.h">
       <Filter>Header Files\Control</Filter>
     </ClInclude>
-    <ClInclude Include="Core\UIDefine.h">
-      <Filter>Header Files\Control</Filter>
-    </ClInclude>
     <ClInclude Include="Control\UIEdit.h">
       <Filter>Header Files\Control</Filter>
     </ClInclude>
@@ -247,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="Layout\UIVerticalLayout.h">
       <Filter>Header Files\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\UIDefine.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

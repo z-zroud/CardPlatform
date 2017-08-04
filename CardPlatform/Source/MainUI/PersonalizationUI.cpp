@@ -45,5 +45,5 @@ void CPersonalizationUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
         else if (name == _T("btnScanFile")) {   //浏览配置文件
 
         }
-	}	
+    }
 }

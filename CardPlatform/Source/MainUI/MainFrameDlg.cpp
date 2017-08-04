@@ -20,7 +20,7 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
 {
 	CDialogBuilderCallbackEx cb(&m_PaintManager);
 	CControlUI* pControl = cb.CreateControl(pstrClass);
-
+    
     return pControl;
 }
 
@@ -36,6 +36,8 @@ void CMainFrame::InitWindow()
         m_pComboReader->AddString(reader);
     }
     m_pComboReader->SetCurSelected(0);
+    
+    delete pPCSC;
 }
 
 /************************************************************

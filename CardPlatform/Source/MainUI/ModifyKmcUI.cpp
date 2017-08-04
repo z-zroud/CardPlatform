@@ -2,6 +2,21 @@
 #include "ModifyKmcUI.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\SqliteDB.h"
+#include "Tool\ModifyKmc.h"
+
+#define NOT_DIV      _T("Not Div")
+#define CPG202      _T("CPG2.0.2")
+#define CPG212      _T("CPG2.1.2")
+
+DIV_METHOD_FLAG GetDivFlag(string flag)
+{
+    if (flag == NOT_DIV)  return DIV_METHOD_FLAG::NO_DIV;
+    if (flag == CPG202)  return DIV_METHOD_FLAG::DIV_CPG202;
+    if (flag == CPG212)  return DIV_METHOD_FLAG::DIV_CPG212;
+
+    return DIV_METHOD_FLAG::NO_DIV;
+}
+
 
 CModifyKmcUI::CModifyKmcUI(CPaintManagerUI* pPM)
 {
@@ -21,7 +36,7 @@ void CModifyKmcUI::DoInit()
 		this->RemoveAll();
 		return;
 	}
-
+    
 	InitDlg();
 }
 
@@ -33,9 +48,9 @@ void CModifyKmcUI::InitDlg()
 	m_pNewDiv = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboNewDiv")));
 
     //初始化DIV flag
-	m_pNewDiv->AddString("Not div");
-	m_pNewDiv->AddString("CPG2.0.2");
-    m_pNewDiv->AddString("CPG2.1.2");
+	m_pNewDiv->AddString(NOT_DIV);
+	m_pNewDiv->AddString(CPG202);
+    m_pNewDiv->AddString(CPG212);
     m_pNewDiv->SetCurSelected(0);
 
     //初始化新KMC、旧KMC
@@ -69,21 +84,24 @@ CModifyKmcUI::~CModifyKmcUI()
 
 
 void CModifyKmcUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
-{
-	CDuiString name = msg.pSender->GetName();
-	CDuiString xxx;
+{	
 	if (msg.sType == _T("click"))
 	{
+        CDuiString name = msg.pSender->GetName();
 		if (name == _T("btnModify"))
 		{
-			//xxx = m_pNewDiv->GetCurItemString();
-		}
-	}
-	else if (msg.sType == DUI_MSGTYPE_ITEMCLICK)
-	{
-		if (name == _T("TestBtn"))
-		{
-			MessageBox(NULL, _T(":Sub:您点击了测试按钮"), _T("按钮例子"), MB_OK);
+            CComboUI* pComboReader = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboReaderList")));
+            CDuiString readerName = pComboReader->GetCurItemString();
+            
+            string aid      = m_pAid->GetCurItemString().GetData();
+            string oldKmc   = m_pOldKmc->GetCurItemString().GetData();
+            string newKmc   = m_pNewKmc->GetCurItemString().GetData();
+            string newDiv   = m_pNewDiv->GetCurItemString().GetData();
+
+            DIV_METHOD_FLAG flag    = GetDivFlag(newDiv);
+            CModifyKmc* pModifyKmc  = new CModifyKmc(readerName.GetData());
+
+            pModifyKmc->StartModifyKMC(aid, oldKmc, newKmc, flag);
 		}
 	}
 }
