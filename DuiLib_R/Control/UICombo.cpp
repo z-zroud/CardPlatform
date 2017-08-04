@@ -407,13 +407,34 @@ void CComboUI::RemoveAll()
     CContainerUI::RemoveAll();
 }
 
+void CComboUI::SetCurSelected(int index)
+{
+    if (m_items.GetSize() <= 0)
+    {
+        return;
+    }
+    if (index < 0 || index >= m_items.GetSize())
+    {
+        return;
+    }
+    m_iCurSel = index;
+}
+
 CListLabelElementUI* CComboUI::GetCurSelected()
 {
+    if (m_iCurSel < 0 || m_iCurSel >= m_items.GetSize())
+    {
+        return NULL;
+    }
 	return static_cast<CListLabelElementUI*>(m_items[m_iCurSel]);
 }
 
 CDuiString CComboUI::GetCurItemString()
 {
+    if (m_iCurSel < 0 || m_iCurSel >= m_items.GetSize())
+    {
+        return _T("");
+    }
 	CListLabelElementUI* item = static_cast<CListLabelElementUI*>(m_items[m_iCurSel]);
 	
 	if (item == NULL)

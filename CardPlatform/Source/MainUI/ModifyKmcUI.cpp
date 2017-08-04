@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "ModifyKmcUI.h"
 #include "IDialogBuilderCallbackEx.h"
-
+#include "Util\SqliteDB.h"
 
 CModifyKmcUI::CModifyKmcUI(CPaintManagerUI* pPM)
 {
@@ -32,9 +32,33 @@ void CModifyKmcUI::InitDlg()
 	m_pNewKmc = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboNewKmc")));
 	m_pNewDiv = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboNewDiv")));
 
-	m_pNewDiv->AddString("111");
-	m_pNewDiv->AddString("222");
+    //初始化DIV flag
+	m_pNewDiv->AddString("Not div");
+	m_pNewDiv->AddString("CPG2.0.2");
+    m_pNewDiv->AddString("CPG2.1.2");
+    m_pNewDiv->SetCurSelected(0);
 
+    //初始化新KMC、旧KMC
+    DB_KMC kmcTable;
+    vector<string> vecKmc;
+    kmcTable.GetKmc(vecKmc);
+    for (auto v : vecKmc)
+    {
+        m_pOldKmc->AddString(v.c_str());
+        m_pNewKmc->AddString(v.c_str());
+    }
+    m_pOldKmc->SetCurSelected(0);
+    m_pNewKmc->SetCurSelected(0);
+
+    //初始化AID
+    DB_AID aidTable;
+    vector<string> vecAid;
+    aidTable.GetAid(vecAid);
+    for (auto v : vecAid)
+    {
+        m_pAid->AddString(v.c_str());
+    }
+    m_pAid->SetCurSelected(0);
 }
 
 

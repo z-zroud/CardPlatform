@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "EMV.h"
+#include "PBOC.h"
 #include "Util\KeyGenerator.h"
 #include "Util\Log.h"
 #include "Util\Des0.h"
@@ -11,7 +11,7 @@
 
 
 
-EMV::EMV(IPCSC* reader)
+PBOC::PBOC(IPCSC* reader)
 {
 	m_pReader = reader;
 	m_pAPDU = reader->GetAPDU();
@@ -20,7 +20,7 @@ EMV::EMV(IPCSC* reader)
 }
 
 //主要实例化那些不需要使用APDU指令的对象，例如脱机数据认证
-EMV::EMV()
+PBOC::PBOC()
 {
     m_pReader = NULL;
     m_pAPDU = NULL;
@@ -28,14 +28,14 @@ EMV::EMV()
     m_IsOnlineAuthSucessed = false;
 }
 
-EMV::~EMV()
+PBOC::~PBOC()
 {
 	if (m_parser)
 		delete m_parser;
 }
 
 //读取标签数据
-string EMV::ReadTag(const string tag)
+string PBOC::ReadTag(const string tag)
 {
 	APDU_RESPONSE response;
 	memset(&response, 0, sizeof(response));
@@ -50,7 +50,7 @@ string EMV::ReadTag(const string tag)
 }
 
 //日期比较
-bool EMV::CompareDate(string first, string second)
+bool PBOC::CompareDate(string first, string second)
 {
 	if (first.length() != 6 || second.length() != 6)
 	{
@@ -64,7 +64,7 @@ bool EMV::CompareDate(string first, string second)
 
 
 //检查卡片AUC信息
-void EMV::ShowCardAUC(string AUC)
+void PBOC::ShowCardAUC(string AUC)
 {
 	int nAUC1 = stoi(AUC.substr(0, 2), 0, 16);
 	int nAUC2 = stoi(AUC.substr(2, 2), 0, 16);
@@ -90,7 +90,7 @@ void EMV::ShowCardAUC(string AUC)
 *	4.应用用途控制检查AUC
 *	5.发卡行国家代码检查
 ***************************************************************/
-bool EMV::HandleLimitation()
+bool PBOC::HandleLimitation()
 {
 	Log->Info("======================== 处理限制 开始 =================================");
 	//检查生效日期
@@ -137,7 +137,7 @@ bool EMV::HandleLimitation()
 }
 
 //显示CVM方法
-void EMV::ShowCVMMethod(int method)
+void PBOC::ShowCVMMethod(int method)
 {
 	switch (method)
 	{
@@ -169,7 +169,7 @@ void EMV::ShowCVMMethod(int method)
 }
 
 //显示CVM条件
-void EMV::ShowCVMCondition(int condition)
+void PBOC::ShowCVMCondition(int condition)
 {
 	switch (condition)
 	{
@@ -213,7 +213,7 @@ void EMV::ShowCVMCondition(int condition)
 * 持卡人验证用于确保持卡人身份合法以及卡片没有丢失。在持卡人验证处
 * 理中，终端决定要使用的CVM并执行选的的持卡人验证方法。
 *************************************************************/
-bool EMV::CardHolderValidation()
+bool PBOC::CardHolderValidation()
 {
 	Log->Info("======================== 持卡人验证 开始 =================================");
 	CVM cvm;
@@ -269,7 +269,7 @@ bool EMV::CardHolderValidation()
 	4. 频度检查
 	5. 新卡检查
 *************************************************************/
-bool EMV::TerminalRiskManagement()
+bool PBOC::TerminalRiskManagement()
 {
 	Log->Info("======================== 终端风险管理 开始 =================================");
 	//最低限额检查
@@ -338,7 +338,7 @@ bool EMV::TerminalRiskManagement()
 	return false;
 }
 
-void EMV::ParseGACResponseData(const string buffer)
+void PBOC::ParseGACResponseData(const string buffer)
 {
 	SaveTag("9F27", string(buffer.substr(0, 2)));   //密文信息数据 表明卡片返回的密文类型并指出终端要进行的操作
 	SaveTag("9F36", string(buffer.substr(2, 4)));   //应用交易计数器(ATC)
@@ -346,7 +346,7 @@ void EMV::ParseGACResponseData(const string buffer)
 	SaveTag("9F10", string(buffer.substr(22))); //发卡行应用数据 在一个联机交易中，要传送到发卡行的专有应用数据。
 }
 
-void EMV::ShowCardTransType()
+void PBOC::ShowCardTransType()
 {
 	string cardTransType = GetTagValue("9F27");
 	if (cardTransType.length() != 2)
@@ -375,7 +375,7 @@ void EMV::ShowCardTransType()
 *	3.脱机交易计数和累计脱机金额
 * 最后，卡片根据CVR决定卡片对交易做AAC/ARQC/TC处理
 *******************************************************************/
-bool EMV::CardActionAnalized(TERM_TRANS_TYPE type)
+bool PBOC::CardActionAnalized(TERM_TRANS_TYPE type)
 {
 	Log->Info("======================== 卡片行为分析 开始 =================================");
 	GACControlParam P1;
@@ -426,7 +426,7 @@ bool EMV::CardActionAnalized(TERM_TRANS_TYPE type)
 }
 
 //比较IAC和TAC结果
-bool EMV::CompareIACAndTVR(string IAC, string strTVR)
+bool PBOC::CompareIACAndTVR(string IAC, string strTVR)
 {
 	if (IAC.length() != strTVR.length())
 	{
@@ -452,7 +452,7 @@ bool EMV::CompareIACAndTVR(string IAC, string strTVR)
 	return false;
 }
 
-TERM_TRANS_TYPE EMV::GetTermAnanlizedResult()
+TERM_TRANS_TYPE PBOC::GetTermAnanlizedResult()
 {
 	TERM_TRANS_TYPE type = TERM_TRANS_TYPE::TERM_TC;
 	string IACDefault = GetTagValue("9F0D");
@@ -506,7 +506,7 @@ TERM_TRANS_TYPE EMV::GetTermAnanlizedResult()
 * 2. 请求密文处理(该GAC转移到卡片行为分析中发送)
 	终端根据第一步的判断结果向卡片请求相应的应用密文。
 **************************************************************/
-bool EMV::TerminalActionAnalized()
+bool PBOC::TerminalActionAnalized()
 {
 	TERM_TRANS_TYPE type = TERM_TRANS_TYPE::TERM_TC;
 	Log->Info("======================== 终端行为分析 开始 =================================");
@@ -515,7 +515,7 @@ bool EMV::TerminalActionAnalized()
 	return false;
 }
 
-bool EMV::GetTagAfterGAC()
+bool PBOC::GetTagAfterGAC()
 {
 	string tags[4] = { "9F5D","9F77","9F78","9F79" };
 	for (int i = 0; i < 4; i++)
@@ -532,7 +532,7 @@ bool EMV::GetTagAfterGAC()
 }
 
 //获取终端TVR
-string EMV::GetTVR()
+string PBOC::GetTVR()
 {
 	int byte1 = 0;
 	int byte2 = 0;
@@ -575,7 +575,7 @@ string EMV::GetTVR()
 	return string(szTVR);
 }
 
-string EMV::GetPAN()
+string PBOC::GetPAN()
 {
 	string tag57 = GetTagValue("57");
 	int index = tag57.find('D');
@@ -586,7 +586,7 @@ string EMV::GetPAN()
 	return tag57.substr(0, index);
 }
 
-string EMV::GenARPC(string AC, string authCode)
+string PBOC::GenARPC(string AC, string authCode)
 {
 	authCode += "000000000000";
 	char* szAC = (char*)AC.c_str();
@@ -622,7 +622,7 @@ string EMV::GenARPC(string AC, string authCode)
 * 发卡行的响应包括卡片的二次发卡更新和一个发卡行生成的密文。卡片验证密文
 * 确保响应来自一个有效的发卡行。此验证叫发卡行认证。
 *******************************************************************/
-bool EMV::OnlineBussiness()
+bool PBOC::OnlineBussiness()
 {
 	Log->Info("======================== 联机处理 开始 =================================");
 	string CID = GetTagValue("9F27");		// 	密文信息数据
@@ -653,7 +653,7 @@ bool EMV::OnlineBussiness()
 	return true;
 }
 
-void EMV::ParseTransLog(const string buffer)
+void PBOC::ParseTransLog(const string buffer)
 {
 	string transDate;		//交易日期
 	string transTime;		//交易时间
@@ -682,7 +682,7 @@ void EMV::ParseTransLog(const string buffer)
 }
 
 //发卡行脚本处理
-bool EMV::DealIusserScript()
+bool PBOC::DealIusserScript()
 {
 	//获取电子现金圈存日志入口
 	string logCashEntry = GetTagValue("DF4D");
@@ -727,7 +727,7 @@ bool EMV::DealIusserScript()
 }
 
 //交易结束
-bool EMV::EndTransaction()
+bool PBOC::EndTransaction()
 {
 	Log->Info("======================== 交易结束 开始 =================================");
 	GACControlParam P1;

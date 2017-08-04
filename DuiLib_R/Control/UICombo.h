@@ -98,7 +98,7 @@ public:
 
 	CListLabelElementUI* GetCurSelected();	//获取当前选中控件
 	CDuiString GetCurItemString();	//获取当前选中控件字符串
-
+    void SetCurSelected(int index);
 protected:
     CComboWnd* m_pWindow;
 

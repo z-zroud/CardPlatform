@@ -21,9 +21,7 @@
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
                         <Label name="lbKeyType" text="密钥类型:" float="true" pos="100,0,200,28"/>
-                        <Combo name="comboKeyType" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png">
-                              <ListLabelElement text="111" height="20" />
-                        </Combo>
+                        <Combo name="comboKeyType" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
                         <Label name="lbAC" text="AC:" float="true" pos="100,0,200,28"/>

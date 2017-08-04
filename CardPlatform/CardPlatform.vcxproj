@@ -22,7 +22,7 @@
     <ClCompile Include="Source\CardCheck\CommTransaction.cpp" />
     <ClCompile Include="Source\CardCheck\qPBOC\QPBOC.cpp" />
     <ClCompile Include="Source\CardCheck\Terminal.cpp" />
-    <ClCompile Include="Source\CardCheck\TouchTransaction\EMV.cpp" />
+    <ClCompile Include="Source\CardCheck\TouchTransaction\PBOC.cpp" />
     <ClCompile Include="Source\DP\DPParaser.cpp" />
     <ClCompile Include="Source\DP\GEDP\GEDPParaser.cpp" />
     <ClCompile Include="Source\DP\YLDP\YLDPParaser.cpp" />
@@ -47,6 +47,7 @@
     <ClCompile Include="Source\Util\SHA1.cpp" />
     <ClCompile Include="Source\Util\Sqlite3\shell.c" />
     <ClCompile Include="Source\Util\Sqlite3\sqlite3.c" />
+    <ClCompile Include="Source\Util\SqliteDB.cpp" />
     <ClCompile Include="Source\Util\StringParaser.cpp" />
     <ClCompile Include="Source\Util\TLVParaser.cpp" />
   </ItemGroup>
@@ -55,7 +56,7 @@
     <ClInclude Include="Source\CardCheck\CommTransaction.h" />
     <ClInclude Include="Source\CardCheck\qPBOC\QPBOC.h" />
     <ClInclude Include="Source\CardCheck\Terminal.h" />
-    <ClInclude Include="Source\CardCheck\TouchTransaction\EMV.h" />
+    <ClInclude Include="Source\CardCheck\TouchTransaction\PBOC.h" />
     <ClInclude Include="Source\DP\DPParaser.h" />
     <ClInclude Include="Source\DP\GEDP\GEDPParser.h" />
     <ClInclude Include="Source\DP\YLDP\YLDPParaser.h" />
@@ -87,6 +88,7 @@
     <ClInclude Include="Source\Util\SM.hpp" />
     <ClInclude Include="Source\Util\Sqlite3\sqlite3.h" />
     <ClInclude Include="Source\Util\Sqlite3\sqlite3ext.h" />
+    <ClInclude Include="Source\Util\SqliteDB.h" />
     <ClInclude Include="Source\Util\StringParaser.h" />
     <ClInclude Include="Source\Util\TLVParaser.h" />
   </ItemGroup>
