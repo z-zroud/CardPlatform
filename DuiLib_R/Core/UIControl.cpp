@@ -28,10 +28,10 @@ m_nBorderSize(0),
 m_nBorderStyle(PS_SOLID),
 m_nTooltipWidth(300)
 {
-    m_cXY.cx = m_cXY.cy = 0;
-    m_cxyFixed.cx = m_cxyFixed.cy = 0;
-    m_cxyMin.cx = m_cxyMin.cy = 0;
-    m_cxyMax.cx = m_cxyMax.cy = 9999;
+    m_cXY.cx		= m_cXY.cy		= 0;
+    m_cxyFixed.cx	= m_cxyFixed.cy	= 0;
+    m_cxyMin.cx		= m_cxyMin.cy	= 0;
+    m_cxyMax.cx		= m_cxyMax.cy	= 9999;
     m_cxyBorderRound.cx = m_cxyBorderRound.cy = 0;
 
     ::ZeroMemory(&m_rcPadding, sizeof(RECT));
@@ -86,6 +86,9 @@ CPaintManagerUI* CControlUI::GetManager() const
     return m_pManager;
 }
 
+/**********************************************************************
+* 功能：设置控件的绘制管理器，如果存在父控件且bInit为true，则初始化该控件
+***********************************************************************/
 void CControlUI::SetManager(CPaintManagerUI* pManager, CControlUI* pParent, bool bInit)
 {
     m_pManager = pManager;
@@ -1064,6 +1067,46 @@ void CControlUI::PaintStatusImage(HDC hDC)
 void CControlUI::PaintText(HDC hDC)
 {
     return;
+}
+
+void CControlUI::PaintBorder(HDC hDC, DWORD borderColor)
+{
+	if (m_nBorderSize > 0 && (m_cxyBorderRound.cx > 0 || m_cxyBorderRound.cy > 0))//画圆角边框
+	{
+		CRenderEngine::DrawRoundRect(hDC, m_rcItem, m_nBorderSize, m_cxyBorderRound.cx, m_cxyBorderRound.cy, GetAdjustColor(borderColor));
+	}
+	else
+	{
+		if (m_nBorderSize > 0)
+		{
+			CRenderEngine::DrawRect(hDC, m_rcItem, m_nBorderSize, GetAdjustColor(borderColor));
+			return;
+		}
+		else if (m_rcBorderSize.left > 0 || m_rcBorderSize.top > 0 || m_rcBorderSize.right > 0 || m_rcBorderSize.bottom > 0)
+		{
+			RECT rcBorder;
+			if (m_rcBorderSize.left > 0) {
+				rcBorder = m_rcItem;
+				rcBorder.right = m_rcItem.left;
+				CRenderEngine::DrawLine(hDC, rcBorder, m_rcBorderSize.left, GetAdjustColor(borderColor), m_nBorderStyle);
+			}
+			if (m_rcBorderSize.top > 0) {
+				rcBorder = m_rcItem;
+				rcBorder.bottom = m_rcItem.top;
+				CRenderEngine::DrawLine(hDC, rcBorder, m_rcBorderSize.top, GetAdjustColor(borderColor), m_nBorderStyle);
+			}
+			if (m_rcBorderSize.right > 0) {
+				rcBorder = m_rcItem;
+				rcBorder.left = m_rcItem.right;
+				CRenderEngine::DrawLine(hDC, rcBorder, m_rcBorderSize.right, GetAdjustColor(borderColor), m_nBorderStyle);
+			}
+			if (m_rcBorderSize.bottom > 0) {
+				rcBorder = m_rcItem;
+				rcBorder.top = m_rcItem.bottom;
+				CRenderEngine::DrawLine(hDC, rcBorder, m_rcBorderSize.bottom, GetAdjustColor(borderColor), m_nBorderStyle);
+			}
+		}
+	}
 }
 
 void CControlUI::PaintBorder(HDC hDC)

@@ -5,11 +5,12 @@
 
 namespace DuiLib {
 
-/////////////////////////////////////////////////////////////////////////////////////
-//
 
 typedef CControlUI* (CALLBACK* FINDCONTROLPROC)(CControlUI*, LPVOID);
-
+/*********************************************************************
+* CControlUI类定义了所有控件的基本属性，以及基本事件响应。 其他控件类基础
+* 该类，并进行属性与事件的扩展。
+**********************************************************************/
 class UILIB_API CControlUI
 {
 public:
@@ -23,46 +24,41 @@ public:
     virtual LPVOID GetInterface(LPCTSTR pstrName);
     virtual UINT GetControlFlags() const;
 
-    virtual bool Activate();
+    virtual bool Activate();		//控件是否处于激活状态
     virtual CPaintManagerUI* GetManager() const;
     virtual void SetManager(CPaintManagerUI* pManager, CControlUI* pParent, bool bInit = true);
     virtual CControlUI* GetParent() const;
 
     // 文本相关
-    virtual CDuiString GetText() const;
+    virtual CDuiString GetText() const;		//text属性
     virtual void SetText(LPCTSTR pstrText);
 
     // 图形相关
-    DWORD GetBkColor() const;
-    void SetBkColor(DWORD dwBackColor);
-    DWORD GetBkColor2() const;
-    void SetBkColor2(DWORD dwBackColor);
-    DWORD GetBkColor3() const;
-    void SetBkColor3(DWORD dwBackColor);
+    DWORD	GetBkColor() const;				//bkcolor背景颜色
+    void	SetBkColor(DWORD dwBackColor);
+    DWORD	GetBkColor2() const;				//bkcolor2
+    void	SetBkColor2(DWORD dwBackColor);
+    DWORD	GetBkColor3() const;				//bkcolor3
+    void	SetBkColor3(DWORD dwBackColor);
 
-    LPCTSTR GetBkImage();
-    void SetBkImage(LPCTSTR pStrImage);
-	LPCTSTR GetNormalImage();
-	void SetNormalImage(LPCTSTR pStrImage);
-	LPCTSTR GetHotImage();
-	void SetHotImage(LPCTSTR pStrImage);
+    LPCTSTR	GetBkImage();
+    void	SetBkImage(LPCTSTR pStrImage);	//bkimage背景图片
+	LPCTSTR	GetNormalImage();
+	void	SetNormalImage(LPCTSTR pStrImage);	//normalimage
+	LPCTSTR	GetHotImage();
+	void	SetHotImage(LPCTSTR pStrImage);		//hotimage
 	LPCTSTR GetPushedImage();
-	void SetPushedImage(LPCTSTR pStrImage);
+	void	SetPushedImage(LPCTSTR pStrImage);	//pushedimage
 	LPCTSTR GetFocusedImage();
-	void SetFocusedImage(LPCTSTR pStrImage);
+	void	SetFocusedImage(LPCTSTR pStrImage);	//focusedimage
 	LPCTSTR GetDisabledImage();
-	void SetDisabledImage(LPCTSTR pStrImage);
+	void	SetDisabledImage(LPCTSTR pStrImage);	//disabledimage
 	LPCTSTR GetForeImage();
-	void SetForeImage(LPCTSTR pStrImage);
+	void	SetForeImage(LPCTSTR pStrImage);	//forimage
 
-	DWORD GetFocusBorderColor() const;
-	void SetFocusBorderColor(DWORD dwBorderColor);
-    bool IsColorHSL() const;
-    void SetColorHSL(bool bColorHSL);
-    SIZE GetBorderRound() const;
-    void SetBorderRound(SIZE cxyRound);
-	bool DrawImage(HDC hDC, CImageAttribute& image);
 
+
+	bool	DrawImage(HDC hDC, CImageAttribute& image);
 	//因为经常需要指定绘制的Dest，所以专门增加rcDest参数控制输出位置
 	bool DrawImage(HDC hDC, CImageAttribute& image, const RECT& rcDest);
 	bool DrawImage(HDC hDC, CImageAttribute& image, LPCTSTR pStrModify);
@@ -71,70 +67,78 @@ public:
 	bool DrawImageEx(HDC hDC, CImageAttribute& image, const RECT& rcDest);
 
 	//边框相关
-	int GetBorderSize() const;
-	void SetBorderSize(int nSize);
-	DWORD GetBorderColor() const;
-	void SetBorderColor(DWORD dwBorderColor);
+	DWORD	GetFocusBorderColor() const;
+	void	SetFocusBorderColor(DWORD dwBorderColor);	//focusbordercolor
+	bool	IsColorHSL() const;
+	void	SetColorHSL(bool bColorHSL);		//HSL
+	SIZE	GetBorderRound() const;
+	void	SetBorderRound(SIZE cxyRound);		//borderround
+	int		GetBorderSize() const;
+	void	SetBorderSize(int nSize);		//bordersize
+	void	SetBorderSize(RECT rc);
+	DWORD	GetBorderColor() const;
+	void	SetBorderColor(DWORD dwBorderColor);	//bordercolor
 
-	void SetBorderSize(RECT rc);
-	int GetLeftBorderSize() const;
-	void SetLeftBorderSize(int nSize);
-	int GetTopBorderSize() const;
-	void SetTopBorderSize(int nSize);
-	int GetRightBorderSize() const;
-	void SetRightBorderSize(int nSize);
-	int GetBottomBorderSize() const;
-	void SetBottomBorderSize(int nSize);
-	int GetBorderStyle() const;
-	void SetBorderStyle(int nStyle);
+	
+	int		GetLeftBorderSize() const;		//分别设置左、上、右、下边框的厚度
+	void	SetLeftBorderSize(int nSize);
+	int		GetTopBorderSize() const;
+	void	SetTopBorderSize(int nSize);
+	int		GetRightBorderSize() const;
+	void	SetRightBorderSize(int nSize);
+	int		GetBottomBorderSize() const;
+	void	SetBottomBorderSize(int nSize);
+
+	int		GetBorderStyle() const;
+	void	SetBorderStyle(int nStyle);	//边框风格
 
     // 位置相关
-    virtual const RECT& GetPos() const;
-    virtual void SetPos(RECT rc);
-    virtual int GetWidth() const;
-    virtual int GetHeight() const;
-    virtual int GetX() const;
-    virtual int GetY() const;
-    virtual RECT GetPadding() const;
-    virtual void SetPadding(RECT rcPadding); // 设置外边距，由上层窗口绘制
-    virtual SIZE GetFixedXY() const;         // 实际大小位置使用GetPos获取，这里得到的是预设的参考值
-    virtual void SetFixedXY(SIZE szXY);      // 仅float为true时有效
-    virtual int GetFixedWidth() const;       // 实际大小位置使用GetPos获取，这里得到的是预设的参考值
-    virtual void SetFixedWidth(int cx);      // 预设的参考值
-    virtual int GetFixedHeight() const;      // 实际大小位置使用GetPos获取，这里得到的是预设的参考值
-    virtual void SetFixedHeight(int cy);     // 预设的参考值
-    virtual int GetMinWidth() const;
-    virtual void SetMinWidth(int cx);
-    virtual int GetMaxWidth() const;
-    virtual void SetMaxWidth(int cx);
-    virtual int GetMinHeight() const;
-    virtual void SetMinHeight(int cy);
-    virtual int GetMaxHeight() const;
-    virtual void SetMaxHeight(int cy);
-    virtual void SetRelativePos(SIZE szMove,SIZE szZoom);
-    virtual void SetRelativeParentSize(SIZE sz);
+    virtual const RECT&	GetPos() const;
+    virtual void	SetPos(RECT rc);
+    virtual int		GetWidth() const;
+    virtual int		GetHeight() const;
+    virtual int		GetX() const;
+    virtual int		GetY() const;
+    virtual RECT	GetPadding() const;
+    virtual void	SetPadding(RECT rcPadding); // 设置外边距，由上层窗口绘制
+    virtual SIZE	GetFixedXY() const;         // 实际大小位置使用GetPos获取，这里得到的是预设的参考值
+    virtual void	SetFixedXY(SIZE szXY);      // 仅float为true时有效
+    virtual int		GetFixedWidth() const;       // 实际大小位置使用GetPos获取，这里得到的是预设的参考值
+    virtual void	SetFixedWidth(int cx);      // 预设的参考值
+    virtual int		GetFixedHeight() const;      // 实际大小位置使用GetPos获取，这里得到的是预设的参考值
+    virtual void	SetFixedHeight(int cy);     // 预设的参考值
+    virtual int		GetMinWidth() const;
+    virtual void	SetMinWidth(int cx);
+    virtual int		GetMaxWidth() const;
+    virtual void	SetMaxWidth(int cx);
+    virtual int		GetMinHeight() const;
+    virtual void	SetMinHeight(int cy);
+    virtual int		GetMaxHeight() const;
+    virtual void	SetMaxHeight(int cy);
+    virtual void	SetRelativePos(SIZE szMove,SIZE szZoom);
+    virtual void	SetRelativeParentSize(SIZE sz);
     virtual TRelativePosUI GetRelativePos() const;
-    virtual bool IsRelativePos() const;
+    virtual bool	IsRelativePos() const;
 
     // 鼠标提示
-    virtual CDuiString GetToolTip() const;
-    virtual void SetToolTip(LPCTSTR pstrText);
-	virtual void SetToolTipWidth(int nWidth);
-	virtual int	  GetToolTipWidth(void);	// 多行ToolTip单行最长宽度
+    virtual CDuiString	GetToolTip() const;
+    virtual void		SetToolTip(LPCTSTR pstrText);
+	virtual void		SetToolTipWidth(int nWidth);
+	virtual int			GetToolTipWidth(void);	// 多行ToolTip单行最长宽度
 
     // 快捷键
-    virtual TCHAR GetShortcut() const;
-    virtual void SetShortcut(TCHAR ch);
+    virtual TCHAR	GetShortcut() const;
+    virtual void	SetShortcut(TCHAR ch);
 
     // 菜单
     virtual bool IsContextMenuUsed() const;
     virtual void SetContextMenuUsed(bool bMenuUsed);
 
     // 用户属性
-    virtual const CDuiString& GetUserData(); // 辅助函数，供用户使用
-    virtual void SetUserData(LPCTSTR pstrText); // 辅助函数，供用户使用
-    virtual UINT_PTR GetTag() const; // 辅助函数，供用户使用
-    virtual void SetTag(UINT_PTR pTag); // 辅助函数，供用户使用
+    virtual const CDuiString&	GetUserData(); // 辅助函数，供用户使用
+    virtual void				SetUserData(LPCTSTR pstrText); // 辅助函数，供用户使用
+    virtual UINT_PTR			GetTag() const; // 辅助函数，供用户使用
+    virtual void				SetTag(UINT_PTR pTag); // 辅助函数，供用户使用
 
     // 一些重要的属性
     virtual bool IsVisible() const;
@@ -154,11 +158,11 @@ public:
 
     virtual CControlUI* FindControl(FINDCONTROLPROC Proc, LPVOID pData, UINT uFlags);
 
-    void Invalidate();
-    bool IsUpdateNeeded() const;
-    void NeedUpdate();
-    void NeedParentUpdate();
-    DWORD GetAdjustColor(DWORD dwColor);
+    void	Invalidate();
+    bool	IsUpdateNeeded() const;
+    void	NeedUpdate();
+    void	NeedParentUpdate();
+    DWORD	GetAdjustColor(DWORD dwColor);
 
     virtual void Init();
     virtual void DoInit();
@@ -177,7 +181,7 @@ public:
     virtual void PaintStatusImage(HDC hDC);
     virtual void PaintText(HDC hDC);
     virtual void PaintBorder(HDC hDC);
-
+	virtual void PaintBorder(HDC hDC, DWORD borderColor);
     virtual void DoPostPaint(HDC hDC, const RECT& rcPaint);
 
 	//虚拟窗口参数

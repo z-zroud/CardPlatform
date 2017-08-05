@@ -13,11 +13,13 @@ namespace DuiLib
 		,m_iBindTabIndex(-1)
 	{
 		m_uTextStyle = DT_SINGLELINE | DT_VCENTER | DT_CENTER;
-		m_rcBorderSize = { 1,1,1,1 };	//°´Å¥Ä¬ÈÏ±ß¿ò
-		m_dwBorderColor = 0xFFB3B3B3;	//°´Å¥Ä¬ÈÏ±ß¿òÑÕÉ«		
-		//SetFocusBorderColor(0xFF79CDCD);	//¾Û½¹Ê±°´Å¥±ß¿òÑÕÉ«
-		SetHotBkColor(0xFFE8E8E8);		//¾Û½¹Ê±°´Å¥±³¾°ÑÕÉ«
-		SetPushedBkColor(0xFFC2C2C2);
+		//m_rcBorderSize = { 1,1,1,1 };	//°´Å¥Ä¬ÈÏ±ß¿ò
+		m_nBorderSize = 1;
+		m_dwBorderColor = 0xFF696969;	//°´Å¥Ä¬ÈÏ±ß¿òÑÕÉ«		
+		SetFocusBorderColor(0xFF3C7FB1);	//¾Û½¹Ê±°´Å¥±ß¿òÑÕÉ«
+		SetBkColor(0xFFE5E5E5);	//±³¾°ÑÕÉ«
+		SetHotBkColor(0xFFBEE6FD);		//foucsÊ±°´Å¥±³¾°ÑÕÉ«
+		SetPushedBkColor(0xFFC4E5F6);	//pushedÊ±°´Å¥±³¾°ÑÕÉ«
 	}
 
 	LPCTSTR CButtonUI::GetClass() const
@@ -309,17 +311,39 @@ namespace DuiLib
 		else CLabelUI::SetAttribute(pstrName, pstrValue);
 	}
 
+	void CButtonUI::PaintBorder(HDC hDC)
+	{
+		if (IsFocused()) m_uButtonState |= UISTATE_FOCUSED;
+		else m_uButtonState &= ~UISTATE_FOCUSED;
+		if (!IsEnabled()) m_uButtonState |= UISTATE_DISABLED;
+		else m_uButtonState &= ~UISTATE_DISABLED;
+
+
+		if ((m_uButtonState & UISTATE_PUSHED) != 0 || (m_uButtonState & UISTATE_HOT) != 0)
+		{
+			if (m_dwFocusBorderColor != 0)
+			{
+					
+				__super::PaintBorder(hDC, m_dwFocusBorderColor);
+			}
+			else
+				__super::PaintBorder(hDC,m_dwBorderColor);
+		}
+		else
+			__super::PaintBorder(hDC, m_dwBorderColor); 
+	}
+
 	void CButtonUI::PaintText(HDC hDC)
 	{
-		if( IsFocused() ) m_uButtonState |= UISTATE_FOCUSED;
-		else m_uButtonState &= ~ UISTATE_FOCUSED;
-		if( !IsEnabled() ) m_uButtonState |= UISTATE_DISABLED;
-		else m_uButtonState &= ~ UISTATE_DISABLED;
+		if (IsFocused()) m_uButtonState |= UISTATE_FOCUSED;
+		else m_uButtonState &= ~UISTATE_FOCUSED;
+		if (!IsEnabled()) m_uButtonState |= UISTATE_DISABLED;
+		else m_uButtonState &= ~UISTATE_DISABLED;
 
-		if( m_dwTextColor == 0 ) m_dwTextColor = m_pManager->GetDefaultFontColor();
-		if( m_dwDisabledTextColor == 0 ) m_dwDisabledTextColor = m_pManager->GetDefaultDisabledColor();
+		if (m_dwTextColor == 0) m_dwTextColor = m_pManager->GetDefaultFontColor();
+		if (m_dwDisabledTextColor == 0) m_dwDisabledTextColor = m_pManager->GetDefaultDisabledColor();
 
-		if( m_sText.IsEmpty() ) return;
+		if (m_sText.IsEmpty()) return;
 		int nLinks = 0;
 		RECT rc = m_rcItem;
 		rc.left += m_rcTextPadding.left;
@@ -327,21 +351,21 @@ namespace DuiLib
 		rc.top += m_rcTextPadding.top;
 		rc.bottom -= m_rcTextPadding.bottom;
 
-		DWORD clrColor = IsEnabled()?m_dwTextColor:m_dwDisabledTextColor;
+		DWORD clrColor = IsEnabled() ? m_dwTextColor : m_dwDisabledTextColor;
 
-		if( ((m_uButtonState & UISTATE_PUSHED) != 0) && (GetPushedTextColor() != 0) )
+		if (((m_uButtonState & UISTATE_PUSHED) != 0) && (GetPushedTextColor() != 0))
 			clrColor = GetPushedTextColor();
-		else if( ((m_uButtonState & UISTATE_HOT) != 0) && (GetHotTextColor() != 0) )
+		else if (((m_uButtonState & UISTATE_HOT) != 0) && (GetHotTextColor() != 0))
 			clrColor = GetHotTextColor();
-		else if( ((m_uButtonState & UISTATE_FOCUSED) != 0) && (GetFocusedTextColor() != 0) )
+		else if (((m_uButtonState & UISTATE_FOCUSED) != 0) && (GetFocusedTextColor() != 0))
 			clrColor = GetFocusedTextColor();
 
-		if( m_bShowHtml )
+		if (m_bShowHtml)
 			CRenderEngine::DrawHtmlText(hDC, m_pManager, rc, m_sText, clrColor, \
-			NULL, NULL, nLinks, m_uTextStyle);
+				NULL, NULL, nLinks, m_uTextStyle);
 		else
 			CRenderEngine::DrawText(hDC, m_pManager, rc, m_sText, clrColor, \
-			m_iFont, m_uTextStyle);
+				m_iFont, m_uTextStyle);
 	}
 
 	void CButtonUI::PaintStatusImage(HDC hDC)

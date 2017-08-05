@@ -10,18 +10,18 @@ namespace DuiLib
 	public:
 		CButtonUI();
 
-		LPCTSTR GetClass() const;
-		LPVOID GetInterface(LPCTSTR pstrName);
-		UINT GetControlFlags() const;
+		LPCTSTR	GetClass() const;
+		LPVOID	GetInterface(LPCTSTR pstrName);
+		UINT	GetControlFlags() const;
 
 		bool Activate();
 		void SetEnabled(bool bEnable = true);
 		void DoEvent(TEventUI& event);
 
-		LPCTSTR GetHotForeImage();
-		void SetHotForeImage(LPCTSTR pStrImage);
-		LPCTSTR GetPushedForeImage();
-		void SetPushedForeImage(LPCTSTR pStrImage);
+		LPCTSTR	GetHotForeImage();
+		void	SetHotForeImage(LPCTSTR pStrImage);
+		LPCTSTR	GetPushedForeImage();
+		void	SetPushedForeImage(LPCTSTR pStrImage);
 
 		void BindTabIndex(int _BindTabIndex);
 		void BindTabLayoutName(LPCTSTR _TabLayoutName);
@@ -30,22 +30,22 @@ namespace DuiLib
 		int	 GetBindTabLayoutIndex();
 		CDuiString GetBindTabLayoutName();
 
-		void SetHotBkColor(DWORD dwColor);
-		DWORD GetHotBkColor() const;
-		void SetPushedBkColor(DWORD dwColor);
-		DWORD GetPushedBkColor()const;
-		void SetHotTextColor(DWORD dwColor);
-		DWORD GetHotTextColor() const;
-		void SetPushedTextColor(DWORD dwColor);
-		DWORD GetPushedTextColor() const;
-		void SetFocusedTextColor(DWORD dwColor);
-		DWORD GetFocusedTextColor() const;
-		SIZE EstimateSize(SIZE szAvailable);
-		void SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
+		void	SetHotBkColor(DWORD dwColor);
+		DWORD	GetHotBkColor() const;
+		void	SetPushedBkColor(DWORD dwColor);
+		DWORD	GetPushedBkColor()const;
+		void	SetHotTextColor(DWORD dwColor);
+		DWORD	GetHotTextColor() const;
+		void	SetPushedTextColor(DWORD dwColor);
+		DWORD	GetPushedTextColor() const;
+		void	SetFocusedTextColor(DWORD dwColor);
+		DWORD	GetFocusedTextColor() const;
+		SIZE	EstimateSize(SIZE szAvailable);
+		void	SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
 
-		void PaintText(HDC hDC);
-		void PaintStatusImage(HDC hDC);
-
+		void	PaintText(HDC hDC);
+		void	PaintStatusImage(HDC hDC);
+		void	PaintBorder(HDC hDC);
 	protected:
 		UINT m_uButtonState;
 
