@@ -12,35 +12,35 @@ namespace DuiLib
 		~COptionUI();
 
 		LPCTSTR GetClass() const;
-		LPVOID GetInterface(LPCTSTR pstrName);
+		LPVOID  GetInterface(LPCTSTR pstrName);
 
-		void SetManager(CPaintManagerUI* pManager, CControlUI* pParent, bool bInit = true);
+		void    SetManager(CPaintManagerUI* pManager, CControlUI* pParent, bool bInit = true);
 
-		bool Activate();
-		void SetEnabled(bool bEnable = true);
+		bool    Activate();
+		void    SetEnabled(bool bEnable = true);
 
 		LPCTSTR GetSelectedImage();
-		void SetSelectedImage(LPCTSTR pStrImage);
+		void    SetSelectedImage(LPCTSTR pStrImage);
 
 		LPCTSTR GetSelectedHotImage();
-		void SetSelectedHotImage(LPCTSTR pStrImage);
+		void    SetSelectedHotImage(LPCTSTR pStrImage);
 
 		LPCTSTR GetSelectedPushedImage();
-		void SetSelectedPushedImage(LPCTSTR pStrImage);
+		void    SetSelectedPushedImage(LPCTSTR pStrImage);
 
-		void SetSelectedTextColor(DWORD dwTextColor);
-		DWORD GetSelectedTextColor();
+		void    SetSelectedTextColor(DWORD dwTextColor);
+		DWORD   GetSelectedTextColor();
 
-		void SetSelectedBkColor(DWORD dwBkColor);
-		DWORD GetSelectBkColor();
+		void    SetSelectedBkColor(DWORD dwBkColor);
+		DWORD   GetSelectBkColor();
 
 		LPCTSTR GetSelectedForedImage();
-		void SetSelectedForedImage(LPCTSTR pStrImage);
+		void    SetSelectedForedImage(LPCTSTR pStrImage);
 
 		LPCTSTR GetGroup() const;
-		void SetGroup(LPCTSTR pStrGroupName = NULL);
-		bool IsSelected() const;
-		virtual void Selected(bool bSelected);
+		void    SetGroup(LPCTSTR pStrGroupName = NULL);
+		bool    IsSelected() const;
+		virtual void    Selected(bool bSelected);
 
 		SIZE EstimateSize(SIZE szAvailable);
 		void SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
