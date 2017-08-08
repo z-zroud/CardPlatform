@@ -33,11 +33,20 @@ namespace DuiLib
 		pCheckBox->SetVisible(false);
 		pItemButton->SetMouseEnabled(false);
 
+        pCheckBox->SetBkColor(0);
+        pCheckBox->SetHotBkColor(0);
+        pCheckBox->SetPushedBkColor(0);
+
+        pFolderButton->SetBkColor(0);
+        pFolderButton->SetHotBkColor(0);
+        pFolderButton->SetPushedBkColor(0);
+
 		pItemButton->SetBorderSize({ 0,0,0,0 });
-		//pItemButton->SetHotBkColor(0xFFCFCFCF);
+        pItemButton->SetBkColor(0);
+		pItemButton->SetHotBkColor(0);
+        pItemButton->SetSelectedBkColor(0);
 
-
-		//pItemButton->SetPushedBkColor(pItemButton->GetBkColor());
+		pItemButton->SetPushedBkColor(pItemButton->GetBkColor());
 		if(_ParentNode)
 		{
 			if (_tcsicmp(_ParentNode->GetClass(), _T("TreeNodeUI")) != 0)
