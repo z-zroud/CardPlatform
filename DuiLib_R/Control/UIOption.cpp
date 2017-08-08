@@ -8,6 +8,7 @@ namespace DuiLib
 		, m_dwSelectedTextColor(0)
 		, m_dwSelectedBkColor(0)
 	{
+        m_nBorderSize = 0;
 	}
 
 	COptionUI::~COptionUI()

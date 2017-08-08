@@ -5,11 +5,18 @@ namespace DuiLib
 {
 	CCheckBoxUI::CCheckBoxUI()
 	{
-		//默认bk hotbk pushedbk颜色一致
-		SetHotBkColor(GetBkColor());
-		SetPushedBkColor(GetBkColor());
+		////默认bk hotbk pushedbk颜色一致
+		//SetHotBkColor(GetBkColor());
+		//SetPushedBkColor(GetBkColor());
 
-		SetBorderSize({ 0,0,0,0 });	//无边框
+        //SetBorderSize(0);
+        m_dwBackColor = 0xFFFFFFFF;
+        m_dwBackColor2 = 0xFFFFFFFF;
+        m_dwBackColor3 = 0xFFFFFFFF;
+        m_dwHotBkColor = 0xFFFFFFFF;
+        m_dwPushedBkColor = 0xFFFFFFFF;
+
+        m_nBorderSize = 0;
 	}
 
 	LPCTSTR CCheckBoxUI::GetClass() const
