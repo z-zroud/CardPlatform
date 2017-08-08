@@ -22,4 +22,17 @@ namespace Base
 
         return string(szTransDate);
     }
+
+    //日期比较
+    bool CompareDate(string grateDate, string lessDate)
+    {
+        if (grateDate.length() != 6 || lessDate.length() != 6)
+        {
+            return false;
+        }
+        int nFirst = stoi(grateDate, 0);
+        int nSecond = stoi(lessDate, 0);
+
+        return nFirst >= nSecond;
+    }
 }

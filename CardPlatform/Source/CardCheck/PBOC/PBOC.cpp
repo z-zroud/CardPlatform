@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PBOC.h"
-#include "Util\KeyGenerator.h"
+#include "Interface\InterfaceInstance.h"
 #include "Util\Log.h"
 #include "Util\Des0.h"
 #include "Util\SHA1.h"
@@ -11,56 +11,25 @@
 
 
 
-PBOC::PBOC(IPCSC* reader)
+PBOC::PBOC(IPCSC* reader) : CommTransaction(reader)
 {
-	m_pReader = reader;
-	m_pAPDU = reader->GetAPDU();
-	m_parser = new TLVParaser();
 	m_IsOnlineAuthSucessed = false;
 }
 
 //主要实例化那些不需要使用APDU指令的对象，例如脱机数据认证
 PBOC::PBOC()
 {
-    m_pReader = NULL;
-    m_pAPDU = NULL;
-    m_parser = new TLVParaser();
-    m_IsOnlineAuthSucessed = false;
+    //m_pReader = NULL;
+    //m_pAPDU = NULL;
+    //m_parser = new TLVParaser();
+    //m_IsOnlineAuthSucessed = false;
 }
 
 PBOC::~PBOC()
 {
-	if (m_parser)
-		delete m_parser;
 }
 
-//读取标签数据
-string PBOC::ReadTag(const string tag)
-{
-	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
 
-	m_pAPDU->GetTag(tag, response);
-	if (response.SW1 == 0x90 && response.SW2 == 0x00)
-	{
-		return string(response.data);
-	}
-
-	return "";
-}
-
-//日期比较
-bool PBOC::CompareDate(string first, string second)
-{
-	if (first.length() != 6 || second.length() != 6)
-	{
-		return false;
-	}
-	int nFirst = stoi(first, 0);
-	int nSecond = stoi(second, 0);
-
-	return nFirst >= nSecond;
-}
 
 
 //检查卡片AUC信息
@@ -94,9 +63,9 @@ bool PBOC::HandleLimitation()
 {
 	Log->Info("======================== 处理限制 开始 =================================");
 	//检查生效日期
-	string effectDate = GetTagValue("5F25");
+	string effectDate = GetTagValue(Tag5F25);
 	string transDate = Base::GenTransDate();
-	if (!CompareDate(transDate, effectDate))
+	if (!Base::CompareDate(transDate, effectDate))
 	{
 		Log->Error("生效日期错误: 生效日期:[%s], 交易日期[%s]", effectDate.c_str(), transDate.c_str());
 		m_tvr.ApplicationNotEffect = true;
@@ -106,8 +75,8 @@ bool PBOC::HandleLimitation()
 	}
 	
 	//检查失效日期
-	string expireDate = GetTagValue("5F24");
-	if (!CompareDate(expireDate, transDate))
+	string expireDate = GetTagValue(Tag5F24);
+	if (!Base::CompareDate(expireDate, transDate))
 	{
 		Log->Error("失效日期错误: 失效日期:[%s],交易日期[%s]", expireDate.c_str(), transDate.c_str());
 		m_tvr.ApplicationExpired = true;
@@ -117,8 +86,8 @@ bool PBOC::HandleLimitation()
 	}
 
 	//检查应用版本号
-	string termApplicationVersion = CTerminal::GetTerminalData("9F09");
-	string cardApplicationVersion = GetTagValue("9F08");
+	string termApplicationVersion = CTerminal::GetTerminalData(Tag9F09);
+	string cardApplicationVersion = GetTagValue(Tag9F08);
 	if (termApplicationVersion != cardApplicationVersion)
 	{
 		Log->Info("应用版本号检查失败!卡片应用版本号:[%s],终端应用版本号:[%s]", cardApplicationVersion, termApplicationVersion);
@@ -128,9 +97,8 @@ bool PBOC::HandleLimitation()
 		Log->Info("应用版本号验证成功! 卡片版本号[%s]", cardApplicationVersion.c_str());
 	}
 
-
 	//检查AUC
-	string AUC = GetTagValue("9F07");
+	string AUC = GetTagValue(Tag9F07);
 	ShowCardAUC(AUC);
 
 	return false;
@@ -217,7 +185,7 @@ bool PBOC::CardHolderValidation()
 {
 	Log->Info("======================== 持卡人验证 开始 =================================");
 	CVM cvm;
-	string strCVM = GetTagValue("8E");
+	string strCVM = GetTagValue(Tag8E);
 
 	//解析CMV值
 	cvm.X = strCVM.substr(0, 8);
@@ -273,7 +241,7 @@ bool PBOC::TerminalRiskManagement()
 {
 	Log->Info("======================== 终端风险管理 开始 =================================");
 	//最低限额检查
-	string transMoney = ReadTag("81");
+	string transMoney = ReadTagValue("81");
 	if (transMoney.empty())
 	{
 		Log->Error("无法获取授权金额!");
@@ -398,7 +366,7 @@ bool PBOC::CardActionAnalized(TERM_TRANS_TYPE type)
 	string CDOL1 = GetTagValue("8C");
 	BCD_TL CDOL1tlEntities[32] = { 0 };
 	unsigned int CDOL1tlEntitiesCount = 0;
-	m_parser->TLVConstruct((unsigned char*)CDOL1.c_str(), CDOL1.length(), CDOL1tlEntities, CDOL1tlEntitiesCount);
+	m_pParaser->TLVConstruct((unsigned char*)CDOL1.c_str(), CDOL1.length(), CDOL1tlEntities, CDOL1tlEntitiesCount);
 	string termData;
 	for (unsigned int i = 0; i < CDOL1tlEntitiesCount; i++)
 	{
@@ -412,7 +380,7 @@ bool PBOC::CardActionAnalized(TERM_TRANS_TYPE type)
 	//解析卡片响应数据
 	BCD_TLV entites[32] = { 0 };
 	unsigned int entitiesCount = 0;
-	m_parser->TLVConstruct((unsigned char*)response1.data, strlen(response1.data), entites, entitiesCount);
+    m_pParaser->TLVConstruct((unsigned char*)response1.data, strlen(response1.data), entites, entitiesCount);
 
 	//格式化输出响应数据
 	PrintTags(entites, entitiesCount);
@@ -515,23 +483,9 @@ bool PBOC::TerminalActionAnalized()
 	return false;
 }
 
-bool PBOC::GetTagAfterGAC()
-{
-	string tags[4] = { "9F5D","9F77","9F78","9F79" };
-	for (int i = 0; i < 4; i++)
-	{
-		string response = ReadTag(tags[i]);
-		if (response.empty())
-		{
-			return false;
-		}
-		Log->Info("[%s]=%s", tags[i].c_str(), response.c_str());
-	}
-
-	return true;
-}
-
-//获取终端TVR
+/**************************************************************
+* 功能：根据脱机数据认证、终端风险管理等步骤，生成终端行为代码(TAC)
+***************************************************************/
 string PBOC::GetTVR()
 {
 	int byte1 = 0;
@@ -575,45 +529,18 @@ string PBOC::GetTVR()
 	return string(szTVR);
 }
 
-string PBOC::GetPAN()
+/***************************************************************
+* 功能：获取主账号
+****************************************************************/
+string PBOC::GetAccount()
 {
-	string tag57 = GetTagValue("57");
+	string tag57 = GetTagValue(Tag57);
 	int index = tag57.find('D');
 	if (index == string::npos)
 	{//未找到，直接返回空
-		return "";
+		return _T("");
 	}
 	return tag57.substr(0, index);
-}
-
-string PBOC::GenARPC(string AC, string authCode)
-{
-	authCode += "000000000000";
-	char* szAC = (char*)AC.c_str();
-	char* szAuthCode = (char*)authCode.c_str();
-	str_xor(szAC, szAuthCode, 16);
-	char szARPC[32] = { 0 };
-
-	KeyGenerator kg;
-	string sudkAuth;
-	string ATC = GetTagValue("9F36");
-	string cardSeq = GetTagValue("5F34");
-	string PAN = GetPAN();
-	if (!m_mdkAuth.empty())
-	{
-		m_udkAuth = kg.GenUDKAuthFromMDKAuth(m_mdkAuth, ATC, PAN, cardSeq);
-	}
-	if (!m_udkAuth.empty())
-	{
-		sudkAuth = kg.GenSUDKAuthFromUDKAuth(m_udkAuth, ATC);
-	}
-	else {
-		return "";
-	}
-
-	Des3(szARPC, (char*)sudkAuth.c_str(), szAC);
-
-	return string(szARPC);
 }
 
 /******************************************************************
@@ -625,15 +552,27 @@ string PBOC::GenARPC(string AC, string authCode)
 bool PBOC::OnlineBussiness()
 {
 	Log->Info("======================== 联机处理 开始 =================================");
-	string CID = GetTagValue("9F27");		// 	密文信息数据
-	string ATC = GetTagValue("9F36");
-	string AC = GetTagValue("9F26");		//应用密文（AC）
-	string issuerApplicationData = GetTagValue("9F10");	//发卡行应用数据
+	string CID = GetTagValue(Tag9F27);		// 	密文信息数据
+	string ATC = GetTagValue(Tag9F36);
+	string AC = GetTagValue(Tag9F26);		//应用密文（AC）
+	string issuerApplicationData = GetTagValue(Tag9F10);	//发卡行应用数据
 	
 	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
-	
-	string strARPC = GenARPC(AC, "3030");
+    string strARPC;
+    IKeyGenerator *pKg = GetKeyGeneratorInterface();
+
+    if (!m_udkAuth.empty()) {
+        strARPC = pKg->GenARPCByUdkAuth(m_udkAuth, AC, "3030", ATC);
+    }
+    else if (!m_mdkAuth.empty()) {
+        string cardSeq = GetTagValue(Tag5F34);
+        string account = GetAccount();
+        strARPC = pKg->GenARPCByMdkAuth(m_mdkAuth, AC, "3030", ATC, cardSeq, account);
+    }
+    else {
+        Log->Error("联机处理 生成ARPC失败");
+        return false;
+    }
 	if (!m_pAPDU->ExternalAuthcateCommand(strARPC, "3030", response))
 	{
 		m_tvr.IssuerValidationFailed = true;
@@ -685,8 +624,8 @@ void PBOC::ParseTransLog(const string buffer)
 bool PBOC::DealIusserScript()
 {
 	//获取电子现金圈存日志入口
-	string logCashEntry = GetTagValue("DF4D");
-	string logEntry = GetTagValue("9F4D");
+	string logCashEntry = GetTagValue(TagDF4D);
+	string logEntry = GetTagValue(Tag9F4D);
 
 	string cashSFI = logCashEntry.substr(0, 2);
 	int cashLogNum = stoi(logCashEntry.substr(2), 0, 16);
@@ -743,10 +682,10 @@ bool PBOC::EndTransaction()
 	}
 
 	/******************************** GAC 2 ******************************/
-	string CDOL2 = GetTagValue("8D");
+	string CDOL2 = GetTagValue(Tag8D);
 	BCD_TL CDOL2tlEntities[32] = { 0 };
 	unsigned int CDOL2tlEntitiesCount = 0;
-	m_parser->TLVConstruct((unsigned char*)CDOL2.c_str(), CDOL2.length(), CDOL2tlEntities, CDOL2tlEntitiesCount);
+    m_pParaser->TLVConstruct((unsigned char*)CDOL2.c_str(), CDOL2.length(), CDOL2tlEntities, CDOL2tlEntitiesCount);
 	string termData;
 	for (unsigned int i = 0; i < CDOL2tlEntitiesCount; i++)
 	{
@@ -765,7 +704,7 @@ bool PBOC::EndTransaction()
 	//解析卡片响应数据
 	BCD_TLV entites[32] = { 0 };
 	unsigned int entitiesCount = 0;
-	m_parser->TLVConstruct((unsigned char*)response.data, strlen(response.data), entites, entitiesCount);
+    m_pParaser->TLVConstruct((unsigned char*)response.data, strlen(response.data), entites, entitiesCount);
 
 	//格式化输出响应数据
 	PrintTags(entites, entitiesCount);

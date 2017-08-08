@@ -605,6 +605,8 @@ bool CommTransaction::InitilizeApplication()
      }
      return true;
  }
+
+
  bool CommTransaction::HandleLimitation()
  {
 	 return false;
@@ -636,4 +638,19 @@ bool CommTransaction::InitilizeApplication()
  bool CommTransaction::EndTransaction()
  {
 	 return false;
+ }
+
+ /********************************************************************
+ * 功能： 读取指定tag值的内容
+ *********************************************************************/
+ string CommTransaction::ReadTagValue(const string &tag)
+ {
+     APDU_RESPONSE response;
+     m_pAPDU->GetTag(tag, response);
+     if (response.SW1 == 0x90 && response.SW2 == 0x00)
+     {
+         return string(response.data);
+     }
+
+     return _T("");
  }

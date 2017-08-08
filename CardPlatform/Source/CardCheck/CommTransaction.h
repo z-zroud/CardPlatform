@@ -48,6 +48,7 @@ public:
 	string SelectPSE(APP_TYPE appType);
     bool SDA(string issuerPublicKey, ENCRYPT_TYPE encryptType);
     bool DDA(string ICCPublicKey, ENCRYPT_TYPE encryptType);
+    string ReadTagValue(const string &tag);
 protected:
 	void	PrintTags(PBCD_TLV entities, int num);
 	string	GetTagValue(const string tag, PBCD_TLV entities, int num);

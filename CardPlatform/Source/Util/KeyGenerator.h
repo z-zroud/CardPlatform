@@ -52,6 +52,9 @@ public:
     string GenSMIssuerPublcKey(const string caPublicKey, const string issuerPublicCert);
     string GenSMICCpublicKey(const string issuerPublicKey, const string iccPublicCert, const string needAuthStaticData);
 
+    string GenARPCByUdkAuth(string udkAuth, string AC, string authCode, string atc);
+    string GenARPCByMdkAuth(string mdkAuth, string AC, string authCode, string atc, string cardSeq, string pan);
+
 private:
 	string GenAuthKey(const string strKMC, string partLeftDivFactor, string partRightDivFactor);
 	string GenMacKey(const string strKMC, string partLeftDivFactor, string partRightDivFactor);

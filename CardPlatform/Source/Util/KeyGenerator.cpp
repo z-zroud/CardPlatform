@@ -490,4 +490,33 @@ string KeyGenerator::EvenOddCheck(string input)
 	return strResult;
 }
 
+string KeyGenerator::GenARPCByUdkAuth(string udkAuth, string ac, string authCode, string atc)
+{
+    authCode += "000000000000";
+    char* szAC = (char*)ac.c_str();
+    char* szAuthCode = (char*)authCode.c_str();
+    str_xor(szAC, szAuthCode, 16);
+    
+    string sessionUdkAuth = GenSUDKAuthFromUDKAuth(udkAuth, atc);
+    if (sessionUdkAuth.empty())
+    {
+        return _T("");
+    }
+    char szARPC[32] = { 0 };
+    Des3(szARPC, (char*)sessionUdkAuth.c_str(), szAC);
+
+    return string(szARPC);
+}
+
+string KeyGenerator::GenARPCByMdkAuth(string mdkAuth, string ac, string authCode, string atc, string cardSeq, string pan)
+{
+
+    string udkAuth = GenUDKAuthFromMDKAuth(mdkAuth, atc, pan, cardSeq);
+    if (udkAuth.empty())
+    {
+        return _T("");
+    }
+
+    return GenARPCByUdkAuth(udkAuth, ac, authCode, atc);
+}
 /***************************************************************************/

@@ -39,4 +39,6 @@ struct IKeyGenerator
     virtual string GenDesICCpublicKey(const string issuerPublicKey, const string iccPublicCert, const string iccRemainder, const string signedData, const string issuerExponent = "03") = 0;
     virtual string GenSMIssuerPublcKey(const string caPublicKey, const string issuerPublicCert) = 0;
     virtual string GenSMICCpublicKey(const string issuerPublicKey, const string iccPublicCert, const string needAuthStaticData) = 0;
+    virtual string GenARPCByUdkAuth(string udkAuth, string AC, string authCode, string atc) = 0;
+    virtual string GenARPCByMdkAuth(string mdkAuth, string AC, string authCode, string atc, string cardSeq, string pan) = 0;
 };
