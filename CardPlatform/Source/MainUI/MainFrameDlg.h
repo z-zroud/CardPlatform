@@ -12,6 +12,7 @@ public:
     CDuiString GetSkinFile() { return _T("MainFrame.xml"); }
     LPCTSTR GetWindowClassName(void) const { return _T("CardPlatform"); }
 
+	LRESULT OnNcHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
     CControlUI* CreateControl(LPCTSTR pstrClass);
     void Notify(TNotifyUI& msg);
 	void InitWindow();

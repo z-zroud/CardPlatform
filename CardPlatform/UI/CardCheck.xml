@@ -5,39 +5,43 @@
             <VerticalLayout>
                   <Control height="60" />
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Label name="lbTransType" text="交易类型:" float="true" pos="100,0,200,28"/>
-                        <Combo name="comboTransType" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Label name="lbTransType" text="交易类型:" float="true" pos="120,0,220,28"/>
+                        <Combo name="comboTransType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Label name="lbOfflineAuthType" text="脱机认证类型:" float="true" pos="100,0,200,28"/>
-                        <Combo name="comboOfflineAuthType" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Label name="lbOfflineAuthType" text="脱机认证类型:" float="true" pos="120,0,220,28"/>
+                        <Combo name="comboOfflineAuthType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
                   </HorizontalLayout>
                   <!--HorizontalLayout height="40">
                         <CheckBox name="CheckBox" text="支持脱机" value="height='20' align='left' textpadding='24,0,0,0' normalimage='switch_close.png' selectedimage='switch_on.png' disabledimage='switch_close.png'"/>
                   </HorizontalLayout-->
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Label name="lbEncryptType" text="加密类型:" float="true" pos="100,0,200,28"/>
-                        <Combo name="comboEncryptType" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Label name="lbEncryptType" text="加密类型:" float="true" pos="120,0,220,28"/>
+                        <Combo name="comboEncryptType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  </HorizontalLayout>
+                  <HorizontalLayout height="40" bordersize="2,0,0,0">                       
+                        <Label name="lbSupportOffline" float="true" pos="120,0,220,28" text="支持脱机:" />
+                        <CheckBox name="ckSupportOffline" float="true" pos="252,3,320,28" bkcolor="" normalimage="Icon/switch_close.png" selectedimage="Icon/switch_on.png"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Label name="lbKeyType" text="密钥类型:" float="true" pos="100,0,200,28"/>
-                        <Combo name="comboKeyType" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Label name="lbKeyType" text="密钥类型:" float="true" pos="120,0,220,28"/>
+                        <Combo name="comboKeyType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Label name="lbAC" text="AC:" float="true" pos="100,0,200,28"/>
-                        <Edit name="editAC" float="true" pos="240,3,540,28" enabled="true" bordersize="1" width="300" height="22"/>
+                        <Label name="lbAC" text="AC:" float="true" pos="120,0,220,28"/>
+                        <Edit name="editAC" float="true" pos="260,3,560,28" enabled="true" bordersize="1" width="300" height="22"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Label name="lbENC" text="ENC:" float="true" pos="100,0,200,28"/>
-                        <Edit name="editENC" float="true" pos="240,3,540,28" bordersize="1" width="300" height="22"/>
+                        <Label name="lbENC" text="ENC:" float="true" pos="120,0,220,28"/>
+                        <Edit name="editENC" float="true" pos="260,3,560,28" bordersize="1" width="300" height="22"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Label name="lbMAC" text="MAC:" float="true" pos="100,0,200,28"/>
-                        <Edit name="editMAC" float="true" pos="240,3,540,28" bordersize="1" width="300" height="22"/>
+                        <Label name="lbMAC" text="MAC:" float="true" pos="120,0,220,28"/>
+                        <Edit name="editMAC" float="true" pos="260,3,560,28" bordersize="1" width="300" height="22"/>
                   </HorizontalLayout>
                   <Control height="40" bordersize="2,0,0,0"/>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
-                        <Button name="btnModify" text="确定" float="true" pos="460,0,540,30" />
+                        <Button name="btnModify" text="确定" float="true" pos="470,0,560,30" />
                   </HorizontalLayout>
             </VerticalLayout>
       <!--卡片检测基本输出信息-->

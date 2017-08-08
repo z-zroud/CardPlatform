@@ -24,6 +24,28 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
     return pControl;
 }
 
+LRESULT CMainFrame::OnNcHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+	POINT pt; pt.x = GET_X_LPARAM(lParam); pt.y = GET_Y_LPARAM(lParam);
+	::ScreenToClient(*this, &pt);
+
+	RECT rcClient;
+	::GetClientRect(*this, &rcClient);
+
+	RECT rcCaption = m_PaintManager.GetCaptionRect();
+	if (pt.x >= rcClient.left + rcCaption.left && pt.x < rcClient.right - rcCaption.right \
+		&& pt.y >= rcCaption.top && pt.y < rcCaption.bottom) {
+		CControlUI* pControl = static_cast<CControlUI*>(m_PaintManager.FindControl(pt));
+		if (pControl && _tcsicmp(pControl->GetClass(), _T("ButtonUI")) != 0 &&
+			_tcsicmp(pControl->GetClass(), _T("OptionUI")) != 0 &&
+			_tcsicmp(pControl->GetClass(), _T("TextUI")) != 0 &&
+			_tcsicmp(pControl->GetClass(), _T("SliderUI")) != 0)
+			return HTCAPTION;
+	}
+
+	return HTCLIENT;
+}
+
 void CMainFrame::InitWindow()
 {
 	m_tabLayout = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mainPanelContainer")));

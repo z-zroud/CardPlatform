@@ -3,24 +3,24 @@
       <VerticalLayout name="modifyKmc" bordersize="2,0,0,2">
             <Control height="80" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
-                  <Label name="lbAID" text="CM AID:" float="true" pos="170,0,230,28"/>
-                  <Combo name="comboAID" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Label name="lbAID" text="CM AID:" float="true" pos="200,0,250,28"/>
+                  <Combo name="comboAID" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
-                  <Label name="lbOldKmc" text="原始KMC:" float="true" pos="170,0,230,28"/>
-                  <Combo name="comboOldKmc" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Label name="lbOldKmc" text="原始KMC:" float="true" pos="200,0,250,28"/>
+                  <Combo name="comboOldKmc" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
-                  <Label name="lbNewKmc" text="新KMC:" float="true" pos="170,0,230,28"/>
-                  <Combo name="comboNewKmc" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Label name="lbNewKmc" text="新KMC:" float="true" pos="200,0,250,28"/>
+                  <Combo name="comboNewKmc" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
-                  <Label name="lbNewDiv" text="新DIV:" float="true" pos="170,0,230,28"/>
-                  <Combo name="comboNewDiv" float="true" pos="240,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Label name="lbNewDiv" text="新DIV:" float="true" pos="200,0,250,28"/>
+                  <Combo name="comboNewDiv" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
             </HorizontalLayout>
             <Control height="50" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
-                  <Button name="btnModify" text="确定" float="true" pos="460,0,540,30" />
+                  <Button name="btnModify" text="确定" float="true" pos="470,0,560,30" />
             </HorizontalLayout>
       </VerticalLayout>
 </Window>

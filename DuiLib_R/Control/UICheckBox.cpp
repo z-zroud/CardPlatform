@@ -10,11 +10,11 @@ namespace DuiLib
 		//SetPushedBkColor(GetBkColor());
 
         //SetBorderSize(0);
-        m_dwBackColor = 0xFFFFFFFF;
+        m_dwBackColor = 0;
         m_dwBackColor2 = 0xFFFFFFFF;
         m_dwBackColor3 = 0xFFFFFFFF;
-        m_dwHotBkColor = 0xFFFFFFFF;
-        m_dwPushedBkColor = 0xFFFFFFFF;
+        m_dwHotBkColor = 0;
+        m_dwPushedBkColor = 0;
 
         m_nBorderSize = 0;
 	}

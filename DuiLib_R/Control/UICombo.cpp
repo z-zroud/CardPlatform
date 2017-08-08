@@ -231,7 +231,7 @@ CComboUI::CComboUI() : m_pWindow(NULL), m_iCurSel(-1), m_uButtonState(0)
     m_ListInfo.bMultiExpandable = false;
     ::ZeroMemory(&m_ListInfo.rcTextPadding, sizeof(m_ListInfo.rcTextPadding));
     ::ZeroMemory(&m_ListInfo.rcColumn, sizeof(m_ListInfo.rcColumn));
-
+	m_ListInfo.rcTextPadding.left = 10;	//Ä¬ÈÏ×ÖÌå¾àÀëCombo×î×ó±ßÁô°×10px
 	SetBkColor(0xFFFFFFFF);		//ÉèÖÃÄ¬ÈÏ±³¾°ÑÕÉ«
 	SetBorderSize({ 1,1,1,1 });
 	m_dwHotBkColor = 0xFFFFFFFF;	//ÉèÖÃÊó±êÐü¸¡Ê±±³¾°ÑÕÉ«
@@ -354,7 +354,7 @@ bool CComboUI::AddString(LPCTSTR pstrText)
 	CListLabelElementUI* pItem = new CListLabelElementUI;
 
 	pItem->SetText(pstrText);
-
+	
 	return Add(pItem);
 }
 
