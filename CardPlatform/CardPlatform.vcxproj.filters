@@ -82,12 +82,6 @@
     <Filter Include="Header Files\Interface">
       <UniqueIdentifier>{310d02be-0f38-4bc0-a535-25ba77527fa0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\CardCheck\TouchTransaction">
-      <UniqueIdentifier>{f45e9161-dfee-4c82-ae68-d906ab52b89e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\CardCheck\UntouchTransaction">
-      <UniqueIdentifier>{ecd26fb6-d4eb-4637-80c3-57c1f110b70a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\CardCheck\qPBOC">
       <UniqueIdentifier>{5f4fa356-9992-4290-9070-6fac938e4c5c}</UniqueIdentifier>
     </Filter>
@@ -100,10 +94,10 @@
     <Filter Include="Source Files\CardCheck\qPBOC">
       <UniqueIdentifier>{97ec43ae-8ca7-4155-b79a-200dd17ab843}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\CardCheck\UntouchTransaction">
-      <UniqueIdentifier>{f0db19fa-870a-4096-904d-ee8ff386cba5}</UniqueIdentifier>
+    <Filter Include="Header Files\CardCheck\PBOC">
+      <UniqueIdentifier>{f45e9161-dfee-4c82-ae68-d906ab52b89e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\CardCheck\TouchTransaction">
+    <Filter Include="Source Files\CardCheck\PBOC">
       <UniqueIdentifier>{435b5d5a-f17c-4d94-9571-7b233f86240c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -196,7 +190,7 @@
       <Filter>Source Files\Util</Filter>
     </ClCompile>
     <ClCompile Include="Source\CardCheck\TouchTransaction\PBOC.cpp">
-      <Filter>Source Files\CardCheck\TouchTransaction</Filter>
+      <Filter>Source Files\CardCheck\PBOC</Filter>
     </ClCompile>
     <ClCompile Include="Source\Tool\ModifyKmc.cpp">
       <Filter>Source Files\Tool</Filter>
@@ -318,7 +312,7 @@
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Source\CardCheck\TouchTransaction\PBOC.h">
-      <Filter>Header Files\CardCheck\TouchTransaction</Filter>
+      <Filter>Header Files\CardCheck\PBOC</Filter>
     </ClInclude>
     <ClInclude Include="Source\Util\SqliteDB.h">
       <Filter>Header Files\Util</Filter>
