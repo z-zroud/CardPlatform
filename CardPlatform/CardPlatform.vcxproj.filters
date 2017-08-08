@@ -189,14 +189,14 @@
     <ClCompile Include="Source\Util\Base.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
-    <ClCompile Include="Source\CardCheck\TouchTransaction\PBOC.cpp">
-      <Filter>Source Files\CardCheck\PBOC</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Tool\ModifyKmc.cpp">
       <Filter>Source Files\Tool</Filter>
     </ClCompile>
     <ClCompile Include="Source\Util\SqliteDB.cpp">
       <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CardCheck\PBOC\PBOC.cpp">
+      <Filter>Source Files\CardCheck\PBOC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -311,14 +311,14 @@
     <ClInclude Include="Source\Util\Base.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="Source\CardCheck\TouchTransaction\PBOC.h">
-      <Filter>Header Files\CardCheck\PBOC</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Util\SqliteDB.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Source\Tool\ModifyKmc.h">
       <Filter>Header Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\PBOC\PBOC.h">
+      <Filter>Header Files\CardCheck\PBOC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

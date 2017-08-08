@@ -20,9 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\CardCheck\CommTransaction.cpp" />
+    <ClCompile Include="Source\CardCheck\PBOC\PBOC.cpp" />
     <ClCompile Include="Source\CardCheck\qPBOC\QPBOC.cpp" />
     <ClCompile Include="Source\CardCheck\Terminal.cpp" />
-    <ClCompile Include="Source\CardCheck\TouchTransaction\PBOC.cpp" />
     <ClCompile Include="Source\DP\DPParaser.cpp" />
     <ClCompile Include="Source\DP\GEDP\GEDPParaser.cpp" />
     <ClCompile Include="Source\DP\YLDP\YLDPParaser.cpp" />
@@ -55,9 +55,9 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Source\CardCheck\CommTransaction.h" />
+    <ClInclude Include="Source\CardCheck\PBOC\PBOC.h" />
     <ClInclude Include="Source\CardCheck\qPBOC\QPBOC.h" />
     <ClInclude Include="Source\CardCheck\Terminal.h" />
-    <ClInclude Include="Source\CardCheck\TouchTransaction\PBOC.h" />
     <ClInclude Include="Source\DP\DPParaser.h" />
     <ClInclude Include="Source\DP\GEDP\GEDPParser.h" />
     <ClInclude Include="Source\DP\YLDP\YLDPParaser.h" />
