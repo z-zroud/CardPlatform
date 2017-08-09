@@ -198,6 +198,9 @@
     <ClCompile Include="Source\CardCheck\PBOC\PBOC.cpp">
       <Filter>Source Files\CardCheck\PBOC</Filter>
     </ClCompile>
+    <ClCompile Include="Source\CardCheck\EC\EC.cpp">
+      <Filter>Source Files\CardCheck\EC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -319,6 +322,9 @@
     </ClInclude>
     <ClInclude Include="Source\CardCheck\PBOC\PBOC.h">
       <Filter>Header Files\CardCheck\PBOC</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\EC\EC.h">
+      <Filter>Header Files\CardCheck\EC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

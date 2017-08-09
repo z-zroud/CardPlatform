@@ -235,6 +235,13 @@ enum APP_TYPE
     APP_AID
 };
 
+//卡片通讯类型
+enum COMMUNICATION_TYPE
+{
+    COMM_TOUCH,
+    COMM_UNTOUCH
+};
+
 //安装应用类型
 enum INSTALL_TYPE
 {
@@ -272,8 +279,23 @@ enum ENCRYPT_TYPE
 
 //脱机数据认证类型
 enum AUTHENCATE_TYPE
-{
-    AUTH_SDA,        
+{          
     AUTH_DDA,        
-    AUTH_CDA
+    AUTH_CDA,
+    AUTH_SDA,
+};
+
+//密钥类型
+enum KEY_TYPE
+{
+    KEY_UDK,
+    KEY_MDK 
+};
+
+//交易类型
+enum TRANS_TYPE
+{
+    TRANS_PBOC,
+    TRANS_QPBOC,
+    TRANS_EC
 };

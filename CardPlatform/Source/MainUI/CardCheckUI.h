@@ -10,6 +10,7 @@ public:
     void DoInit();
     void Notify(TNotifyUI& msg); //处理内嵌模块的消息
 
+    void OnBtnDoTransClicked();
 protected:
     CPaintManagerUI*	m_pPM;
 
@@ -19,6 +20,11 @@ private:
     CComboUI*   m_pEncryptType;         //加密类型
     CComboUI*   m_pKeyType;             //密钥类型
 
-    //CEdit*
+    CCheckBoxUI*    m_pSupportOffline;  //支持脱机
+    CCheckBoxUI*    m_pTouchTrans;      //接触交易
+
+    CEditUI*    m_pAuth;
+    CEditUI*    m_pMac;
+    CEditUI*    m_pEnc;
 };
 

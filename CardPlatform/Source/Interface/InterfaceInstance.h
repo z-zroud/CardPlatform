@@ -13,9 +13,8 @@
 #define DP_GEER     1
 #define DP_HUATENG  2
 
-IAPDU* GetAPDUInterface(SCARDHANDLE scardHandle, CARD_TRANSMISSION_PROTOCOL protocol);
-//IDPParser* GetDPParserInterface(int dpType);
-//IEMV* GetEMVInterface(IPCSC* pPCSC);
-//IEMV* GetEMVInterfaceEx();
-IKeyGenerator* GetKeyGeneratorInterface();
-IPCSC* GetPCSCInterface();
+IAPDU*              GetAPDUInterface(SCARDHANDLE scardHandle, CARD_TRANSMISSION_PROTOCOL protocol);
+ICommTransaction*   GetTransInterface(TRANS_TYPE type, IPCSC* pReader, COMMUNICATION_TYPE commType = COMM_TOUCH);
+IKeyGenerator*      GetKeyGeneratorInterface();
+IPCSC*              GetPCSCInterface();
+IPCSC*              GetPCSCInterface(const char* szReaderName);

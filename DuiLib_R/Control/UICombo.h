@@ -35,6 +35,7 @@ public:
     bool SetItemIndex(CControlUI* pControl, int iIndex);
     bool Add(CControlUI* pControl);
     bool AddAt(CControlUI* pControl, int iIndex);
+    bool AddAt(LPCTSTR pstrText, int iIndex);
 	bool AddString(LPCTSTR pstrText);
     bool Remove(CControlUI* pControl);
     bool RemoveAt(int iIndex);

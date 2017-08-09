@@ -11,9 +11,12 @@
 
 
 
-PBOC::PBOC(IPCSC* reader) : CommTransaction(reader)
+PBOC::PBOC(COMMUNICATION_TYPE type, IPCSC* reader) : CommTransaction(reader)
 {
+    m_commType = type;
 	m_IsOnlineAuthSucessed = false;
+
+    SetCommunicationType(type);
 }
 
 //主要实例化那些不需要使用APDU指令的对象，例如脱机数据认证
@@ -29,8 +32,37 @@ PBOC::~PBOC()
 {
 }
 
+void PBOC::DoTrans()
+{
+    SelectApplication();
+    InitilizeApplication();
+    ReadApplicationData();
+    OfflineDataAuth();
+    HandleLimitation();
+    CardHolderValidation();
+    TerminalRiskManagement();
+    CardActionAnalized();
+    TerminalActionAnalized();
+    OnlineBussiness();
+    HandleIusserScript();
+    EndTransaction();
+}
 
 
+void PBOC::SetCommunicationType(COMMUNICATION_TYPE type)
+{
+    switch (type)
+    {
+    case COMM_TOUCH:
+        SelectPSE(APP_TYPE::APP_PSE);
+        break;
+    case COMM_UNTOUCH:
+        SelectPSE(APP_TYPE::APP_PPSE);
+        break;
+    default:
+        break;
+    }
+}
 
 //检查卡片AUC信息
 void PBOC::ShowCardAUC(string AUC)
@@ -343,11 +375,11 @@ void PBOC::ShowCardTransType()
 *	3.脱机交易计数和累计脱机金额
 * 最后，卡片根据CVR决定卡片对交易做AAC/ARQC/TC处理
 *******************************************************************/
-bool PBOC::CardActionAnalized(TERM_TRANS_TYPE type)
+bool PBOC::CardActionAnalized()
 {
 	Log->Info("======================== 卡片行为分析 开始 =================================");
 	GACControlParam P1;
-	switch (type)
+	switch (m_termTransType)
 	{
 	case AAC:
 		P1 = GACControlParam::AAC;
@@ -476,9 +508,8 @@ TERM_TRANS_TYPE PBOC::GetTermAnanlizedResult()
 **************************************************************/
 bool PBOC::TerminalActionAnalized()
 {
-	TERM_TRANS_TYPE type = TERM_TRANS_TYPE::TERM_TC;
 	Log->Info("======================== 终端行为分析 开始 =================================");
-	type = GetTermAnanlizedResult();
+	m_termTransType = GetTermAnanlizedResult();
 
 	return false;
 }

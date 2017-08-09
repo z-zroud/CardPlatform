@@ -327,6 +327,15 @@ bool CComboUI::Add(CControlUI* pControl)
     return CContainerUI::Add(pControl);
 }
 
+bool CComboUI::AddAt(LPCTSTR pstrText, int iIndex)
+{
+    CListLabelElementUI* pItem = new CListLabelElementUI;
+
+    pItem->SetText(pstrText);
+
+    return AddAt(pItem, iIndex);
+}
+
 bool CComboUI::AddAt(CControlUI* pControl, int iIndex)
 {
     if (!CContainerUI::AddAt(pControl, iIndex)) return false;

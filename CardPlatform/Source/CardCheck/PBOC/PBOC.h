@@ -13,19 +13,20 @@ class PBOC : public CommTransaction
 {
 public:
     PBOC();
-    PBOC(IPCSC* reader);
+    PBOC(COMMUNICATION_TYPE type, IPCSC* reader);
 	~PBOC();
 
+    void DoTrans();
 	bool HandleLimitation();                                      //处理限制	
 	bool CardHolderValidation();                                 //持卡人验证	
 	bool TerminalRiskManagement();                              //终端风险管理	
-	bool CardActionAnalized(TERM_TRANS_TYPE type);              //卡片行为分析	
+	bool CardActionAnalized();              //卡片行为分析	
 	bool TerminalActionAnalized();                              //终端行为分析	
 	bool OnlineBussiness();                                     //联机处理	
 	bool DealIusserScript();                                    //发卡行脚本处理	
 	bool EndTransaction();                                      //交易结束	
 
-
+    void SetCommunicationType(COMMUNICATION_TYPE type); //选择接触还是非接触
 protected:	
 	TERM_TRANS_TYPE GetTermAnanlizedResult();                           //获取终端行为分析结果	 	
 	string          GetTVR();                                                    //获取终端TVR结果
@@ -45,5 +46,7 @@ private:
 	string m_staticApplicationData;
 	TVR			m_tvr;		
 	bool		m_IsOnlineAuthSucessed;
+    COMMUNICATION_TYPE  m_commType;
+    TERM_TRANS_TYPE m_termTransType;
 };
 

@@ -7,6 +7,8 @@
 ********************************************************/
 struct ICommTransaction
 {
+    virtual void DoTrans()                  = 0;
+
 	virtual bool SelectApplication()		= 0;
 	virtual bool InitilizeApplication()		= 0;
 	virtual bool ReadApplicationData()		= 0;

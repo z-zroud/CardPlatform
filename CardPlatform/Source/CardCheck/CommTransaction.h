@@ -3,6 +3,9 @@
 #include "Util\APDU.h"
 #include "Util\PCSC.h"
 #include "Util\TLVParaser.h"
+#include <map>
+
+using namespace std;
 
 class CommTransaction : public ICommTransaction
 {
@@ -26,7 +29,7 @@ public:
 	virtual bool HandleIusserScript();
 	virtual bool EndTransaction();
 
-	
+	virtual void DoTrans(){}
 
 	virtual void SetEncryption(ENCRYPT_TYPE type) { m_encryptType = type; }
 	virtual void SetAuthencation(AUTHENCATE_TYPE type) { m_authType = type; }
@@ -42,13 +45,13 @@ public:
 public:
 
     //子类需要扩展的功能列表
-	virtual bool SelectApplication(APP_TYPE type, string app = "") = 0;
+	virtual void SetCommunicationType(COMMUNICATION_TYPE type) = 0;
 
 public:
-	string SelectPSE(APP_TYPE appType);
-    bool SDA(string issuerPublicKey, ENCRYPT_TYPE encryptType);
-    bool DDA(string ICCPublicKey, ENCRYPT_TYPE encryptType);
-    string ReadTagValue(const string &tag);
+	string  SelectPSE(APP_TYPE appType);
+    bool    SDA(string issuerPublicKey, ENCRYPT_TYPE encryptType);
+    bool    DDA(string ICCPublicKey, ENCRYPT_TYPE encryptType);
+    string  ReadTagValue(const string &tag);
 protected:
 	void	PrintTags(PBCD_TLV entities, int num);
 	string	GetTagValue(const string tag, PBCD_TLV entities, int num);

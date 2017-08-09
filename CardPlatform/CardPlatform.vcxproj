@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\CardCheck\CommTransaction.cpp" />
+    <ClCompile Include="Source\CardCheck\EC\EC.cpp" />
     <ClCompile Include="Source\CardCheck\PBOC\PBOC.cpp" />
     <ClCompile Include="Source\CardCheck\qPBOC\QPBOC.cpp" />
     <ClCompile Include="Source\CardCheck\Terminal.cpp" />
@@ -55,6 +56,7 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Source\CardCheck\CommTransaction.h" />
+    <ClInclude Include="Source\CardCheck\EC\EC.h" />
     <ClInclude Include="Source\CardCheck\PBOC\PBOC.h" />
     <ClInclude Include="Source\CardCheck\qPBOC\QPBOC.h" />
     <ClInclude Include="Source\CardCheck\Terminal.h" />
