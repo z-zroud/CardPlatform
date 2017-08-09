@@ -5,7 +5,7 @@
 	<Font shared="true" id="2" name="微软雅黑" size="18" />	
 	<Font shared="true" id="3" name="微软雅黑" size="20"/>
       <Default shared="true" name="Button" value="textcolor=&quot;#FFFFFFFF&quot; bkcolor=&quot;#FF2D2D30&quot;"/>
-      <Default shared="true" name="Combo" value="bkcolor=&quot;#FF3F3F46&quot; droptype=&quot;droplist&quot;"/>
+      <Default shared="true" name="Combo" value="bkcolor=&quot;#FF9E9E9E&quot; droptype=&quot;droplist&quot;"/>
       <VerticalLayout name="root" bkcolor="#FFFFFFFF">
             <!--标题栏-->
             <HorizontalLayout name="1" height="30" bkcolor="#FF2D2D30">
