@@ -201,6 +201,9 @@
     <ClCompile Include="Source\CardCheck\EC\EC.cpp">
       <Filter>Source Files\CardCheck\EC</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\TipDlg.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -326,6 +329,9 @@
     <ClInclude Include="Source\CardCheck\EC\EC.h">
       <Filter>Header Files\CardCheck\EC</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\TipDlg.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -347,6 +353,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\CardCheck.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\TipDlg.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

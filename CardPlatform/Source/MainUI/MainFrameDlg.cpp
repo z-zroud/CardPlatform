@@ -48,7 +48,8 @@ LRESULT CMainFrame::OnNcHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& b
 
 void CMainFrame::InitWindow()
 {
-	m_tabLayout = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mainPanelContainer")));
+    m_tabLayoutMainPanel = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mainPanelContainer")));
+    m_tabLayoutOutputPanel = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("tabOutputPanel")));
     m_pComboReader = static_cast<CComboUI*>(m_PaintManager.FindControl(_T("comboReaderList")));
 
     IPCSC* pPCSC = GetPCSCInterface();
@@ -73,10 +74,16 @@ void CMainFrame::Notify(TNotifyUI& msg) //处理内嵌模块的消息
     {
         if (name == _T("treeViewNav"))
         {
-			if (m_tabLayout)
+			if (m_tabLayoutMainPanel)
 			{
-				m_tabLayout->SelectItem(msg.wParam);
+                m_tabLayoutMainPanel->SelectItem(msg.wParam);
 			}
+        }
+        else if (name == _T("optOutput")) {
+            m_tabLayoutOutputPanel->SelectItem(0);
+        }
+        else if (name == _T("optError")) {
+            m_tabLayoutOutputPanel->SelectItem(1);
         }
         else {
             WindowImplBase::Notify(msg);

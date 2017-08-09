@@ -95,9 +95,30 @@ void CCardCheckUI::OnBtnDoTransClicked()
         break;
     }
 
-    if (pTrans) //开始交易流程
+    AUTHENCATE_TYPE authType    = static_cast<AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
+    ENCRYPT_TYPE encType        = static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
+    KEY_TYPE keyType            = static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
+    string auth                 = m_pAuth->GetText().GetData();
+    string enc                  = m_pEnc->GetText().GetData();
+    string mac                  = m_pMac->GetText().GetData();
+
+    if (pTrans)
     {
-        pTrans->DoTrans();
+        pTrans->SetAuthencation(authType);
+        pTrans->SetEncryption(encType);
+
+        if (keyType == KEY_UDK) {
+            pTrans->SetUdkAuth(auth);
+            pTrans->SetUdkEnc(enc);
+            pTrans->SetUdkMac(mac);
+        }
+        else if (keyType == KEY_MDK) {
+            pTrans->SetMdkAuth(auth);
+            pTrans->SetMdkEnc(enc);
+            pTrans->SetMdkMac(mac);
+        }
+
+        pTrans->DoTrans();  //开始交易流程
     }
 }
 

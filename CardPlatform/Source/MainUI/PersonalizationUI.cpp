@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "PersonaliztionUI.h"
 #include "IDialogBuilderCallbackEx.h"
+#include "MainUI\TipDlg.h"
 
 
 CPersonalizationUI::CPersonalizationUI(CPaintManagerUI* pPM)
@@ -37,7 +38,9 @@ void CPersonalizationUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	{
 		if (name == _T("btnDoPerso"))   //开始个人化
 		{
-			MessageBox(NULL, _T(":Sub:您点击了测试按钮"), _T("按钮例子"), MB_OK);
+			//MessageBox(NULL, _T(":Sub:您点击了测试按钮"), _T("按钮例子"), MB_OK);
+            CTipDlg* pTip = new CTipDlg;
+            pTip->ShowDlg(m_pPM->GetPaintWindow(), _T("提示"), _T("Test"), ICO_INFO, BTN_OK);
         }
         else if (name == _T("btnView")) {   //查看安装参数
 

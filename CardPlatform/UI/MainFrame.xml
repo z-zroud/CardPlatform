@@ -39,17 +39,37 @@
                   </HorizontalLayout>
             </HorizontalLayout>
             <!--客户区-->
-            <HorizontalLayout name="clientContainer" maxwidth="1200" maxheight="700">
+            <HorizontalLayout name="clientContainer">
+                  <!--左侧树形导航区域-->
                   <HorizontalLayout name="treeViewMenuContainer" sepwidth="5" sepimm="true" minwidth="50" maxwidth="300" width="200">
                         <TreeViewNav name="treeViewNav" bkcolor="#FF7F7F7F"/>
                   </HorizontalLayout>
                   <VerticalLayout>
+                        <!--中间主区域-->
                         <TabLayout name="mainPanelContainer" bkcolor="#FF7F7F7F" selectedid="0" bordersize="2,0,0,2">
                               <ModifyKmcUI />
                               <PersonalizationUI />
                               <CardCheckUI />
                         </TabLayout>
-                        <VerticalLayout name="outputPanelContainer" bkcolor="#FF7F7F7F" bordersize="2,0,0,0"  minheight="50" height="200" sepheight="-5" sepimm="true"/>
+                        <VerticalLayout name="outputPanelContainer" bkcolor="#FF7F7F7F" bordersize="2,0,0,0"  minheight="50" height="200" sepheight="-5" sepimm="true">
+                              <!--输出、错误选项控件-->
+                              <HorizontalLayout height="20">
+                                    <Option name="optOutput" float="true" pos="00,0,50,20" text="Output" bkcolor="#FF7F7F7F" selectedbkcolor="#FF007ACC" group="grpOutput" selected="true"/>
+                                    <Option name="optError" float="true" pos="50,0,100,20" text="Error" bkcolor="#FF7F7F7F" selectedbkcolor="#FF007ACC" group="grpOutput"/>
+                              </HorizontalLayout>
+                              <HorizontalLayout height="3">
+                                    <Control bordersize="3" bordercolor="#FF007ACC" /> 
+                              </HorizontalLayout> 
+                              <!--输出窗口-->
+                              <TabLayout name="tabOutputPanel">
+                                    <HorizontalLayout>
+                                          <RichEdit name="richOutput" text="output" bkcolor="#FF9E9E9E" vscrollbar="true" autovscroll="true" hscrollbar="true" />
+                                    </HorizontalLayout>
+                                    <HorizontalLayout>
+                                          <RichEdit name="richError" text="error" bkcolor="#FF9E9E9E" vscrollbar="true" autovscroll="true" hscrollbar="true" />
+                                    </HorizontalLayout>
+                              </TabLayout>
+                        </VerticalLayout>
                   </VerticalLayout>
             </HorizontalLayout>
       </VerticalLayout>

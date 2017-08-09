@@ -30,6 +30,7 @@
     <ClCompile Include="Source\Factory.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\MainUI\CardCheckUI.cpp" />
+    <ClCompile Include="Source\MainUI\TipDlg.cpp" />
     <ClCompile Include="Source\MainUI\DialogBuilderCallbackEx.cpp" />
     <ClCompile Include="Source\MainUI\MainFrameDlg.cpp" />
     <ClCompile Include="Source\MainUI\ModifyKmcUI.cpp" />
@@ -72,6 +73,7 @@
     <ClInclude Include="Source\Interface\IPCSC.h" />
     <ClInclude Include="Source\Interface\Tag.h" />
     <ClInclude Include="Source\MainUI\CardCheckUI.h" />
+    <ClInclude Include="Source\MainUI\TipDlg.h" />
     <ClInclude Include="Source\MainUI\IDialogBuilderCallbackEx.h" />
     <ClInclude Include="Source\MainUI\MainFrameDlg.h" />
     <ClInclude Include="Source\MainUI\ModifyKmcUI.h" />
@@ -105,6 +107,7 @@
       <SubType>Designer</SubType>
     </Xml>
     <Xml Include="UI\PersonalizationAddConfig.xml" />
+    <Xml Include="UI\TipDlg.xml" />
     <Xml Include="UI\TreeViewNav.xml" />
   </ItemGroup>
   <ItemGroup>
