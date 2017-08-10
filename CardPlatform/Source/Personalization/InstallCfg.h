@@ -4,17 +4,17 @@
 #include "Util\IniParaser.h"
 using namespace std;
 
-class InstallCfg
+class CInstallCfg
 {
 public:
-	InstallCfg(string cfgPath);
+    CInstallCfg(string cfgPath);
 	string GetExeLoadFileAID(INSTALL_TYPE type);
 	string GetExeModuleAID(INSTALL_TYPE type);
 	string GetApplicationAID(INSTALL_TYPE type);
 	string GetPrivilege(INSTALL_TYPE type);
 	string GetInstallParam(INSTALL_TYPE type);
 	string GetToken(INSTALL_TYPE type);
-	void GetInstallCfg(INSTALL_TYPE type, INSTALL_CFG &cfg);
+	void GetInstallCfg(INSTALL_TYPE type, INSTALL_PARAM &cfg);
 
 protected:
 	string GetRoot(INSTALL_TYPE type);

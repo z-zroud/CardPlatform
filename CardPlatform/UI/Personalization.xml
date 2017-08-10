@@ -21,8 +21,7 @@
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbConfig" text="配置:" float="true" pos="170,0,260,28"/>
                   <Combo name="comboConfig" float="true" pos="270,3,540,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
-                  <Button name="btnScanFile" text="浏览文件" float="true" pos="580,3,650,25" />
-                  <Button name="btnView" text="预览" float="true" pos="660,3,720,25" />
+                  <Button name="btnView" text="预览" float="true" pos="580,3,650,25" />
             </HorizontalLayout>
             <Control height="50" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">

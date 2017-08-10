@@ -30,6 +30,7 @@
     <ClCompile Include="Source\Factory.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\MainUI\CardCheckUI.cpp" />
+    <ClCompile Include="Source\MainUI\InstallParamDlg.cpp" />
     <ClCompile Include="Source\MainUI\TipDlg.cpp" />
     <ClCompile Include="Source\MainUI\DialogBuilderCallbackEx.cpp" />
     <ClCompile Include="Source\MainUI\MainFrameDlg.cpp" />
@@ -73,6 +74,7 @@
     <ClInclude Include="Source\Interface\IPCSC.h" />
     <ClInclude Include="Source\Interface\Tag.h" />
     <ClInclude Include="Source\MainUI\CardCheckUI.h" />
+    <ClInclude Include="Source\MainUI\InstallParamDlg.h" />
     <ClInclude Include="Source\MainUI\TipDlg.h" />
     <ClInclude Include="Source\MainUI\IDialogBuilderCallbackEx.h" />
     <ClInclude Include="Source\MainUI\MainFrameDlg.h" />
@@ -100,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\CardCheck.xml" />
+    <Xml Include="UI\InstallParamViewDlg.xml" />
     <Xml Include="UI\MainFrame.xml" />
     <Xml Include="UI\FileMenu.xml" />
     <Xml Include="UI\ModifyKMCTool.xml" />
@@ -196,7 +199,8 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /i /e /y $(ProjectDir)UI $(OutDir)CardPlatformRes
-xcopy /i /e /y $(ProjectDir)Dll $(OutDir)</Command>
+xcopy /i /e /y $(ProjectDir)Dll $(OutDir)
+xcopy /i /e /y $(ProjectDir)Configuration $(OutDir)Configuration</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -234,7 +238,8 @@ xcopy /i /e /y $(ProjectDir)Dll $(OutDir)</Command>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /i /e /y $(ProjectDir)UI $(OutDir)CardPlatformRes
-xcopy /i /e /y $(ProjectDir)Dll $(OutDir)</Command>
+xcopy /i /e /y $(ProjectDir)Dll $(OutDir)
+xcopy /i /e /y $(ProjectDir)Configuration $(OutDir)Configuration</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

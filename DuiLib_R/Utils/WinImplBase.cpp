@@ -67,7 +67,7 @@ LRESULT WindowImplBase::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPara
 LRESULT WindowImplBase::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
 	bHandled = FALSE;
-	::PostQuitMessage(0L);
+	//::PostQuitMessage(0L);
 	return 0;
 }
 

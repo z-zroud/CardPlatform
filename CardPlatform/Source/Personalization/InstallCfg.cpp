@@ -2,42 +2,42 @@
 #include "InstallCfg.h"
 
 
-InstallCfg::InstallCfg(string cfgPath)
+CInstallCfg::CInstallCfg(string cfgPath)
 {
 	m_parser.Read(cfgPath);
 }
 
-string InstallCfg::GetExeLoadFileAID(INSTALL_TYPE type)
+string CInstallCfg::GetExeLoadFileAID(INSTALL_TYPE type)
 {
 	return m_parser.GetValue(GetRoot(type), "ExecuableLoadFileAID");
 }
 
-string InstallCfg::GetExeModuleAID(INSTALL_TYPE type)
+string CInstallCfg::GetExeModuleAID(INSTALL_TYPE type)
 {
 	return m_parser.GetValue(GetRoot(type), "ExecuableModuleAID");
 }
 
-string InstallCfg::GetApplicationAID(INSTALL_TYPE type)
+string CInstallCfg::GetApplicationAID(INSTALL_TYPE type)
 {
 	return m_parser.GetValue(GetRoot(type), "ApplicationAID");
 }
 
-string InstallCfg::GetPrivilege(INSTALL_TYPE type)
+string CInstallCfg::GetPrivilege(INSTALL_TYPE type)
 {
 	return m_parser.GetValue(GetRoot(type), "Privilege");
 }
 
-string InstallCfg::GetInstallParam(INSTALL_TYPE type)
+string CInstallCfg::GetInstallParam(INSTALL_TYPE type)
 {
 	return m_parser.GetValue(GetRoot(type), "InstallParam");
 }
 
-string InstallCfg::GetToken(INSTALL_TYPE type)
+string CInstallCfg::GetToken(INSTALL_TYPE type)
 {
 	return m_parser.GetValue(GetRoot(type), "Token");
 }
 
-void InstallCfg::GetInstallCfg(INSTALL_TYPE type, INSTALL_CFG &cfg)
+void CInstallCfg::GetInstallCfg(INSTALL_TYPE type, INSTALL_PARAM &cfg)
 {
 	cfg.strExeLoadFileAID	= GetExeLoadFileAID(type);
 	cfg.strExeModuleAID		= GetExeModuleAID(type);
@@ -48,7 +48,7 @@ void InstallCfg::GetInstallCfg(INSTALL_TYPE type, INSTALL_CFG &cfg)
 }
 
 //根据安装应用类型返回匹配的字符串形式
-string InstallCfg::GetRoot(INSTALL_TYPE type)
+string CInstallCfg::GetRoot(INSTALL_TYPE type)
 {
 	switch (type)
 	{

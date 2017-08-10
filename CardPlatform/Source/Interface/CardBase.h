@@ -8,7 +8,14 @@
 
 using namespace std;
 
+//定义分散方法
+#define NOT_DIV      _T("Not Div")
+#define CPG202      _T("CPG2.0.2")
+#define CPG212      _T("CPG2.1.2")
 
+//定义安全等级
+#define NO_SECURE   _T("NO SECURE")
+#define MAC         _T("MAC")
 
 #define Status_IssuerSecurityDomain	0x80			//发行者安全域
 #define Status_ApplicationAndSecurityDomain	0x40	//应用和安全域
@@ -245,14 +252,15 @@ enum COMMUNICATION_TYPE
 //安装应用类型
 enum INSTALL_TYPE
 {
-	INSTALL_APP,
+    INSTALL_MIN = 0,
+	INSTALL_APP = 0,
 	INSTALL_PSE,
 	INSTALL_PPSE,
 	INSTALL_MAX
 };
 
 //应用安装参数结构体
-struct INSTALL_CFG
+struct INSTALL_PARAM
 {
 	string strExeLoadFileAID;
 	string strExeModuleAID;

@@ -4,9 +4,6 @@
 #include "Util\SqliteDB.h"
 #include "Tool\ModifyKmc.h"
 
-#define NOT_DIV      _T("Not Div")
-#define CPG202      _T("CPG2.0.2")
-#define CPG212      _T("CPG2.1.2")
 
 DIV_METHOD_FLAG GetDivFlag(string flag)
 {
