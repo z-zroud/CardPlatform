@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <Window>
-      <VerticalLayout name="convPanel" bordersize="2,0,0,2">
+      <VerticalLayout name="geConvPanel" bordersize="2,0,0,2">
             <Control height="150" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
-                  <Edit name="editDoConvert" float="true" pos="150,0,560,30" bordersize="1" />
-                  <Button name="btnScanFile" text="浏览文件" float="true" pos="570,0,650,30" />
+                  <Edit name="geDoConvert" float="true" pos="150,0,560,30" bordersize="1" />
+                  <Button name="geBtnScanFile" text="浏览文件" float="true" pos="570,0,650,30" />
             </HorizontalLayout>
             <Control height="100" />
             <HorizontalLayout height="50">
-                  <Button name="btnDoConvert" text="开始转换" float="true" pos="570,0,650,30" />
+                  <Button name="geBtnDoConvert" text="开始转换" float="true" pos="570,0,650,30" />
             </HorizontalLayout>
       </VerticalLayout>
 </Window>

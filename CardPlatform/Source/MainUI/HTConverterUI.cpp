@@ -34,7 +34,7 @@ void CHTConverterUI::DoInit()
 
 void CHTConverterUI::InitDlg()
 {
-	m_pConvertFile = static_cast<CEditUI*>(m_pPM->FindControl(_T("editDoConvert")));
+	m_pConvertFile = static_cast<CEditUI*>(m_pPM->FindControl(_T("htDoConvert")));
 }
 
 
@@ -45,11 +45,11 @@ void CHTConverterUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	{
 		CDuiString name = msg.pSender->GetName();
 		string editText;
-		if (name == _T("btnDoConvert"))
+		if (name == _T("htBtnDoConvert"))
 		{
 			editText = m_pConvertFile->GetText();
 		}
-		else if (name == _T("btnScanFile"))
+		else if (name == _T("htBtnScanFile"))
 		{
 			CFileDlg fileDlg;
 			string filePath = fileDlg.OpenFileDlg();

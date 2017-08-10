@@ -34,7 +34,7 @@ void CYLConverterUI::DoInit()
 
 void CYLConverterUI::InitDlg()
 {
-    m_pConvertFile = static_cast<CEditUI*>(m_pPM->FindControl(_T("editDoConvert")));
+    m_pConvertFile = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylDoConvert")));
 }
 
 
@@ -45,11 +45,11 @@ void CYLConverterUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
     {
         CDuiString name = msg.pSender->GetName();
         string editText;
-        if (name == _T("btnDoConvert"))
+        if (name == _T("ylBtnDoConvert"))
         {
             editText = m_pConvertFile->GetText();
         }
-        else if (name == _T("btnScanFile"))
+        else if (name == _T("ylBtnScanFile"))
         {            
 			CFileDlg fileDlg;
 			string filePath = fileDlg.OpenFileDlg();
