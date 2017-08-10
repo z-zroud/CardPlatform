@@ -15,17 +15,13 @@ CGEConverterUI::~CGEConverterUI()
 
 void CGEConverterUI::DoInit()
 {
-	static bool bHandled = false;
 	CDialogBuilder builder;
 	CDialogBuilderCallbackEx cb(m_pPM);
-	CContainerUI* pTreeView = static_cast<CContainerUI*>(builder.Create(_T("Converter.xml"), (UINT)0, NULL, m_pPM));
-	if (pTreeView) {
+	CContainerUI* pTreeView = static_cast<CContainerUI*>(builder.Create(_T("GEConverter.xml"), (UINT)0, NULL, m_pPM));
+	if (pTreeView)
+	{
 		this->Add(pTreeView);
-		if (!bHandled) {    //对于复用的组件，仅添加一次通知，避免多次重复事件的发生
-			m_pPM->AddNotifier(this);
-			bHandled = true;
-		}
-
+		m_pPM->AddNotifier(this);
 	}
 	else {
 		this->RemoveAll();
@@ -52,7 +48,7 @@ void CGEConverterUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 		{
 			editText = m_pConvertFile->GetText();
 		}
-		else if (name == _T("btnScanFile1"))
+		else if (name == _T("btnScanFile"))
 		{
 			CFileDlg fileDlg;
 			string filePath = fileDlg.OpenFileDlg();

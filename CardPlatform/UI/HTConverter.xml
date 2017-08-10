@@ -4,7 +4,7 @@
             <Control height="150" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Edit name="editDoConvert" float="true" pos="150,0,560,30" bordersize="1" />
-                  <Button name="btnScanFile1" text="浏览文件" float="true" pos="570,0,650,30" />
+                  <Button name="btnScanFile" text="浏览文件" float="true" pos="570,0,650,30" />
             </HorizontalLayout>
             <Control height="100" />
             <HorizontalLayout height="50">
