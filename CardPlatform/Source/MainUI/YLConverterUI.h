@@ -3,11 +3,11 @@
 
 using namespace std;
 
-class CConverterUI : public CContainerUI, public INotifyUI
+class CYLConverterUI : public CContainerUI, public INotifyUI
 {
 public:
-    CConverterUI(CPaintManagerUI* pPM);
-    ~CConverterUI();
+    CYLConverterUI(CPaintManagerUI* pPM);
+    ~CYLConverterUI();
 
     void DoInit();
     void InitDlg();	//³õÊ¼»¯¿Ø¼þ

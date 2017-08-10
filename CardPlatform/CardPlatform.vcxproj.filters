@@ -207,11 +207,17 @@
     <ClCompile Include="Source\MainUI\InstallParamDlg.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MainUI\ConverterUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Util\FileDlg.cpp">
       <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\YLConverterUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\HTConverterUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\GEConverterUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -344,11 +350,17 @@
     <ClInclude Include="Source\MainUI\InstallParamDlg.h">
       <Filter>Header Files\MainUI</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MainUI\ConverterUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Util\FileDlg.h">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\YLConverterUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\HTConverterUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\GEConverterUI.h">
+      <Filter>Header Files\MainUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -379,7 +391,13 @@
     <Xml Include="UI\InstallParamViewDlg.xml">
       <Filter>UI</Filter>
     </Xml>
-    <Xml Include="UI\Converter.xml">
+    <Xml Include="UI\YLConverter.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\HTConverter.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\GEConverter.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>
