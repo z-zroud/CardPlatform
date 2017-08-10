@@ -207,6 +207,12 @@
     <ClCompile Include="Source\MainUI\InstallParamDlg.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\ConverterUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Util\FileDlg.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -338,6 +344,12 @@
     <ClInclude Include="Source\MainUI\InstallParamDlg.h">
       <Filter>Header Files\MainUI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\ConverterUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\FileDlg.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -365,6 +377,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\InstallParamViewDlg.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\Converter.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

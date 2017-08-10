@@ -5,9 +5,12 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <winscard.h>
+#include<Commdlg.h>   
+#include<Shlobj.h>  
 #include "..\resource.h"
 #include "Interface\Tag.h"
-#include "..\..\DuiLib_R\UIlib.h"
+#include "..\..\DuiLib_R\UIlib.h" 
+
 
 using namespace DuiLib;
 
@@ -19,6 +22,7 @@ using namespace DuiLib;
 
 #pragma comment(lib,"Des0.lib")
 #pragma comment(lib,"WINSCARD.LIB")
+#pragma comment(lib,"Shell32.lib")
 #pragma comment(lib,"sqlite3.lib")
 
 

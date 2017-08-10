@@ -47,9 +47,12 @@
                   <VerticalLayout>
                         <!--中间主区域-->
                         <TabLayout name="mainPanelContainer" bkcolor="#FF7F7F7F" selectedid="0" bordersize="2,0,0,2">
-                              <ModifyKmcUI />
+                              <ConverterUI name="ylConverterPanel"/>
+                              <ConverterUI name="htConverterPanel"/>
+                              <ConverterUI name="geConverterPanel"/>
                               <PersonalizationUI />
                               <CardCheckUI />
+                              <ModifyKmcUI />
                         </TabLayout>
                         <VerticalLayout name="outputPanelContainer" bkcolor="#FF7F7F7F" bordersize="2,0,0,0"  minheight="50" height="200" sepheight="-5" sepimm="true">
                               <!--输出、错误选项控件-->
