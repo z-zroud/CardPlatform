@@ -55,6 +55,12 @@ int CTipDlg::ShowDlg(HWND hWnd, LPCTSTR szTilte, LPCTSTR szContent, int iconType
 
     m_pTitle->SetText(szTilte);
     m_pContent->SetText(szContent);
+	switch (iconType)
+	{
+	case ICO_INFO:		m_pIcon->SetBkImage(_T("./Icon/info.png"));		break;
+	case ICO_WARNING:	m_pIcon->SetBkImage(_T("./Icon/Warning.png"));	break;
+	case ICO_ERROR:		m_pIcon->SetBkImage(_T("./Icon/Error.png"));	break;
+	}
 
     if (btnType & BTN_CANCEL) {
         m_pBtnCancel->SetVisible(true);
