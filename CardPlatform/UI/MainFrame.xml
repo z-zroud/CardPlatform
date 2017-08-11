@@ -46,7 +46,8 @@
                   </HorizontalLayout>
                   <VerticalLayout>
                         <!--中间主区域-->
-                        <TabLayout name="mainPanelContainer" bkcolor="#FF7F7F7F" selectedid="0" bordersize="2,0,0,2">
+                        <TabLayout name="mainPanelContainer" bkcolor="#FF7F7F7F" selectedid="1" bordersize="2,0,0,2">
+                              <YLConfigUI name="ylConfigPanel" />
                               <YLConverterUI name="ylConverterPanel"/>
                               <HTConverterUI name="htConverterPanel"/>
                               <GEConverterUI name="geConverterPanel"/>

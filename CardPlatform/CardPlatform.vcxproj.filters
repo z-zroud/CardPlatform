@@ -219,6 +219,9 @@
     <ClCompile Include="Source\MainUI\GEConverterUI.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\YLConfigUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -362,6 +365,9 @@
     <ClInclude Include="Source\MainUI\GEConverterUI.h">
       <Filter>Header Files\MainUI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\YLConfigUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -398,6 +404,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\GEConverter.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\YLConfig.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

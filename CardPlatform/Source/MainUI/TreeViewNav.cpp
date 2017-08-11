@@ -2,12 +2,13 @@
 #include "TreeViewNav.h"
 #include "IDialogBuilderCallbackEx.h"
 
-#define TAB_DO_YL_CONVERTER     0
-#define TAB_DO_HT_CONVERTER     1
-#define TAB_DO_GE_CONVERTER     2
-#define TAB_DO_PERSONALIZATION	3
-#define TAB_CHARD_CHECK         4
-#define TAB_MODIFY_KMC		    5
+#define TAB_YL_CONFIG           0
+#define TAB_DO_YL_CONVERTER     1
+#define TAB_DO_HT_CONVERTER     2
+#define TAB_DO_GE_CONVERTER     3
+#define TAB_DO_PERSONALIZATION	4
+#define TAB_CHARD_CHECK         5
+#define TAB_MODIFY_KMC		    6
 
 CTreeViewNav::CTreeViewNav(CPaintManagerUI* pPM)
 {
@@ -63,6 +64,9 @@ void CTreeViewNav::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 		}
         else if (name == _T("ccCardCheckNode")) {
             m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_CHARD_CHECK);
+        }
+        else if (name == _T("ylOptionSettingNode")) {
+            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_YL_CONFIG);
         }
     }
 }
