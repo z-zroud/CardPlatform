@@ -12,11 +12,6 @@ using namespace std;
 #define DGI_NUMBER	4
 #define DGI_LEN		2
 
-#define DGI_8202    "8202"
-#define DGI_8203    "8203"
-#define DGI_8204    "8204"
-#define DGI_8205    "8205"
-
 enum PSE_TYPE
 {
 	PSE1,
@@ -107,13 +102,13 @@ bool YLDpParser::IsEncryptDGI(string tag)
 
 void YLDpParser::ClearCurrentDPData()
 {
-	for (auto m : m_CurrentDpData.vecDpData)
+	for (auto m : m_oneCardDpData.vecDpData)
 	{
 		m.Clear();
 	}
-	m_CurrentDpData.vecDpData.clear();
-	m_CurrentDpData.strAccount = "";
-	m_CurrentDpData.nCardSequence = -1;
+	m_oneCardDpData.vecDpData.clear();
+	m_oneCardDpData.strAccount = "";
+	m_oneCardDpData.nCardSequence = -1;
 }
 
 /********************************************************************
@@ -149,7 +144,7 @@ int YLDpParser::ReadCardSequence(ifstream &dpFile, streamoff offset)
 	char szCardSeq[4] = { 0 };
 	dpFile.read(szCardSeq, 4);
 	int *pCardSeq = (int*)(szCardSeq);
-	//m_CurrentDpData.nCardSequence = *pCardSeq;
+	//m_oneCardDpData.nCardSequence = *pCardSeq;
 
 	return *pCardSeq;
 }
@@ -183,7 +178,7 @@ void YLDpParser::ReadDGIName(ifstream &dpFile, streamoff offset)
 		char* DGIName = new char[*len + 1];
 		memset(DGIName, 0, *len + 1);
 		dpFile.read(DGIName, *len);
-		m_DGIName.push_back(DGIName);
+        m_dGIName.push_back(DGIName);
 		delete DGIName;
 	}
 }
@@ -242,7 +237,7 @@ void YLDpParser::ParseTLV(char* buffer, int nBufferLen, DGI &YLDGI)
 			int index = strValue.find('D');
 			if (index != string::npos)
 			{
-				m_CurrentDpData.strAccount = strValue.substr(0, index);
+				m_oneCardDpData.strAccount = strValue.substr(0, index);
 			}
 		}
 		/*************************************************************/
@@ -250,7 +245,7 @@ void YLDpParser::ParseTLV(char* buffer, int nBufferLen, DGI &YLDGI)
 		YLDGI.vecItem.push_back(item);	
 	}
 
-	m_CurrentDpData.vecDpData.push_back(YLDGI);	//添加一个DGI分组
+	m_oneCardDpData.vecDpData.push_back(YLDGI);	//添加一个DGI分组
 }
 
 /********************************************************************
@@ -264,7 +259,7 @@ void YLDpParser::DealPSEDataCompleted(ifstream &dpFile, streamoff offset)
 	for (int i = PSE1; i < PSE_TYPE::END; i++)
 	{
         DGI YLDGI;
-		YLDGI.DGIName = m_DGIName[m_DGIName.size() + i - PSE_TYPE::END];
+		YLDGI.DGIName = m_dGIName[m_dGIName.size() + i - PSE_TYPE::END];
 		//DGI起始标志		
 		ReadDGIStartTag(dpFile, dpFile.tellg());
 
@@ -300,7 +295,7 @@ void YLDpParser::DealPSEDataCompleted(ifstream &dpFile, streamoff offset)
         sprintf_s(len, 12, "%02X", nFollowedDataLen * 2);
         TLVItem item(YLDGI.DGIName, len, s);
         YLDGI.vecItem.push_back(item);
-        m_CurrentDpData.vecDpData.push_back(YLDGI);
+        m_oneCardDpData.vecDpData.push_back(YLDGI);
 	}
 }
 
@@ -332,14 +327,14 @@ int YLDpParser::Read(const string& filePath)
 		ClearCurrentDPData();
 
 		//第三步： 读取卡片序列号
-		m_CurrentDpData.nCardSequence = ReadCardSequence(dpFile, dpFile.tellg());
+		m_oneCardDpData.nCardSequence = ReadCardSequence(dpFile, dpFile.tellg());
 
 		//第四步： 读取该卡片个人化数据内容总长度
 		ReadCardPersonalizedTotelLen(dpFile, dpFile.tellg());
-		for (unsigned int i = 0; i < m_DGIName.size() - PSE_TYPE::END; i++)
-		{
+		for (unsigned int i = 0; i < m_dGIName.size() - PSE_TYPE::END; i++)
+		{   //解析每一张卡片数据
 			DGI YLDGI;
-			YLDGI.DGIName = m_DGIName[i];
+			YLDGI.DGIName = m_dGIName[i];
 
 			//第五步： 读取DGI起始标志
 			char tag = ReadDGIStartTag(dpFile, dpFile.tellg());
@@ -386,7 +381,7 @@ int YLDpParser::Read(const string& filePath)
 				string strValue = Tool::Converter::StrToHex(buffer, nFollowedDataLen);
 				TLVItem item(szTag, "0", strValue);
 				YLDGI.vecItem.push_back(item);
-				m_CurrentDpData.vecDpData.push_back(YLDGI);	//添加一个DGI分组
+				m_oneCardDpData.vecDpData.push_back(YLDGI);	//添加一个DGI分组
 			}
 			else
 			{   //解析标准TLV结构
@@ -396,14 +391,16 @@ int YLDpParser::Read(const string& filePath)
 
         //第十二步： 解析PSE PPSE数据
 		DealPSEDataCompleted(dpFile,dpFile.tellg());
-		m_YLDpData.push_back(m_CurrentDpData);
+		m_manyCardDpData.push_back(m_oneCardDpData);
 	}
 
 	return 0;
 }
 
 
-
+/***********************************************************
+* 功能： 解密指定的tag
+************************************************************/
 string YLDpParser::DecrptData(string tag, string value)
 {
 	string strResult;
@@ -429,55 +426,57 @@ string YLDpParser::DecrptData(string tag, string value)
 	return strResult;
 }
 
-string YLDpParser::GetTagValue(string Tag)
+/**********************************************************
+* 功能： 获取指定tag值
+**********************************************************/
+string YLDpParser::GetTagValue(string Tag, OneCardPersoData &oneCardDpData)
 {
     string result;
-    for (auto f : m_YLDpData)
+
+    for (auto iter = oneCardDpData.vecDpData.begin(); iter != oneCardDpData.vecDpData.end(); iter++)
     {
-        for (auto iter = f.vecDpData.begin(); iter != f.vecDpData.end(); iter++)
-        {
-            if (iter->DGIName.substr(3) == Tag)
-                return iter->vecItem[0].strValue;
-        }
+        if (iter->DGIName.substr(3) == Tag)
+            return iter->vecItem[0].strValue;
     }
 
     return result;
 }
 
-void YLDpParser::SetTagValue(string tag, string value)
+/**********************************************************
+* 功能： 设定指定tag值
+**********************************************************/
+void YLDpParser::SetTagValue(string tag, string value, OneCardPersoData &oneCardDpData)
 {
     string result;
-    for (auto &f : m_YLDpData)
+    for (auto &iter = oneCardDpData.vecDpData.begin(); iter != oneCardDpData.vecDpData.end(); iter++)
     {
-        for (auto iter = f.vecDpData.begin(); iter != f.vecDpData.end(); iter++)
+        if (iter->DGIName.substr(3) == tag)
         {
-            if (iter->DGIName.substr(3) == tag)
-            {
-                iter->vecItem[0].strValue = value;
-                return;
-            }               
-        }
+            iter->vecItem[0].strValue = value;
+            return;
+        }               
     }
 }
 
-
+/****************************************************************
+* 功能： 将DP个人化数据转化为CPS结构的个人化数据
+*****************************************************************/
 void YLDpParser::FilterDpData()
 {
-    for (auto f : m_YLDpData)  //交换tag8202与8203, tag8204与8205
+    for (auto &f : m_manyCardDpData)  //交换tag8202与8203, tag8204与8205
     {      
-        string dgi8202 = GetTagValue(DGI_8202);
-        string dgi8203 = GetTagValue(DGI_8203);
-        string dgi8204 = GetTagValue(DGI_8204);
-        string dgi8205 = GetTagValue(DGI_8205);
-        SetTagValue(DGI_8202, dgi8203);
-        SetTagValue(DGI_8203, dgi8202);
-        SetTagValue(DGI_8204, dgi8205);
-        SetTagValue(DGI_8205, dgi8204);
+        for (auto m : m_exchangeDGI)
+        {
+            string dgi1 = GetTagValue(m.first, f);
+            string dgi2 = GetTagValue(m.second, f);
+            SetTagValue(m.first, dgi2, f);
+            SetTagValue(m.second, dgi1, f);
+        }
     }
 
-	for (auto &f : m_YLDpData)
+	for (auto &f : m_manyCardDpData)
 	{	//处理每一个文件数据
-		DP dpData;
+		CPSDP dpData;
         dpData.fileName = f.strAccount;	//文件名称
 		for (auto v : f.vecDpData)	//处理每一个DGI
 		{
@@ -525,22 +524,24 @@ void YLDpParser::FilterDpData()
 			}
 	
 		}
-		m_vecDP.push_back(dpData);
+        m_vecCPSDP.push_back(dpData);
 	}
 }
 
-//保存DP数据
+/*****************************************************************
+* 功能： 保存CPS个人化的数据到指定的文件
+******************************************************************/
 void YLDpParser::Save(const string &strPath)
 {
 	if (!CheckFolderExist(strPath))
 	{
 		CreateDirectory(strPath.c_str(), NULL);
 	}
-	if (m_vecDP.empty())
+	if (m_vecCPSDP.empty())
 	{
 		FilterDpData();
 	}
-	for (auto m : m_vecDP)
+	for (auto m : m_vecCPSDP)
 	{
 		string filePath = strPath + "\\" + m.fileName + ".txt";
 		INIParser ini;
@@ -553,7 +554,9 @@ void YLDpParser::Save(const string &strPath)
 	}
 }
 
-//目录是否存在的检查：
+/**********************************************************
+* 功能： 检查目录是否存在
+***********************************************************/
 bool  YLDpParser::CheckFolderExist(const string &strPath)
 {
 	WIN32_FIND_DATA  wfd;

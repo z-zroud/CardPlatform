@@ -44,7 +44,8 @@ struct TLVItem
 	string	strValue;
 };
 
-//DGI 分组数据
+////////////////用于解析DP文件格式//////////////////////////
+//DGI 分组数据,每个DGI包含多个TLV结构
 typedef struct tagDGI
 {
 	void Clear() { vecItem.clear(); }
@@ -52,6 +53,16 @@ typedef struct tagDGI
 	vector<TLVItem> vecItem;
 }DGI;
 
+//每一张卡片的个人化数据结构
+struct OneCardPersoData
+{
+    int nCardSequence;
+    vector<DGI> vecDpData;
+    string strAccount;	//卡片账号作为输出的文件名称
+};
+//////////////////////////////////////////////////////////
+//////////////////用于保存到CPS文件中//////////////////////
+//CPS 个人化分组结构
 typedef struct tagDTL
 {
 	string DGI;
@@ -59,11 +70,13 @@ typedef struct tagDTL
 	string Value;
 }DTL;
 
-typedef struct tagDP
+//每一个CPS文件的数据结构
+typedef struct tagCPSDP
 {
 	string fileName;
 	vector<DTL> data;
-}DP;
+}CPSDP;
+/////////////////////////////////////////////////////////
 
 class DPParser : public IDPParser
 {

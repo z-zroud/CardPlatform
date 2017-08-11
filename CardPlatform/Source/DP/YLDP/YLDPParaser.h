@@ -1,12 +1,7 @@
 #pragma once
 #include "../DPParaser.h"
 
-struct YLPersonlizedDpData
-{
-	int nCardSequence;
-	vector<DGI> vecDpData;
-	string strAccount;	//卡片账号作为输出的文件名称
-};
+
 
 class YLDpParser : public DPParser
 {
@@ -36,22 +31,20 @@ private:
 	void			FilterDpData();
 	string			DecrptData(string tag, string value);
 	void			ClearCurrentDPData();
-    string          GetTagValue(string Tag);
-    void            SetTagValue(string tag, string value);
+    string          GetTagValue(string Tag, OneCardPersoData &oneCardDpData);
+    void            SetTagValue(string tag, string value, OneCardPersoData &oneCardDpData);
 
 private:
 	
 	
-	vector<string> m_DGIName;
-	
-	YLPersonlizedDpData m_CurrentDpData;
-	vector<YLPersonlizedDpData> m_YLDpData;	//银联一个数据文件包含多张卡片数据
-	vector<DP>	m_vecDP;	//m_YLDpData过滤后的数据格式
-
-    const int               m_reserved = 8596;  //银联保留的文件头大小
-    vector<string>          m_encryptTag;       //加密的tag
-    vector<unsigned short>  m_valueOnlyDGI;     //仅还有value的tag
-    map<string, string>     m_exchangeDGI;      //需要交换的tag
-    string                  m_key;              //解密密钥
+	vector<string>              m_dGIName;	
+    OneCardPersoData            m_oneCardDpData;
+	vector<OneCardPersoData>    m_manyCardDpData;	//银联一个数据文件包含多张卡片数据
+	vector<CPSDP>               m_vecCPSDP;	//CPS DP数据结构
+    const int                   m_reserved = 8596;  //银联保留的文件头大小
+    vector<string>              m_encryptTag;       //加密的tag
+    vector<unsigned short>      m_valueOnlyDGI;     //仅还有value的tag
+    map<string, string>         m_exchangeDGI;      //需要交换的tag
+    string                      m_key;              //解密密钥
 };
 
