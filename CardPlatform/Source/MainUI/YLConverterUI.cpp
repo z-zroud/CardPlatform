@@ -2,6 +2,8 @@
 #include "YLConverterUI.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\FileDlg.h"
+#include "Util\StringParaser.h"
+#include "DP\YLDP\YLDPParaser.h"
 
 
 CYLConverterUI::CYLConverterUI(CPaintManagerUI* pPM)
@@ -44,10 +46,9 @@ void CYLConverterUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
     if (msg.sType == _T("click"))
     {
         CDuiString name = msg.pSender->GetName();
-        string editText;
         if (name == _T("ylBtnDoConvert"))
         {
-            editText = m_pConvertFile->GetText();
+            DoConvert();
         }
         else if (name == _T("ylBtnScanFile"))
         {            
@@ -64,6 +65,48 @@ void CYLConverterUI::DoConvert()
     CEditUI* m_pDecryptKey = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylDecryptKey")));
     CEditUI* m_pValueData = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylValueData")));
     CEditUI* m_pExchangeData = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylExchangeData")));
+
+    vector<string> vecEncryptData;
+    vector<string> vecValueData;
+    vector<string> vecExchangeData;
+
+    Tool::Stringparser::SplitString(m_pEncryptData->GetText().GetData(), vecEncryptData, _T(","));
+    Tool::Stringparser::SplitString(m_pValueData->GetText().GetData(), vecValueData, _T(","));
+    Tool::Stringparser::SplitString(m_pExchangeData->GetText().GetData(), vecExchangeData, _T("("), _T(")"));
+
+    string decryptKey = m_pDecryptKey->GetText().GetData();
+
+    YLDpParser* pDP = new YLDpParser;
+    pDP->SetDecryptKey(decryptKey);
+    pDP->SetEncryptTag(vecEncryptData);
+
+    map<string, string> mapExchangeDGI;
+    for (auto v : vecExchangeData)
+    {
+        vector<string> temp;
+        Tool::Stringparser::SplitString(v, temp, _T(","));
+        if (temp.size() != 2)
+        {
+            return;
+        }
+        mapExchangeDGI.insert(make_pair<string, string>(string(temp[0]), string(temp[1])));
+    }
+    pDP->SetExchangeDGI(mapExchangeDGI);
+
+    vector<unsigned short> vecValueDGI;
+    for (auto v : vecValueData)
+    {
+        int result = stoi(v, 0, 16);
+        vecValueDGI.push_back(static_cast<unsigned int>(result));
+    }
+    pDP->SetOnlyValueOfDGI(vecValueDGI);
+    string filePath = m_pConvertFile->GetText().GetData();
+    pDP->Read(filePath);
+
+    string result = filePath;
+    int index = result.find_last_of('\\');
+    result = result.substr(0, index + 1) + "conv";
+    pDP->Save(result);
 }
 
 

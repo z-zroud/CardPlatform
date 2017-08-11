@@ -15,9 +15,14 @@ public:
 	int Read(const string& filePath);
 	void Save(const string &strPath = "YLDP");
 
+    void SetOnlyValueOfDGI(vector<unsigned short> vecValueDGI);    
+    void SetEncryptTag(vector<string> vecEncryptDGI);
+    void SetDecryptKey(const string &key);
+    void SetExchangeDGI(map<string, string> mapDGI);
+
 private:
-	bool			IsNeedConvertDGI(unsigned short sDGINO);
-	bool			IsNeedDecrpt(string tag);
+	bool			IsValueOnlyDGI(unsigned short sDGINO);
+	bool			IsEncryptDGI(string tag);
 	void			ReadDGIName(ifstream &dpFile, streamoff offset);						//读取DGI名称
 	void			DealPSEDataCompleted(ifstream &dpFile, streamoff offset);			//处理PSE数据
 	char			ReadDGIStartTag(ifstream &dpFile, streamoff offset);					//读取起始标签
@@ -35,12 +40,18 @@ private:
     void            SetTagValue(string tag, string value);
 
 private:
-	vector<unsigned short> m_ValueOnlyDGI;
-	vector<string> m_encryptTag;
+	
+	
 	vector<string> m_DGIName;
-	const int m_reserved = 8596;
+	
 	YLPersonlizedDpData m_CurrentDpData;
 	vector<YLPersonlizedDpData> m_YLDpData;	//银联一个数据文件包含多张卡片数据
 	vector<DP>	m_vecDP;	//m_YLDpData过滤后的数据格式
+
+    const int               m_reserved = 8596;  //银联保留的文件头大小
+    vector<string>          m_encryptTag;       //加密的tag
+    vector<unsigned short>  m_valueOnlyDGI;     //仅还有value的tag
+    map<string, string>     m_exchangeDGI;      //需要交换的tag
+    string                  m_key;              //解密密钥
 };
 

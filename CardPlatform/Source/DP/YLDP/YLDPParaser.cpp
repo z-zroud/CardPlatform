@@ -25,23 +25,84 @@ enum PSE_TYPE
 	END
 };
 
+/*********************************************************
+* 功能：设置加密数据的解密密钥
+**********************************************************/
+void YLDpParser::SetDecryptKey(const string &key)
+{
+    m_key = key;
+}
+
+
+/*****************************************************************
+* 功能： 设置仅包含值的GGI,非标准TLV结构
+******************************************************************/
+void YLDpParser::SetOnlyValueOfDGI(vector<unsigned short> vecValueDGI)
+{
+    for (auto v : vecValueDGI)
+    {
+        m_valueOnlyDGI.push_back(v);
+    }
+}
+
+/*****************************************************************
+* 功能：设置加密的tag
+******************************************************************/
+void YLDpParser::SetEncryptTag(vector<string> vecEncryptDGI)
+{
+    for (auto v : vecEncryptDGI)
+    {
+        m_encryptTag.push_back(v);
+    }
+}
+
+/****************************************************************
+* 功能：设置需要交换值的tag
+*****************************************************************/
+void YLDpParser::SetExchangeDGI(map<string, string> mapDGI)
+{
+    for (auto m : mapDGI)
+    {
+        m_exchangeDGI.insert(m);
+    }
+}
+
 //特殊DGI分组
 YLDpParser::YLDpParser()
 {
-	m_ValueOnlyDGI = { 0x8000,0x9000,0x8010,0x9010,0x8201,0x9103,
-		0x8202,0x8203,0x8204,0x8205,0x9102, };
-	m_encryptTag = { "8000","8201","8202","8203" ,"8204","8205" };
+	//m_ValueOnlyDGI = { 0x8000,0x9000,0x8010,0x9010,0x8201,0x9103,
+	//	0x8202,0x8203,0x8204,0x8205,0x9102, };
+	//m_encryptTag = { "8000","8201","8202","8203" ,"8204","8205" };
 }
 
-bool YLDpParser::IsNeedConvertDGI(unsigned short sDGINO)
+/********************************************************************
+* 功能：判断是否为仅有值的tag
+*********************************************************************/
+bool YLDpParser::IsValueOnlyDGI(unsigned short sDGINO)
 {
-	auto result = find(m_ValueOnlyDGI.begin(), m_ValueOnlyDGI.end(), sDGINO);
-	if (result != m_ValueOnlyDGI.end())
+	auto result = find(m_valueOnlyDGI.begin(), m_valueOnlyDGI.end(), sDGINO);
+	if (result != m_valueOnlyDGI.end())
 	{
 		return true;
 	}
 
 	return false;
+}
+
+/********************************************************************
+* 功能：判断是否为加密tag
+*********************************************************************/
+bool YLDpParser::IsEncryptDGI(string tag)
+{
+    for (auto v : m_encryptTag)
+    {
+        if (tag == v)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void YLDpParser::ClearCurrentDPData()
@@ -55,7 +116,9 @@ void YLDpParser::ClearCurrentDPData()
 	m_CurrentDpData.nCardSequence = -1;
 }
 
-//读取标签
+/********************************************************************
+* 功能：读取DGI起始标准符
+*********************************************************************/
 char YLDpParser::ReadDGIStartTag(ifstream &dpFile, streamoff offset)
 {
 	char cDGIStartTag;
@@ -65,7 +128,9 @@ char YLDpParser::ReadDGIStartTag(ifstream &dpFile, streamoff offset)
 	return cDGIStartTag;
 }
 
-//读取数据长度
+/********************************************************************
+* 功能：读取DGI后续数据长度
+*********************************************************************/
 unsigned short YLDpParser::ReadFollowedDataLength(ifstream &dpFile, streamoff offset)
 {
 	unsigned char szBehindLen = '\0';
@@ -76,7 +141,9 @@ unsigned short YLDpParser::ReadFollowedDataLength(ifstream &dpFile, streamoff of
 	return (unsigned short)szBehindLen;
 }
 
-//读取卡片序列号
+/********************************************************************
+* 功能：读取卡片序列号
+*********************************************************************/
 int YLDpParser::ReadCardSequence(ifstream &dpFile, streamoff offset)
 {
 	char szCardSeq[4] = { 0 };
@@ -87,7 +154,9 @@ int YLDpParser::ReadCardSequence(ifstream &dpFile, streamoff offset)
 	return *pCardSeq;
 }
 
-//读取卡片个人化数据总长度
+/********************************************************************
+* 功能：读取每一张卡片的个人化总数据长度
+*********************************************************************/
 int YLDpParser::ReadCardPersonalizedTotelLen(ifstream &dpFile, streamoff offset)
 {
 	char szPersonlizedDataLen[3] = { 0 };
@@ -97,7 +166,9 @@ int YLDpParser::ReadCardPersonalizedTotelLen(ifstream &dpFile, streamoff offset)
 	return *pPersonlizedDataLen;
 }
 
-//读取DGI分组名称
+/********************************************************************
+* 功能：读取DGI分组名称
+*********************************************************************/
 void YLDpParser::ReadDGIName(ifstream &dpFile, streamoff offset)
 {
 	char szDGICount[DGI_NUMBER] = { 0 };
@@ -117,7 +188,9 @@ void YLDpParser::ReadDGIName(ifstream &dpFile, streamoff offset)
 	}
 }
 
-//读取卡片DGI分组序号
+/********************************************************************
+* 功能：读取DGI需要，也就是DGI名称
+*********************************************************************/
 unsigned short YLDpParser::ReadDGISequence(ifstream &dpFile, streamoff offset)
 {
 	char szDGISeq[2] = { 0 };
@@ -131,7 +204,9 @@ unsigned short YLDpParser::ReadDGISequence(ifstream &dpFile, streamoff offset)
 	return *sDGISeq;
 }
 
-//读取记录模板
+/********************************************************************
+* 功能：读取每一张卡片的记录模板("70")
+*********************************************************************/
 char YLDpParser::ReadRecordTemplate(ifstream &dpFile, streamoff offset)
 {
 	char cRecordTemplate;
@@ -140,7 +215,9 @@ char YLDpParser::ReadRecordTemplate(ifstream &dpFile, streamoff offset)
 	return cRecordTemplate;
 }
 
-//解析TLV结构
+/********************************************************************
+* 功能：解析标准TLV结构，并保存到DGI数据结构中
+*********************************************************************/
 void YLDpParser::ParseTLV(char* buffer, int nBufferLen, DGI &YLDGI)
 {
 	TLVParaser *parser = new TLVParaser();
@@ -176,7 +253,9 @@ void YLDpParser::ParseTLV(char* buffer, int nBufferLen, DGI &YLDGI)
 	m_CurrentDpData.vecDpData.push_back(YLDGI);	//添加一个DGI分组
 }
 
-//处理PSE数据
+/********************************************************************
+* 功能：处理PSE、PPSE数据
+*********************************************************************/
 void YLDpParser::DealPSEDataCompleted(ifstream &dpFile, streamoff offset)
 {
 	PSE_TYPE pseType = PSE_TYPE::PSE1;
@@ -225,7 +304,9 @@ void YLDpParser::DealPSEDataCompleted(ifstream &dpFile, streamoff offset)
 	}
 }
 
-//读取银联DP文件
+/********************************************************************
+* 功能: 读取银联DP数据，并解析
+*********************************************************************/
 int YLDpParser::Read(const string& filePath)
 {
 	ifstream dpFile(filePath.c_str(), ios::binary);
@@ -233,34 +314,34 @@ int YLDpParser::Read(const string& filePath)
 		return -1;
 	dpFile.seekg(0, ios::end);
 	long dpFileSize =static_cast<long>(dpFile.tellg());
-	if (dpFileSize <= m_reserved)
+	if (dpFileSize <= m_reserved)   //检查文件是否异常
 	{
 		Log->Error("银联DP文件大小异常! 检查DP文件大小[%l]", dpFileSize);
 		return -1;
-	}
-	//重置文件指针保留数据末尾位置
-	dpFile.seekg(m_reserved,ios::beg);
+	}	
+	dpFile.seekg(m_reserved,ios::beg);  //重置文件指针保留数据末尾位置
 
-	//读取DGI分组名称
+	//第一步： 读取DGI分组
 	ReadDGIName(dpFile, dpFile.tellg());
 
-	//读取文件直到文件末尾
+	//第二步： 遍历后续数据，每一次遍历解析一个卡片数据
+    // 注意，一个DP文件可能包含几张卡片的数据
 	while (dpFile.tellg() < dpFileSize)
 	{
 		//清空当前DP数据
 		ClearCurrentDPData();
 
-		//卡片序列号
+		//第三步： 读取卡片序列号
 		m_CurrentDpData.nCardSequence = ReadCardSequence(dpFile, dpFile.tellg());
 
-		//卡片个人化数据内容总长度
+		//第四步： 读取该卡片个人化数据内容总长度
 		ReadCardPersonalizedTotelLen(dpFile, dpFile.tellg());
 		for (unsigned int i = 0; i < m_DGIName.size() - PSE_TYPE::END; i++)
 		{
 			DGI YLDGI;
 			YLDGI.DGIName = m_DGIName[i];
 
-			//DGI起始标志
+			//第五步： 读取DGI起始标志
 			char tag = ReadDGIStartTag(dpFile, dpFile.tellg());
 			if ((unsigned char)tag != 0x86)
 			{
@@ -268,16 +349,16 @@ int YLDpParser::Read(const string& filePath)
 				return -1;
 			}
 
-			//后续数据长度1
+			//第六步： 读取该DGI总数据长度(包含了该DGI序号)
 			int nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
 
-			//DGI序号
+			//第七步： 读取该DGI序号
 			unsigned short sDGISeq = ReadDGISequence(dpFile, dpFile.tellg());
 
-			//后续数据长度2
+			//第八步： 读取后续数据长度(该DGI数据部分)
 			nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
 
-			//记录模板
+			//第九步： 读取记录模板(该模板仅当DGI序号小于0x0B01时出现)
 			bool isInnerDGI = false;			
 			if (sDGISeq < 0x0b01)
 			{
@@ -287,7 +368,7 @@ int YLDpParser::Read(const string& filePath)
 				isInnerDGI = true;
 			}
 
-			//后续数据长度3
+			//第十步： 读取后续TLV结构的数据长度
 			if (!isInnerDGI)
 			{
 				nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
@@ -297,8 +378,8 @@ int YLDpParser::Read(const string& filePath)
 			memset(buffer, 0, nFollowedDataLen);
 			dpFile.read(buffer, nFollowedDataLen);
 
-			//是否仅包含数据内容，不是标准的TLV结构
-			if (IsNeedConvertDGI(sDGISeq))
+			//第十一步： 判断是否仅包含数据内容，不是标准的TLV结构
+			if (IsValueOnlyDGI(sDGISeq))
 			{
 				char szTag[5] = { 0 };
 				sprintf_s(szTag, "%X", sDGISeq);
@@ -308,11 +389,12 @@ int YLDpParser::Read(const string& filePath)
 				m_CurrentDpData.vecDpData.push_back(YLDGI);	//添加一个DGI分组
 			}
 			else
-			{
+			{   //解析标准TLV结构
 				ParseTLV(buffer, nFollowedDataLen, YLDGI);
 			}
 		}
 
+        //第十二步： 解析PSE PPSE数据
 		DealPSEDataCompleted(dpFile,dpFile.tellg());
 		m_YLDpData.push_back(m_CurrentDpData);
 	}
@@ -320,18 +402,7 @@ int YLDpParser::Read(const string& filePath)
 	return 0;
 }
 
-bool YLDpParser::IsNeedDecrpt(string tag)
-{
-	for (auto v : m_encryptTag)
-	{
-		if (tag == v)
-		{
-			return true;
-		}
-	}
 
-	return false;
-}
 
 string YLDpParser::DecrptData(string tag, string value)
 {
@@ -351,7 +422,7 @@ string YLDpParser::DecrptData(string tag, string value)
 	{
 		char* pOutput = new char[unit + 1];
 		memset(pOutput, 0, unit + 1);
-		_Des3(pOutput, "0123456789ABCDEF1111111111111111", (char*)value.substr(i, unit).c_str());
+		_Des3(pOutput, (char*)m_key.c_str(), (char*)value.substr(i, unit).c_str());
 		strResult += string(pOutput);
 	}
 
@@ -435,7 +506,7 @@ void YLDpParser::FilterDpData()
                 if (DGI == "Store_PPSE" || 
                     DGI == "Store_PSE_1" || 
                     DGI == "Store_PSE_2" ||
-                    (IsNeedConvertDGI(stoi(DGI,0,16)) && !IsNeedDecrpt(DGI)))
+                    (IsValueOnlyDGI(stoi(DGI,0,16)) && !IsEncryptDGI(DGI)))
                 {
                     Value = tlv.strValue;
                 }
@@ -445,7 +516,7 @@ void YLDpParser::FilterDpData()
                    
 				dtl.DGI = DGI;
 				dtl.Tag = Tag;
-				if (IsNeedDecrpt(Tag))	//是否需要解密
+				if (IsEncryptDGI(Tag))	//是否需要解密
 				{
 					Value = DecrptData(Tag, tlv.strValue);
 				}
