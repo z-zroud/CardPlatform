@@ -26,6 +26,7 @@
     <ClCompile Include="Source\CardCheck\Terminal.cpp" />
     <ClCompile Include="Source\DP\DPParaser.cpp" />
     <ClCompile Include="Source\DP\GEDP\GEDPParaser.cpp" />
+    <ClCompile Include="Source\DP\YLDP\YLDPConfig.cpp" />
     <ClCompile Include="Source\DP\YLDP\YLDPParaser.cpp" />
     <ClCompile Include="Source\Factory.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -69,6 +70,7 @@
     <ClInclude Include="Source\CardCheck\Terminal.h" />
     <ClInclude Include="Source\DP\DPParaser.h" />
     <ClInclude Include="Source\DP\GEDP\GEDPParser.h" />
+    <ClInclude Include="Source\DP\YLDP\YLDPConfig.h" />
     <ClInclude Include="Source\DP\YLDP\YLDPParaser.h" />
     <ClInclude Include="Source\Interface\CardBase.h" />
     <ClInclude Include="Source\Interface\InterfaceInstance.h" />

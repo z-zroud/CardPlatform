@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "StringParaser.h"
 
-
+using namespace std;
 
 namespace Tool
 {
@@ -23,6 +23,28 @@ namespace Tool
 			if (pos1 != s.length())
 				v.push_back(s.substr(pos1));
 		}
+
+        void SplitString(const string &s, std::vector<string> &vec, const string& start, const string& end)
+        {
+            string::size_type startPos = 0;
+            string::size_type endPos = 0;
+            
+            while (string::npos != startPos)
+            {
+                startPos = s.find_first_of(start, startPos);
+                if (startPos == string::npos)
+                {
+                    break;
+                }
+                endPos = s.find_first_of(end, startPos);
+                if (endPos == string::npos)
+                {
+                    break;
+                }
+                vec.push_back(s.substr(startPos + start.length(), endPos - startPos - start.length()));
+                startPos = endPos;
+            }
+        }
 
 		//É¾³ý×Ö·û´®ÖÐµÄ¿Õ¸ñ
 		string DeleteSpace(string s)

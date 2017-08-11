@@ -222,6 +222,9 @@
     <ClCompile Include="Source\MainUI\YLConfigUI.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DP\YLDP\YLDPConfig.cpp">
+      <Filter>Source Files\DP\YLDP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -367,6 +370,9 @@
     </ClInclude>
     <ClInclude Include="Source\MainUI\YLConfigUI.h">
       <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DP\YLDP\YLDPConfig.h">
+      <Filter>Header Files\DP\YLDP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

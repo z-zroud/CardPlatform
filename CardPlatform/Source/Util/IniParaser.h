@@ -11,6 +11,8 @@
 
 using namespace std; 
 
+#define INI_OK  1
+#define INI_ERROR   0
   
 //每个ini节点
 struct ININode 

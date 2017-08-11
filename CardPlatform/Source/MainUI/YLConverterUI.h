@@ -12,6 +12,8 @@ public:
     void DoInit();
     void InitDlg();	//初始化控件
     void Notify(TNotifyUI& msg); //处理内嵌模块的消息
+
+    void DoConvert();
 protected:
     CPaintManagerUI* m_pPM;
 

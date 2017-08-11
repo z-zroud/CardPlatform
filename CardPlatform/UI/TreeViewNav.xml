@@ -5,7 +5,7 @@
 			<TreeNode name="ylTreeNode" text="银联数据" height="25" folderattr="padding=&quot;0,5,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;" >
 				<TreeNode name="ylOptionSettingNode" text="选项设置" height="25" inset="0,0,0,0" itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
 				<TreeNode name="ylDoConvertNode" text="开始转换" height="25" inset="0,0,0,0"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
-				<TreeNode name="ylAddConfigNode" text="增加配置" height="25" inset="0,0,0,0"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                        <!--TreeNode name="ylAddConfigNode" text="增加配置" height="25" inset="0,0,0,0"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/-->
 			</TreeNode>
 			<TreeNode name="htTreeNode" text="华腾数据" height="25" folderattr="padding=&quot;0,5,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;" >
 				<TreeNode name="htOptionSettingNode" text="选项设置" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>

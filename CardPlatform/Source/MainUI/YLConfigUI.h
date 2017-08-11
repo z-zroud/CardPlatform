@@ -15,6 +15,9 @@ public:
 protected:
     CPaintManagerUI* m_pPM;
 
-    CEditUI*    m_pConvertFile;
+    CEditUI*    m_pEncryptData;
+    CEditUI*    m_pDecryptKey;
+    CEditUI*    m_pValueData;
+    CEditUI*    m_pExchangeData;
 };
 

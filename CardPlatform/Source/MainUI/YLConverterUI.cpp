@@ -58,4 +58,12 @@ void CYLConverterUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
     }
 }
 
+void CYLConverterUI::DoConvert()
+{
+    CEditUI* m_pEncryptData = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylEncryptData")));
+    CEditUI* m_pDecryptKey = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylDecryptKey")));
+    CEditUI* m_pValueData = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylValueData")));
+    CEditUI* m_pExchangeData = static_cast<CEditUI*>(m_pPM->FindControl(_T("ylExchangeData")));
+}
+
 
