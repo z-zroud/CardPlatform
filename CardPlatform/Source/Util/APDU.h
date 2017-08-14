@@ -13,7 +13,7 @@ public:
 	bool InitializeUpdateCommand(string strDiv, APDU_RESPONSE &response);	//个人化 更新初始化命令
 	bool DeleteCommand(string id);	//删除命令
 	bool StoreDataCommand(string DGI, string GDIData, STORE_DATA_TYPE dataType, bool bReset);
-    bool StorePSEData(string data, bool bReset);
+    bool StorePSEData(string data, STORE_DATA_TYPE dataType, bool bReset);
 	bool InstallCommand(string exeLoadFile, string exeModule, string application, string privilege, string installParam, string token = "");
 	bool GetTag(const string &tag, APDU_RESPONSE &response);	//取数据命令 获取标签
 	bool ExternalAuthCommand(const string cardRandomNum,		//外部认证命令

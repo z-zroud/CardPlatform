@@ -100,8 +100,9 @@ void CPersonalizationUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	{
 		if (name == _T("btnDoPerso"))   //开始个人化
 		{
-            CTipDlg* pTip = new CTipDlg;
-            pTip->ShowDlg(m_pPM->GetPaintWindow(), _T("提示"), _T("Test"), ICO_INFO, BTN_OK);
+            //CTipDlg* pTip = new CTipDlg;
+            //pTip->ShowDlg(m_pPM->GetPaintWindow(), _T("提示"), _T("Test"), ICO_INFO, BTN_OK);
+            DoPersonaliztion();
         }
         else if (name == _T("btnInstCfgView")) {   //查看安装参数
             string file = m_pCfgFile->GetCurItemString().GetData();
@@ -175,7 +176,8 @@ void CPersonalizationUI::DoPersonaliztion()
         }
 
         //重新安装应用
-        CInstallCfg cfg(instCfg.GetData());
+        CDuiString instCfgPath = m_pPM->GetInstancePath() + _T("Configuration\\InstallParams\\") + instCfg;
+        CInstallCfg cfg(instCfgPath.GetData());
         for (int i = INSTALL_APP; i < INSTALL_MAX; i++)
         {
             INSTALL_PARAM param;
@@ -203,11 +205,11 @@ void CPersonalizationUI::DoPersonaliztion()
         string pse2 = ini.GetValue("Store_PSE_2", "Store_PSE_2");
         string pse2Len = Base::GetDataHexLen(pse2);
         pse2 = _T("9102") + Base::Increase(pse2Len, 5) + _T("A5") + Base::Increase(pse2Len,3) + _T("88") +_T("0101") + pse2;
-        if (!pAPDU->StorePSEData(pse1, true))
+        if (!pAPDU->StorePSEData(pse1, STORE_DATA_COMMON, true))
         {
             return;     //个人化PSE失败
         }
-        if (!pAPDU->StorePSEData(pse2, false))
+        if (!pAPDU->StorePSEData(pse2, STORE_DATA_LAST, false))
         {
             return;     //个人化PSE失败
         }
@@ -219,7 +221,7 @@ void CPersonalizationUI::DoPersonaliztion()
         string ppse = ini.GetValue("Store_PPSE", "Store_PPSE");
         string ppseLen = Base::GetDataHexLen(ppse);
         ppse = _T("9102") + Base::Increase(ppseLen, 5) + _T("A5") + Base::Increase(ppseLen, 3) + _T("BF0C") + ppseLen + ppse;
-        if (!pAPDU->StorePSEData(pse2, true))
+        if (!pAPDU->StorePSEData(pse2, STORE_DATA_LAST, true))
         {
             return;     // 个人化PPSE失败
         }
@@ -229,14 +231,24 @@ void CPersonalizationUI::DoPersonaliztion()
         if (!SetSelectedApplication(pbocAid))
             return;      
         auto vec = ConcatNodeWithSameSection(ini);
+        int nVecCount = 0;
         for (auto v : vec)
         {
+            nVecCount++;
             if (v.first == "Store_PSE_1" || v.first == "Store_PSE_2" || v.first == "Store_PPSE")
             {
                 continue;
             }
             else {
-                auto type = GetStoreDataType(v.first);
+                STORE_DATA_TYPE type;
+                if (vec.size() - 2 == nVecCount)    //PSE及PPSE在文件尾，减之。
+                {
+                    type = STORE_DATA_LAST;
+                }
+                else {
+                    type = GetStoreDataType(v.first);
+                }
+                
                 if (type == STORE_DATA_ENCRYPT)
                 {   //处理特殊数据
                     string encKey = m_pPCSC->GetSessionEncKey(); //m_pPCSC->GetEncKey();

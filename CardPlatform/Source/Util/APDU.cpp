@@ -105,7 +105,7 @@ bool APDU::DeleteCommand(string id)
 	return true;
 }
 
-bool APDU::StorePSEData(string data, bool bReset)
+bool APDU::StorePSEData(string data, STORE_DATA_TYPE dataType, bool bReset)
 {
     static int count = -1;		//用于计数
     if (bReset)
@@ -115,8 +115,13 @@ bool APDU::StorePSEData(string data, bool bReset)
     else {
         count++;
     }
-
-    string cmd = _T("80E200");
+    string cmd = "80E2";
+    switch (dataType)
+    {
+    case STORE_DATA_COMMON:		cmd += "00"; break;
+    case STORE_DATA_ENCRYPT:	cmd += "60"; break;
+    case STORE_DATA_LAST:		cmd += "80"; break;
+    }
     char szCount[3] = { 0 };
     sprintf_s(szCount, "%02X", count);
     cmd += string(szCount);     //构造Install Data头部命令
