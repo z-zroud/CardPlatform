@@ -11,6 +11,7 @@ struct IAPDU
 	virtual bool InitializeUpdateCommand(string strDiv, APDU_RESPONSE &response) = 0;	//个人化 更新初始化命令
 	virtual bool DeleteCommand(string id) = 0;	//删除命令
 	virtual bool StoreDataCommand(string DGI, string GDIData, STORE_DATA_TYPE dataType, bool bReset) = 0;	//加载数据
+    virtual bool StorePSEData(string data, bool bReset) = 0;    //存储PSE、PPSE个人化数据
 	virtual bool InstallCommand(string exeLoadFile, 
 		string exeModule, 
 		string application, 

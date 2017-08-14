@@ -105,6 +105,37 @@ bool APDU::DeleteCommand(string id)
 	return true;
 }
 
+bool APDU::StorePSEData(string data, bool bReset)
+{
+    static int count = -1;		//用于计数
+    if (bReset)
+    {
+        count = 0;	//重置计数器
+    }
+    else {
+        count++;
+    }
+
+    string cmd = _T("80E200");
+    char szCount[3] = { 0 };
+    sprintf_s(szCount, "%02X", count);
+    cmd += string(szCount);     //构造Install Data头部命令
+
+    char szLen[3] = { 0 };
+    int len = data.length() / 2;
+    sprintf_s(szLen, 3, "%02X", len);
+
+    cmd += szLen + data;    // + data len + data
+
+    APDU_RESPONSE response;
+    if (!SendAPDU(cmd, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
+    {
+        return false;     // 个人化PSE失败
+    }
+
+    return true;
+}
+
 //加载数据命令 用于个人化
 bool APDU::StoreDataCommand(string DGI, string DGIData, STORE_DATA_TYPE dataType, bool bReset)
 {
@@ -125,72 +156,48 @@ bool APDU::StoreDataCommand(string DGI, string DGIData, STORE_DATA_TYPE dataType
 	case STORE_DATA_ENCRYPT:	cmd += "60"; break;
 	case STORE_DATA_LAST:		cmd += "80"; break;
 	}
-	cmd += string(szCount);
+	cmd += string(szCount);     //构造Install Data头部命令
 
-	char szTotalLen[5] = { 0 };
+
 	char szDataLen[5] = { 0 };
 	sprintf_s(szDataLen, 5, "%02X", DGIData.length() / 2);
 
-	int nDGI = stoi(DGI, 0, 16);
-	if (nDGI <= 0x0501)	//需要添加70模板
-	{
-        if (DGIData.length() / 2 >= 0xFE)
+    char szTotalLen[5] = { 0 };
+    sprintf_s(szTotalLen, 5, "%02X", (DGI.length() + DGIData.length()) / 2 + 1);
+    cmd += szTotalLen + DGI;        // header + totalLen + DGI
+
+    //如果DGI分组数据过长，需要两次或多次上传(这里仅处理两次存储的情况，多次的暂不处理(未碰到此种情况))
+    if (DGIData.length() / 2 >= 0xFE)
+    {
+        string data1 = DGI + szDataLen + DGIData.substr(0, 0xDD * 2);
+        char szRightLen[5] = { 0 };
+        sprintf_s(szRightLen, 5, "%02X", DGIData.substr(0xDD * 2).length() / 2);
+        string data2 = szRightLen + DGIData.substr(0xDD * 2);
+
+        string cmdFirst = cmd + "E0" + data1;
+
+        count++;
+        memset(szCount, 0, sizeof(szCount));
+        sprintf_s(szCount, "%02X", count);
+        string cmdSecond = cmd.substr(0, 6) + szCount + data2;
+
+        APDU_RESPONSE response;
+        if (SendAPDU(cmdFirst, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))
         {
-            string data1 = DGI + szDataLen + DGIData.substr(0, 0xDD * 2);
-            char szRightLen[5] = { 0 };
-            sprintf_s(szRightLen, 5, "%02X", DGIData.substr(0xDD * 2).length() / 2);
-            string data2 = szRightLen + DGIData.substr(0xDD * 2);
-
-            string cmd1 = cmd + "E0" + data1;
-
-            count++;
-            memset(szCount, 0, sizeof(szCount));
-            sprintf_s(szCount, "%02X", count);
-            string cmd2 = cmd.substr(0, 6) + szCount + data2;
-
-            APDU_RESPONSE response;
-            memset(&response, 0, sizeof(response));
-            if (SendAPDU(cmd1, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))
-            {
-                memset(&response, 0, sizeof(response));
-                return SendAPDU(cmd2, response) && (response.SW1 == 0x90 && response.SW2 == 0x00);
-            }
-            //Log->Info("%s", cmd1.c_str());
-            //Log->Info("%s", cmd2.c_str());
-
-            return false;
+            return SendAPDU(cmdSecond, response) && (response.SW1 == 0x90 && response.SW2 == 0x00);
         }
-        else {
-            char szWith70TagLen[5] = { 0 };
-            if (DGIData.length() / 2 > 0x7F)
-            {
-                sprintf_s(szWith70TagLen, "%02X", 2 + DGIData.length() / 2 + 1);
-                sprintf_s(szTotalLen, "%02X", 3 + DGI.length() / 2 + DGIData.length() / 2 + 1);
-                cmd += string(szTotalLen) + DGI + string(szWith70TagLen) + "7081";
-            }
-            else {
-                sprintf_s(szWith70TagLen, "%02X", 2 + DGIData.length() / 2);
-                sprintf_s(szTotalLen, "%02X", 3 + DGI.length() / 2 + DGIData.length() / 2);
-                cmd += string(szTotalLen) + DGI + string(szWith70TagLen) + "70";
-            }
-           
-        }
-
-	}else {
-        char szTotalLen[5] = { 0 };
-        sprintf_s(szTotalLen, 5, "%02X", (DGI.length() + DGIData.length()) / 2 + 1);
-        cmd += szTotalLen + DGI;
+        return false;
     }
-	
-	cmd += string(szDataLen) + DGIData;
-	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
+    else {
+        cmd += string(szDataLen) + DGIData; // + DGI data len + DGI data
 
-    //Log->Info("%s", cmd.c_str());
-	if (SendAPDU(cmd, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))
-	{
-		return true;
-	}
+        APDU_RESPONSE response;
+        if (SendAPDU(cmd, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))
+        {
+            return true;
+        }
+    }
+
 
 	return false;
 }

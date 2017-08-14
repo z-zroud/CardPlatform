@@ -31,6 +31,7 @@
 		<TreeNode name="toolTreeNode" text="常用工具" height="33" itemattr="align=&quot;left&quot; font=&quot;2&quot;" folderattr="padding=&quot;0,8,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;" >
 			<TreeNode name="cryptNode" text="加密/解密" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
 			<TreeNode name="kmcNode" text="修改KMC" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="fileDecryptNode" text="文件解密" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;" />
 		</TreeNode>
 	</TreeView>
 </Window>

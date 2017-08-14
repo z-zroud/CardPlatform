@@ -23,6 +23,26 @@ namespace Base
         return string(szTransDate);
     }
 
+    string GetDataHexLen(string data)
+    {
+        int nLen = data.length() / 2;
+        char szLen[5] = { 0 };
+        sprintf_s(szLen, 5, _T("%02X"), nLen);
+
+        return string(szLen);
+    }
+
+    string Increase(string current, int step)
+    {
+        int nCurrent = stoi(current, 0, 16);
+        nCurrent += step;
+
+        char szLen[5] = { 0 };
+        sprintf_s(szLen, 5, _T("%02X"), nCurrent);
+
+        return string(szLen);
+    }
+
     //日期比较
     bool CompareDate(string grateDate, string lessDate)
     {

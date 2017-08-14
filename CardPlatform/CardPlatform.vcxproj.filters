@@ -228,6 +228,9 @@
     <ClCompile Include="Source\MainUI\PersonalizationConfigUI.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\DecryptFileUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -380,6 +383,9 @@
     <ClInclude Include="Source\MainUI\PersonalizationConfigUI.h">
       <Filter>Header Files\MainUI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\DecryptFileUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -419,6 +425,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\PersonalizationConfig.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\FileDecrypt.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

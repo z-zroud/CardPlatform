@@ -7,4 +7,6 @@ namespace Base
     string GenTransDate();
     string GenTransTime();
     bool CompareDate(string grateDate, string lessDate);
+    string GetDataHexLen(string data);
+    string Increase(string current, int step);
 }

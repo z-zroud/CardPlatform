@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window>
+      <VerticalLayout name="fileDecrypt" bordersize="2,0,0,2">
+            <Control height="150" bordersize="2,0,0,0"/>
+            <HorizontalLayout height="50" bordersize="2,0,0,0">
+                  <Label name="lbEncryptFile" text="加密文件:" float="true" pos="130,0,200,28"/>
+                  <Edit name="editEncryptFile" float="true" pos="210,3,560,28" />
+                  <Button name="btnEncryptFile" text="浏览文件" float="true" pos="570,3,640,28" />
+            </HorizontalLayout>
+            <HorizontalLayout height="50" bordersize="2,0,0,0">
+                  <Label name="lbKey" text="密钥:" float="true" pos="130,0,200,28"/>
+                  <Edit name="editKey" float="true" pos="210,3,560,28" />
+            </HorizontalLayout>
+            <Control height="50" bordersize="2,0,0,0"/>
+            <HorizontalLayout height="50" bordersize="2,0,0,0">
+                  <Button name="btnDoDecrypt" text="确定" float="true" pos="470,0,560,30" />
+            </HorizontalLayout>
+      </VerticalLayout>
+</Window>

@@ -55,6 +55,7 @@
                               <PersonalizationUI />
                               <CardCheckUI />
                               <ModifyKmcUI />
+                              <FileDecryptUI />
                         </TabLayout>
                         <VerticalLayout name="outputPanelContainer" bkcolor="#FF7F7F7F" bordersize="2,0,0,0"  minheight="50" height="200" sepheight="-5" sepimm="true">
                               <!--输出、错误选项控件-->

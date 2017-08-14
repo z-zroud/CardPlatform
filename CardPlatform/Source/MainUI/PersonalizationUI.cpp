@@ -7,6 +7,7 @@
 #include "Util\SqliteDB.h"
 #include "Util\FileDlg.h"
 #include "Util\Des0.h"
+#include "Util\Base.h"
 #include "Util\IniParaser.h"
 #include "Interface\InterfaceInstance.h"
 #include "Personalization\InstallCfg.h"
@@ -196,25 +197,19 @@ void CPersonalizationUI::DoPersonaliztion()
         string pseAid = cfg.GetApplicationAID(INSTALL_PSE);      
         if (!SetSelectedApplication(pseAid))
             return;
-        char szLen[3] = { 0 };
-        string pse1 = ini.GetValue("Store_PSE_1", "Store_PSE_1");
-        int len = pse1.length() / 2;
-        sprintf_s(szLen, 3, "%02X", len);
-        pse1 = "80E200002F0101" + string(szLen) + pse1;
-        string pse2 = ini.GetValue("Store_PSE_2", "Store_PSE_2");
-        memset(szLen, 0, sizeof(szLen));
-        len = pse2.length() / 2;
-        sprintf_s(szLen, 3, "%02X", len);
-        pse2 = "80E280011191020EA50C880101" + pse2;
+        string pse1 = ini.GetValue("Store_PSE_1", "Store_PSE_1");       
+        pse1 = "0101" + Base::GetDataHexLen(pse1) + pse1;
 
-        APDU_RESPONSE response;
-        if (!pAPDU->SendAPDU(pse1, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
+        string pse2 = ini.GetValue("Store_PSE_2", "Store_PSE_2");
+        string pse2Len = Base::GetDataHexLen(pse2);
+        pse2 = _T("9102") + Base::Increase(pse2Len, 5) + _T("A5") + Base::Increase(pse2Len,3) + _T("88") +_T("0101") + pse2;
+        if (!pAPDU->StorePSEData(pse1, true))
         {
-            return;     // 个人化PSE失败
+            return;     //个人化PSE失败
         }
-        if (!pAPDU->SendAPDU(pse2, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
+        if (!pAPDU->StorePSEData(pse2, false))
         {
-            return;     // 个人化PSE失败
+            return;     //个人化PSE失败
         }
 
         //个人化PPSE
@@ -222,11 +217,9 @@ void CPersonalizationUI::DoPersonaliztion()
         if (!SetSelectedApplication(ppseAid))
             return;
         string ppse = ini.GetValue("Store_PPSE", "Store_PPSE");
-        memset(szLen, 0, sizeof(szLen));
-        len = ppse.length() / 2;
-        sprintf_s(szLen, 3, "%02X", len);
-        ppse = "80E2800024 910221A51FBF0C1C" + ppse;
-        if (!pAPDU->SendAPDU(ppse, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
+        string ppseLen = Base::GetDataHexLen(ppse);
+        ppse = _T("9102") + Base::Increase(ppseLen, 5) + _T("A5") + Base::Increase(ppseLen, 3) + _T("BF0C") + ppseLen + ppse;
+        if (!pAPDU->StorePSEData(pse2, true))
         {
             return;     // 个人化PPSE失败
         }
@@ -234,8 +227,7 @@ void CPersonalizationUI::DoPersonaliztion()
         //个人化PBOC
         string pbocAid = cfg.GetApplicationAID(INSTALL_APP);
         if (!SetSelectedApplication(pbocAid))
-            return;
-       
+            return;      
         auto vec = ConcatNodeWithSameSection(ini);
         for (auto v : vec)
         {
@@ -246,7 +238,7 @@ void CPersonalizationUI::DoPersonaliztion()
             else {
                 auto type = GetStoreDataType(v.first);
                 if (type == STORE_DATA_ENCRYPT)
-                {
+                {   //处理特殊数据
                     string encKey = m_pPCSC->GetSessionEncKey(); //m_pPCSC->GetEncKey();
                     char szEncryptData[1024] = { 0 };
                     if (v.first != "8000")
@@ -256,6 +248,7 @@ void CPersonalizationUI::DoPersonaliztion()
                     Des3_ECB(szEncryptData, (char*)encKey.c_str(), (char*)v.second.c_str(), v.second.length());
                     v.second = szEncryptData;
                 }
+                //存储个人化数据
                 if (!pAPDU->StoreDataCommand(v.first, v.second, type, false))
                 {
                     return;     // 个人化PBOC失败

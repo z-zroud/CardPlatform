@@ -10,6 +10,7 @@
 #define TAB_DO_PERSONALIZATION	5
 #define TAB_CHARD_CHECK         6
 #define TAB_MODIFY_KMC		    7
+#define TAB_FILE_DECRYPT        8
 
 CTreeViewNav::CTreeViewNav(CPaintManagerUI* pPM)
 {
@@ -71,6 +72,9 @@ void CTreeViewNav::Notify(TNotifyUI& msg) //处理内嵌模块的消息
         }
         else if (name == _T("personOptionSettingNode")) {
             m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_PERSO_CONFIG);
+        }
+        else if (name == _T("fileDecryptNode")) {
+            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_FILE_DECRYPT);
         }
     }
 }
