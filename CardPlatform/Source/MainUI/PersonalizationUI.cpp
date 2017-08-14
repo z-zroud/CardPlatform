@@ -5,6 +5,7 @@
 #include "MainUI\InstallParamDlg.h"
 #include "Interface\CardBase.h"
 #include "Util\SqliteDB.h"
+#include "Util\FileDlg.h"
 #include <cstdio>
 #include <io.h>
 
@@ -41,6 +42,7 @@ void CPersonalizationUI::InitDlg()
     m_pDiv = static_cast<CComboUI*>(m_pPM->FindControl(_T("comboDiv")));
     m_pSecLevel = static_cast<CComboUI*>(m_pPM->FindControl(_T("comboSecLevel")));
     m_pCfgFile  = static_cast<CComboUI*>(m_pPM->FindControl(_T("comboConfig")));
+    m_pCpsFile = static_cast<CEditUI*>(m_pPM->FindControl(_T("editCpsFile")));
 
     //初始化AID
     DB_AID aidTable;
@@ -96,12 +98,18 @@ void CPersonalizationUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
             CTipDlg* pTip = new CTipDlg;
             pTip->ShowDlg(m_pPM->GetPaintWindow(), _T("提示"), _T("Test"), ICO_INFO, BTN_OK);
         }
-        else if (name == _T("btnView")) {   //查看安装参数
+        else if (name == _T("btnInstCfgView")) {   //查看安装参数
             string file = m_pCfgFile->GetCurItemString().GetData();
             string filePath = m_pPM->GetInstancePath().GetData() + string("\\Configuration\\InstallParams\\") +  file;
             CInstallParamDlg* pInstParamDlg = new CInstallParamDlg;
 
             pInstParamDlg->ShowDlg(m_pPM->GetPaintWindow(), filePath);
+        }
+        else if (name == _T("btnScanCpsFile"))
+        {
+            CFileDlg fileDlg;
+            string filePath = fileDlg.OpenFileDlg();
+            m_pCpsFile->SetText(filePath.c_str());
         }
     }
 }

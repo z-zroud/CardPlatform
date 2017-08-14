@@ -21,6 +21,7 @@ private:
     CComboUI*   m_pDiv;
     CComboUI*   m_pSecLevel;
     CComboUI*   m_pCfgFile;
+    CEditUI*    m_pCpsFile;
 };
 
 
