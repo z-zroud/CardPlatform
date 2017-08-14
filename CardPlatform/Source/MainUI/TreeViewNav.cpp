@@ -6,9 +6,10 @@
 #define TAB_DO_YL_CONVERTER     1
 #define TAB_DO_HT_CONVERTER     2
 #define TAB_DO_GE_CONVERTER     3
-#define TAB_DO_PERSONALIZATION	4
-#define TAB_CHARD_CHECK         5
-#define TAB_MODIFY_KMC		    6
+#define TAB_PERSO_CONFIG        4
+#define TAB_DO_PERSONALIZATION	5
+#define TAB_CHARD_CHECK         6
+#define TAB_MODIFY_KMC		    7
 
 CTreeViewNav::CTreeViewNav(CPaintManagerUI* pPM)
 {
@@ -67,6 +68,9 @@ void CTreeViewNav::Notify(TNotifyUI& msg) //处理内嵌模块的消息
         }
         else if (name == _T("ylOptionSettingNode")) {
             m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_YL_CONFIG);
+        }
+        else if (name == _T("personOptionSettingNode")) {
+            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_PERSO_CONFIG);
         }
     }
 }

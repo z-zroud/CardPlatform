@@ -225,6 +225,9 @@
     <ClCompile Include="Source\DP\YLDP\YLDPConfig.cpp">
       <Filter>Source Files\DP\YLDP</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\PersonalizationConfigUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -374,6 +377,9 @@
     <ClInclude Include="Source\DP\YLDP\YLDPConfig.h">
       <Filter>Header Files\DP\YLDP</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\PersonalizationConfigUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -383,9 +389,6 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\FileMenu.xml">
-      <Filter>UI</Filter>
-    </Xml>
-    <Xml Include="UI\PersonalizationAddConfig.xml">
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\Personalization.xml">
@@ -413,6 +416,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\YLConfig.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\PersonalizationConfig.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

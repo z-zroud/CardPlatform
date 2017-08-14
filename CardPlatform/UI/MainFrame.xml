@@ -51,6 +51,7 @@
                               <YLConverterUI name="ylConverterPanel"/>
                               <HTConverterUI name="htConverterPanel"/>
                               <GEConverterUI name="geConverterPanel"/>
+                              <PersoConfigUI />
                               <PersonalizationUI />
                               <CardCheckUI />
                               <ModifyKmcUI />

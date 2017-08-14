@@ -6,6 +6,10 @@
 #include "Interface\CardBase.h"
 #include "Util\SqliteDB.h"
 #include "Util\FileDlg.h"
+#include "Util\Des0.h"
+#include "Util\IniParaser.h"
+#include "Interface\InterfaceInstance.h"
+#include "Personalization\InstallCfg.h"
 #include <cstdio>
 #include <io.h>
 
@@ -112,6 +116,194 @@ void CPersonalizationUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
             m_pCpsFile->SetText(filePath.c_str());
         }
     }
+}
+
+bool CPersonalizationUI::SetSelectedApplication(string aid)
+{
+    CDuiString kmc = m_pKmc->GetText();
+    if (m_pPCSC == NULL)
+    {
+        return false;     //无法获取APDU接口
+    }
+    bool bRet = m_pPCSC->SelectAID(aid);
+    if (!bRet)
+    {
+        return false;     //选择应用失败
+    }
+    bRet = m_pPCSC->OpenSecureChannel(kmc.GetData());
+    if (!bRet)
+    {
+        return false;     //打开安全通道失败
+    }
+
+    return true;
+}
+
+void CPersonalizationUI::DoPersonaliztion()
+{
+    CDuiString aid = m_pAid->GetText();
+    CDuiString kmc = m_pKmc->GetText();
+    CDuiString div = m_pDiv->GetText();
+    CDuiString secLevel = m_pSecLevel->GetText();
+    CDuiString instCfg  = m_pCfgFile->GetText();
+    CDuiString cpfFile  = m_pCpsFile->GetText();
+
+    //连接读卡器
+    CComboUI* pComboReader = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboReaderList")));
+    CDuiString readerName = pComboReader->GetCurItemString();
+
+    m_pPCSC = GetPCSCInterface(readerName.GetData());
+
+    if (m_pPCSC == NULL)
+    {
+        return;     //无法连接读卡器
+    }
+    IAPDU *pAPDU = m_pPCSC->GetAPDU();
+    vector<APP_STATUS> status;
+    if (pAPDU)
+    {
+        bool bResult = SetSelectedApplication(aid.GetData());
+        if (!bResult)
+            return;
+
+        //删除当前应用
+        pAPDU->GetApplicationStatusCommand(status);
+        for (auto v : status)
+        {
+            pAPDU->DeleteCommand(v.strAID);
+        }
+
+        //重新安装应用
+        CInstallCfg cfg(instCfg.GetData());
+        for (int i = INSTALL_APP; i < INSTALL_MAX; i++)
+        {
+            INSTALL_PARAM param;
+            cfg.GetInstallCfg((INSTALL_TYPE)i, param);
+            pAPDU->InstallCommand(param.strExeLoadFileAID,
+                param.strExeModuleAID,
+                param.strApplicationAID,
+                param.strPrivilege,
+                param.strInstallParam,
+                param.strToken);
+        }
+        INIParser ini;
+        if (!ini.Read(cpfFile.GetData()))
+        {
+            return;     //读取CPS文件失败
+        }
+
+        //个人化PSE
+        string pseAid = cfg.GetApplicationAID(INSTALL_PSE);      
+        if (!SetSelectedApplication(pseAid))
+            return;
+        char szLen[3] = { 0 };
+        string pse1 = ini.GetValue("Store_PSE_1", "Store_PSE_1");
+        int len = pse1.length() / 2;
+        sprintf_s(szLen, 3, "%02X", len);
+        pse1 = "80E200002F0101" + string(szLen) + pse1;
+        string pse2 = ini.GetValue("Store_PSE_2", "Store_PSE_2");
+        memset(szLen, 0, sizeof(szLen));
+        len = pse2.length() / 2;
+        sprintf_s(szLen, 3, "%02X", len);
+        pse2 = "80E280011191020EA50C880101" + pse2;
+
+        APDU_RESPONSE response;
+        if (!pAPDU->SendAPDU(pse1, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
+        {
+            return;     // 个人化PSE失败
+        }
+        if (!pAPDU->SendAPDU(pse2, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
+        {
+            return;     // 个人化PSE失败
+        }
+
+        //个人化PPSE
+        string ppseAid = cfg.GetApplicationAID(INSTALL_PPSE);
+        if (!SetSelectedApplication(ppseAid))
+            return;
+        string ppse = ini.GetValue("Store_PPSE", "Store_PPSE");
+        memset(szLen, 0, sizeof(szLen));
+        len = ppse.length() / 2;
+        sprintf_s(szLen, 3, "%02X", len);
+        ppse = "80E2800024 910221A51FBF0C1C" + ppse;
+        if (!pAPDU->SendAPDU(ppse, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
+        {
+            return;     // 个人化PPSE失败
+        }
+
+        //个人化PBOC
+        string pbocAid = cfg.GetApplicationAID(INSTALL_APP);
+        if (!SetSelectedApplication(pbocAid))
+            return;
+       
+        auto vec = ConcatNodeWithSameSection(ini);
+        for (auto v : vec)
+        {
+            if (v.first == "Store_PSE_1" || v.first == "Store_PSE_2" || v.first == "Store_PPSE")
+            {
+                continue;
+            }
+            else {
+                auto type = GetStoreDataType(v.first);
+                if (type == STORE_DATA_ENCRYPT)
+                {
+                    string encKey = m_pPCSC->GetSessionEncKey(); //m_pPCSC->GetEncKey();
+                    char szEncryptData[1024] = { 0 };
+                    if (v.first != "8000")
+                    {
+                        v.second += "8000000000000000";
+                    }
+                    Des3_ECB(szEncryptData, (char*)encKey.c_str(), (char*)v.second.c_str(), v.second.length());
+                    v.second = szEncryptData;
+                }
+                if (!pAPDU->StoreDataCommand(v.first, v.second, type, false))
+                {
+                    return;     // 个人化PBOC失败
+                }
+            }
+        }
+        //个人化任务成功
+    }
+}
+
+STORE_DATA_TYPE CPersonalizationUI::GetStoreDataType(string tag)
+{
+    string encryptTag[] = { "8000","8201","8202","8203","8204","8205" };
+    string lastTag = "9207";
+    if (tag == lastTag)
+    {
+        return STORE_DATA_LAST;
+    }
+    for (auto s : encryptTag)
+    {
+        if (tag == s)
+            return STORE_DATA_ENCRYPT;
+    }
+
+    return STORE_DATA_COMMON;
+}
+
+vector<pair<string, string>> CPersonalizationUI::ConcatNodeWithSameSection(INIParser ini)
+{
+    vector<pair<string, string>> vecResult;
+    auto nodes = ini.GetAllNodes();
+    if (nodes.size() == 0)
+    {
+        return vecResult;
+    }
+
+
+    for (auto v : nodes)
+    {
+        string value;
+        for (auto nodeIter : v.second.m_Dict)
+        {
+            value += nodeIter.second;
+        }
+        vecResult.push_back(pair<string, string>(v.first, value));
+    }
+
+    return vecResult;
 }
 
 void CPersonalizationUI::GetFiles(string path, vector<string>& files)

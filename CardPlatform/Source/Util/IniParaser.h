@@ -54,6 +54,7 @@ public:
     string GetValue(string root, string key); 
     vector<ININode>::size_type GetSize(){return m_Section.size();} 
     vector<ININode>::size_type SetValue(string root, string key, string value); 
+    vector<pair<string, SubNode>> GetAllNodes() const { return m_Section; }
     int Save(string path); 
     inline void Clear(){m_Section.clear();} 
 
