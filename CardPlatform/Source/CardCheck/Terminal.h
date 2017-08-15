@@ -3,7 +3,7 @@
 * 用于设置和获取终端数据
 **************************************************/
 #include <string>
-
+#include "Util\IniParaser.h"
 using namespace std;
 //case 0x5F2A:	return "0156";		//交易货币代码, 默认RMB
 //case 0x95:		return GetTVR();	//终端验证结果TVR
@@ -26,6 +26,8 @@ using namespace std;
 class CTerminal
 {
 public:
+	static void LoadData(const string &filePath);
+	static void SetTerminalData(const string &tag, const string &value);
 	static string GetTerminalData(const string &tag);
 	static string Get5F2A();
 	static string Get95();
@@ -80,4 +82,7 @@ private:
 	static string m_9F7A;
 	static string m_DF60;
 	static string m_DF69;
+
+	static INIParser m_parse;
+	static bool bLoaded;
 };

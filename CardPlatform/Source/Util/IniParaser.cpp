@@ -38,6 +38,8 @@ int INIParser::Read(string path)
     ifstream iniFile(path.c_str()); 
     if(!iniFile) 
 		return 0;
+
+	m_filePath = path;
     string strLine; 
     string strRoot; 
     vector<ININode> vec_ini; 
@@ -122,6 +124,10 @@ string INIParser::GetValue(string root, string key)
     return "";
 } 
  
+void INIParser::Save()
+{
+	Save(m_filePath);
+}
 
 //Ð´iniÎÄ¼þ
 int INIParser::Save(string path) 
