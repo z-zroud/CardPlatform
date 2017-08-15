@@ -509,6 +509,14 @@ void YLDpParser::FilterDpData()
                 {
                     Value = tlv.strValue;
                 }
+                else if (DGI == _T("0301")) //对银联0301分组特殊处理，为90发卡行公钥证书
+                {
+                    dtl.DGI = DGI;
+                    dtl.Tag = _T("90");
+                    dtl.Value = tlv.strValue;
+                    dpData.data.push_back(dtl);
+                    continue;
+                }
                 else {
                     Value = Tool::Stringparser::DeleteSpace(tlv.strTag + tlv.strLen + tlv.strValue);
                 }

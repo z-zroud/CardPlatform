@@ -107,7 +107,7 @@ string INIParser::GetValue(string root, string key)
     {
         if (v.first == root)
         {
-            auto subIter = v.second.m_Dict.find(key);
+            auto subIter = IsExisted(v.second.m_Dict, key);
             if (subIter == v.second.m_Dict.end())
             {
                 return "";
@@ -150,13 +150,24 @@ int INIParser::Save(string path)
     return 1; 
 } 
 
+vector<pair<string, string>>::iterator INIParser::IsExisted(vector<pair<string, string>> &vec, string key)
+{
+    for (auto iter = vec.begin(); iter != vec.end(); iter++)
+    {
+        if (iter->first == key)
+            return iter;
+    }
+
+    return vec.end();
+}
+
 bool INIParser::IsExisted(string root, string key)
 {
     for (auto v : m_Section)
     {
         if (v.first == root)
         {
-            auto m = v.second.m_Dict.find(key);
+            auto m = IsExisted(v.second.m_Dict, key);
             if (m != v.second.m_Dict.end())
             {
                 return true;
@@ -176,7 +187,7 @@ vector<ININode>::size_type INIParser::SetValue(string root, string key, string v
         {
             if (v.first == root)
             {
-                auto m = v.second.m_Dict.find(key);
+                auto m = IsExisted(v.second.m_Dict, key);
                 if (m != v.second.m_Dict.end())
                 {
                     m->second = value;

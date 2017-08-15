@@ -33,12 +33,13 @@ struct ININode
 // key=value ½ÚµãÈÝÆ÷
 struct SubNode 
 { 
-    void InsertElement(string key, string value) 
-    { 
-		m_Dict.insert(pair<string, string>(key, value));
-    } 
+    void InsertElement(string key, string value)
+    {
+        //m_Dict.insert(pair<string, string>(key, value));
+        m_Dict.push_back(pair<string, string>(key, value));
+    }
 
-    map<string, string> m_Dict; 
+    vector<pair<string, string>> m_Dict;
 }; 
 
   
@@ -59,7 +60,9 @@ public:
     inline void Clear(){m_Section.clear();} 
 
 private:
+private:
     bool IsExisted(string root, string key);
+    vector<pair<string, string>>::iterator IsExisted(vector<pair<string, string>> &vec, string key);
 
 private: 
     //map<string, SubNode> m_Section; 

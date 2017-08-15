@@ -5,6 +5,7 @@
 #include "Log.h"
 #include "StringParaser.h"
 #include "Converter.h"
+#include "Util\Base.h"
 
 APDU::APDU(SCARDHANDLE scardHandle, CARD_TRANSMISSION_PROTOCOL protocol)
 {
@@ -163,28 +164,23 @@ bool APDU::StoreDataCommand(string DGI, string DGIData, STORE_DATA_TYPE dataType
 	}
 	cmd += string(szCount);     //构造Install Data头部命令
 
+   /* char szDataLen[5] = { 0 };
+    sprintf_s(szDataLen, 5, "%02X", DGIData.length() / 2);*/
 
-	char szDataLen[5] = { 0 };
-	sprintf_s(szDataLen, 5, "%02X", DGIData.length() / 2);
-
-    char szTotalLen[5] = { 0 };
-    sprintf_s(szTotalLen, 5, "%02X", (DGI.length() + DGIData.length()) / 2 + 1);
-    cmd += szTotalLen + DGI;        // header + totalLen + DGI
-
+    string sDataLen = Base::GetDataHexLen(DGIData);
     //如果DGI分组数据过长，需要两次或多次上传(这里仅处理两次存储的情况，多次的暂不处理(未碰到此种情况))
     if (DGIData.length() / 2 >= 0xFE)
     {
-        string data1 = DGI + szDataLen + DGIData.substr(0, 0xDD * 2);
-        char szRightLen[5] = { 0 };
-        sprintf_s(szRightLen, 5, "%02X", DGIData.substr(0xDD * 2).length() / 2);
-        string data2 = szRightLen + DGIData.substr(0xDD * 2);
-
-        string cmdFirst = cmd + "E0" + data1;
+        string data1 = DGI + sDataLen + DGIData.substr(0, 0xDD * 2);    // DGI + 总数据长度 + 第一个存储的data数据
+        string cmdFirst = cmd + Base::GetDataHexLen(data1) + data1;
 
         count++;
         memset(szCount, 0, sizeof(szCount));
         sprintf_s(szCount, "%02X", count);
-        string cmdSecond = cmd.substr(0, 6) + szCount + data2;
+
+        //命令头 + 第二部分数据长度 + 第二次存储data
+        string data2 = DGIData.substr(0xDD * 2);
+        string cmdSecond = cmd.substr(0, 6) + szCount + Base::GetDataHexLen(data2) + data2;
 
         APDU_RESPONSE response;
         if (SendAPDU(cmdFirst, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))
@@ -194,7 +190,13 @@ bool APDU::StoreDataCommand(string DGI, string DGIData, STORE_DATA_TYPE dataType
         return false;
     }
     else {
-        cmd += string(szDataLen) + DGIData; // + DGI data len + DGI data
+       
+
+        char szTotalLen[5] = { 0 };
+        sprintf_s(szTotalLen, 5, "%02X", (DGI.length() + DGIData.length()) / 2 + 1);
+        cmd += szTotalLen + DGI;        // header + totalLen + DGI
+
+        cmd += string(sDataLen) + DGIData; // + DGI data len + DGI data
 
         APDU_RESPONSE response;
         if (SendAPDU(cmd, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))

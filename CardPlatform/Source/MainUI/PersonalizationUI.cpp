@@ -221,7 +221,7 @@ void CPersonalizationUI::DoPersonaliztion()
         string ppse = ini.GetValue("Store_PPSE", "Store_PPSE");
         string ppseLen = Base::GetDataHexLen(ppse);
         ppse = _T("9102") + Base::Increase(ppseLen, 5) + _T("A5") + Base::Increase(ppseLen, 3) + _T("BF0C") + ppseLen + ppse;
-        if (!pAPDU->StorePSEData(pse2, STORE_DATA_LAST, true))
+        if (!pAPDU->StorePSEData(ppse, STORE_DATA_LAST, true))
         {
             return;     // 个人化PPSE失败
         }
@@ -240,6 +240,22 @@ void CPersonalizationUI::DoPersonaliztion()
                 continue;
             }
             else {
+
+                string sDataLen;
+                if (v.second.length() > 0xFE)
+                {
+                    sDataLen = _T("81") + Base::GetDataHexLen(v.second);
+                }
+                else {
+                    sDataLen = Base::GetDataHexLen(v.second);
+                }
+
+                int nDGI = stoi(v.first, 0, 16);
+                if (nDGI <= 0x0501) //小于0x0501的GDI分组需要添加70模板
+                {
+                    v.second = _T("70") + sDataLen + v.second;
+                }
+
                 STORE_DATA_TYPE type;
                 if (vec.size() - 2 == nVecCount)    //PSE及PPSE在文件尾，减之。
                 {
