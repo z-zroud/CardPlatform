@@ -1,14 +1,6 @@
 #pragma once
 
-#define BTN_OK          1
-#define BTN_CANCEL      2
-
-#define ICO_INFO        1
-#define ICO_WARNING     2
-#define ICO_ERROR       3
-
-#define STATUS_OK       0
-#define STATUS_CANCEL   1
+#include "Util\IniParaser.h"
 
 class CTerminalDlg : public WindowImplBase
 {
@@ -21,12 +13,12 @@ public:
     LPCTSTR GetWindowClassName(void) const { return _T("TerminalDlg"); }
 
     LRESULT OnNcHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-
-
     void Notify(TNotifyUI& msg);
     void InitWindow();
     int ShowDlg(HWND hWnd);
 
+    void ShowTags();
+    void SaveTags();
 private:
     CEditUI*    m_tag5F2A;
     CEditUI*    m_tag95;
@@ -46,6 +38,7 @@ private:
     CEditUI*    m_tagDF60;
     CEditUI*    m_tagDF69;
 
+    INIParser   m_parse;
     int         m_nStatus;
     HWND        m_hWnd;
 };
