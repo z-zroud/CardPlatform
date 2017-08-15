@@ -35,6 +35,7 @@
     <ClCompile Include="Source\MainUI\GEConverterUI.cpp" />
     <ClCompile Include="Source\MainUI\HTConverterUI.cpp" />
     <ClCompile Include="Source\MainUI\PersonalizationConfigUI.cpp" />
+    <ClCompile Include="Source\MainUI\TerminalDlg.cpp" />
     <ClCompile Include="Source\MainUI\YLConfigUI.cpp" />
     <ClCompile Include="Source\MainUI\YLConverterUI.cpp" />
     <ClCompile Include="Source\MainUI\InstallParamDlg.cpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="Source\MainUI\GEConverterUI.h" />
     <ClInclude Include="Source\MainUI\HTConverterUI.h" />
     <ClInclude Include="Source\MainUI\PersonalizationConfigUI.h" />
+    <ClInclude Include="Source\MainUI\TerminalDlg.h" />
     <ClInclude Include="Source\MainUI\YLConfigUI.h" />
     <ClInclude Include="Source\MainUI\YLConverterUI.h" />
     <ClInclude Include="Source\MainUI\InstallParamDlg.h" />
@@ -121,6 +123,8 @@
     <Xml Include="UI\FileDecrypt.xml" />
     <Xml Include="UI\GEConverter.xml" />
     <Xml Include="UI\HTConverter.xml" />
+    <Xml Include="UI\TerminalDlg.xml" />
+    <Xml Include="UI\TerminalMenu.xml" />
     <Xml Include="UI\YLConfig.xml" />
     <Xml Include="UI\YLConverter.xml" />
     <Xml Include="UI\InstallParamViewDlg.xml" />

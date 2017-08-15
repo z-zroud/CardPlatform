@@ -16,13 +16,14 @@ public:
     CControlUI* CreateControl(LPCTSTR pstrClass);
     void Notify(TNotifyUI& msg);
 	void InitWindow();
-
+    LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 private:
 	void OnShowSysMenu(TNotifyUI& msg);
 
 
 private:
 	map<CDuiString, bool> m_SysFileMenuInfo;
+    map<CDuiString, bool> m_terminalMenuInfo;
 	CTabLayoutUI*	m_tabLayoutMainPanel;
     CTabLayoutUI*   m_tabLayoutOutputPanel;
     CComboUI*       m_pComboReader;

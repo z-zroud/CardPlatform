@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window size="800,500" caption="0,0,0,30" roundcorner="5,5,5,5" sizebox="4,4,4,4" mininfo="600,320">
+      <Font shared="true" id="0" name="幼圆" size="12" default="true" />
+      <Font shared="true" id="1" name="幼圆" size="14" default="true" />
+      <Font shared="true" id="2" name="微软雅黑" size="18" />
+      <Font shared="true" id="3" name="微软雅黑" size="20"/>
+      <Default shared="true" name="Button" value="textcolor=&quot;#FFFFFFFF&quot; bkcolor=&quot;#FF2D2D30&quot;"/>
+      <Default shared="true" name="Combo" value="bkcolor=&quot;#FF3F3F46&quot; droptype=&quot;droplist&quot;"/>
+      <VerticalLayout name="root" bkcolor="#FFFFFFFF">
+            <!--标题栏-->
+            <HorizontalLayout name="1" height="30" bkcolor="#FF2D2D30">
+                  <HorizontalLayout name="2">
+                        <Control width="20"/>
+                        <Label name="installParamLogo" padding="0,5,5,0" bkimage="file='Icon/logo.png' source='1,4,23,20'" width="22" height="16"/>
+                        <Label name="installParamTitle" inset="5,0,0,0" textcolor="#FFF2F2F2" font="0"/>
+                  </HorizontalLayout>
+                  <HorizontalLayout>
+                        <HorizontalLayout>
+                        </HorizontalLayout>
+                        <HorizontalLayout width="40">
+                              <Button float="true" pos="0,0,30,20" name="closebtn" bordersize="0" normalimage="Icon/close_10.png" />
+                        </HorizontalLayout>
+                  </HorizontalLayout>
+            </HorizontalLayout>
+            <VerticalLayout bkcolor="#FF9E9E9E">
+                  <Control height="50" />
+                  <!--Package AID-->
+                  <HorizontalLayout name="packagePanel" height="50">
+                        <Label text="Tag 5F2A" float="true" pos="20,0,90,30"/>
+                        <Edit name="Tag5F2A" float="true" pos="100,0,200,30" />
+                        <Label text="Tag 95" float="true" pos="210,0,280,30"/>
+                        <Edit name="Tag95" float="true" pos="280,0,390,30" />
+                        <Label text="Tag 9A" float="true" pos="400,0,470,30" />
+                        <Edit name="Tag9A" float="true" pos="480,0,580,30" />
+                        <Label text="Tag 9C" float="true" pos="590,0,660,30" />
+                        <Edit name="Tag9C" float="true" pos="670,0,770,30" />
+                  </HorizontalLayout>
+                  <HorizontalLayout name="packagePanel" height="50">
+                        <Label text="Tag 9F02" float="true" pos="20,0,90,30"/>
+                        <Edit name="Tag9F02" float="true" pos="100,0,200,30" />
+                        <Label text="Tag 9F03" float="true" pos="210,0,280,30"/>
+                        <Edit name="Tag9F03" float="true" pos="280,0,390,30" />
+                        <Label text="Tag 9F09" float="true" pos="400,0,470,30" />
+                        <Edit name="Tag9F09" float="true" pos="480,0,580,30" />
+                        <Label text="Tag 9F1A" float="true" pos="590,0,660,30" />
+                        <Edit name="Tag9F1A" float="true" pos="670,0,770,30" />
+                  </HorizontalLayout>
+                  <HorizontalLayout name="packagePanel" height="50">
+                        <Label text="Tag 9F1B" float="true" pos="20,0,90,30"/>
+                        <Edit name="Tag9F1B" float="true" pos="100,0,200,30" />
+                        <Label text="Tag 9F21" float="true" pos="210,0,280,30"/>
+                        <Edit name="Tag9F21" float="true" pos="280,0,390,30" />
+                        <Label text="Tag 9F37" float="true" pos="400,0,470,30" />
+                        <Edit name="Tag9F37" float="true" pos="480,0,580,30" />
+                        <Label text="Tag 9F42" float="true" pos="590,0,660,30" />
+                        <Edit name="Tag9F42" float="true" pos="670,0,770,30" />
+                  </HorizontalLayout>
+                  <HorizontalLayout name="packagePanel" height="50">
+                        <Label text="Tag 9F4E" float="true" pos="20,0,90,30"/>
+                        <Edit name="Tag9F4E" float="true" pos="100,0,200,30" />
+                        <Label text="Tag 9F66" float="true" pos="210,0,280,30"/>
+                        <Edit name="Tag9F66" float="true" pos="280,0,390,30" />
+                        <Label text="Tag 9F7A" float="true" pos="400,0,470,30" />
+                        <Edit name="Tag9F7A" float="true" pos="480,0,580,30" />
+                        <Label text="Tag DF60" float="true" pos="590,0,660,30" />
+                        <Edit name="TagDF60" float="true" pos="670,0,770,30" />
+                  </HorizontalLayout>
+                  <HorizontalLayout name="packagePanel" height="50">
+                        <Label text="Tag DF69" float="true" pos="20,0,90,30"/>
+                        <Edit name="TagDF69" float="true" pos="100,0,200,30" />
+                  </HorizontalLayout>
+                  <HorizontalLayout>
+                        
+                  </HorizontalLayout>
+                  <HorizontalLayout height="60">
+                        <HorizontalLayout>
+                        </HorizontalLayout>
+                        <HorizontalLayout width="120">
+                              <Button name="btnTerminalSetting" text="保存设置" float="true" pos="0,0,80,30" />
+                        </HorizontalLayout>
+                  </HorizontalLayout>
+            </VerticalLayout>
+      </VerticalLayout>
+</Window>
+

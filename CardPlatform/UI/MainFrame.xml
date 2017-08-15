@@ -29,7 +29,7 @@
             <HorizontalLayout name="sysMenuPanel" height="30" bkcolor="#FF2D2D30">
                   <HorizontalLayout width="300" bordersize="0,0,0,2">
                         <Button name="btnFile" text="文件" float="true" pos="0,0,50,30" bordersize="0" height="28" />
-                        <Button name="btnEdit" text="终端" float="true" pos="50,0,100,30"  bordersize="0" height="28"/>
+                        <Button name="btnTerminal" text="终端" float="true" pos="50,0,100,30"  bordersize="0" height="28"/>
                         <Button name="btnView" text="视图" float="true" pos="100,0,150,30"  bordersize="0" height="28"/>
                         <Button name="btnProject" text="项目" float="true" pos="150,0,200,30" bordersize="0" height="28"/>
                   </HorizontalLayout>

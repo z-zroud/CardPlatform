@@ -2,13 +2,15 @@
 #include "MainFrameDlg.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Interface\InterfaceInstance.h"
-
+#include "TerminalDlg.h"
 
 
 CMainFrame::CMainFrame()
 {
 	m_SysFileMenuInfo.insert(map<CDuiString, bool>::value_type(_T("file_New"), false));
 	m_SysFileMenuInfo.insert(map<CDuiString, bool>::value_type(_T("file_Open"), false));
+
+    m_terminalMenuInfo.insert(map<CDuiString, bool>::value_type(_T("terminalSettting"), false));
 }
 
 
@@ -92,6 +94,21 @@ void CMainFrame::Notify(TNotifyUI& msg) //处理内嵌模块的消息
     }
 }
 
+LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+    if (uMsg == WM_MENUCLICK)
+    {
+        CDuiString strMenuName = CMenuWnd::GetClickedMenuName();
+        if (strMenuName == _T("terminalSetting"))
+        {
+            CTerminalDlg termDlg;
+            termDlg.ShowDlg(m_hWnd);
+        }
+    }
+
+    return 0;
+}
+
 /**********************************************************
 * 响应菜单按钮事件
 ***********************************************************/
@@ -107,9 +124,15 @@ void CMainFrame::OnShowSysMenu(TNotifyUI& msg)
 		ClientToScreen(m_hWnd, &point);
 		pMenu->CreateMenu(NULL, _T("FileMenu.xml"), point, &m_PaintManager, &m_SysFileMenuInfo);
 	}
-	else if (msg.pSender->GetName() == _T("btnEdit"))
+	else if (msg.pSender->GetName() == _T("btnTerminal"))
 	{
-
+        CMenuWnd *pMenu = new CMenuWnd();
+        CPoint point(0, 0);
+        GetCursorPos(&point);
+        point.x = msg.pSender->GetX();
+        point.y = msg.pSender->GetY() + msg.pSender->GetHeight();
+        ClientToScreen(m_hWnd, &point);
+        pMenu->CreateMenu(NULL, _T("TerminalMenu.xml"), point, &m_PaintManager, &m_terminalMenuInfo);
 	}
 	else if (msg.pSender->GetName() == _T("btnView"))
 	{

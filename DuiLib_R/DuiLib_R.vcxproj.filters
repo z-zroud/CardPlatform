@@ -118,7 +118,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Utils\WebBrowserEventHandler.h" />
     <ClInclude Include="StdAfx.h">
       <Filter>Header Files\Control</Filter>
     </ClInclude>
@@ -247,6 +246,9 @@
     </ClInclude>
     <ClInclude Include="Core\UIDefine.h">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\WebBrowserEventHandler.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -100,8 +100,6 @@ void CPersonalizationUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	{
 		if (name == _T("btnDoPerso"))   //开始个人化
 		{
-            //CTipDlg* pTip = new CTipDlg;
-            //pTip->ShowDlg(m_pPM->GetPaintWindow(), _T("提示"), _T("Test"), ICO_INFO, BTN_OK);
             DoPersonaliztion();
         }
         else if (name == _T("btnInstCfgView")) {   //查看安装参数
