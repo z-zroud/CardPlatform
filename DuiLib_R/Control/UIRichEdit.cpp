@@ -254,7 +254,9 @@ CTxtWinHost::~CTxtWinHost()
 }
 
 ////////////////////// Create/Init/Destruct Commands ///////////////////////
-
+/*****************************************************************
+* 功能： 初始化Text Service服务，初始化richedit默认字体、段落
+******************************************************************/
 BOOL CTxtWinHost::Init(CRichEditUI *re, const CREATESTRUCT *pcs)
 {
     IUnknown *pUnk;
@@ -355,7 +357,9 @@ err:
 
 /////////////////////////////////  IUnknown ////////////////////////////////
 
-
+/**********************************************************
+* 功能： 查询ITextHost接口
+***********************************************************/
 HRESULT CTxtWinHost::QueryInterface(REFIID riid, void **ppvObject)
 {
     HRESULT hr = E_NOINTERFACE;
@@ -402,17 +406,26 @@ void CTxtWinHost::TxImmReleaseContext(HIMC himc)
 }
 
 //////////////////////////// ITextHost Interface  ////////////////////////////
-
+/*************************************************************
+* 功能： 将text host window 的DC 传给 text host service.
+**************************************************************/
 HDC CTxtWinHost::TxGetDC()
 {
     return m_re->GetManager()->GetPaintDC();
 }
 
+/************************************************************
+* 功能：1表示释放成功、0表示释放失败。 这里返回1，而实际上没有释放
+* 主要是因为这个DC在其他窗口需要使用。
+*************************************************************/
 int CTxtWinHost::TxReleaseDC(HDC hdc)
 {
     return 1;
 }
 
+/**********************************************************
+* 功能： 显示Scrollbar
+***********************************************************/
 BOOL CTxtWinHost::TxShowScrollBar(INT fnBar, BOOL fShow)
 {
     CScrollBarUI* pVerticalScrollBar = m_re->GetVerticalScrollBar();
@@ -430,6 +443,9 @@ BOOL CTxtWinHost::TxShowScrollBar(INT fnBar, BOOL fShow)
     return TRUE;
 }
 
+/******************************************************************
+* 功能：是否Enable scroll bar
+******************************************************************/
 BOOL CTxtWinHost::TxEnableScrollBar (INT fuSBFlags, INT fuArrowflags)
 {
     if( fuSBFlags == SB_VERT ) {
@@ -448,6 +464,9 @@ BOOL CTxtWinHost::TxEnableScrollBar (INT fuSBFlags, INT fuArrowflags)
     return TRUE;
 }
 
+/******************************************************************
+* 功能：设置scroll bar range
+******************************************************************/
 BOOL CTxtWinHost::TxSetScrollRange(INT fnBar, LONG nMinPos, INT nMaxPos, BOOL fRedraw)
 {
     CScrollBarUI* pVerticalScrollBar = m_re->GetVerticalScrollBar();
@@ -473,6 +492,9 @@ BOOL CTxtWinHost::TxSetScrollRange(INT fnBar, LONG nMinPos, INT nMaxPos, BOOL fR
     return TRUE;
 }
 
+/******************************************************************
+* 功能： 设置scroll bar 位置
+******************************************************************/
 BOOL CTxtWinHost::TxSetScrollPos (INT fnBar, INT nPos, BOOL fRedraw)
 {
     CScrollBarUI* pVerticalScrollBar = m_re->GetVerticalScrollBar();
@@ -486,6 +508,9 @@ BOOL CTxtWinHost::TxSetScrollPos (INT fnBar, INT nPos, BOOL fRedraw)
     return TRUE;
 }
 
+/******************************************************************
+* 功能： 重置需要重绘的窗口区域
+******************************************************************/
 void CTxtWinHost::TxInvalidateRect(LPCRECT prc, BOOL fMode)
 {
     if( prc == NULL ) {
@@ -824,12 +849,18 @@ SIZEL* CTxtWinHost::GetExtent()
     return &sizelExtent;
 }
 
+/******************************************************************
+* 功能： 设置缩进
+******************************************************************/
 void CTxtWinHost::SetExtent(SIZEL *psizelExtent) 
 { 
     sizelExtent = *psizelExtent; 
     pserv->OnTxPropertyBitsChange(TXTBIT_EXTENTCHANGE, TXTBIT_EXTENTCHANGE);
 }
 
+/******************************************************************
+* 功能： 设置字数限制
+******************************************************************/
 void CTxtWinHost::LimitText(LONG nChars)
 {
     cchTextMost = nChars;

@@ -20,25 +20,25 @@ public:
     UINT GetControlFlags() const;
 
     bool IsWantTab();
-    void SetWantTab(bool bWantTab = true);
+    void SetWantTab(bool bWantTab = true);      //是否接受Tab键
     bool IsWantReturn();
-    void SetWantReturn(bool bWantReturn = true);
+    void SetWantReturn(bool bWantReturn = true);    //是否接受回车键
     bool IsWantCtrlReturn();
-    void SetWantCtrlReturn(bool bWantCtrlReturn = true);
+    void SetWantCtrlReturn(bool bWantCtrlReturn = true);    //是否接受 Ctrl + 回车键
     bool IsRich();
-    void SetRich(bool bRich = true);
+    void SetRich(bool bRich = true);    //是否使用富格式
     bool IsReadOnly();
-    void SetReadOnly(bool bReadOnly = true);
+    void SetReadOnly(bool bReadOnly = true);    //是否只读
     bool GetWordWrap();
     void SetWordWrap(bool bWordWrap = true);
     int GetFont();
-    void SetFont(int index);
+    void SetFont(int index);        //设置字体
     void SetFont(LPCTSTR pStrFontName, int nSize, bool bBold, bool bUnderline, bool bItalic);
-	void SetEnabled(bool bEnabled);
+	void SetEnabled(bool bEnabled);     //设置Enable
     LONG GetWinStyle();
     void SetWinStyle(LONG lStyle);
     DWORD GetTextColor();
-    void SetTextColor(DWORD dwTextColor);
+    void SetTextColor(DWORD dwTextColor);   //设置文本颜色
     int GetLimitText();
     void SetLimitText(int iChars);
     long GetTextLength(DWORD dwFlags = GTL_DEFAULT) const;
@@ -66,11 +66,11 @@ public:
     CDuiString GetTextRange(long nStartChar, long nEndChar) const;
     void HideSelection(bool bHide = true, bool bChangeStyle = false);
     void ScrollCaret();
-    int InsertText(long nInsertAfterChar, LPCTSTR lpstrText, bool bCanUndo = false);
-    int AppendText(LPCTSTR lpstrText, bool bCanUndo = false);
+    int InsertText(long nInsertAfterChar, LPCTSTR lpstrText, bool bCanUndo = false);    //插入文本
+    int AppendText(LPCTSTR lpstrText, bool bCanUndo = false);       //添加文本
     DWORD GetDefaultCharFormat(CHARFORMAT2 &cf) const;
     bool SetDefaultCharFormat(CHARFORMAT2 &cf);
-    DWORD GetSelectionCharFormat(CHARFORMAT2 &cf) const;
+    DWORD GetSelectionCharFormat(CHARFORMAT2 &cf) const;    //设置选择文本字体格式
     bool SetSelectionCharFormat(CHARFORMAT2 &cf);
     bool SetWordCharFormat(CHARFORMAT2 &cf);
     DWORD GetParaFormat(PARAFORMAT2 &pf) const;
