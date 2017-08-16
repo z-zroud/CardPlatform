@@ -162,10 +162,7 @@ string CTerminal::Get9F1B()
 }
 string CTerminal::Get9F21()
 {
-	if (m_9F21.empty())
-	{
-        m_9F21 = Base::GenTransTime();
-	}
+    m_9F21 = Base::GenTransTime();
 	return m_9F21;
 }
 string CTerminal::Get9F37()

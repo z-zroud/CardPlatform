@@ -716,7 +716,8 @@ bool PBOC::EndTransaction()
 		P1 = GACControlParam::AAC;
 		authCode = "2020";
 	}
-
+    //发送GAC2时，需要重置终端处理结果。
+    CTerminal::SetTerminalData(Tag95, GetTVR());
 	/******************************** GAC 2 ******************************/
 	string CDOL2 = GetTagValue(Tag8D);
 	BCD_TL CDOL2tlEntities[32] = { 0 };
