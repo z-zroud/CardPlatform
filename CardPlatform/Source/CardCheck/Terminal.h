@@ -6,19 +6,24 @@
 #include "Util\IniParaser.h"
 using namespace std;
 //case 0x5F2A:	return "0156";		//交易货币代码, 默认RMB
-//case 0x95:		return GetTVR();	//终端验证结果TVR
-//case 0x9A:		return GenTransDate();	//交易日期
-//case 0x9C:		return "00";			//交易类型
+
+
 //case 0x9F02:	return "000000010000";	//授权金额，默认100元
 //case 0x9F03:	return "000000000000";	//其他金额	
 //case 0x9F09:	return "0030";		//终端应用版本号
 //case 0x9F1A:	return "0156";		//终端国家代码，默认中国
 //case 0x9F1B:	return "000000000000";	//终端最低限额
-//case 0x9F21:	return GenTransTime();			//交易时间
 //case 0x9F37:	return "11223344";	//随机数
 //case 0x9F42:	return "0156";		//应用货币代码，默认中国
 //case 0x9F4E:	return "6368696E61756E696F6E7061792E616263643132";		//商户名称
 //case 0x9F66:    return "76C00000";  //终端交易属性
+//case 0x9C:		return "00";			//交易类型
+
+//case 0x95:		return GetTVR();	//终端验证结果TVR
+//case 0x9A:		return GenTransDate();	//交易日期
+
+//case 0x9F21:	return GenTransTime();			//交易时间
+
 //case 0x9F7A:	return "00";		//电子现金交易指示器
 //case 0xDF60:    return "00";    //终端不支持扩展交易
 //case 0xDF69:    return "01";        //SM2算法支持指示器，默认采用DES算法
@@ -49,14 +54,14 @@ public:
 
 	static void Set5F2A(string value);
 	static void Set95(string value);
-	static void Set9A(string value);
+	//static void Set9A(string value);
 	static void Set9C(string value);
 	static void Set9F02(string value);
 	static void Set9F03(string value);
 	static void Set9F09(string value);
 	static void Set9F1A(string value);
 	static void Set9F1B(string value);
-	static void Set9F21(string value);
+	//static void Set9F21(string value);
 	static void Set9F37(string value);
 	static void Set9F42(string value);
 	static void Set9F4E(string value);

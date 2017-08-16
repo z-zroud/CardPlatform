@@ -30,15 +30,15 @@ void CTerminal::LoadData(const string &filePath)
 	if (INI_OK == m_parse.Read(filePath))
 	{
 		Set5F2A(m_parse.GetValue(root, _T("Tag5F2A")));
-		Set95(m_parse.GetValue(root, _T("Tag95")));
-		Set9A(m_parse.GetValue(root, _T("Tag9A")));
+		//Set95(m_parse.GetValue(root, _T("Tag95")));
+		//Set9A(m_parse.GetValue(root, _T("Tag9A")));
 		Set9C(m_parse.GetValue(root, _T("Tag9C")));
 		Set9F02(m_parse.GetValue(root, _T("Tag9F02")));
 		Set9F03(m_parse.GetValue(root, _T("Tag9F03")));
 		Set9F09(m_parse.GetValue(root, _T("Tag9F09")));
 		Set9F1A(m_parse.GetValue(root, _T("Tag9F1A")));
 		Set9F1B(m_parse.GetValue(root, _T("Tag9F1B")));
-		Set9F21(m_parse.GetValue(root, _T("Tag9F21")));
+		//Set9F21(m_parse.GetValue(root, _T("Tag9F21")));
 		Set9F37(m_parse.GetValue(root, _T("Tag9F37")));
 		Set9F42(m_parse.GetValue(root, _T("Tag9F42")));
 		Set9F4E(m_parse.GetValue(root, _T("Tag9F4E")));
@@ -51,26 +51,29 @@ void CTerminal::LoadData(const string &filePath)
 
 void CTerminal::SetTerminalData(const string &tag, const string &value)
 {
-	if (tag == _T("Tag5F2A"))	Set5F2A(value);
-	else if (tag == _T("Tag95"))	Set95(value);
-	else if (tag == _T("Tag9A"))	Set9A(value);
-	else if (tag == _T("Tag9C"))	Set9C(value);
-	else if (tag == _T("Tag9F02"))	Set9F02(value);
-	else if (tag == _T("Tag9F03"))	Set9F03(value);
-	else if (tag == _T("Tag9F09"))	Set9F09(value);
-	else if (tag == _T("Tag9F1A"))	Set9F1A(value);
-	else if (tag == _T("Tag9F1B"))	Set9F1B(value);
-	else if (tag == _T("Tag9F21"))	Set9F21(value);
-	else if (tag == _T("Tag9F37"))	Set9F37(value);
-	else if (tag == _T("Tag9F42"))	Set9F42(value);
-	else if (tag == _T("Tag9F4E"))	Set9F4E(value);
-	else if (tag == _T("Tag9F66"))	Set9F66(value);
-	else if (tag == _T("Tag9F7A"))	Set9F7A(value);
-	else if (tag == _T("TagDF60"))	SetDF60(value);
-	else if (tag == _T("TagDF69"))	SetDF69(value);
+	if (tag == _T("Tag5F2A") || tag == Tag5F2A)	Set5F2A(value);
+	//else if (tag == _T("Tag95") || tag == Tag95)	Set95(value);
+	//else if (tag == _T("Tag9A"))	Set9A(value);
+	else if (tag == _T("Tag9C") || tag == Tag9C)	Set9C(value);
+	else if (tag == _T("Tag9F02") || tag == Tag9F02)	Set9F02(value);
+	else if (tag == _T("Tag9F03") || tag == Tag9F03)	Set9F03(value);
+	else if (tag == _T("Tag9F09") || tag == Tag9F09)	Set9F09(value);
+	else if (tag == _T("Tag9F1A") || tag == Tag9F1A)	Set9F1A(value);
+	else if (tag == _T("Tag9F1B") || tag == Tag9F1B)	Set9F1B(value);
+	//else if (tag == _T("Tag9F21"))	Set9F21(value);
+	else if (tag == _T("Tag9F37") || tag == Tag9F37)	Set9F37(value);
+	else if (tag == _T("Tag9F42") || tag == Tag9F42)	Set9F42(value);
+	else if (tag == _T("Tag9F4E") || tag == Tag9F4E)	Set9F4E(value);
+	else if (tag == _T("Tag9F66") || tag == Tag9F66)	Set9F66(value);
+	else if (tag == _T("Tag9F7A") || tag == Tag9F7A)	Set9F7A(value);
+	else if (tag == _T("TagDF60") || tag == TagDF60)	SetDF60(value);
+	else if (tag == _T("TagDF69") || tag == TagDF69)	SetDF69(value);
 
 	m_parse.SetValue(root, tag, value);
 	m_parse.Save();
+
+    //特殊标签不需要保存到配置文件中，
+    if (tag == _T("Tag95") || tag == Tag95)	Set95(value);
 }
 
 string CTerminal::GetTerminalData(const string &tag)
@@ -88,23 +91,23 @@ string CTerminal::GetTerminalData(const string &tag)
 
 		bLoaded = true;
 	}
-	if (tag == _T("Tag5F2A"))	return Get5F2A();
-	else if (tag == _T("Tag95"))	return Get95();
-	else if (tag == _T("Tag9A"))	return Get9A();
-	else if (tag == _T("Tag9C"))	return Get9C();
-	else if (tag == _T("Tag9F02"))	return Get9F02();
-	else if (tag == _T("Tag9F03"))	return Get9F03();
-	else if (tag == _T("Tag9F09"))	return Get9F09();
-	else if (tag == _T("Tag9F1A"))	return Get9F1A();
-	else if (tag == _T("Tag9F1B"))	return Get9F1B();
-	else if (tag == _T("Tag9F21"))	return Get9F21();
-	else if (tag == _T("Tag9F37"))	return Get9F37();
-	else if (tag == _T("Tag9F42"))	return Get9F42();
-	else if (tag == _T("Tag9F4E"))	return Get9F4E();
-	else if (tag == _T("Tag9F66"))	return Get9F66();
-	else if (tag == _T("Tag9F7A"))	return Get9F7A();
-	else if (tag == _T("TagDF60"))	return GetDF60();
-	else if (tag == _T("TagDF69"))	return GetDF69();
+	if (tag == _T("Tag5F2A") || tag == Tag5F2A)	return Get5F2A();
+	else if (tag == _T("Tag95") || tag == Tag95)	return Get95();
+	else if (tag == _T("Tag9A") || tag == Tag9A)	return Get9A();
+	else if (tag == _T("Tag9C") || tag == Tag9C)	return Get9C();
+	else if (tag == _T("Tag9F02") || tag == Tag9F02)	return Get9F02();
+	else if (tag == _T("Tag9F03") || tag == Tag9F03)	return Get9F03();
+	else if (tag == _T("Tag9F09") || tag == Tag9F09)	return Get9F09();
+	else if (tag == _T("Tag9F1A") || tag == Tag9F1A)	return Get9F1A();
+	else if (tag == _T("Tag9F1B") || tag == Tag9F1B)	return Get9F1B();
+	else if (tag == _T("Tag9F21") || tag == Tag9F21)	return Get9F21();
+	else if (tag == _T("Tag9F37") || tag == Tag9F37)	return Get9F37();
+	else if (tag == _T("Tag9F42") || tag == Tag9F42)	return Get9F42();
+	else if (tag == _T("Tag9F4E") || tag == Tag9F4E)	return Get9F4E();
+	else if (tag == _T("Tag9F66") || tag == Tag9F66)	return Get9F66();
+	else if (tag == _T("Tag9F7A") || tag == Tag9F7A)	return Get9F7A();
+	else if (tag == _T("TagDF60") || tag == TagDF60)	return GetDF60();
+	else if (tag == _T("TagDF69") || tag == TagDF69)	return GetDF69();
 
 	return _T("");
 }
@@ -203,10 +206,10 @@ void CTerminal::Set95(string value)
 {
 	m_95 = value;
 }
-void CTerminal::Set9A(string value)
-{
-	m_9A = value;
-}
+//void CTerminal::Set9A(string value)
+//{
+//	m_9A = value;
+//}
 void CTerminal::Set9C(string value)
 {
 	m_9C = value;
@@ -231,10 +234,10 @@ void CTerminal::Set9F1B(string value)
 {
 	m_9F1B = value;
 }
-void CTerminal::Set9F21(string value)
-{
-	m_9F21 = value;
-}
+//void CTerminal::Set9F21(string value)
+//{
+//	m_9F21 = value;
+//}
 void CTerminal::Set9F37(string value)
 {
 	m_9F37 = value;

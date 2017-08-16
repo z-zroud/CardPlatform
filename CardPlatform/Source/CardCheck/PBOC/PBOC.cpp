@@ -304,6 +304,8 @@ bool PBOC::TerminalRiskManagement()
 		Log->Error("频度检查失败!无法获取上次联机ATC或者应用交易ATC");
 		m_tvr.ExceedContinuedTransUpLimitation = true;
 		m_tvr.ExceedContinuedTransFloorLimitation = true;
+        ATC = ATC.empty() ? _T("00") : ATC;
+        lastOnlineATC = lastOnlineATC.empty() ? _T("00") : lastOnlineATC;
 	}
 	Log->Info("上次联机ATC:[%s]", lastOnlineATC.c_str());
 	Log->Info("应用交易计数器ATC:[%s]", ATC.c_str());
@@ -394,6 +396,9 @@ bool PBOC::CardActionAnalized()
 		break;
 	}
 	
+    //卡片行为分析之前，需要将终端验证结果保存下来，并传递到卡片中
+    CTerminal::SetTerminalData(Tag95, GetTVR());
+
 	/******************************** GAC 1 ******************************/
 	string CDOL1 = GetTagValue("8C");
 	BCD_TL CDOL1tlEntities[32] = { 0 };

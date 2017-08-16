@@ -131,6 +131,5 @@ void CCardCheckUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
         {
             OnBtnDoTransClicked();
         }
-    }
-    
+    }    
 }
