@@ -142,6 +142,10 @@ void SimpleLog::WriteLog(char* szLogHeader, char* szFormatString)
 	{
 		printf(szMessage);
 	}
+    if (m_outputType & OUT_CONTROL && m_pControl)
+    {
+        m_pControl->AppendText(szMessage);
+    }
 
     if(string(szLogHeader) == LOG_INFO)     m_vecInfoLog.push_back(szMessage);
     if (string(szLogHeader) == LOG_WARNING)  m_vecWarningLog.push_back(szMessage);

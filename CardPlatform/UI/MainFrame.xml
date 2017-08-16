@@ -69,10 +69,10 @@
                               <!--输出窗口-->
                               <TabLayout name="tabOutputPanel">
                                     <HorizontalLayout>
-                                          <RichEdit name="richOutput" text="output" bkcolor="#FF9E9E9E" vscrollbar="true" autovscroll="true" hscrollbar="true" />
+                                          <RichEdit name="richOutput" bkcolor="#FF9E9E9E" menu="true" vscrollbar="true" autovscroll="true" hscrollbar="true" />
                                     </HorizontalLayout>
                                     <HorizontalLayout>
-                                          <RichEdit name="richError" text="error" bkcolor="#FF9E9E9E" vscrollbar="true" autovscroll="true" hscrollbar="true" />
+                                          <RichEdit name="richError" bkcolor="#FF9E9E9E" vscrollbar="true" autovscroll="true" hscrollbar="true" />
                                     </HorizontalLayout>
                               </TabLayout>
                         </VerticalLayout>

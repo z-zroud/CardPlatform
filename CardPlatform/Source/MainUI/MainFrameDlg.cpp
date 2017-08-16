@@ -3,6 +3,7 @@
 #include "IDialogBuilderCallbackEx.h"
 #include "Interface\InterfaceInstance.h"
 #include "TerminalDlg.h"
+#include "Util\Log.h"
 
 
 CMainFrame::CMainFrame()
@@ -53,6 +54,10 @@ void CMainFrame::InitWindow()
     m_tabLayoutMainPanel = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mainPanelContainer")));
     m_tabLayoutOutputPanel = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("tabOutputPanel")));
     m_pComboReader = static_cast<CComboUI*>(m_PaintManager.FindControl(_T("comboReaderList")));
+    m_pRichOutput = static_cast<CRichEditUI*>(m_PaintManager.FindControl(_T("richOutput")));
+
+    SimpleLog* pLog = SimpleLog::GetInstance();
+    pLog->SetLogControl(m_pRichOutput);
 
     IPCSC* pPCSC = GetPCSCInterface();
     auto readers = pPCSC->GetAllReaders();

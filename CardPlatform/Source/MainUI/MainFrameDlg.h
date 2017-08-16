@@ -27,5 +27,6 @@ private:
 	CTabLayoutUI*	m_tabLayoutMainPanel;
     CTabLayoutUI*   m_tabLayoutOutputPanel;
     CComboUI*       m_pComboReader;
+    CRichEditUI*    m_pRichOutput;
 };
 
