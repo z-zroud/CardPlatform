@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<Window>
+      <VerticalLayout name="ecLaodPanel" bordersize="2,0,0,2">
+            <Control height="50" bordersize="2,0,0,0"/>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Tag 9F77" float="true" pos="100,0,200,25" tooltip="电子现金余额上限"/>
+                  <Edit name="edit9F77" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Tag 9F78" float="true" pos="100,0,200,25" tooltip="电子现金单笔交易限额"/>
+                  <Edit name="edit9F78" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Tag 9F79" float="true" pos="100,0,200,25" tooltip="电子现金余额"/>
+                  <Edit name="edit9F79" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Tag DF77" float="true" pos="100,0,200,25" tooltip="电子现金余额上限"/>
+                  <Edit name="editDF77" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Tag DF78" float="true" pos="100,0,200,25" tooltip="电子现金余额上限"/>
+                  <Edit name="editDF78" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Tag DF79" float="true" pos="100,0,200,25" tooltip="电子现金余额上限"/>
+                  <Edit name="editDF79" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Tag DF62" float="true" pos="100,0,200,25" tooltip="电子现金余额上限"/>
+                  <Edit name="editDF62" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="Other" float="true" pos="100,0,200,25" />
+                  <Edit name="editOther" float="true" pos="210,0,560,25" bordersize="1" />
+            </HorizontalLayout>
+            <HorizontalLayout height="40" bordersize="2,0,0,0">
+                  <Label text="执行脚本" float="true" pos="100,0,200,25" />
+                  <CheckBox name="ckExeECLoadScript" float="true" pos="150,0,320,25" normalimage="Icon/switch_close.png" selectedimage="Icon/switch_on.png"/>
+            </HorizontalLayout>
+            <HorizontalLayout>
+            </HorizontalLayout>
+      </VerticalLayout>
+</Window>

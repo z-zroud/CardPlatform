@@ -8,9 +8,10 @@
 #define TAB_DO_GE_CONVERTER     3
 #define TAB_PERSO_CONFIG        4
 #define TAB_DO_PERSONALIZATION	5
-#define TAB_CHARD_CHECK         6
-#define TAB_MODIFY_KMC		    7
-#define TAB_FILE_DECRYPT        8
+#define TAB_EC_LOAD_SCRIPT      6
+#define TAB_CHARD_CHECK         7
+#define TAB_MODIFY_KMC		    8
+#define TAB_FILE_DECRYPT        9
 
 CTreeViewNav::CTreeViewNav(CPaintManagerUI* pPM)
 {
@@ -75,6 +76,9 @@ void CTreeViewNav::Notify(TNotifyUI& msg) //处理内嵌模块的消息
         }
         else if (name == _T("fileDecryptNode")) {
             m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_FILE_DECRYPT);
+        }
+        else if (name == _T("ccECLoadScriptNode")) {
+            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_EC_LOAD_SCRIPT);
         }
     }
 }

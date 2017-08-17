@@ -53,6 +53,7 @@
                               <GEConverterUI name="geConverterPanel"/>
                               <PersoConfigUI />
                               <PersonalizationUI />
+                              <ECLoadScriptUI />
                               <CardCheckUI />
                               <ModifyKmcUI />
                               <FileDecryptUI />

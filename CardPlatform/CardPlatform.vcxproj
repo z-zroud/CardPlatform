@@ -32,6 +32,7 @@
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\MainUI\CardCheckUI.cpp" />
     <ClCompile Include="Source\MainUI\DecryptFileUI.cpp" />
+    <ClCompile Include="Source\MainUI\ECLoadUI.cpp" />
     <ClCompile Include="Source\MainUI\GEConverterUI.cpp" />
     <ClCompile Include="Source\MainUI\HTConverterUI.cpp" />
     <ClCompile Include="Source\MainUI\PersonalizationConfigUI.cpp" />
@@ -85,6 +86,7 @@
     <ClInclude Include="Source\Interface\Tag.h" />
     <ClInclude Include="Source\MainUI\CardCheckUI.h" />
     <ClInclude Include="Source\MainUI\DecryptFileUI.h" />
+    <ClInclude Include="Source\MainUI\ECLoadUI.h" />
     <ClInclude Include="Source\MainUI\GEConverterUI.h" />
     <ClInclude Include="Source\MainUI\HTConverterUI.h" />
     <ClInclude Include="Source\MainUI\PersonalizationConfigUI.h" />
@@ -120,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\CardCheck.xml" />
+    <Xml Include="UI\ECLoadScript.xml" />
     <Xml Include="UI\FileDecrypt.xml" />
     <Xml Include="UI\GEConverter.xml" />
     <Xml Include="UI\HTConverter.xml" />

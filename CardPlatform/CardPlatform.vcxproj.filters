@@ -234,6 +234,9 @@
     <ClCompile Include="Source\MainUI\TerminalDlg.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\ECLoadUI.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -392,6 +395,9 @@
     <ClInclude Include="Source\MainUI\TerminalDlg.h">
       <Filter>Header Files\MainUI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\ECLoadUI.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -440,6 +446,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\TerminalMenu.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\ECLoadScript.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

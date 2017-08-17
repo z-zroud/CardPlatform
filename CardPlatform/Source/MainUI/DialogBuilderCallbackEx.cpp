@@ -10,6 +10,7 @@
 #include "YLConfigUI.h"
 #include "PersonalizationConfigUI.h"
 #include "DecryptFileUI.h"
+#include "ECLoadUI.h"
 
 #define DUI_CTR_MODIFY_KMC_UI       _T("ModifyKmcUI")
 #define DUI_CTR_TREE_VIEW_NAV       _T("TreeViewNav")
@@ -21,6 +22,7 @@
 #define DUI_CTR_YL_CONFIG_UI        _T("YLConfigUI")
 #define DUI_CTR_PERSO_CONFIG_UI     _T("PersoConfigUI")
 #define DUI_CTR_FILE_DECRYPT_UI     _T("FileDecryptUI")
+#define DUI_CTR_EC_LOAD_CRIYPT_UI   _T("ECLoadScriptUI")
 
 CDialogBuilderCallbackEx::CDialogBuilderCallbackEx(CPaintManagerUI *pPM)
 {
@@ -39,5 +41,6 @@ CControlUI*	CDialogBuilderCallbackEx::CreateControl(LPCTSTR pstrClass)
     else if (_tcscmp(pstrClass, DUI_CTR_YL_CONFIG_UI) == 0) return new CYLConfigUI(m_pPM);
     else if (_tcscmp(pstrClass, DUI_CTR_PERSO_CONFIG_UI) == 0) return new CPersonalizationConfigUI(m_pPM);
     else if (_tcscmp(pstrClass, DUI_CTR_FILE_DECRYPT_UI) == 0) return new CDecryptFileUI(m_pPM);
+    else if (_tcscmp(pstrClass, DUI_CTR_EC_LOAD_CRIYPT_UI) == 0) return new CECLoadUI(m_pPM);
 	return NULL;
 }
