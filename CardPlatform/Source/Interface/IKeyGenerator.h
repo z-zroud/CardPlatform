@@ -41,4 +41,5 @@ struct IKeyGenerator
     virtual string GenSMICCpublicKey(const string issuerPublicKey, const string iccPublicCert, const string needAuthStaticData) = 0;
     virtual string GenARPCByUdkAuth(string udkAuth, string AC, string authCode, string atc) = 0;
     virtual string GenARPCByMdkAuth(string mdkAuth, string AC, string authCode, string atc, string cardSeq, string pan) = 0;
+    virtual string GenScriptMac(string mac, string atc, string data) = 0;
 };

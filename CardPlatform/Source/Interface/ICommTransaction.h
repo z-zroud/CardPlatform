@@ -32,4 +32,6 @@ struct ICommTransaction
     virtual void SetMdkAuth(const string &auth) = 0;
     virtual void SetMdkMac(const string &mac) = 0;
     virtual void SetMdkEnc(const string &enc) = 0;
+    virtual void SetScript(bool hasScript) = 0;
+    virtual void ShowLog() = 0;
 };

@@ -30,6 +30,8 @@ public:
 	virtual bool EndTransaction();
 
 	virtual void DoTrans(){}
+    virtual void Clear();
+    virtual void ShowLog() {}
 
 	virtual void SetEncryption(ENCRYPT_TYPE type) { m_encryptType = type; }
 	virtual void SetAuthencation(AUTHENCATE_TYPE type) { m_authType = type; }
@@ -41,6 +43,7 @@ public:
 	virtual void SetMdkAuth(const string &auth) { m_mdkAuth = auth; }
 	virtual void SetMdkMac(const string &mac) { m_mdkMac = mac; }
 	virtual void SetMdkEnc(const string &enc) { m_mdkEnc = enc; }
+
 
 public:
 

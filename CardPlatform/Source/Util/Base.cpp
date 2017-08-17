@@ -32,13 +32,13 @@ namespace Base
         return string(szLen);
     }
 
-    string Increase(string current, int step)
+    string Increase(string currentLen, int step)
     {
-        int nCurrent = stoi(current, 0, 16);
-        nCurrent += step;
+        int nCurrentLen = stoi(currentLen, 0, 16);
+        nCurrentLen += step;
 
         char szLen[5] = { 0 };
-        sprintf_s(szLen, 5, _T("%02X"), nCurrent);
+        sprintf_s(szLen, 5, _T("%02X"), nCurrentLen);
 
         return string(szLen);
     }

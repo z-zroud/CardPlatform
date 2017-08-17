@@ -344,9 +344,19 @@ bool APDU::ReadRecordCommand(const string &SFI, const string strRecordNumber, AP
 	return SendAPDU(strCommand, response);
 
 }
-bool APDU::PutRecordCommand(const string &strCommand, APDU_RESPONSE &response)
+bool APDU::PutDataCommand(const string &tag, const string &value, const string &mac)
 {
-	return false;
+    if (mac.length() % 8 != 0)
+    {
+        return false;
+    }
+    string cmd = _T("04DA");
+    cmd += tag;
+    string dataLen = Base::GetDataHexLen(value + mac);
+    cmd += dataLen + value + mac;
+    APDU_RESPONSE response;
+
+    return SendAPDU(cmd, response) && (response.SW1 == 0x90 && response.SW2 == 0x00);
 }
 
 bool APDU::PutKeyCommand(const string keyVersion,

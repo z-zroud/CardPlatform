@@ -48,9 +48,19 @@ void PBOC::DoTrans()
     EndTransaction();
 }
 
+void PBOC::Clear()
+{
+    CommTransaction::Clear();
+}
+
+void PBOC::SetScript(bool hasScript)
+{
+    m_bExecScript = hasScript;
+}
 
 void PBOC::SetCommunicationType(COMMUNICATION_TYPE type)
 {
+    
     switch (type)
     {
     case COMM_TOUCH:
@@ -656,49 +666,91 @@ void PBOC::ParseTransLog(const string buffer)
 
 }
 
-//发卡行脚本处理
+/*************************************************************
+* 功能： 处理发卡行脚本
+**************************************************************/
 bool PBOC::DealIusserScript()
 {
-	//获取电子现金圈存日志入口
-	string logCashEntry = GetTagValue(TagDF4D);
-	string logEntry = GetTagValue(Tag9F4D);
+    IKeyGenerator *pKg = GetKeyGeneratorInterface();
+    string atc = GetTagValue(Tag9F36);
+    string appCip = GetTagValue(Tag9F26);
+    if (!m_mdkMac.empty())
+    {
+        string cardSeq = GetTagValue(Tag5F34);
+        string account = GetAccount();
+        m_udkMac = pKg->GenUDKAuthFromMDKAuth(m_mdkMac, atc, account, cardSeq);
+    }
+    if (m_udkMac.empty())
+    {
+        Log->Error(_T("MAC 不能为空"));
+        return false;
+    }
 
-	string cashSFI = logCashEntry.substr(0, 2);
-	int cashLogNum = stoi(logCashEntry.substr(2), 0, 16);
-	string logSFI = logEntry.substr(0, 2);
-	int logNum = stoi(logEntry.substr(2), 0, 16);
-
-	//显示电子现金圈存日志
-	for (int i = 0; i < cashLogNum; i++)
-	{
-		APDU_RESPONSE response;
-		memset(&response, 0, sizeof(response));
-		char seq[3] = { 0 };
-		sprintf_s(seq, 3, "%02X", i);
-		m_pAPDU->ReadRecordCommand(cashSFI, seq, response);
-		if (response.SW1 != 0x90 && response.SW2 != 0x00)
-		{
-			break;
-		}
-		Log->Info("Cash Log: [%d]=%s", i, response.data);
-	}
-
-	//显示日志
-	for (int j = 0; j < logNum; j++)
-	{
-		APDU_RESPONSE response;
-		memset(&response, 0, sizeof(response));
-		char seq[3] = { 0 };
-		sprintf_s(seq, 3, "%02X", j);
-		m_pAPDU->ReadRecordCommand(logSFI, seq, response);
-		if (response.SW1 != 0x90 && response.SW2 != 0x00)
-		{
-			break;
-		}
-		Log->Info("Card Log: [%d]=%s", j, response.data);
-	}
-
+    //执行电子现金相关脚本
+    for (auto v : m_vecECLoadScript)
+    {
+        string len = Base::GetDataHexLen(v.second);
+        len = Base::Increase(len, 4);
+        string data = _T("04DA") + v.first + len + atc + appCip + v.second;
+        if (data.length() % 16 != 0)
+        {
+            data += _T("80");
+            if (data.length() % 16 != 0)
+            {
+                int absent = 16 - data.length() % 16;
+                data.append(absent, '0');
+            }
+        }
+        string macResult = pKg->GenScriptMac(m_udkMac, atc, data);
+        if (!m_pAPDU->PutDataCommand(v.first, v.second, macResult))
+        {
+            Log->Error(_T("执行脚本失败"));
+        }
+    }
+    
 	return true;
+}
+
+void PBOC::ShowLog()
+{
+    //获取电子现金圈存日志入口
+    string logCashEntry = GetTagValue(TagDF4D);
+    string logEntry = GetTagValue(Tag9F4D);
+
+    string cashSFI = logCashEntry.substr(0, 2);
+    int cashLogNum = stoi(logCashEntry.substr(2), 0, 16);
+    string logSFI = logEntry.substr(0, 2);
+    int logNum = stoi(logEntry.substr(2), 0, 16);
+
+    //显示电子现金圈存日志
+    for (int i = 0; i < cashLogNum; i++)
+    {
+        APDU_RESPONSE response;
+        memset(&response, 0, sizeof(response));
+        char seq[3] = { 0 };
+        sprintf_s(seq, 3, "%02X", i);
+        m_pAPDU->ReadRecordCommand(cashSFI, seq, response);
+        if (response.SW1 != 0x90 && response.SW2 != 0x00)
+        {
+            break;
+        }
+        Log->Info("Cash Log: [%d]=%s", i, response.data);
+    }
+
+    //显示日志
+    for (int j = 0; j < logNum; j++)
+    {
+        APDU_RESPONSE response;
+        memset(&response, 0, sizeof(response));
+        char seq[3] = { 0 };
+        sprintf_s(seq, 3, "%02X", j);
+        m_pAPDU->ReadRecordCommand(logSFI, seq, response);
+        if (response.SW1 != 0x90 && response.SW2 != 0x00)
+        {
+            break;
+        }
+        Log->Info("Card Log: [%d]=%s", j, response.data);
+    }
 }
 
 //交易结束

@@ -31,7 +31,7 @@ struct IAPDU
 	virtual bool ReadRecordCommand(const string &strCommand, const string strRecordNumber, APDU_RESPONSE &response) = 0;	//读记录 命令
 	virtual bool GPOCommand(const string &strCommand, APDU_RESPONSE &response) = 0;		//获取处理选项(GPO)命令
 	virtual bool InternalAuthCommand(const string &strCommand, APDU_RESPONSE &response) = 0;
-	virtual bool PutRecordCommand(const string &strCommand, APDU_RESPONSE &response) = 0;
+	virtual bool PutDataCommand(const string &tag, const string &value, const string &mac) = 0;
     virtual bool PutKeyCommand(const string keyVersion,
         const string authKeyWithKcv,
         const string macKeyWithKcv,

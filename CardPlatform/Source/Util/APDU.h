@@ -28,7 +28,7 @@ public:
 	bool ReadRecordCommand(const string &strCommand, const string strRecordNumber, APDU_RESPONSE &response);	//读记录 命令
 	bool GPOCommand(const string &strCommand, APDU_RESPONSE &response);		//获取处理选项(GPO)命令
 	bool InternalAuthCommand(const string &strCommand, APDU_RESPONSE &response);
-	bool PutRecordCommand(const string &strCommand, APDU_RESPONSE &response);
+	bool PutDataCommand(const string &tag, const string &value, const string &mac);
     virtual bool PutKeyCommand(const string keyVersion,
         const string authKeyWithKcv,
         const string macKeyWithKcv,

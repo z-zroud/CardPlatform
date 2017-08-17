@@ -31,6 +31,26 @@ CommTransaction::~CommTransaction()
 		delete m_pParaser;
 }
 
+void CommTransaction::Clear()
+{    
+    if (m_pReader)
+        delete m_pReader;
+    if (m_pAPDU)
+        delete m_pAPDU;
+    if (m_pParaser)
+        delete m_pParaser;
+    m_tags.clear();
+
+    m_acceptAuthData = _T("");
+    m_mdkAuth   = _T("");
+    m_mdkMac    = _T("");
+    m_mdkEnc    = _T("");
+    m_udkAuth   = _T("");
+    m_udkMac    = _T("");
+    m_udkEnc    = _T("");
+    m_IsOnlineAuthSucessed = false;;
+}
+
 /******************************************************************
 * 功能： 打印entities数组中的tag值
 *******************************************************************/
