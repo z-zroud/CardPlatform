@@ -34,18 +34,22 @@ PBOC::~PBOC()
 
 void PBOC::DoTrans()
 {
-    SelectApplication();
-    InitilizeApplication();
-    ReadApplicationData();
-    OfflineDataAuth();
-    HandleLimitation();
-    CardHolderValidation();
-    TerminalRiskManagement();
-    CardActionAnalized();
-    TerminalActionAnalized();
-    OnlineBussiness();
-    HandleIusserScript();
-    EndTransaction();
+    SelectApplication();        //第一步： 应用选择
+    InitilizeApplication();     //第二步： 应用初始化
+    ReadApplicationData();      //第三步： 读应用数据
+    OfflineDataAuth();          //第四步： 脱机数据认证
+    HandleLimitation();         //第五步： 处理限制
+    CardHolderValidation();     //第六步： 持卡人验证
+    TerminalRiskManagement();   //第七步： 终端风险管理  
+    TerminalActionAnalized();   //第八步： 终端行为分析
+    CardActionAnalized();       //第九步： 卡片行为分析
+    OnlineBussiness();          //第十步： 发卡行认证
+    EndTransaction();           //第十一步： 交易结束处理
+
+    if (m_bExecScript)
+    {
+        HandleIusserScript();   //第十二步： 发卡行脚本处理
+    }
 }
 
 void PBOC::Clear()
@@ -53,9 +57,15 @@ void PBOC::Clear()
     CommTransaction::Clear();
 }
 
-void PBOC::SetScript(bool hasScript)
+void PBOC::SetScript(const string& tag, const string& value)
 {
-    m_bExecScript = hasScript;
+    if(value.size() > 0)
+        m_vecECLoadScript.push_back(pair<string, string>(tag, value));
+}
+
+void PBOC::ExecScript(bool bExecScript)
+{
+    m_bExecScript = bExecScript;
 }
 
 void PBOC::SetCommunicationType(COMMUNICATION_TYPE type)
@@ -358,9 +368,17 @@ void PBOC::ParseGACResponseData(const string buffer)
 	SaveTag("9F10", string(buffer.substr(22))); //发卡行应用数据 在一个联机交易中，要传送到发卡行的专有应用数据。
 }
 
-void PBOC::ShowCardTransType()
+void PBOC::ShowCardTransType(const string transType)
 {
-	string cardTransType = GetTagValue("9F27");
+    string cardTransType;
+    if (transType.empty())
+    {
+        cardTransType  = GetTagValue("9F27");
+    }
+    else {
+        cardTransType = transType.substr(0,2);
+    }
+
 	if (cardTransType.length() != 2)
 	{
 		return;
@@ -797,12 +815,8 @@ bool PBOC::EndTransaction()
 
 	//格式化输出响应数据
 	PrintTags(entites, entitiesCount);
-	SaveTag(entites, entitiesCount);
-
-	//分析GAC 卡片响应数据
-	ParseGACResponseData(GetTagValue("80"));
-	ShowCardTransType();
-
+	//SaveTag(entites, entitiesCount);  //不保存该响应值，会覆盖第一次GAC响应，而脚本处理需要第一次应用密文。  
+	ShowCardTransType(string((char*)entites[0].Value));
 
 	return true;
 }

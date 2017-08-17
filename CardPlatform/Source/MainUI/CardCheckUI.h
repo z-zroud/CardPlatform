@@ -1,4 +1,5 @@
 #pragma once
+#include "CardCheck\CommTransaction.h"
 
 class CCardCheckUI : public CContainerUI, public INotifyUI
 {
@@ -11,6 +12,7 @@ public:
     void Notify(TNotifyUI& msg); //处理内嵌模块的消息
 
     void OnBtnDoTransClicked();
+    bool HandleScript(ICommTransaction* pCommTrans);
 protected:
     CPaintManagerUI*	m_pPM;
 

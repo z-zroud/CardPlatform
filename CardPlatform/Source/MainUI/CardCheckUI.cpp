@@ -117,9 +117,39 @@ void CCardCheckUI::OnBtnDoTransClicked()
             pTrans->SetMdkEnc(enc);
             pTrans->SetMdkMac(mac);
         }
+        
+        bool bECLoadChecked = HandleScript(pTrans);
+        pTrans->ExecScript(bECLoadChecked);
 
         pTrans->DoTrans();  //开始交易流程
     }
+}
+
+bool CCardCheckUI::HandleScript(ICommTransaction* pCommTrans)
+{
+    //处理 电子现金脚本
+    CCheckBoxUI* pECLoadScript = static_cast<CCheckBoxUI*>(m_pPM->FindControl(_T("ckExeECLoadScript")));
+    bool bExecECLoadScript = pECLoadScript->GetCheck();
+    if (bExecECLoadScript)
+    {
+        CEditUI* pTag9F77 = static_cast<CEditUI*>(m_pPM->FindControl(_T("edit9F77")));
+        CEditUI* pTag9F78 = static_cast<CEditUI*>(m_pPM->FindControl(_T("edit9F78")));
+        CEditUI* pTag9F79 = static_cast<CEditUI*>(m_pPM->FindControl(_T("edit9F79")));
+        CEditUI* pTagDF77 = static_cast<CEditUI*>(m_pPM->FindControl(_T("editDF77")));
+        CEditUI* pTagDF78 = static_cast<CEditUI*>(m_pPM->FindControl(_T("editDF78")));
+        CEditUI* pTagDF79 = static_cast<CEditUI*>(m_pPM->FindControl(_T("editDF79")));
+        CEditUI* pTagDF62 = static_cast<CEditUI*>(m_pPM->FindControl(_T("editDF62")));
+
+        pCommTrans->SetScript(Tag9F77, pTag9F77->GetText().GetData());
+        pCommTrans->SetScript(Tag9F78, pTag9F78->GetText().GetData());
+        pCommTrans->SetScript(Tag9F79, pTag9F79->GetText().GetData());
+        pCommTrans->SetScript(TagDF77, pTagDF77->GetText().GetData());
+        pCommTrans->SetScript(TagDF78, pTagDF78->GetText().GetData());
+        pCommTrans->SetScript(TagDF79, pTagDF79->GetText().GetData());
+        pCommTrans->SetScript(TagDF62, pTagDF62->GetText().GetData());
+    }
+
+    return bExecECLoadScript;
 }
 
 void CCardCheckUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息

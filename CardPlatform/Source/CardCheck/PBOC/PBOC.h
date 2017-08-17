@@ -26,7 +26,8 @@ public:
 	bool DealIusserScript();                                    //发卡行脚本处理	
 	bool EndTransaction();                                      //交易结束	
     
-    void SetScript(bool hasScript);
+    void SetScript(const string& tag, const string& value);
+    void ExecScript(bool bExecScript);
     void ShowLog();
     void SetCommunicationType(COMMUNICATION_TYPE type); //选择接触还是非接触
 protected:	
@@ -43,7 +44,7 @@ private:
 
 	void ShowCVMMethod(int method);
 	void ShowCVMCondition(int condition);
-	void ShowCardTransType();	//显示卡片交易类型
+	void ShowCardTransType(const string transType=_T(""));	//显示卡片交易类型
 	void ShowCardAUC(string AUC);
 	
 private:

@@ -32,7 +32,8 @@ public:
 	virtual void DoTrans(){}
     virtual void Clear();
     virtual void ShowLog() {}
-
+    virtual void SetScript(const string& tag, const string& value) {}
+    virtual void ExecScript(bool bExecScript) {}
 	virtual void SetEncryption(ENCRYPT_TYPE type) { m_encryptType = type; }
 	virtual void SetAuthencation(AUTHENCATE_TYPE type) { m_authType = type; }
 
