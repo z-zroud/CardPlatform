@@ -55,16 +55,19 @@ public:
     string GenARPCByUdkAuth(string udkAuth, string AC, string authCode, string atc);
     string GenARPCByMdkAuth(string mdkAuth, string AC, string authCode, string atc, string cardSeq, string pan);
 
+    string GenSessionAuthKey(string seqNo, string strAuthKey);
+    string GenSessionMacKey(string seqNo, string strMacKey);
+    string GenSessionEncKey(string seqNo, string strEncKey);
+    string EvenOddCheck(string input);	//奇偶校验
+    string GenScriptMac(string mac, string atc, string data);
 private:
 	string GenAuthKey(const string strKMC, string partLeftDivFactor, string partRightDivFactor);
 	string GenMacKey(const string strKMC, string partLeftDivFactor, string partRightDivFactor);
 	string GenEncKey(const string strKMC, string partLeftDivFactor, string partRightDivFactor);
 	string GenKey(const string strKMC, string leftDivFactor, string rightDivFactor);
-	string GenSessionAuthKey(string seqNo, string strAuthKey);
-	string GenSessionMacKey(string seqNo, string strMacKey);
-	string GenSessionEncKey(string seqNo, string strEncKey);
+
 	string GenSessionKey(const string leftDivFactor, const string rightDivFactor, string key);
-	string EvenOddCheck(string input);	//奇偶校验
+	
     void QueryPcscTable(string sql, sqlite3_callback callbackFunc, SqlParam& sqlParam);
 
 private:

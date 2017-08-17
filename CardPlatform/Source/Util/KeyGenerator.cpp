@@ -519,4 +519,37 @@ string KeyGenerator::GenARPCByMdkAuth(string mdkAuth, string ac, string authCode
 
     return GenARPCByUdkAuth(udkAuth, ac, authCode, atc);
 }
+
+string KeyGenerator::GenScriptMac(string mac, string atc, string data)
+{
+    if (mac.length() != 32 || data.length() % 16 != 0)
+    {
+        return _T("");
+    }
+    string sessionMac = GenSUDKAuthFromUDKAuth(mac, atc);
+
+    if (sessionMac.length() != 32)
+    {
+        return _T("");
+    }
+
+    string sessionMacLeft = sessionMac.substr(0, 16);
+    string sessionMacRight = sessionMac.substr(16);
+
+    int blocks = data.length() / 16;
+    char szOutput[17] = { 0 };
+
+    string blockData = data.substr(0, 16);
+    for (int i = 1; i < blocks; i++)
+    {       
+        Des(szOutput, (char*)sessionMacLeft.c_str(), (char*)blockData.c_str());
+        str_xor(szOutput, (char*)data.substr(i * 16, 16).c_str(), 16);
+        blockData = szOutput;
+    }
+    Des(szOutput, (char*)sessionMacLeft.c_str(), szOutput);
+    _Des(szOutput, (char*)sessionMacRight.c_str(), szOutput);
+    Des(szOutput, (char*)sessionMacRight.c_str(), szOutput);
+
+    return string(szOutput).substr(0, 8);
+}
 /***************************************************************************/
