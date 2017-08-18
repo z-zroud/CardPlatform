@@ -30,67 +30,67 @@ void CTerminal::LoadData(const string &filePath)
 	if (INI_OK == m_parse.Read(filePath))
 	{
 		Set5F2A(m_parse.GetValue(root, _T("Tag5F2A")));
-		//Set95(m_parse.GetValue(root, _T("Tag95")));
-		//Set9A(m_parse.GetValue(root, _T("Tag9A")));
 		Set9C(m_parse.GetValue(root, _T("Tag9C")));
 		Set9F02(m_parse.GetValue(root, _T("Tag9F02")));
 		Set9F03(m_parse.GetValue(root, _T("Tag9F03")));
 		Set9F09(m_parse.GetValue(root, _T("Tag9F09")));
 		Set9F1A(m_parse.GetValue(root, _T("Tag9F1A")));
 		Set9F1B(m_parse.GetValue(root, _T("Tag9F1B")));
-		//Set9F21(m_parse.GetValue(root, _T("Tag9F21")));
 		Set9F37(m_parse.GetValue(root, _T("Tag9F37")));
 		Set9F42(m_parse.GetValue(root, _T("Tag9F42")));
 		Set9F4E(m_parse.GetValue(root, _T("Tag9F4E")));
 		Set9F66(m_parse.GetValue(root, _T("Tag9F66")));
-		Set9F7A(m_parse.GetValue(root, _T("Tag9F7A")));
 		SetDF60(m_parse.GetValue(root, _T("TagDF60")));
 		SetDF69(m_parse.GetValue(root, _T("TagDF69")));
 	}
 }
 
+void CTerminal::InitTerminalTags()
+{
+        TCHAR tszModule[MAX_PATH + 1] = { 0 };
+        ::GetModuleFileName(NULL, tszModule, MAX_PATH);
+        CDuiString sInstancePath = tszModule;
+        int pos = sInstancePath.ReverseFind(_T('\\'));
+        if (pos >= 0) sInstancePath = sInstancePath.Left(pos + 1);
+
+        string path = string(sInstancePath.GetData()) + _T("Configuration\\terminal.cfg");
+        LoadData(path);
+
+        bLoaded = true;
+}
+
 void CTerminal::SetTerminalData(const string &tag, const string &value)
 {
+    if (!bLoaded)
+        InitTerminalTags();
+
 	if (tag == _T("Tag5F2A") || tag == Tag5F2A)	Set5F2A(value);
-	//else if (tag == _T("Tag95") || tag == Tag95)	Set95(value);
-	//else if (tag == _T("Tag9A"))	Set9A(value);
 	else if (tag == _T("Tag9C") || tag == Tag9C)	Set9C(value);
 	else if (tag == _T("Tag9F02") || tag == Tag9F02)	Set9F02(value);
 	else if (tag == _T("Tag9F03") || tag == Tag9F03)	Set9F03(value);
 	else if (tag == _T("Tag9F09") || tag == Tag9F09)	Set9F09(value);
 	else if (tag == _T("Tag9F1A") || tag == Tag9F1A)	Set9F1A(value);
 	else if (tag == _T("Tag9F1B") || tag == Tag9F1B)	Set9F1B(value);
-	//else if (tag == _T("Tag9F21"))	Set9F21(value);
 	else if (tag == _T("Tag9F37") || tag == Tag9F37)	Set9F37(value);
 	else if (tag == _T("Tag9F42") || tag == Tag9F42)	Set9F42(value);
 	else if (tag == _T("Tag9F4E") || tag == Tag9F4E)	Set9F4E(value);
 	else if (tag == _T("Tag9F66") || tag == Tag9F66)	Set9F66(value);
-	else if (tag == _T("Tag9F7A") || tag == Tag9F7A)	Set9F7A(value);
 	else if (tag == _T("TagDF60") || tag == TagDF60)	SetDF60(value);
 	else if (tag == _T("TagDF69") || tag == TagDF69)	SetDF69(value);
 
 	m_parse.SetValue(root, tag, value);
 	m_parse.Save();
 
-    //特殊标签不需要保存到配置文件中，
+    //特殊标签不需要保存到配置文件中，需根据程序动态加载
     if (tag == _T("Tag95") || tag == Tag95)	Set95(value);
+    else if (tag == _T("Tag9F7A") || tag == Tag9F7A)	Set9F7A(value);
 }
 
 string CTerminal::GetTerminalData(const string &tag)
 {
-	if (!bLoaded)
-	{
-		TCHAR tszModule[MAX_PATH + 1] = { 0 };
-		::GetModuleFileName(NULL, tszModule, MAX_PATH);
-		CDuiString sInstancePath = tszModule;
-		int pos = sInstancePath.ReverseFind(_T('\\'));
-		if (pos >= 0) sInstancePath = sInstancePath.Left(pos + 1);
+    if (!bLoaded)
+        InitTerminalTags();
 
-		string path = string(sInstancePath.GetData()) + _T("Configuration\\terminal.cfg");
-		LoadData(path);
-
-		bLoaded = true;
-	}
 	if (tag == _T("Tag5F2A") || tag == Tag5F2A)	return Get5F2A();
 	else if (tag == _T("Tag95") || tag == Tag95)	return Get95();
 	else if (tag == _T("Tag9A") || tag == Tag9A)	return Get9A();

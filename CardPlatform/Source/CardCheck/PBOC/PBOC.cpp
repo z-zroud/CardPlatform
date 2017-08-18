@@ -296,7 +296,7 @@ bool PBOC::TerminalRiskManagement()
 	string transMoney = ReadTagValueFromCard("81");
 	if (transMoney.empty())
 	{
-		Log->Error("无法获取授权金额!");
+		//Log->Error("无法获取授权金额!");
 	}
 	else {
 		string termTransFloorLimit = CTerminal::GetTerminalData("9F1B");
@@ -311,8 +311,8 @@ bool PBOC::TerminalRiskManagement()
 	}
 	
 	//频度检查
-	string lastOnlineATC = GetTagValue("9F13");
-	string ATC = GetTagValue("9F36");
+	string lastOnlineATC = ReadTagValueFromCard("9F13");
+	string ATC = ReadTagValueFromCard("9F36");
 	string offlineTransFloorLimit = GetTagValue("9F23");
 	string offlineTransUpLimit = GetTagValue("9F14");
 

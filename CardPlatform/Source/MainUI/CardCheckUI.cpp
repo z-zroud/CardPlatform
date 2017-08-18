@@ -222,12 +222,32 @@ bool CCardCheckUI::HandleScript(ICommTransaction* pCommTrans)
 
 void CCardCheckUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 {
+    CDuiString name = msg.pSender->GetName();
     if (msg.sType == _T("click"))
-    {
-        CDuiString name = msg.pSender->GetName();
+    {      
         if (name == _T("btnCheckCard"))
         {
             OnBtnDoTransClicked();
         }
-    }    
+    }
+    else if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
+    {
+        if (msg.pSender == m_pTransType)
+        {
+            CHorizontalLayoutUI* pLayout = static_cast<CHorizontalLayoutUI*>(m_pPM->FindControl(_T("offlinePanel")));
+            if (msg.pSender->GetText() == _T("EC")) //电子现金
+            {
+                m_pTouchTrans->SetCheck(true);
+                m_pTouchTrans->SetEnabled(false);
+                m_pSupportOffline->SetCheck(false);
+                m_pSupportOffline->SetEnabled(false);
+            }
+            else {
+                m_pTouchTrans->SetCheck(false);
+                m_pTouchTrans->SetEnabled(true);
+                m_pSupportOffline->SetCheck(true);
+                m_pSupportOffline->SetEnabled(true);
+            }
+        }
+    }
 }

@@ -69,6 +69,9 @@ public:
 	static void Set9F7A(string value);
 	static void SetDF60(string value);
 	static void SetDF69(string value);
+
+private:
+    static void InitTerminalTags();
 private:
 	static string m_5F2A;
 	static string m_95;
