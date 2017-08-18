@@ -5,4 +5,9 @@ class EC : public PBOC
 {
 public:
     EC(IPCSC* pReader);
+
+    void DoTrans();
+
+    void ReadECRelativeTags();
+    void ReadECRelativeTagsAfterGAC();
 };

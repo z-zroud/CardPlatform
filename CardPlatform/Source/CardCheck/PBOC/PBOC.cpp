@@ -293,7 +293,7 @@ bool PBOC::TerminalRiskManagement()
 {
 	Log->Info("======================== 终端风险管理 开始 =================================");
 	//最低限额检查
-	string transMoney = ReadTagValue("81");
+	string transMoney = ReadTagValueFromCard("81");
 	if (transMoney.empty())
 	{
 		Log->Error("无法获取授权金额!");

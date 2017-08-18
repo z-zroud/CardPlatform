@@ -13,6 +13,10 @@ public:
 
     void OnBtnDoTransClicked();
     bool HandleScript(ICommTransaction* pCommTrans);
+
+    void DoPBOC(IPCSC* pReader);
+    void DoEC(IPCSC* pReader);
+    void DoQPBOC(IPCSC* pReader);
 protected:
     CPaintManagerUI*	m_pPM;
 

@@ -7,6 +7,7 @@
 #include "CardCheck\PBOC\PBOC.h"
 #include "CardCheck\qPBOC\QPBOC.h"
 #include "TipDlg.h"
+#include "CardCheck\Terminal.h"
 
 
 CCardCheckUI::CCardCheckUI(CPaintManagerUI* pPM)
@@ -69,39 +70,23 @@ CCardCheckUI::~CCardCheckUI()
 {
 }
 
-/*********************************************************************
-* 功能：响应开始交易事件
-**********************************************************************/
-void CCardCheckUI::OnBtnDoTransClicked()
+void CCardCheckUI::DoPBOC(IPCSC* pReader)
 {
-    CComboUI* pComboReader = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboReaderList")));
-    CDuiString readerName = pComboReader->GetCurItemString();
-    IPCSC* pReader = GetPCSCInterface(readerName.GetData());
+    //读取交易界面信息
+    AUTHENCATE_TYPE authType = static_cast<AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
+    ENCRYPT_TYPE encType = static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
+    KEY_TYPE keyType = static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
+    string auth = m_pAuth->GetText().GetData();
+    string enc = m_pEnc->GetText().GetData();
+    string mac = m_pMac->GetText().GetData();
 
+    //设置终端相关数据
+    CTerminal::SetTerminalData(Tag9F7A, _T("00"));  //是否支持电子现金交易
+
+    //设置交易流程参数
     ICommTransaction* pTrans = NULL;
-    TRANS_TYPE transType = static_cast<TRANS_TYPE>(m_pTransType->GetCurSel());    
-    switch (transType)
-    {
-    case TRANS_PBOC:
-    {
-        COMMUNICATION_TYPE commType = m_pTouchTrans->GetCheck() ? COMM_TOUCH : COMM_UNTOUCH;
-        pTrans = new PBOC(commType, pReader);      
-    }
-    break;
-    case TRANS_QPBOC:
-        pTrans = new QPBOC(pReader);
-        break;
-    case TRANS_EC:
-        pTrans = new EC(pReader);
-        break;
-    }
-
-    AUTHENCATE_TYPE authType    = static_cast<AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
-    ENCRYPT_TYPE encType        = static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
-    KEY_TYPE keyType            = static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
-    string auth                 = m_pAuth->GetText().GetData();
-    string enc                  = m_pEnc->GetText().GetData();
-    string mac                  = m_pMac->GetText().GetData();
+    COMMUNICATION_TYPE commType = m_pTouchTrans->GetCheck() ? COMM_TOUCH : COMM_UNTOUCH;
+    pTrans = new PBOC(commType, pReader);
 
     if (pTrans)
     {
@@ -118,11 +103,84 @@ void CCardCheckUI::OnBtnDoTransClicked()
             pTrans->SetMdkEnc(enc);
             pTrans->SetMdkMac(mac);
         }
-        
+
         bool bECLoadChecked = HandleScript(pTrans);
         pTrans->ExecScript(bECLoadChecked);
 
-        pTrans->DoTrans();  //开始交易流程
+        //开始交易流程
+        pTrans->DoTrans();  
+    }
+}
+
+void CCardCheckUI::DoEC(IPCSC* pReader)
+{
+    //读取交易界面信息
+    AUTHENCATE_TYPE authType = static_cast<AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
+    ENCRYPT_TYPE encType = static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
+    KEY_TYPE keyType = static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
+    string auth = m_pAuth->GetText().GetData();
+    string enc = m_pEnc->GetText().GetData();
+    string mac = m_pMac->GetText().GetData();
+
+    //设置终端相关数据
+    CTerminal::SetTerminalData(Tag9F7A, _T("01"));  //是否支持电子现金交易
+
+    //设置交易流程参数
+    ICommTransaction* pTrans = NULL;
+
+    pTrans = new EC(pReader);
+
+    if (pTrans)
+    {
+        pTrans->SetAuthencation(authType);
+        pTrans->SetEncryption(encType);
+
+        if (keyType == KEY_UDK) {
+            pTrans->SetUdkAuth(auth);
+            pTrans->SetUdkEnc(enc);
+            pTrans->SetUdkMac(mac);
+        }
+        else if (keyType == KEY_MDK) {
+            pTrans->SetMdkAuth(auth);
+            pTrans->SetMdkEnc(enc);
+            pTrans->SetMdkMac(mac);
+        }
+
+        bool bECLoadChecked = HandleScript(pTrans);
+        pTrans->ExecScript(bECLoadChecked);
+
+        //开始交易流程
+        pTrans->DoTrans();
+    }
+}
+
+void CCardCheckUI::DoQPBOC(IPCSC* pReader)
+{
+
+}
+
+/*********************************************************************
+* 功能：响应开始交易事件
+**********************************************************************/
+void CCardCheckUI::OnBtnDoTransClicked()
+{
+    CComboUI* pComboReader = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboReaderList")));
+    CDuiString readerName = pComboReader->GetCurItemString();
+    IPCSC* pReader = GetPCSCInterface(readerName.GetData());
+    if (pReader == NULL)
+    {
+        CTipDlg tip;
+        tip.ShowDlg(m_pPM->GetPaintWindow(), _T("ERROR"), _T("读卡器接口读取异常!"), ICO_ERROR, BTN_OK);
+
+        return;
+    }
+    
+    TRANS_TYPE transType = static_cast<TRANS_TYPE>(m_pTransType->GetCurSel());    
+    switch (transType)
+    {
+    case TRANS_PBOC:    DoPBOC(pReader);    break;
+    case TRANS_QPBOC:   DoQPBOC(pReader);   break;
+    case TRANS_EC:      DoEC(pReader);      break;
     }
 }
 

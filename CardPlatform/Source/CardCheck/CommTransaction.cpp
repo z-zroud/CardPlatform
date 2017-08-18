@@ -663,7 +663,7 @@ bool CommTransaction::InitilizeApplication()
  /********************************************************************
  * 功能： 读取指定tag值的内容
  *********************************************************************/
- string CommTransaction::ReadTagValue(const string &tag)
+ string CommTransaction::ReadTagValueFromCard(const string &tag)
  {
      APDU_RESPONSE response;
      m_pAPDU->GetTag(tag, response);
