@@ -548,7 +548,7 @@ string KeyGenerator::GenScriptMac(string mac, string atc, string data)
     }
     Des(szOutput, (char*)sessionMacLeft.c_str(), szOutput);
     _Des(szOutput, (char*)sessionMacRight.c_str(), szOutput);
-    Des(szOutput, (char*)sessionMacRight.c_str(), szOutput);
+    Des(szOutput, (char*)sessionMacLeft.c_str(), szOutput);
 
     return string(szOutput).substr(0, 8);
 }

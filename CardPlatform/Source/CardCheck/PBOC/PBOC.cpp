@@ -687,7 +687,7 @@ void PBOC::ParseTransLog(const string buffer)
 /*************************************************************
 * 功能： 处理发卡行脚本
 **************************************************************/
-bool PBOC::DealIusserScript()
+bool PBOC::HandleIusserScript()
 {
     IKeyGenerator *pKg = GetKeyGeneratorInterface();
     string atc = GetTagValue(Tag9F36);

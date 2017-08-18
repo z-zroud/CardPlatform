@@ -23,7 +23,7 @@ public:
 	bool CardActionAnalized();                                  //卡片行为分析	
 	bool TerminalActionAnalized();                              //终端行为分析	
 	bool OnlineBussiness();                                     //联机处理	
-	bool DealIusserScript();                                    //发卡行脚本处理	
+	bool HandleIusserScript();                                    //发卡行脚本处理	
 	bool EndTransaction();                                      //交易结束	
     
     void SetScript(const string& tag, const string& value);
