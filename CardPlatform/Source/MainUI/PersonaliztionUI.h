@@ -14,7 +14,6 @@ public:
 	void DoInit();
     void InitDlg();
 	void Notify(TNotifyUI& msg); //处理内嵌模块的消息
-    void GetFiles(string path, vector<string>& files);
     void DoPersonaliztion();
     bool SetSelectedApplication(string aid);
     vector< pair<string, string>> ConcatNodeWithSameSection(INIParser ini);

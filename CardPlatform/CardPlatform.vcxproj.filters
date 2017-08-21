@@ -237,6 +237,9 @@
     <ClCompile Include="Source\MainUI\ECLoadUI.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DP\HTDP\HTDPParaser.cpp">
+      <Filter>Source Files\DP\HTDP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -397,6 +400,9 @@
     </ClInclude>
     <ClInclude Include="Source\MainUI\ECLoadUI.h">
       <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DP\HTDP\HTDPParser.h">
+      <Filter>Header Files\DP\HTDP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

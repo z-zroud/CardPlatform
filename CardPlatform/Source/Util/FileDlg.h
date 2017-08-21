@@ -12,4 +12,5 @@ public:
     string OpenFileDlg();
     void SaveFileDlg(const string &filePath);
     string OpenFolderDlg();
+    static void GetFiles(string path, vector<string>& files);
 };

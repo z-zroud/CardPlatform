@@ -49,10 +49,10 @@ void CHTConverterUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 		{
 			editText = m_pConvertFile->GetText();
 		}
-		else if (name == _T("htBtnScanFile"))
+		else if (name == _T("htBtnScanFolder"))
 		{
 			CFileDlg fileDlg;
-			string filePath = fileDlg.OpenFileDlg();
+            string filePath = fileDlg.OpenFolderDlg();
 			m_pConvertFile->SetText(filePath.c_str());
 		}
 	}
