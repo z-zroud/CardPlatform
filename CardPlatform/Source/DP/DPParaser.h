@@ -10,23 +10,15 @@ using namespace std;
 
 
 
-//单个TLV元素
+/***************************************************************
+* 构造TLV元素
+****************************************************************/
 struct TLVItem
 {
-	//TLVItem(string tag, int len, string value)
-	//{
-	//	strTag = Tool::Converter::StrToHex(tag);
-	//	nLen = len;
-	//	strValue = Tool::Converter::StrToHex(value);		
-	//}
-
 	TLVItem(string tag, string len, string value, bool isNeedConvert = false)
 	{
 		if (isNeedConvert)
-		{
-			//int *pLen = &len.c_;//stoi(len, nullptr, 16);
-			//const char* pLen = len.c_str();
-			
+		{			
 			strTag = Tool::Converter::StrToHex(tag.c_str(),tag.size());
 			strLen = Tool::Converter::StrToHex(len.c_str(),len.size());
 			const char* pLen = strLen.c_str();

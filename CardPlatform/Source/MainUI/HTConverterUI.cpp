@@ -2,6 +2,7 @@
 #include "HTConverterUI.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\FileDlg.h"
+#include "DP\HTDP\HTDPParser.h"
 
 
 CHTConverterUI::CHTConverterUI(CPaintManagerUI* pPM)
@@ -34,7 +35,7 @@ void CHTConverterUI::DoInit()
 
 void CHTConverterUI::InitDlg()
 {
-	m_pConvertFile = static_cast<CEditUI*>(m_pPM->FindControl(_T("htDoConvert")));
+    m_pConvertFolder = static_cast<CEditUI*>(m_pPM->FindControl(_T("htDoConvert")));
 }
 
 
@@ -44,16 +45,24 @@ void CHTConverterUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	if (msg.sType == _T("click"))
 	{
 		CDuiString name = msg.pSender->GetName();
-		string editText;
+		string htDpFolder;
 		if (name == _T("htBtnDoConvert"))
 		{
-			editText = m_pConvertFile->GetText();
+            vector<string> files;
+            HTDPParaser parser;
+
+            htDpFolder = m_pConvertFolder->GetText();            
+            CFileDlg::GetFiles(htDpFolder, files);
+            for (auto file : files)
+            {
+                parser.Read(file);
+            }
 		}
 		else if (name == _T("htBtnScanFolder"))
 		{
 			CFileDlg fileDlg;
             string filePath = fileDlg.OpenFolderDlg();
-			m_pConvertFile->SetText(filePath.c_str());
+            m_pConvertFolder->SetText(filePath.c_str());
 		}
 	}
 }

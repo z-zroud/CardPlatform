@@ -15,6 +15,6 @@ public:
 protected:
 	CPaintManagerUI* m_pPM;
 
-	CEditUI*    m_pConvertFile;
+	CEditUI*    m_pConvertFolder;
 };
 
