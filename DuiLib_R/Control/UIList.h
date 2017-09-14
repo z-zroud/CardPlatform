@@ -17,27 +17,27 @@ class CListHeaderUI;
 
 typedef struct tagTListInfoUI
 {
-    int nColumns;
-    RECT rcColumn[UILIST_MAX_COLUMNS];
-    int nFont;
-    UINT uTextStyle;
-    RECT rcTextPadding;
-    DWORD dwTextColor;
-    DWORD dwBkColor;
+    int		nColumns;
+    RECT	rcColumn[UILIST_MAX_COLUMNS];
+    int		nFont;
+    UINT	uTextStyle;
+    RECT	rcTextPadding;
+    DWORD	dwTextColor;
+    DWORD	dwBkColor;
 	CImageAttribute bkImage;
-    bool bAlternateBk;
-    DWORD dwSelectedTextColor;
-    DWORD dwSelectedBkColor;
+    bool	bAlternateBk;
+    DWORD	dwSelectedTextColor;
+    DWORD	dwSelectedBkColor;
 	CImageAttribute selectedImage;
-    DWORD dwHotTextColor;
-    DWORD dwHotBkColor;
+    DWORD	dwHotTextColor;
+    DWORD	dwHotBkColor;
 	CImageAttribute hotImage;
-    DWORD dwDisabledTextColor;
-    DWORD dwDisabledBkColor;
+    DWORD	dwDisabledTextColor;
+    DWORD	dwDisabledBkColor;
     CImageAttribute disabledImage;
-    DWORD dwLineColor;
-    bool bShowHtml;
-    bool bMultiExpandable;
+    DWORD	dwLineColor;
+    bool	bShowHtml;
+    bool	bMultiExpandable;
 } TListInfoUI;
 
 
@@ -195,14 +195,14 @@ public:
     virtual CScrollBarUI* GetHorizontalScrollBar() const;
     BOOL SortItems(PULVCompareFunc pfnCompare, UINT_PTR dwData);
 protected:
-    bool m_bScrollSelect;
-    int m_iCurSel;
-	int m_iCurSelActivate;  // 双击的列
-    int m_iExpandedItem;
-    IListCallbackUI* m_pCallback;
-    CListBodyUI* m_pList;
-    CListHeaderUI* m_pHeader;
-    TListInfoUI m_ListInfo;
+    bool	m_bScrollSelect;
+    int		m_iCurSel;
+	int		m_iCurSelActivate;  // 双击的列
+    int		m_iExpandedItem;
+    IListCallbackUI*	m_pCallback;
+    CListBodyUI*		m_pList;
+    CListHeaderUI*		m_pHeader;
+    TListInfoUI			m_ListInfo;
 
 };
 
@@ -255,36 +255,39 @@ private:
 /////////////////////////////////////////////////////////////////////////////////////
 //
 
+/***********************************************************************************
+* 功能： 描述了列表头部相关信息
+************************************************************************************/
 class UILIB_API CListHeaderItemUI : public CContainerUI
 {
 public:
     CListHeaderItemUI();
 
-    LPCTSTR GetClass() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
-    UINT GetControlFlags() const;
+    LPCTSTR	GetClass() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
+    UINT	GetControlFlags() const;
 
-    void SetEnabled(bool bEnable = true);
+    void	SetEnabled(bool bEnable = true);
 
-	bool IsDragable() const;
-    void SetDragable(bool bDragable);
-	DWORD GetSepWidth() const;
-    void SetSepWidth(int iWidth);
-	DWORD GetTextStyle() const;
-    void SetTextStyle(UINT uStyle);
-	DWORD GetTextColor() const;
-    void SetTextColor(DWORD dwTextColor);
-	void SetTextPadding(RECT rc);
-	RECT GetTextPadding() const;
-    void SetFont(int index);
-    bool IsShowHtml();
-    void SetShowHtml(bool bShowHtml = true);
+	bool	IsDragable() const;
+    void	SetDragable(bool bDragable);
+	DWORD	GetSepWidth() const;
+    void	SetSepWidth(int iWidth);
+	DWORD	GetTextStyle() const;
+    void	SetTextStyle(UINT uStyle);
+	DWORD	GetTextColor() const;
+    void	SetTextColor(DWORD dwTextColor);
+	void	SetTextPadding(RECT rc);
+	RECT	GetTextPadding() const;
+    void	SetFont(int index);
+    bool	IsShowHtml();
+    void	SetShowHtml(bool bShowHtml = true);
 
-    LPCTSTR GetSepImage() const;
-    void SetSepImage(LPCTSTR pStrImage);
+    LPCTSTR	GetSepImage() const;
+    void	SetSepImage(LPCTSTR pStrImage);
 	//开启百分比表头功能,百分比 redrain 2014.12.29
-	void SetScale(int nScale);
-	int GetScale() const;
+	void	SetScale(int nScale);
+	int		GetScale() const;
 
     void DoEvent(TEventUI& event);
     SIZE EstimateSize(SIZE szAvailable);
@@ -295,36 +298,36 @@ public:
     void PaintStatusImage(HDC hDC);
 
 protected:
-    POINT ptLastMouse;
-    bool m_bDragable;
-    UINT m_uButtonState;
-    int m_iSepWidth;
-    DWORD m_dwTextColor;
-    int m_iFont;
-    UINT m_uTextStyle;
-    bool m_bShowHtml;
-	RECT m_rcTextPadding;
+    POINT	ptLastMouse;
+    bool	m_bDragable;
+    UINT	m_uButtonState;
+    int		m_iSepWidth;
+    DWORD	m_dwTextColor;
+    int		m_iFont;
+    UINT	m_uTextStyle;
+    bool	m_bShowHtml;
+	RECT	m_rcTextPadding;
 	CImageAttribute m_sepImage;
-	int m_nScale;
+	int		m_nScale;
 };
 
 
-/////////////////////////////////////////////////////////////////////////////////////
-//
-
+/*********************************************************************
+* 功能： 实现列表单元
+**********************************************************************/
 class UILIB_API CListElementUI : public CControlUI, public IListItemUI
 {
 public:
     CListElementUI();
 
-    LPCTSTR GetClass() const;
-    UINT GetControlFlags() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
+    LPCTSTR	GetClass() const;
+    UINT	GetControlFlags() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
 
-    void SetEnabled(bool bEnable = true);
+    void	SetEnabled(bool bEnable = true);
 
-    int GetIndex() const;
-    void SetIndex(int iIndex);
+    int		GetIndex() const;
+    void	SetIndex(int iIndex);
 
     IListOwnerUI* GetOwner();
     void SetOwner(CControlUI* pOwner);
@@ -344,9 +347,9 @@ public:
     void DrawItemBk(HDC hDC, const RECT& rcItem);
 
 protected:
-    int m_iIndex;
-    bool m_bSelected;
-    UINT m_uButtonState;
+    int		m_iIndex;
+    bool	m_bSelected;
+    UINT	m_uButtonState;
     IListOwnerUI* m_pOwner;
 };
 
@@ -359,8 +362,8 @@ class UILIB_API CListLabelElementUI : public CListElementUI
 public:
     CListLabelElementUI();
 
-    LPCTSTR GetClass() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
+    LPCTSTR	GetClass() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
 
     void DoEvent(TEventUI& event);
     SIZE EstimateSize(SIZE szAvailable);
@@ -379,14 +382,14 @@ public:
     CListTextElementUI();
     ~CListTextElementUI();
 
-    LPCTSTR GetClass() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
-    UINT GetControlFlags() const;
+    LPCTSTR	GetClass() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
+    UINT	GetControlFlags() const;
 
-    LPCTSTR GetText(int iIndex) const;
-    void SetText(int iIndex, LPCTSTR pstrText);
+    LPCTSTR	GetText(int iIndex) const;
+    void	SetText(int iIndex, LPCTSTR pstrText);
 
-    void SetOwner(CControlUI* pOwner);
+    void	SetOwner(CControlUI* pOwner);
     CDuiString* GetLinkContent(int iIndex);
 
     void DoEvent(TEventUI& event);
@@ -396,12 +399,12 @@ public:
 
 protected:
     enum { MAX_LINK = 8 };
-    int m_nLinks;
-    RECT m_rcLinks[MAX_LINK];
-    CDuiString m_sLinks[MAX_LINK];
-    int m_nHoverLink;
-    IListUI* m_pOwner;
-    CStdPtrArray m_aTexts;
+    int				m_nLinks;
+    RECT			m_rcLinks[MAX_LINK];
+    CDuiString		m_sLinks[MAX_LINK];
+    int				m_nHoverLink;
+    IListUI*		m_pOwner;
+    CStdPtrArray	m_aTexts;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -412,12 +415,12 @@ class UILIB_API CListContainerElementUI : public CHorizontalLayoutUI, public ILi
 public:
     CListContainerElementUI();
 
-    LPCTSTR GetClass() const;
-    UINT GetControlFlags() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
+    LPCTSTR	GetClass() const;
+    UINT	GetControlFlags() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
 
-    int GetIndex() const;
-    void SetIndex(int iIndex);
+    int		GetIndex() const;
+    void	SetIndex(int iIndex);
 
     IListOwnerUI* GetOwner();
     void SetOwner(CControlUI* pOwner);
@@ -442,9 +445,9 @@ public:
 	void SetPos(RECT rc);
 	
 protected:
-    int m_iIndex;
-    bool m_bSelected;
-    UINT m_uButtonState;
+    int		m_iIndex;
+    bool	m_bSelected;
+    UINT	m_uButtonState;
     IListOwnerUI* m_pOwner;
 
 };
