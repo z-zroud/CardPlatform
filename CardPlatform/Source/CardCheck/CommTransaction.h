@@ -35,7 +35,7 @@ public:
     virtual void SetScript(const string& tag, const string& value) {}
     virtual void ExecScript(bool bExecScript) {}
 	virtual void SetEncryption(ENCRYPT_TYPE type) { m_encryptType = type; }
-	virtual void SetAuthencation(AUTHENCATE_TYPE type) { m_authType = type; }
+	virtual void SetAuthencation(OFFLINE_AUTHENCATE_TYPE type) { m_authType = type; }
 
 	virtual void SetUdkAuth(const string &auth) { m_udkAuth = auth; }
 	virtual void SetUdkMac(const string &mac) { m_udkMac = mac; }
@@ -74,7 +74,7 @@ protected:
 
 
 	ENCRYPT_TYPE m_encryptType;
-	AUTHENCATE_TYPE m_authType;
+	OFFLINE_AUTHENCATE_TYPE m_authType;
 	string		m_mdkAuth;
 	string      m_mdkMac;
 	string      m_mdkEnc;

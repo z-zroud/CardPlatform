@@ -31,6 +31,9 @@ void CCardCheckUI::DoInit()
     InitDlg();
 }
 
+/*********************************************
+* 初始化卡片检测主界面
+**********************************************/
 void CCardCheckUI::InitDlg()
 {
     m_pTransType        = static_cast<CComboUI*>(m_pManager->FindControl(_T("comboTransType")));
@@ -50,9 +53,9 @@ void CCardCheckUI::InitDlg()
     m_pTransType->SetCurSelected(TRANS_TYPE::TRANS_PBOC);
 
     //初始化脱机认证类型
-    m_pOfflineAuthType->AddAt(_T("DDA"), AUTHENCATE_TYPE::AUTH_DDA);
-    m_pOfflineAuthType->AddAt(_T("CDA"), AUTHENCATE_TYPE::AUTH_CDA);
-    m_pOfflineAuthType->SetCurSelected(AUTHENCATE_TYPE::AUTH_DDA);
+    m_pOfflineAuthType->AddAt(_T("DDA"), OFFLINE_AUTHENCATE_TYPE::AUTH_DDA);
+    m_pOfflineAuthType->AddAt(_T("CDA"), OFFLINE_AUTHENCATE_TYPE::AUTH_CDA);
+    m_pOfflineAuthType->SetCurSelected(OFFLINE_AUTHENCATE_TYPE::AUTH_DDA);
 
     //初始化加密类型
     m_pEncryptType->AddAt(_T("DES"), ENCRYPT_TYPE::ENCRYPT_DES);
@@ -70,18 +73,23 @@ CCardCheckUI::~CCardCheckUI()
 {
 }
 
+/*************************************************
+* 执行PBOC交易流程
+**************************************************/
 void CCardCheckUI::DoPBOC(IPCSC* pReader)
 {
     //读取交易界面信息
-    AUTHENCATE_TYPE authType = static_cast<AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
-    ENCRYPT_TYPE encType = static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
-    KEY_TYPE keyType = static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
-    string auth = m_pAuth->GetText().GetData();
-    string enc = m_pEnc->GetText().GetData();
-    string mac = m_pMac->GetText().GetData();
+	OFFLINE_AUTHENCATE_TYPE authType	= static_cast<OFFLINE_AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
+    ENCRYPT_TYPE encType		= static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
+    KEY_TYPE keyType			= static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
+    string auth					= m_pAuth->GetText().GetData();
+    string enc					= m_pEnc->GetText().GetData();
+    string mac					= m_pMac->GetText().GetData();
+
+	Log->Debug("Start PBOC trans...");
 
     //设置终端相关数据
-    CTerminal::SetTerminalData(Tag9F7A, _T("00"));  //是否支持电子现金交易
+    CTerminal::SetTerminalData(Tag9F7A, _T("00"));  //不支持电子现金交易
 
     //设置交易流程参数
     ICommTransaction* pTrans = NULL;
@@ -109,21 +117,30 @@ void CCardCheckUI::DoPBOC(IPCSC* pReader)
 
         //开始交易流程
         pTrans->DoTrans();  
+
+		delete pTrans;
+		pTrans = NULL;
     }
+	Log->Debug("PBOC trans end.");
 }
 
+/*****************************************************
+* 执行标准电子现金交易流程
+******************************************************/
 void CCardCheckUI::DoEC(IPCSC* pReader)
 {
     //读取交易界面信息
-    AUTHENCATE_TYPE authType = static_cast<AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
-    ENCRYPT_TYPE encType = static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
-    KEY_TYPE keyType = static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
-    string auth = m_pAuth->GetText().GetData();
-    string enc = m_pEnc->GetText().GetData();
-    string mac = m_pMac->GetText().GetData();
+	OFFLINE_AUTHENCATE_TYPE authType = static_cast<OFFLINE_AUTHENCATE_TYPE>(m_pOfflineAuthType->GetCurSel());
+    ENCRYPT_TYPE encType	= static_cast<ENCRYPT_TYPE>(m_pEncryptType->GetCurSel());
+    KEY_TYPE keyType		= static_cast<KEY_TYPE>(m_pKeyType->GetCurSel());
+    string auth				= m_pAuth->GetText().GetData();
+    string enc				= m_pEnc->GetText().GetData();
+    string mac				= m_pMac->GetText().GetData();
+
+	Log->Debug("Start EC trans...");
 
     //设置终端相关数据
-    CTerminal::SetTerminalData(Tag9F7A, _T("01"));  //是否支持电子现金交易
+    CTerminal::SetTerminalData(Tag9F7A, _T("01"));  //支持电子现金交易
 
     //设置交易流程参数
     ICommTransaction* pTrans = NULL;
@@ -151,9 +168,16 @@ void CCardCheckUI::DoEC(IPCSC* pReader)
 
         //开始交易流程
         pTrans->DoTrans();
+
+		delete pTrans;
+		pTrans = NULL;
     }
+	Log->Debug("EC trans end.");
 }
 
+/***************************************************
+* 执行标准QPBOC交易流程
+****************************************************/
 void CCardCheckUI::DoQPBOC(IPCSC* pReader)
 {
 
@@ -184,6 +208,9 @@ void CCardCheckUI::OnBtnDoTransClicked()
     }
 }
 
+/************************************************************
+* 脚本处理
+*************************************************************/
 bool CCardCheckUI::HandleScript(ICommTransaction* pCommTrans)
 {
     //处理 电子现金脚本
@@ -220,6 +247,9 @@ bool CCardCheckUI::HandleScript(ICommTransaction* pCommTrans)
     return bExecECLoadScript;
 }
 
+/***********************************************************
+* 主界面事件消息事件响应
+************************************************************/
 void CCardCheckUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 {
     CDuiString name = msg.pSender->GetName();

@@ -286,7 +286,7 @@ enum ENCRYPT_TYPE
 };
 
 //脱机数据认证类型
-enum AUTHENCATE_TYPE
+enum OFFLINE_AUTHENCATE_TYPE
 {          
     AUTH_DDA,        
     AUTH_CDA,

@@ -130,7 +130,7 @@ bool PCSC::OpenReader(const char* szReaderName)
 //¹Ø±Õ¶Á¿¨Æ÷
 void PCSC::CloseReader()
 {
-	HRESULT hRet = SCardDisconnect(m_scardHandle, SCARD_LEAVE_CARD);
+	HRESULT hRet = SCardDisconnect(m_scardHandle, SCARD_UNPOWER_CARD);
 	if (hRet != SCARD_S_SUCCESS)
 	{
 		Log->Warning("¹Ø±Õ¶Á¿¨Æ÷Ê§°Ü");

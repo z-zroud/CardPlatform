@@ -597,7 +597,7 @@ bool CommTransaction::InitilizeApplication()
          return false;
      }
      Log->Info("SDA validate success.");
-     if (m_authType == AUTHENCATE_TYPE::AUTH_DDA)
+     if (m_authType == OFFLINE_AUTHENCATE_TYPE::AUTH_DDA)
      {
          //动态数据认证	
          string iccPublicCert = GetTagValue(Tag9F46);    //ICC公钥证书       

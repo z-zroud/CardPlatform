@@ -87,6 +87,11 @@ void PBOC::SetCommunicationType(COMMUNICATION_TYPE type)
 //检查卡片AUC信息
 void PBOC::ShowCardAUC(string AUC)
 {
+	if (AUC.length() < 2)
+	{
+		Log->Error("AUC format error. value[%s]", AUC.c_str());
+		return;
+	}
 	int nAUC1 = stoi(AUC.substr(0, 2), 0, 16);
 	int nAUC2 = stoi(AUC.substr(2, 2), 0, 16);
 
@@ -142,7 +147,7 @@ bool PBOC::HandleLimitation()
 	string cardApplicationVersion = GetTagValue(Tag9F08);
 	if (termApplicationVersion != cardApplicationVersion)
 	{
-		Log->Info("应用版本号检查失败!卡片应用版本号:[%s],终端应用版本号:[%s]", cardApplicationVersion, termApplicationVersion);
+		Log->Info("应用版本号检查失败!卡片应用版本号:[%s],终端应用版本号:[%s]", cardApplicationVersion.c_str(), termApplicationVersion.c_str());
 		m_tvr.ApplicationVersionFailed = true;
 	}
 	else {
@@ -239,6 +244,11 @@ bool PBOC::CardHolderValidation()
 	CVM cvm;
 	string strCVM = GetTagValue(Tag8E);
 
+	if (strCVM.length() < 16)
+	{
+		Log->Error("CMV format error. value[%s]", strCVM.c_str());
+		return false;
+	}
 	//解析CMV值
 	cvm.X = strCVM.substr(0, 8);
 	cvm.Y = strCVM.substr(8, 8);
@@ -316,6 +326,17 @@ bool PBOC::TerminalRiskManagement()
 	string offlineTransFloorLimit = GetTagValue("9F23");
 	string offlineTransUpLimit = GetTagValue("9F14");
 
+	if (offlineTransFloorLimit.length() <= 0)
+	{
+		Log->Error("Offline trans floor limit format error. value[%s]", offlineTransFloorLimit.c_str());
+		return false;
+	}
+	if (offlineTransUpLimit.length() <= 0)
+	{
+		Log->Error("Offline trans up limit format error. value[%s]", offlineTransUpLimit.c_str());
+		return false;
+	}
+
 	int nOfflineTransFloorLimit = stoi(offlineTransFloorLimit, 0, 16);
 	int nOfflineTransUpLimit = stoi(offlineTransUpLimit, 0, 16);
 
@@ -362,6 +383,11 @@ bool PBOC::TerminalRiskManagement()
 
 void PBOC::ParseGACResponseData(const string buffer)
 {
+	if (buffer.length() < 22)
+	{
+		Log->Error("GAC return data incorrected. value [%s]", buffer.c_str());
+		return;
+	}
 	SaveTag("9F27", string(buffer.substr(0, 2)));   //密文信息数据 表明卡片返回的密文类型并指出终端要进行的操作
 	SaveTag("9F36", string(buffer.substr(2, 4)));   //应用交易计数器(ATC)
 	SaveTag("9F26", string(buffer.substr(6, 16)));  //应用密文 8字节

@@ -23,7 +23,7 @@ struct ICommTransaction
 	virtual bool EndTransaction()			= 0;
 
 	virtual void SetEncryption(ENCRYPT_TYPE type)		= 0;
-	virtual void SetAuthencation(AUTHENCATE_TYPE type)	= 0;
+	virtual void SetAuthencation(OFFLINE_AUTHENCATE_TYPE type)	= 0;
 
     virtual void SetUdkAuth(const string &auth) = 0;
     virtual void SetUdkMac(const string &mac) = 0;
