@@ -16,7 +16,7 @@ public:
 	void Notify(TNotifyUI& msg); //处理内嵌模块的消息
     void DoPersonaliztion();
     bool SetSelectedApplication(string aid);
-    vector< pair<string, string>> ConcatNodeWithSameSection(INIParser ini);
+    vector< pair<string, string>> ConcatNodeWithSameSection(IniParser ini);
     STORE_DATA_TYPE GetStoreDataType(string tag);
 protected:
 	CPaintManagerUI* m_pPM;

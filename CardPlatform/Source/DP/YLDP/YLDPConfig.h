@@ -20,5 +20,5 @@ private:
     map<string,string>  m_mapExchangeData;
     string              m_sDecryptKey;
 
-    INIParser           m_paraser;
+    IniParser           m_paraser;
 };

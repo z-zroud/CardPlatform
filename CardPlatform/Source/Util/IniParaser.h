@@ -15,9 +15,9 @@ using namespace std;
 #define INI_ERROR   0
   
 //每个ini节点
-struct ININode 
+struct IniNode 
 { 
-    ININode(string root, string key, string value) 
+    IniNode(string root, string key, string value) 
     { 
 		m_Root	= root;
 		m_Key	= key;
@@ -44,17 +44,17 @@ struct SubNode
 
   
 
-class INIParser 
+class IniParser 
 { 
 public:
-	INIParser();
-	INIParser(string path);
+	IniParser();
+	IniParser(string path);
 public: 
     int Read(string path); 
 	int Read();
     string GetValue(string root, string key); 
-    vector<ININode>::size_type GetSize(){return m_Section.size();} 
-    vector<ININode>::size_type SetValue(string root, string key, string value); 
+    vector<IniNode>::size_type GetSize(){return m_Section.size();} 
+    vector<IniNode>::size_type SetValue(string root, string key, string value); 
     vector<pair<string, SubNode>> GetAllNodes() const { return m_Section; }
     int Save(string path); 
 	void Save();

@@ -21,7 +21,7 @@ string CTerminal::m_9F7A = _T("");
 string CTerminal::m_DF60 = _T("");
 string CTerminal::m_DF69 = _T("");
 bool CTerminal::bLoaded = false;
-INIParser CTerminal::m_parse;
+IniParser CTerminal::m_parse;
 
 const string root = _T("TERMINAL");
 

@@ -91,6 +91,6 @@ private:
 	static string m_DF60;
 	static string m_DF69;
 
-	static INIParser m_parse;
+	static IniParser m_parse;
 	static bool bLoaded;
 };

@@ -3,6 +3,9 @@
 #include <cstdio>
 #include <io.h>
 
+/***********************************************************
+* 获取指定路径下所有文件，包括子目录。
+************************************************************/
 void CFileDlg::GetFiles(string path, vector<string>& files)
 {
     //文件句柄  
@@ -31,6 +34,9 @@ void CFileDlg::GetFiles(string path, vector<string>& files)
     }
 }
 
+/***************************************************
+* 打开文件对话框，并返回选定的文件名
+****************************************************/
 string CFileDlg::OpenFileDlg()
 {
     OPENFILENAME ofn = { 0 };
@@ -52,6 +58,9 @@ string CFileDlg::OpenFileDlg()
     return _T("");
 }
 
+/***********************************************
+* 打开文件夹对话框，并返回指定的文件夹名称
+************************************************/
 string CFileDlg::OpenFolderDlg()
 {
     TCHAR szBuffer[MAX_PATH] = { 0 };
@@ -69,6 +78,9 @@ string CFileDlg::OpenFolderDlg()
     return _T("");
 }
 
+/****************************************************
+* 打开保存文件对话框
+*****************************************************/
 void CFileDlg::SaveFileDlg(const string &filePath)
 {
     OPENFILENAME ofn = { 0 };

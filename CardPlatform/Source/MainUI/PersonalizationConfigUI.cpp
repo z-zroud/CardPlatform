@@ -39,7 +39,7 @@ void CPersonalizationConfigUI::InitDlg()
     m_pEncryptData = static_cast<CEditUI*>(m_pPM->FindControl(_T("persoEncryptData")));
 
     //初始化数据
-    INIParser cfg;
+    IniParser cfg;
     string filePath = m_pManager->GetInstancePath() + _T("Configuration\\Personalization.cfg");
     if (cfg.Read(filePath))
     {

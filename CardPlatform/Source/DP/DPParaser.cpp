@@ -25,9 +25,9 @@ void DPParser::Save(const string& filePath)
 	outputFile.clear();
 }
 
-INIParser DPParser::GetConfig(const string& filePath)
+IniParser DPParser::GetConfig(const string& filePath)
 {
-	INIParser iniFile(filePath);
+	IniParser iniFile(filePath);
 
 	return iniFile;
 }

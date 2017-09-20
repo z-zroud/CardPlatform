@@ -12,17 +12,17 @@ string &TrimString(string &str)
     return str; 
 } 
 
-INIParser::INIParser()
+IniParser::IniParser()
 {
 
 }
 
-INIParser::INIParser(string filePath)
+IniParser::IniParser(string filePath)
 {
 	m_filePath = filePath;
 }
 
-int INIParser::Read()
+int IniParser::Read()
 {
 	if (!m_filePath.empty())
 	{
@@ -33,7 +33,7 @@ int INIParser::Read()
 }
 
 //读ini文件
-int INIParser::Read(string path) 
+int IniParser::Read(string path) 
 { 
     ifstream iniFile(path.c_str()); 
     if(!iniFile) 
@@ -42,7 +42,7 @@ int INIParser::Read(string path)
 	m_filePath = path;
     string strLine; 
     string strRoot; 
-    vector<ININode> vec_ini; 
+    vector<IniNode> vec_ini; 
     while(getline(iniFile, strLine))	//逐行读取
     { 
         string::size_type leftPos = 0; 
@@ -68,7 +68,7 @@ int INIParser::Read(string path)
 			(!str_key.empty()) && 
 			(!str_value.empty())) 
         { 
-			ININode iniNode(strRoot, str_key, str_value); 
+			IniNode iniNode(strRoot, str_key, str_value); 
 			vec_ini.push_back(iniNode);
         } 
     } 
@@ -103,7 +103,7 @@ int INIParser::Read(string path)
  
 
 //通过root和key获取value 
-string INIParser::GetValue(string root, string key) 
+string IniParser::GetValue(string root, string key) 
 { 
     for (auto v : m_Section)
     {
@@ -124,13 +124,13 @@ string INIParser::GetValue(string root, string key)
     return "";
 } 
  
-void INIParser::Save()
+void IniParser::Save()
 {
 	Save(m_filePath);
 }
 
 //写ini文件
-int INIParser::Save(string path) 
+int IniParser::Save(string path) 
 { 
     ofstream iniFile(path.c_str()); 
     if(!iniFile)
@@ -156,7 +156,7 @@ int INIParser::Save(string path)
     return 1; 
 } 
 
-vector<pair<string, string>>::iterator INIParser::IsExisted(vector<pair<string, string>> &vec, string key)
+vector<pair<string, string>>::iterator IniParser::IsExisted(vector<pair<string, string>> &vec, string key)
 {
     for (auto iter = vec.begin(); iter != vec.end(); iter++)
     {
@@ -167,7 +167,7 @@ vector<pair<string, string>>::iterator INIParser::IsExisted(vector<pair<string, 
     return vec.end();
 }
 
-bool INIParser::IsExisted(string root, string key)
+bool IniParser::IsExisted(string root, string key)
 {
     for (auto v : m_Section)
     {
@@ -185,7 +185,7 @@ bool INIParser::IsExisted(string root, string key)
 }
 
 //设置值
-vector<ININode>::size_type INIParser::SetValue(string root, string key, string value) 
+vector<IniNode>::size_type IniParser::SetValue(string root, string key, string value) 
 { 
     if (IsExisted(root, key))
     {

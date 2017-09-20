@@ -552,7 +552,7 @@ void YLDpParser::Save(const string &strPath)
 	for (auto m : m_vecCPSDP)
 	{
 		string filePath = strPath + "\\" + m.fileName + ".txt";
-		INIParser ini;
+		IniParser ini;
 
 		for (auto v : m.data)
 		{

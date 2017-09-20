@@ -188,7 +188,7 @@ void CPersonalizationUI::DoPersonaliztion()
                 param.strToken,
 				reponse);
         }
-        INIParser ini;
+        IniParser ini;
         if (!ini.Read(cpfFile.GetData()))
         {
             return;     //¶ÁÈ¡CPSÎÄ¼þÊ§°Ü
@@ -304,7 +304,7 @@ STORE_DATA_TYPE CPersonalizationUI::GetStoreDataType(string tag)
     return STORE_DATA_COMMON;
 }
 
-vector<pair<string, string>> CPersonalizationUI::ConcatNodeWithSameSection(INIParser ini)
+vector<pair<string, string>> CPersonalizationUI::ConcatNodeWithSameSection(IniParser ini)
 {
     vector<pair<string, string>> vecResult;
     auto nodes = ini.GetAllNodes();

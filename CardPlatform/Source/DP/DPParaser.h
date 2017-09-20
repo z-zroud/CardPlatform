@@ -75,7 +75,7 @@ class DPParser : public IDPParser
 public:
 	virtual int Read(const string& filePath);
 	virtual void Save(const string& filePath);
-	virtual INIParser GetConfig(const string& filePath);
+	virtual IniParser GetConfig(const string& filePath);
 
 protected:
 	vector<DGI> m_DpData;

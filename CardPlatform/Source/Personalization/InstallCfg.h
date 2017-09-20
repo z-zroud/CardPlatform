@@ -19,5 +19,5 @@ public:
 protected:
 	string GetRoot(INSTALL_TYPE type);
 private:
-	INIParser m_parser;
+	IniParser m_parser;
 };

@@ -38,7 +38,7 @@ private:
     CEditUI*    m_tagDF60;
     CEditUI*    m_tagDF69;
 
-    INIParser   m_parse;
+    IniParser   m_parse;
     int         m_nStatus;
     HWND        m_hWnd;
 };
