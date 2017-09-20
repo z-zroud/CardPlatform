@@ -12,55 +12,43 @@ APDU::APDU(SCARDHANDLE scardHandle, CARD_TRANSMISSION_PROTOCOL protocol)
 	m_scardHandle = scardHandle;
 	m_dwActiveProtocol = protocol;
 }
-bool APDU::SelectApplicationCommand(const string &aid, APDU_RESPONSE &response)
+
+/*****************************************************************
+* 选择应用命令
+******************************************************************/
+bool APDU::SelectAppCmd(const string &aid, APDU_RESPONSE &response)
 {
 	if (aid.length() % 2 != 0)
 	{
 		return false;	//AID有误
 	}
-	char szLen[3] = { 0 };
-	sprintf_s(szLen, 3, "%02X", aid.length() / 2);
-	string strCommand = "00A40400" + string(szLen) + aid;
-	return SendAPDU(strCommand, response);
+	string len = Tool::Stringparser::GetStringLen(aid);
+	string cmd = "00A40400" + len + aid;
+
+	return SendAPDU(cmd, response);
 }
 
-//select PSE
-bool APDU::SelectPSECommand(APDU_RESPONSE &response)
+
+/******************************************************************
+* 初始化更新命令
+*******************************************************************/
+bool APDU::InitUpdateCmd(const string& randomNum, APDU_RESPONSE &response)
 {
-	string strCommand = "00A40400 0E 315041592E5359532E4444463031";
-
-	return SendAPDU(strCommand, response);
-}
-
-//select PPSE
-bool APDU::SelectPPSECommand(APDU_RESPONSE &response)
-{
-	string strCommand = "00A40400 0E 325041592E5359532E4444463031";
-
-	return SendAPDU(strCommand, response);
-}
-
-//Initialize Update
-bool APDU::InitializeUpdateCommand(string strDiv, APDU_RESPONSE &response)
-{
-	if (strDiv.length() != 16)
+	if (randomNum.length() != 16)
 	{
 		return false;
 	}
-	string strCommand = string("8050000008") + strDiv;
+	string cmd = string("8050000008") + randomNum;
 
-	return SendAPDU(strCommand, response);
+	return SendAPDU(cmd, response);
 }
 
 /******************************************************
 * 根据给定的匹配/查找标准取得发行者安全域、可执行装载文件、
 * 可执行模块、应用和安全域的生命周期的状态信息。
 *******************************************************/
-bool APDU::GetApplicationStatusCommand(vector<APP_STATUS> &status)
+bool APDU::GetAppStatusCmd(vector<APP_STATUS> &status, APDU_RESPONSE& response)
 {
-	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
-
 	string cmd = "80F24000 02 4F00";
 
 	if (SendAPDU(cmd, response))
@@ -85,194 +73,145 @@ bool APDU::GetApplicationStatusCommand(vector<APP_STATUS> &status)
 	return false;
 }
 
-//删除可执行装载文件、应用等等
-bool APDU::DeleteCommand(string id)
+/******************************************************
+* 删除应用
+*******************************************************/
+bool APDU::DeleteAppCmd(const string& aid)
 {
-	char szDataLen[3] = { 0 };
-	char szAllLen[3] = { 0 };
-	sprintf_s(szDataLen, "%02X", id.length() / 2);
-	sprintf_s(szAllLen, "%02X", id.length() / 2 + 2);
-	string cmd = "80E40000" + string(szAllLen) + "4F" + szDataLen + id;
 	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
 
-	SendAPDU(cmd, response);
-    //Log->Info("%s", cmd.c_str());
-	if (response.SW1 != 90 && response.SW2 != 0x00)
-	{
-		return false;
-	}
+	string aidLen = Tool::Stringparser::GetStringLen(aid);
+	string totalDataLen = Tool::Stringparser::IncStringLenStep(aidLen, 2);
+	string cmd = "80E40000" + totalDataLen + "4F" + aidLen + aid;
 
-	return true;
+	return SendAPDU(cmd, response);
 }
 
-bool APDU::StorePSEData(string data, STORE_DATA_TYPE dataType, bool bReset)
-{
-    static int count = -1;		//用于计数
-    if (bReset)
-    {
-        count = 0;	//重置计数器
-    }
-    else {
-        count++;
-    }
-    string cmd = "80E2";
-    switch (dataType)
-    {
-    case STORE_DATA_COMMON:		cmd += "00"; break;
-    case STORE_DATA_ENCRYPT:	cmd += "60"; break;
-    case STORE_DATA_LAST:		cmd += "80"; break;
-    }
-    char szCount[3] = { 0 };
-    sprintf_s(szCount, "%02X", count);
-    cmd += string(szCount);     //构造Install Data头部命令
 
-    char szLen[3] = { 0 };
-    int len = data.length() / 2;
-    sprintf_s(szLen, 3, "%02X", len);
 
-    cmd += szLen + data;    // + data len + data
-
-    APDU_RESPONSE response;
-    if (!SendAPDU(cmd, response) || (response.SW1 != 0x90 && response.SW2 != 0x00))
-    {
-        return false;     // 个人化PSE失败
-    }
-
-    return true;
-}
-
-//加载数据命令 用于个人化
-bool APDU::StoreDataCommand(string DGI, string DGIData, STORE_DATA_TYPE dataType, bool bReset)
+/******************************************************
+* 个人化数据命令
+*******************************************************/
+bool APDU::StoreDataCmd(const string& dgi,
+						const string& dgiData,
+						STORE_DATA_TYPE type,
+						bool reset,
+						APDU_RESPONSE& response)
 {
 	static int count = -1;		//用于计数
-	if (bReset)
-	{
+	if (reset){
 		count = 0;	//重置计数器
+    }else {
+		count++;
     }
-    else {
-        count++;
-    }
+
 	char szCount[3] = { 0 };
 	sprintf_s(szCount, "%02X", count);
 	string cmd = "80E2";
-	switch (dataType)
+	switch (type)
 	{
 	case STORE_DATA_COMMON:		cmd += "00"; break;
 	case STORE_DATA_ENCRYPT:	cmd += "60"; break;
 	case STORE_DATA_LAST:		cmd += "80"; break;
 	}
 	cmd += string(szCount);     //构造Install Data头部命令
-
-   /* char szDataLen[5] = { 0 };
-    sprintf_s(szDataLen, 5, "%02X", DGIData.length() / 2);*/
-
-    string sDataLen = Base::GetDataHexLen(DGIData);
-    //如果DGI分组数据过长，需要两次或多次上传(这里仅处理两次存储的情况，多次的暂不处理(未碰到此种情况))
-    if (DGIData.length() / 2 >= 0xFE)
+    string dataLen = Tool::Stringparser::GetStringLen(dgiData);
+    
+    if (dgiData.length() / 2 >= 0xFC)	//如果DGI分组数据过长，需要两次或多次上传
     {
-        string data1 = DGI + sDataLen + DGIData.substr(0, 0xDD * 2);    // DGI + 总数据长度 + 第一个存储的data数据
-        string cmdFirst = cmd + Base::GetDataHexLen(data1) + data1;
+		if (dgiData.length() / 2 > 0xFF)
+		{
+			dataLen = "FF" + dataLen;	//符合BER-TLV格式解析()，若操作0xFFFF，则需要另外处理
+		}
 
-        count++;
-        memset(szCount, 0, sizeof(szCount));
-        sprintf_s(szCount, "%02X", count);
+        string data1 = dgi + dataLen + dgiData.substr(0, 0xDD * 2);    // DGI + 总数据长度 + 第一个存储的data数据
+        string cmd1 = cmd + Tool::Stringparser::GetStringLen(data1) + data1;
+		
+		if (!SendAPDU(cmd1, response))
+		{
+			return false;
+		}
+		int remainderDataLen = dgiData.length() - 0xDD * 2;
+		while (remainderDataLen > 0)
+		{
+			count++;
+			memset(szCount, 0, sizeof(szCount));
+			sprintf_s(szCount, "%02X", count);
 
-        //命令头 + 第二部分数据长度 + 第二次存储data
-        string data2 = DGIData.substr(0xDD * 2);
-        string cmdSecond = cmd.substr(0, 6) + szCount + Base::GetDataHexLen(data2) + data2;
-
-        APDU_RESPONSE response;
-        if (SendAPDU(cmdFirst, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))
-        {
-            return SendAPDU(cmdSecond, response) && (response.SW1 == 0x90 && response.SW2 == 0x00);
-        }
-        return false;
+			string data = dgiData.substr(0xDD * 2, 0xDD * 2);
+			string cmd2 = cmd.substr(0, 6) + szCount + Tool::Stringparser::GetStringLen(data) + data;
+			if (!SendAPDU(cmd2, response))
+			{
+				return false;
+			}
+			remainderDataLen -= data.length();
+		}
     }
-    else {
-       
-
-        char szTotalLen[5] = { 0 };
-        sprintf_s(szTotalLen, 5, "%02X", (DGI.length() + DGIData.length()) / 2 + 1);
-        cmd += szTotalLen + DGI;        // header + totalLen + DGI
-
-        cmd += string(sDataLen) + DGIData; // + DGI data len + DGI data
-
-        APDU_RESPONSE response;
-        if (SendAPDU(cmd, response) && (response.SW1 == 0x90 && response.SW2 == 0x00))
+    else {       
+		cmd += Tool::Stringparser::IncStringLenStep(dataLen, 3) + dgi + dataLen + dgiData;
+        if (!SendAPDU(cmd, response))
         {
-            return true;
+            return false;
         }
     }
 
-
-	return false;
+	return true;
 }
 
-// install command
-bool APDU::InstallCommand(string exeLoadFile, string exeModule, string application, string privilege, string installParam, string token)
+/******************************************************
+* 安装实例命令
+*******************************************************/
+bool APDU::InstallAppCmd(const string& package,
+	const string& applet,
+	const string& instance,
+	const string& privilege,
+	const string& installParam,
+	const string& token,
+	APDU_RESPONSE& response)
 {
-	char szExeLoadFileAIDLen[3] = { 0 };	//可执行安装文件AID的长度
-	char szExeModuleAIDLen[3] = { 0 };	//可执行模块AID的长度
-	char szApplicationAIDLen[3] = { 0 };	//应用AID的长度
-	char szPrivilegeLen[3] = { 0 };		//应用权限的长度
-	char szInstallParamLen[3] = { 0 };	//安装参数的长度
-	char szTokenLen[3] = { 0 };	//安装Token的长度
-	char szTotalLen[3] = { 0 };	//数据总长度
-	sprintf_s(szExeLoadFileAIDLen, "%02X", exeLoadFile.length() / 2);
-	sprintf_s(szExeModuleAIDLen, "%02X", exeModule.length() / 2);
-	sprintf_s(szApplicationAIDLen, "%02X", application.length() / 2);
-	sprintf_s(szPrivilegeLen, "%02X", privilege.length() / 2);
-	sprintf_s(szInstallParamLen, "%02X", installParam.length() / 2);
-	sprintf_s(szTokenLen, "%02X", token.length() / 2);
+	char totalDataLen[3] = { 0 };	//数据总长度
+	string packageLen = Tool::Stringparser::GetStringLen(package);
+	string appletLen = Tool::Stringparser::GetStringLen(applet);
+	string instanceLen = Tool::Stringparser::GetStringLen(instance);
+	string privilegeLen = Tool::Stringparser::GetStringLen(privilege);
+	string installParamLen = Tool::Stringparser::GetStringLen(installParam);
+	string tokenLen = Tool::Stringparser::GetStringLen(token);
 
-	sprintf_s(szTotalLen, "%02X", 6 + exeLoadFile.length() / 2 +
-		exeModule.length() / 2 +
-		application.length() / 2 +
+	sprintf_s(totalDataLen, "%02X", 6 + package.length() / 2 +
+		applet.length() / 2 +
+		instance.length() / 2 +
 		privilege.length() / 2 +
 		installParam.length() / 2 +
 		token.length() / 2);
 
-	string cmd = "80E60C00" + string(szTotalLen) + 
-		string(szExeLoadFileAIDLen) + exeLoadFile +
-		string(szExeModuleAIDLen) + exeModule +
-		string(szApplicationAIDLen) + application +
-		string(szPrivilegeLen) + privilege +
-		string(szInstallParamLen) + installParam +
-		string(szTokenLen) + token;
+	string cmd = "80E60C00" + string(totalDataLen) + 
+		packageLen + package +
+		appletLen + applet +
+		instanceLen + instance +
+		privilegeLen + privilege +
+		installParamLen + installParam +
+		tokenLen + token;
 
-	APDU_RESPONSE response;
-	memset(&response, 0, sizeof(response));
-    //Log->Info("%s", cmd.c_str());
-	if (!SendAPDU(cmd, response))
-	{
-		return false;
-	}
-	if (strcmp(response.data, "00") == 0)
-	{
-		return true;
-	}
-
-	return false;
+	return SendAPDU(cmd, response);
 }
 
-// Get Tag
-bool APDU::GetTag(const string &tag, APDU_RESPONSE &response)
+/****************************************************************
+* 读取tag命令
+*****************************************************************/
+bool APDU::ReadTagCmd(const string &tag, APDU_RESPONSE &response)
 {
-	string strCommand;
+	string cmd = "80CA";
 	if (tag.length() != 2 && tag.length() != 4)
 	{
 		return false;
 	}
 	if (tag.length() == 2)
 	{
-		strCommand = "80CA00" + tag;
+		cmd += "00";
 	}
-	else {
-		strCommand = "80CA" + tag;
-	}
+	cmd += tag;
 
-	return SendAPDU(strCommand, response);
+	return SendAPDU(cmd, response);
 }
 
 //内部认证 命令
@@ -450,7 +389,9 @@ bool APDU::GetAPDUResponseCommand(unsigned int len, unsigned char* szResponse, D
 	return SendAPDU(szCommand, szResponse, pResponseLen);
 }
 
-//发送APDU命令
+/***************************************************************
+* 发送APDU指令
+****************************************************************/
 bool APDU::SendAPDU(string &strCommand, APDU_RESPONSE &response)
 {
 	bool bResult = false;

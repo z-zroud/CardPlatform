@@ -192,7 +192,7 @@ string CommTransaction::SelectPSE(APP_TYPE appType)
 	APDU_RESPONSE response;
 	if (appType == APP_PSE)  //执行PSE应用
 	{
-		if (!m_pAPDU->SelectPSECommand(response))
+		if (!m_pAPDU->SelectAppCmd(PSE_AID,response))
 		{
 			Log->Error("执行 select PSE 失败!");
 			return "";
@@ -200,7 +200,7 @@ string CommTransaction::SelectPSE(APP_TYPE appType)
 	}
 	else if (appType == APP_PPSE)   //执行PPSE应用
 	{
-		if (!m_pAPDU->SelectPPSECommand(response))
+		if (!m_pAPDU->SelectAppCmd(PPSE_AID,response))
 		{
 			Log->Error("执行 select PPSE 失败!");
 			return "";
@@ -297,7 +297,7 @@ bool CommTransaction::SelectApplication()
         Log->Error("AID can not be empty");
         return false;
     }
-    if (!m_pAPDU->SelectApplicationCommand(aid, response))
+    if (!m_pAPDU->SelectAppCmd(aid, response))
     {
         Log->Error("Send Select cmmand failed.");
         return false;
@@ -666,7 +666,7 @@ bool CommTransaction::InitilizeApplication()
  string CommTransaction::ReadTagValueFromCard(const string &tag)
  {
      APDU_RESPONSE response;
-     m_pAPDU->GetTag(tag, response);
+     m_pAPDU->ReadTagCmd(tag, response);
      if (response.SW1 == 0x90 && response.SW2 == 0x00)
      {
          return string(response.data);

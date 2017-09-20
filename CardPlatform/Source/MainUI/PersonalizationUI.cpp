@@ -159,6 +159,7 @@ void CPersonalizationUI::DoPersonaliztion()
     }
     IAPDU *pAPDU = m_pPCSC->GetAPDU();
     vector<APP_STATUS> status;
+	APDU_RESPONSE reponse;
     if (pAPDU)
     {
         bool bResult = SetSelectedApplication(aid.GetData());
@@ -166,10 +167,10 @@ void CPersonalizationUI::DoPersonaliztion()
             return;
 
         //删除当前应用
-        pAPDU->GetApplicationStatusCommand(status);
+        pAPDU->GetAppStatusCmd(status, reponse);
         for (auto v : status)
         {
-            pAPDU->DeleteCommand(v.strAID);
+            pAPDU->DeleteAppCmd(v.strAID);
         }
 
         //重新安装应用
@@ -179,12 +180,13 @@ void CPersonalizationUI::DoPersonaliztion()
         {
             INSTALL_PARAM param;
             cfg.GetInstallCfg((INSTALL_TYPE)i, param);
-            pAPDU->InstallCommand(param.strExeLoadFileAID,
+            pAPDU->InstallAppCmd(param.strExeLoadFileAID,
                 param.strExeModuleAID,
                 param.strApplicationAID,
                 param.strPrivilege,
                 param.strInstallParam,
-                param.strToken);
+                param.strToken,
+				reponse);
         }
         INIParser ini;
         if (!ini.Read(cpfFile.GetData()))
@@ -202,14 +204,14 @@ void CPersonalizationUI::DoPersonaliztion()
         string pse2 = ini.GetValue("Store_PSE_2", "Store_PSE_2");
         string pse2Len = Base::GetDataHexLen(pse2);
         pse2 = _T("9102") + Base::Increase(pse2Len, 5) + _T("A5") + Base::Increase(pse2Len,3) + _T("88") +_T("0101") + pse2;
-        if (!pAPDU->StorePSEData(pse1, STORE_DATA_COMMON, true))
-        {
-            return;     //个人化PSE失败
-        }
-        if (!pAPDU->StorePSEData(pse2, STORE_DATA_LAST, false))
-        {
-            return;     //个人化PSE失败
-        }
+        //if (!pAPDU->StorePSEData(pse1, STORE_DATA_COMMON, true))
+        //{
+        //    return;     //个人化PSE失败
+        //}
+        //if (!pAPDU->StorePSEData(pse2, STORE_DATA_LAST, false))
+        //{
+        //    return;     //个人化PSE失败
+        //}
 
         //个人化PPSE
         string ppseAid = cfg.GetApplicationAID(INSTALL_PPSE);
@@ -218,10 +220,10 @@ void CPersonalizationUI::DoPersonaliztion()
         string ppse = ini.GetValue("Store_PPSE", "Store_PPSE");
         string ppseLen = Base::GetDataHexLen(ppse);
         ppse = _T("9102") + Base::Increase(ppseLen, 5) + _T("A5") + Base::Increase(ppseLen, 3) + _T("BF0C") + ppseLen + ppse;
-        if (!pAPDU->StorePSEData(ppse, STORE_DATA_LAST, true))
-        {
-            return;     // 个人化PPSE失败
-        }
+        //if (!pAPDU->StorePSEData(ppse, STORE_DATA_LAST, true))
+        //{
+        //    return;     // 个人化PPSE失败
+        //}
 
         //个人化PBOC
         string pbocAid = cfg.GetApplicationAID(INSTALL_APP);
@@ -273,8 +275,9 @@ void CPersonalizationUI::DoPersonaliztion()
                     Des3_ECB(szEncryptData, (char*)encKey.c_str(), (char*)v.second.c_str(), v.second.length());
                     v.second = szEncryptData;
                 }
+				APDU_RESPONSE response;
                 //存储个人化数据
-                if (!pAPDU->StoreDataCommand(v.first, v.second, type, false))
+                if (!pAPDU->StoreDataCmd(v.first, v.second, type, false,response))
                 {
                     return;     // 个人化PBOC失败
                 }

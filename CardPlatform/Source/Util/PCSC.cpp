@@ -309,7 +309,7 @@ bool PCSC::SelectAID(const string &strAID)
 	APDU_RESPONSE output;
 	memset(&output, 0, sizeof(output));
 	
-	if (!m_APDU->SelectApplicationCommand(strAID, output))
+	if (!m_APDU->SelectAppCmd(strAID, output))
 	{
 		m_Error = m_APDU->GetAPDUError();
 		return false;
@@ -336,7 +336,7 @@ bool PCSC::OpenSecureChannel(const string &strKMC)
     termRandomNum = termRandomNum.substr(2) + szTemp;
     count++;
 	memset(&output, 0, sizeof(output));
-	if (!m_APDU->InitializeUpdateCommand(termRandomNum, output))
+	if (!m_APDU->InitUpdateCmd(termRandomNum, output))
 	{
 		return false;
 	}

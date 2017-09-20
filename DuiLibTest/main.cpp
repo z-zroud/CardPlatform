@@ -1,8 +1,15 @@
 #include "StdAfx.h"
 #include "MainFrameDlg.h"
+#include <string>
+using namespace std;
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int nCmdShow)
 {
+
+	string str = "ABCDEFG";
+	string test;
+	test = str.substr(4, 10);
+
     CPaintManagerUI::SetInstance(hInstance);
 
 

@@ -7,6 +7,23 @@ namespace Tool
 {
 	namespace Stringparser
 	{
+		string GetStringLen(const string& str)
+		{
+			char len[5] = { 0 };
+			sprintf_s(len, 5, "%02X", str.length() / 2);
+
+			return len;
+		}
+
+		string IncStringLenStep(const string& len, int step)
+		{
+			int incLen = stoi(len, 0, 16) + step;
+			char sLen[3] = { 0 };
+			sprintf_s(sLen, 3, "%02X", incLen);
+
+			return sLen;
+		}
+
 		//·Ö¸î×Ö·û´®
 		void SplitString(const string& s, std::vector<std::string>& v, const string& c)
 		{
