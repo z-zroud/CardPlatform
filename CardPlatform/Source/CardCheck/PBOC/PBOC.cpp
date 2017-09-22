@@ -841,7 +841,11 @@ bool PBOC::EndTransaction()
 
 	//格式化输出响应数据
 	PrintTags(entites, entitiesCount);
-	//SaveTag(entites, entitiesCount);  //不保存该响应值，会覆盖第一次GAC响应，而脚本处理需要第一次应用密文。  
+	//SaveTag(entites, entitiesCount);  //不保存该响应值，会覆盖第一次GAC响应，而脚本处理需要第一次应用密文。
+	if (entites[0].Value == NULL)
+	{
+		return false;
+	}
 	ShowCardTransType(string((char*)entites[0].Value));
 
 	return true;
