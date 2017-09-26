@@ -240,6 +240,9 @@
     <ClCompile Include="Source\DP\HTDP\HTDPParaser.cpp">
       <Filter>Source Files\DP\HTDP</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Util\DpDecrypt.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -403,6 +406,9 @@
     </ClInclude>
     <ClInclude Include="Source\DP\HTDP\HTDPParser.h">
       <Filter>Header Files\DP\HTDP</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\DpDecrypt.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

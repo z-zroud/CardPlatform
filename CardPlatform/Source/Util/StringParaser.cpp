@@ -156,16 +156,5 @@ namespace Tool
 
 			return str;
 		}
-
-		//½«×Ö·û´®Ð¡Ð´
-		string ToLower(string& str)
-		{
-			for (auto &s : str)
-			{
-				s = tolower(s);
-			}
-
-			return str;
-		}
 	}
 }

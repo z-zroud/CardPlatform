@@ -15,5 +15,7 @@ protected:
 
     CEditUI*        m_pEncryptFile;
     CEditUI*        m_pKey;
+	CComboUI*		m_pDecryptType;
+	CButtonUI*		m_pScanFile;
 };
 

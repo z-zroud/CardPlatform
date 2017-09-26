@@ -14,8 +14,6 @@ namespace Tool
 		string HexStrToStr(const char* str);
 		string IntToHexStr(const int n);
 		int HexStrToInt(const string hexStr);
-		string ToUpper(string& str);
-		string ToLower(string& str);
 		string GetStringLen(const string& str);
 		string IncStringLenStep(const string& len, int step);
 	}

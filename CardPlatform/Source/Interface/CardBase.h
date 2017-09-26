@@ -307,3 +307,8 @@ enum TRANS_TYPE
     TRANS_QPBOC,
     TRANS_EC
 };
+
+enum DECRYPT_TYPE
+{
+	DES3_ECB,
+};

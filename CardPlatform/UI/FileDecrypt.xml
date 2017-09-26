@@ -8,6 +8,10 @@
                   <Button name="btnEncryptFile" text="浏览文件" float="true" pos="570,3,640,28" />
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
+                  <Label name="lbKey" text="密钥类型:" float="true" pos="130,0,200,28"/>
+                  <Combo name="comboEncryptType" float="true" pos="210,3,560,28" droptype="droplist" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+            </HorizontalLayout>
+            <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbKey" text="密钥:" float="true" pos="130,0,200,28"/>
                   <Edit name="editKey" float="true" pos="210,3,560,28" />
             </HorizontalLayout>

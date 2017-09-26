@@ -53,6 +53,7 @@
     <ClCompile Include="Source\Util\APDU.cpp" />
     <ClCompile Include="Source\Util\Base.cpp" />
     <ClCompile Include="Source\Util\Converter.cpp" />
+    <ClCompile Include="Source\Util\DpDecrypt.cpp" />
     <ClCompile Include="Source\Util\EnumToString.cpp" />
     <ClCompile Include="Source\Util\FileDlg.cpp" />
     <ClCompile Include="Source\Util\IniParaser.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="Source\Tool\ModifyKmc.h" />
     <ClInclude Include="Source\Util\APDU.h" />
     <ClInclude Include="Source\Util\Base.h" />
+    <ClInclude Include="Source\Util\DpDecrypt.h" />
     <ClInclude Include="Source\Util\FileDlg.h" />
     <ClInclude Include="Source\Util\Converter.h" />
     <ClInclude Include="Source\Util\Des0.h" />
