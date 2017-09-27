@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 #include "Util\IniParaser.h"
-#include "Util\Converter.h"
+#include "Util\Tool.h"
 #include "Util\TLVParaser.h"
 #include "Interface\IDPParser.h"
 using namespace std;
@@ -19,11 +19,11 @@ struct TLVItem
 	{
 		if (isNeedConvert)
 		{			
-			strTag = Tool::Converter::StrToHex(tag.c_str(),tag.size());
-			strLen = Tool::Converter::StrToHex(len.c_str(),len.size());
+			strTag = Tool::StrToHex(tag.c_str(),tag.size());
+			strLen = Tool::StrToHex(len.c_str(),len.size());
 			const char* pLen = strLen.c_str();
-			int nLen = Tool::Converter::HexStrToInt(strLen.c_str(), strLen.size());
-			strValue = Tool::Converter::StrToHex(value.c_str(), nLen);
+			int nLen = Tool::HexStrToInt(strLen.c_str(), strLen.size());
+			strValue = Tool::StrToHex(value.c_str(), nLen);
 		}
 		else {
 			strTag = tag;

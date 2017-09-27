@@ -52,7 +52,7 @@
     <ClCompile Include="Source\Tool\ModifyKmc.cpp" />
     <ClCompile Include="Source\Util\APDU.cpp" />
     <ClCompile Include="Source\Util\Base.cpp" />
-    <ClCompile Include="Source\Util\Converter.cpp" />
+    <ClCompile Include="Source\Util\Tool.cpp" />
     <ClCompile Include="Source\Util\DpDecrypt.cpp" />
     <ClCompile Include="Source\Util\EnumToString.cpp" />
     <ClCompile Include="Source\Util\FileDlg.cpp" />
@@ -64,7 +64,6 @@
     <ClCompile Include="Source\Util\Sqlite3\shell.c" />
     <ClCompile Include="Source\Util\Sqlite3\sqlite3.c" />
     <ClCompile Include="Source\Util\SqliteDB.cpp" />
-    <ClCompile Include="Source\Util\StringParaser.cpp" />
     <ClCompile Include="Source\Util\TLVParaser.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -110,7 +109,7 @@
     <ClInclude Include="Source\Util\Base.h" />
     <ClInclude Include="Source\Util\DpDecrypt.h" />
     <ClInclude Include="Source\Util\FileDlg.h" />
-    <ClInclude Include="Source\Util\Converter.h" />
+    <ClInclude Include="Source\Util\Tool.h" />
     <ClInclude Include="Source\Util\Des0.h" />
     <ClInclude Include="Source\Util\IniParaser.h" />
     <ClInclude Include="Source\Util\KeyGenerator.h" />
@@ -121,7 +120,6 @@
     <ClInclude Include="Source\Util\Sqlite3\sqlite3.h" />
     <ClInclude Include="Source\Util\Sqlite3\sqlite3ext.h" />
     <ClInclude Include="Source\Util\SqliteDB.h" />
-    <ClInclude Include="Source\Util\StringParaser.h" />
     <ClInclude Include="Source\Util\TLVParaser.h" />
   </ItemGroup>
   <ItemGroup>

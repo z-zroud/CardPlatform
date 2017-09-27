@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "YLDPConfig.h"
-#include "Util\StringParaser.h"
+#include "Util\Tool.h"
 
 #define ROOT            _T("YINLIAN")
 #define ENCRYPT_DATA   _T("ENCRYPT_DATA")
@@ -22,11 +22,11 @@ bool CYLDPConfig::Read(const string &filePath)
     string exchangeData = m_paraser.GetValue(ROOT, EXCHANGE_DATA);
 
     //½âÎöÊý¾Ý
-    Tool::Stringparser::SplitString(encryptData, m_vecEncryptData, _T(","));
-    Tool::Stringparser::SplitString(valueData, m_vecValueData, _T(","));
+    Tool::SplitString(encryptData, m_vecEncryptData, _T(","));
+    Tool::SplitString(valueData, m_vecValueData, _T(","));
 
     vector<string> vecExchangeData;
-    Tool::Stringparser::SplitString(exchangeData, vecExchangeData, _T("("), _T(")"));
+    Tool::SplitString(exchangeData, vecExchangeData, _T("("), _T(")"));
 
     return true;
 }

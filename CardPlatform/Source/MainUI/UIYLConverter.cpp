@@ -2,7 +2,6 @@
 #include "UIYLConverter.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\FileDlg.h"
-#include "Util\StringParaser.h"
 #include "DP\YLDP\YLDPParaser.h"
 
 
@@ -70,9 +69,9 @@ void CYLConverterUI::DoConvert()
     vector<string> vecValueData;
     vector<string> vecExchangeData;
 
-    Tool::Stringparser::SplitString(m_pEncryptData->GetText().GetData(), vecEncryptData, _T(","));
-    Tool::Stringparser::SplitString(m_pValueData->GetText().GetData(), vecValueData, _T(","));
-    Tool::Stringparser::SplitString(m_pExchangeData->GetText().GetData(), vecExchangeData, _T("("), _T(")"));
+    Tool::SplitString(m_pEncryptData->GetText().GetData(), vecEncryptData, _T(","));
+    Tool::SplitString(m_pValueData->GetText().GetData(), vecValueData, _T(","));
+    Tool::SplitString(m_pExchangeData->GetText().GetData(), vecExchangeData, _T("("), _T(")"));
 
     string decryptKey = m_pDecryptKey->GetText().GetData();
 
@@ -84,7 +83,7 @@ void CYLConverterUI::DoConvert()
     for (auto v : vecExchangeData)
     {
         vector<string> temp;
-        Tool::Stringparser::SplitString(v, temp, _T(","));
+        Tool::SplitString(v, temp, _T(","));
         if (temp.size() != 2)
         {
             return;

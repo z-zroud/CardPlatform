@@ -2,7 +2,7 @@
 #include "CommTransaction.h"
 #include "Terminal.h"
 #include "Util\Log.h"
-#include "Util\Converter.h"
+#include "Util\Tool.h"
 #include "Util\KeyGenerator.h"
 #include "Util\SHA1.h"
 #include "Util\SM.hpp"
@@ -160,7 +160,7 @@ void CommTransaction::ParaseAFL(string strAFL, vector<AFL> &output)
 	{
 		AFL afl;
 
-		afl.SFI = ((Tool::Converter::HexToInt(strAFL[i]) & 0x0F) << 1) + (Tool::Converter::HexToInt(strAFL[i + 1]) && 0x08);
+		afl.SFI = ((Tool::HexToInt(strAFL[i]) & 0x0F) << 1) + (Tool::HexToInt(strAFL[i + 1]) && 0x08);
 		string strStartRecord = strAFL.substr(i + 2, 2);
 		string strEndRecord = strAFL.substr(i + 4, 2);
 		string strNeedValidate = strAFL.substr(i + 6, 2);
@@ -403,7 +403,7 @@ bool CommTransaction::InitilizeApplication()
         if (v.bAcceptAuthencation)
         {           
             string needSigData = response.data;
-            if (Tool::Converter::HexToInt(needSigData[2]) & 0x08)   //最高位1
+            if (Tool::HexToInt(needSigData[2]) & 0x08)   //最高位1
             {                
                 unsigned int lengthSize = 2 * ((needSigData[2] & 0x07) * 8 + (needSigData[3] & 0x0f));
 				m_acceptAuthData += needSigData.substr(lengthSize + 4);
@@ -509,7 +509,7 @@ bool CommTransaction::InitilizeApplication()
          return false;
      }
      //判断长度字节的最高位是否为1，如果为1，则该字节为长度扩展字节，由下一个字节开始决定长度
-     if (Tool::Converter::HexToInt(strResponse[2]) & 0x08)
+     if (Tool::HexToInt(strResponse[2]) & 0x08)
      {
          //最高位1
          unsigned int lengthSize = 2 * ((strResponse[2] & 0x07) * 8 + (strResponse[3] & 0x0f));

@@ -3,8 +3,7 @@
 #include "APDU.h"
 #include "KeyGenerator.h"
 #include "Util\Log.h"
-#include "Util\Converter.h"
-#include "Util\StringParaser.h"
+#include "Util\Tool.h"
 #include "Util\Des0.h"
 #include <bitset>
 using namespace std;

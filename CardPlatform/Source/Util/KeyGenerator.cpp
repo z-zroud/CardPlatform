@@ -3,7 +3,6 @@
 #include "Util\Des0.h"
 #include "Util\SHA1.h"
 #include "Interface\CardBase.h"
-#include "Util\StringParaser.h"
 #include "Util\Sqlite3\sqlite3.h"
 #include "Util\SM.hpp"
 #include <string>

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GEDPParser.h"
-#include "Util\StringParaser.h"
 #include "Util\Log.h"
 #include <fstream>
 
@@ -31,7 +30,7 @@ int GeErDPParser::Read(const string& filePath)
 		}
 		else {
 			vector<string> splitItems;
-			Tool::Stringparser::SplitString(strLine, splitItems, "|");
+			Tool::SplitString(strLine, splitItems, "|");
 			if (splitItems.size() != 3)
 			{
 				Log->Error("格尔DP数据[%s]中TLV格式不正确", strLine);
@@ -40,7 +39,7 @@ int GeErDPParser::Read(const string& filePath)
 			int nLen = atoi(splitItems[1].c_str());
 			char temp[5] = { 0 };
 			_itoa_s(nLen, temp, 16); 
-			string strLen = Tool::Converter::StrUpper(temp);
+			string strLen = Tool::StrUpper(temp);
 			TLVItem tlvItem(splitItems[0], strLen, splitItems[2]);
 			dpData.vecData.push_back(tlvItem);
 		}

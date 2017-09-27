@@ -10,7 +10,8 @@
 
 #include "stdafx.h"
 #include "SHA1.h"
-#include "StringParaser.h"
+#include <string>
+using namespace std;
 
 #define SHA1_MAX_FILE_BUFFER (32 * 20 * 820)
 
@@ -254,11 +255,29 @@ bool CSHA1::GetHash(UINT_8* pbDest20) const
 	return true;
 }
 
+//将十六进制字符串 转换为ascii字符串
+string HexStrToStr(const char* str)
+{
+    string strResult;
+    if (strlen(str) % 2 != 0)
+        return "";
+    for (size_t i = 0; i < strlen(str); i += 2)
+    {
+        char temp[3] = { 0 };
+        memcpy(temp, str + i, 2);
+        char c = static_cast<char>(stoi(temp, 0, 16));
+
+        strResult.push_back(c);
+    }
+
+    return strResult;
+}
+
 string CSHA1::GetBCDHash(string buffer)
 {
 	string hashResult;
 	char szReuslt[64] = { 0 };
-	string temp = Tool::Stringparser::HexStrToStr(buffer.c_str());
+	string temp = HexStrToStr(buffer.c_str());
 	CSHA1 sha1;
 	sha1.Update((unsigned char*)temp.c_str(), buffer.length() / 2);
 	sha1.Final();

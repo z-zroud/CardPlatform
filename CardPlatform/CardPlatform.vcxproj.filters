@@ -129,9 +129,6 @@
     <ClCompile Include="Source\Util\SHA1.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Util\StringParaser.cpp">
-      <Filter>Source Files\Util</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Util\TLVParaser.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
@@ -139,9 +136,6 @@
       <Filter>Source Files\Personalization</Filter>
     </ClCompile>
     <ClCompile Include="Source\Util\EnumToString.cpp">
-      <Filter>Source Files\Util</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Util\Converter.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
     <ClCompile Include="Source\DP\DPParaser.cpp">
@@ -243,6 +237,9 @@
     <ClCompile Include="Source\MainUI\UIYLConverter.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Util\Tool.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -273,9 +270,6 @@
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Source\Util\SM.hpp">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Util\StringParaser.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Source\Util\TLVParaser.h">
@@ -310,9 +304,6 @@
     </ClInclude>
     <ClInclude Include="Source\Personalization\InstallCfg.h">
       <Filter>Header Files\Personalization</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Util\Converter.h">
-      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="Source\DP\DPParaser.h">
       <Filter>Header Files\DP</Filter>
@@ -409,6 +400,9 @@
     </ClInclude>
     <ClInclude Include="Source\MainUI\UIYLConverter.h">
       <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Util\Tool.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

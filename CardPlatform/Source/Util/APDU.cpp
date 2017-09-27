@@ -3,8 +3,7 @@
 #include "Interface\CardBase.h"
 #include "Des0.h"
 #include "Log.h"
-#include "StringParaser.h"
-#include "Converter.h"
+#include "Tool.h"
 #include "Util\Base.h"
 
 APDU::APDU(SCARDHANDLE scardHandle, CARD_TRANSMISSION_PROTOCOL protocol)
@@ -22,7 +21,7 @@ bool APDU::SelectAppCmd(const string &aid, APDU_RESPONSE &response)
 	{
 		return false;	//AID有误
 	}
-	string len = Tool::Stringparser::GetStringLen(aid);
+	string len = Tool::GetStringLen(aid);
 	string cmd = "00A40400" + len + aid;
 
 	return SendAPDU(cmd, response);
@@ -80,8 +79,8 @@ bool APDU::DeleteAppCmd(const string& aid)
 {
 	APDU_RESPONSE response;
 
-	string aidLen = Tool::Stringparser::GetStringLen(aid);
-	string totalDataLen = Tool::Stringparser::IncStringLenStep(aidLen, 2);
+	string aidLen = Tool::GetStringLen(aid);
+	string totalDataLen = Tool::IncStringLenStep(aidLen, 2);
 	string cmd = "80E40000" + totalDataLen + "4F" + aidLen + aid;
 
 	return SendAPDU(cmd, response);
@@ -115,7 +114,7 @@ bool APDU::StoreDataCmd(const string& dgi,
 	case STORE_DATA_LAST:		cmd += "80"; break;
 	}
 	cmd += string(szCount);     //构造Install Data头部命令
-    string dataLen = Tool::Stringparser::GetStringLen(dgiData);
+    string dataLen = Tool::GetStringLen(dgiData);
     
     if (dgiData.length() / 2 >= 0xFC)	//如果DGI分组数据过长，需要两次或多次上传
     {
@@ -125,7 +124,7 @@ bool APDU::StoreDataCmd(const string& dgi,
 		}
 
         string data1 = dgi + dataLen + dgiData.substr(0, 0xDD * 2);    // DGI + 总数据长度 + 第一个存储的data数据
-        string cmd1 = cmd + Tool::Stringparser::GetStringLen(data1) + data1;
+        string cmd1 = cmd + Tool::GetStringLen(data1) + data1;
 		
 		if (!SendAPDU(cmd1, response))
 		{
@@ -139,7 +138,7 @@ bool APDU::StoreDataCmd(const string& dgi,
 			sprintf_s(szCount, "%02X", count);
 
 			string data = dgiData.substr(0xDD * 2, 0xDD * 2);
-			string cmd2 = cmd.substr(0, 6) + szCount + Tool::Stringparser::GetStringLen(data) + data;
+			string cmd2 = cmd.substr(0, 6) + szCount + Tool::GetStringLen(data) + data;
 			if (!SendAPDU(cmd2, response))
 			{
 				return false;
@@ -148,7 +147,7 @@ bool APDU::StoreDataCmd(const string& dgi,
 		}
     }
     else {       
-		cmd += Tool::Stringparser::IncStringLenStep(dataLen, 3) + dgi + dataLen + dgiData;
+		cmd += Tool::IncStringLenStep(dataLen, 3) + dgi + dataLen + dgiData;
         if (!SendAPDU(cmd, response))
         {
             return false;
@@ -170,12 +169,12 @@ bool APDU::InstallAppCmd(const string& package,
 	APDU_RESPONSE& response)
 {
 	char totalDataLen[3] = { 0 };	//数据总长度
-	string packageLen = Tool::Stringparser::GetStringLen(package);
-	string appletLen = Tool::Stringparser::GetStringLen(applet);
-	string instanceLen = Tool::Stringparser::GetStringLen(instance);
-	string privilegeLen = Tool::Stringparser::GetStringLen(privilege);
-	string installParamLen = Tool::Stringparser::GetStringLen(installParam);
-	string tokenLen = Tool::Stringparser::GetStringLen(token);
+	string packageLen = Tool::GetStringLen(package);
+	string appletLen = Tool::GetStringLen(applet);
+	string instanceLen = Tool::GetStringLen(instance);
+	string privilegeLen = Tool::GetStringLen(privilege);
+	string installParamLen = Tool::GetStringLen(installParam);
+	string tokenLen = Tool::GetStringLen(token);
 
 	sprintf_s(totalDataLen, "%02X", 6 + package.length() / 2 +
 		applet.length() / 2 +
@@ -433,7 +432,7 @@ bool APDU::SendAPDU(string &strCommand, APDU_RESPONSE &response)
 		bResult = true;
 	}
 	memset(response.data, 0, MAX_DATA_LEN);
-	Tool::Converter::BcdToAsc(response.data, (char*)szResponse, dwResponseLen * 2 - 4);
+	Tool::BcdToAsc(response.data, (char*)szResponse, dwResponseLen * 2 - 4);
 	response.SW1 = SW1;
 	response.SW2 = SW2;
 
@@ -445,14 +444,14 @@ bool APDU::SendAPDU(string strCommand, unsigned char* szResponse, DWORD* pRespon
 	HRESULT hRet = S_FALSE;
 
 	//删除字符串中的空格
-	strCommand = Tool::Stringparser::DeleteSpace(strCommand);
+	strCommand = Tool::DeleteSpace(strCommand);
 	if (strCommand.length() < 8 || strCommand.length() % 2 != 0)
 	{
 		Log->Error("APDU Command length error. [%s]", strCommand.c_str());
 		return false;
 	}
 	unsigned char szAPDU[256] = { 0 };
-	Tool::Converter::AscToBcd(szAPDU, (unsigned char*)strCommand.c_str(), strCommand.length());
+	Tool::AscToBcd(szAPDU, (unsigned char*)strCommand.c_str(), strCommand.length());
 
 	switch (m_dwActiveProtocol)
 	{

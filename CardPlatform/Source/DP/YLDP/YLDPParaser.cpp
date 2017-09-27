@@ -1,9 +1,8 @@
 #include "stdafx.h"
 #include "YLDPParaser.h"
 #include "Util\Log.h"
-#include "Util\Converter.h"
+#include "Util\Tool.h"
 #include "Util\IniParaser.h"
-#include "Util\StringParaser.h"
 #include "Util\Des0.h"
 #include <Windows.h>
 #include <string>
@@ -225,13 +224,13 @@ void YLDpParser::ParseTLV(char* buffer, int nBufferLen, DGI &YLDGI)
 	parser->TLVParseAndFindError(entities, entitiesCount, parseBuf, buf_count);
 	for (unsigned int i = 0; i < entitiesCount; i++)
 	{
-		string strTag = Tool::Converter::StrToHex((char*)entities[i].Tag, entities[i].TagSize);
-		string strLen = Tool::Converter::StrToHex((char*)entities[i].Length, entities[i].LengthSize);
+		string strTag = Tool::StrToHex((char*)entities[i].Tag, entities[i].TagSize);
+		string strLen = Tool::StrToHex((char*)entities[i].Length, entities[i].LengthSize);
 		int nLen = std::stoi(strLen, 0, 16);
-		string strValue = Tool::Converter::StrToHex((char*)entities[i].Value, nLen);
+		string strValue = Tool::StrToHex((char*)entities[i].Value, nLen);
 
 		/****************小插曲，用于生成文件的文件名********************/
-		string temp = Tool::Stringparser::DeleteSpace(strTag);
+		string temp = Tool::DeleteSpace(strTag);
 		if (temp.substr(0,2).compare("57") == 0)
 		{
 			int index = strValue.find('D');
@@ -290,7 +289,7 @@ void YLDpParser::DealPSEDataCompleted(ifstream &dpFile, streamoff offset)
 		memset(buffer, 0, nFollowedDataLen);
 		dpFile.read(buffer, nFollowedDataLen);
         string s;
-        s = Tool::Converter::StrToHex(buffer, nFollowedDataLen);
+        s = Tool::StrToHex(buffer, nFollowedDataLen);
         char len[12] = { 0 };
         sprintf_s(len, 12, "%02X", nFollowedDataLen * 2);
         TLVItem item(YLDGI.DGIName, len, s);
@@ -378,7 +377,7 @@ int YLDpParser::Read(const string& filePath)
 			{
 				char szTag[5] = { 0 };
 				sprintf_s(szTag, "%X", sDGISeq);
-				string strValue = Tool::Converter::StrToHex(buffer, nFollowedDataLen);
+				string strValue = Tool::StrToHex(buffer, nFollowedDataLen);
 				TLVItem item(szTag, "0", strValue);
 				YLDGI.vecItem.push_back(item);
 				m_oneCardDpData.vecDpData.push_back(YLDGI);	//添加一个DGI分组
@@ -481,7 +480,7 @@ void YLDpParser::FilterDpData()
 		for (auto v : f.vecDpData)	//处理每一个DGI
 		{
 			DTL dtl;
-			string DGI = Tool::Stringparser::DeleteSpace(v.DGIName);
+			string DGI = Tool::DeleteSpace(v.DGIName);
 			if (DGI.substr(0, 3) == "DGI")
 			{
 				DGI = DGI.substr(3);
@@ -492,7 +491,7 @@ void YLDpParser::FilterDpData()
                 {
                     continue;
                 }
-				string Tag = Tool::Stringparser::DeleteSpace(tlv.strTag);
+				string Tag = Tool::DeleteSpace(tlv.strTag);
 				if (stoi(tlv.strLen, 0, 16) > 0x80)
 				{
 					tlv.strLen = "81" + tlv.strLen;
@@ -518,7 +517,7 @@ void YLDpParser::FilterDpData()
                     continue;
                 }
                 else {
-                    Value = Tool::Stringparser::DeleteSpace(tlv.strTag + tlv.strLen + tlv.strValue);
+                    Value = Tool::DeleteSpace(tlv.strTag + tlv.strLen + tlv.strValue);
                 }
                    
 				dtl.DGI = DGI;
