@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "CardCheckUI.h"
+#include "UICardCheck.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Interface\CardBase.h"
 #include "Interface\InterfaceInstance.h"

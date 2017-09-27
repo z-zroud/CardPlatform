@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "HTConverterUI.h"
+#include "UIHTConverter.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\FileDlg.h"
 #include "DP\HTDP\HTDPParser.h"

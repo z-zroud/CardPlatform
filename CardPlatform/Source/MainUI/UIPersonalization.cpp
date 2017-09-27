@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "PersonaliztionUI.h"
+#include "UIPersonaliztion.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "MainUI\TipDlg.h"
 #include "MainUI\InstallParamDlg.h"

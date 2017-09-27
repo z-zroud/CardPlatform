@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "ModifyKmcUI.h"
+#include "UIModifyKmc.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\SqliteDB.h"
 #include "Tool\ModifyKmc.h"

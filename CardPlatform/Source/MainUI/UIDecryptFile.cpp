@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "DecryptFileUI.h"
+#include "UIDecryptFile.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\FileDlg.h"
 #include "Util\DpDecrypt.h"

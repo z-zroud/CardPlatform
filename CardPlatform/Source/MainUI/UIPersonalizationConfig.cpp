@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "PersonalizationConfigUI.h"
+#include "UIPersonalizationConfig.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\IniParaser.h"
 

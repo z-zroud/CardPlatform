@@ -168,13 +168,7 @@
     <ClCompile Include="Source\Factory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MainUI\ModifyKmcUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MainUI\DialogBuilderCallbackEx.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MainUI\PersonalizationUI.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
     <ClCompile Include="Source\CardCheck\Terminal.cpp">
@@ -182,9 +176,6 @@
     </ClCompile>
     <ClCompile Include="Source\CardCheck\CommTransaction.cpp">
       <Filter>Source Files\CardCheck</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MainUI\CardCheckUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
     </ClCompile>
     <ClCompile Include="Source\Util\Base.cpp">
       <Filter>Source Files\Util</Filter>
@@ -210,31 +201,10 @@
     <ClCompile Include="Source\Util\FileDlg.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MainUI\YLConverterUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MainUI\HTConverterUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MainUI\GEConverterUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MainUI\YLConfigUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
     <ClCompile Include="Source\DP\YLDP\YLDPConfig.cpp">
       <Filter>Source Files\DP\YLDP</Filter>
     </ClCompile>
-    <ClCompile Include="Source\MainUI\PersonalizationConfigUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MainUI\DecryptFileUI.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
     <ClCompile Include="Source\MainUI\TerminalDlg.cpp">
-      <Filter>Source Files\MainUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MainUI\ECLoadUI.cpp">
       <Filter>Source Files\MainUI</Filter>
     </ClCompile>
     <ClCompile Include="Source\DP\HTDP\HTDPParaser.cpp">
@@ -242,6 +212,36 @@
     </ClCompile>
     <ClCompile Include="Source\Util\DpDecrypt.cpp">
       <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UICardCheck.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIDecryptFile.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIECLoad.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIGEConverter.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIHTConverter.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIModifyKmc.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIPersonalizationConfig.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIPersonalization.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIYLConfig.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MainUI\UIYLConverter.cpp">
+      <Filter>Source Files\MainUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -326,17 +326,11 @@
     <ClInclude Include="Source\Interface\InterfaceInstance.h">
       <Filter>Header Files\Interface</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MainUI\ModifyKmcUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MainUI\IDialogBuilderCallbackEx.h">
       <Filter>Header Files\MainUI</Filter>
     </ClInclude>
     <ClInclude Include="Source\Interface\Tag.h">
       <Filter>Header Files\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainUI\PersonaliztionUI.h">
-      <Filter>Header Files\MainUI</Filter>
     </ClInclude>
     <ClInclude Include="Source\CardCheck\Terminal.h">
       <Filter>Header Files\CardCheck</Filter>
@@ -349,9 +343,6 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainUI\CardCheckUI.h">
-      <Filter>Header Files\MainUI</Filter>
     </ClInclude>
     <ClInclude Include="Source\Util\Base.h">
       <Filter>Header Files\Util</Filter>
@@ -377,31 +368,10 @@
     <ClInclude Include="Source\Util\FileDlg.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MainUI\YLConverterUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainUI\HTConverterUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainUI\GEConverterUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainUI\YLConfigUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
     <ClInclude Include="Source\DP\YLDP\YLDPConfig.h">
       <Filter>Header Files\DP\YLDP</Filter>
     </ClInclude>
-    <ClInclude Include="Source\MainUI\PersonalizationConfigUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainUI\DecryptFileUI.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
     <ClInclude Include="Source\MainUI\TerminalDlg.h">
-      <Filter>Header Files\MainUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\MainUI\ECLoadUI.h">
       <Filter>Header Files\MainUI</Filter>
     </ClInclude>
     <ClInclude Include="Source\DP\HTDP\HTDPParser.h">
@@ -409,6 +379,36 @@
     </ClInclude>
     <ClInclude Include="Source\Util\DpDecrypt.h">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UICardCheck.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIGEConverter.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIECLoad.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIDecryptFile.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIHTConverter.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIModifyKmc.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIPersonalizationConfig.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIPersonaliztion.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIYLConfig.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MainUI\UIYLConverter.h">
+      <Filter>Header Files\MainUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

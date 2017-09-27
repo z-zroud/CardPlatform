@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "YLConfigUI.h"
+#include "UIYLConfig.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\FileDlg.h"
 #include "DP\YLDP\YLDPConfig.h"

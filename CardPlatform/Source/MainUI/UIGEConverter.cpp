@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "GEConverterUI.h"
+#include "UIGEConverter.h"
 #include "IDialogBuilderCallbackEx.h"
 #include "Util\FileDlg.h"
 
