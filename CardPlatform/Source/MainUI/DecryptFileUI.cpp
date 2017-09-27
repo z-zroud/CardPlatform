@@ -34,7 +34,7 @@ void CDecryptFileUI::DoInit()
 void CDecryptFileUI::InitDlg()
 {
     m_pEncryptFile	= static_cast<CEditUI*>(m_pManager->FindControl(_T("editEncryptFile")));
-	m_pScanFile		= static_cast<CButtonUI*>(m_pManager->FindControl(_T("btnEncryptFile")));
+	//m_pScanFile		= static_cast<CButtonUI*>(m_pManager->FindControl(_T("btnEncryptFile")));
 	m_pDecryptType	= static_cast<CComboUI*>(m_pManager->FindControl(_T("comboEncryptType")));
     m_pKey			= static_cast<CEditUI*>(m_pManager->FindControl(_T("editKey")));
 
@@ -53,7 +53,7 @@ void CDecryptFileUI::Notify(TNotifyUI& msg) //处理内嵌模块的消息
         {
 			CFileDlg fileDlg;
 			string filePath = fileDlg.OpenFileDlg();
-			m_pScanFile->SetText(filePath.c_str());
+            m_pEncryptFile->SetText(filePath.c_str());
 		}
 		else if (name == _T("btnDoDecrypt"))
 		{

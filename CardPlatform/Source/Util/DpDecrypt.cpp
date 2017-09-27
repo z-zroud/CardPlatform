@@ -13,9 +13,18 @@ bool DpDecrypt::Decrypt(const string& key, const string& input, string& output, 
 		char* result = new char[inputLen + 1];
 		memset(result, 0, inputLen + 1);
 		
-		Des3_ECB(result, (char*)key.c_str(), (char*)input.c_str(), inputLen + 1);
-		output = result;
-
+        //for (int i = 0; i < inputLen; i += 16)
+        //{
+        //    char tmp[17] = { 0 };
+        //    _Des3(tmp, (char*)key.c_str(), (char*)input.substr(i, 16).c_str());
+        //    output += tmp;
+        //}
+        for (int i = 0; i < inputLen; i += 16)
+        {
+            char tmp[17] = { 0 };
+            Des3(tmp, (char*)key.c_str(), (char*)input.substr(i, 16).c_str());
+            output += tmp;
+        }
 		return true;
 	}
 
@@ -50,7 +59,7 @@ bool DpDecrypt::Decrypt(const string& key, const string& path, DECRYPT_TYPE type
 		return false;	//½âÃÜÊ§°Ü
 	}
 	string newPath;
-	int pos = path.find('.');
+	int pos = path.find_last_of('.');
 	if (pos == string::npos)
 	{
 		newPath = path + "_decrypt";
