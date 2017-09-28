@@ -41,11 +41,15 @@ void RealseContext()
     }
 }
 
-int GetReaders(char** readers, int& count, int len)
+extern "C" int GetReaders(char** readers, int& count)
 {
     DWORD nReadersLen = 1024;
     char szReaders[1024] = { 0 };
 
+	if (g_scardContext == NULL)
+	{
+		EstablishContext();
+	}
     HRESULT hRet = SCardListReaders(g_scardContext,
         NULL,
         szReaders,
@@ -63,14 +67,15 @@ int GetReaders(char** readers, int& count, int len)
         pos++;
         if (szReaderName[pos] == '\0')
         {
-            if (num < count)
-            {
-                memcpy(readers[num], szReaderName, strlen(szReaderName));
-                num++;
-            }            
+			int len = strlen(szReaderName);
+			readers[num] = new char[len + 1];
+			memset(readers[num], 0, len + 1);
+            memcpy(readers[num], szReaderName, len);
+            num++;           
             szReaderName += pos + 1;
         }
     }
+	count = num;
 
     return 0;
 }
@@ -107,7 +112,10 @@ bool ColdReset()
 bool OpenReader(const char* reader)
 {
     strncpy_s(g_readerName, sizeof(g_readerName), reader, strlen(reader));
-
+	if (g_scardContext == NULL)
+	{
+		EstablishContext();
+	}
     HRESULT hResult = SCardConnect(g_scardContext,
         g_readerName,
         SCARD_SHARE_SHARED,
@@ -141,7 +149,7 @@ void GetATR(char* atr, int len)
 {
     char			szHexATR[256] = { 0 };
     BYTE			szATR[SCARD_ATR_LENGTH] = { 0 };
-    DWORD			szReaderNameLenght = strlen(g_readerName);
+    DWORD			szReaderNameLenght = 256;
     DWORD			dwATRLen;
     DWORD			dwProtocol;
     DWORD			dwState;
@@ -172,7 +180,7 @@ int  GetCardStatus()
 {
     BYTE			szATR[SCARD_ATR_LENGTH] = { 0 };
     char			szHexATR[SCARD_ATR_LENGTH] = { 0 };
-    DWORD			szReaderNameLenght = strlen(g_readerName);
+    DWORD			szReaderNameLenght = 256;
     DWORD			dwATRLen;
     DWORD			dwProtocol;
     DWORD			dwState;
@@ -199,7 +207,7 @@ int  GetTransProtocol()
 {
     BYTE			szATR[SCARD_ATR_LENGTH] = { 0 };
     char			szHexATR[SCARD_ATR_LENGTH] = { 0 };
-    DWORD			szReaderNameLenght = strlen(g_readerName);
+    DWORD			szReaderNameLenght = 256;
     DWORD			dwATRLen;
     DWORD			dwProtocol;
     DWORD			dwState;
@@ -218,35 +226,30 @@ int  GetTransProtocol()
     return dwProtocol;
 }
 
-int  SendApduCmd(const char* cmd, char* output, int &len)
+bool  SendApduCmd(const char* cmd, char* output, int &len)
 {
     HRESULT hRet = S_FALSE;
 
     //删除字符串中的空格
     int cmdLen = strlen(cmd);
-    char* noSpaceCmd = new char[cmdLen];
-    memset(noSpaceCmd, 0, cmdLen);
+	char noSpaceCmd[1024] = { 0 };
 
-    Tool::DeleteSpace(cmd, noSpaceCmd, cmdLen);
+    Tool::DeleteSpace(cmd, noSpaceCmd, sizeof(noSpaceCmd));
 
     cmdLen = strlen(noSpaceCmd);
     if (cmdLen < 8 || cmdLen % 2 != 0)
     {
-        return -1;
+        return false;
     }
     unsigned char szAPDU[256] = { 0 };
     Tool::AscToBcd(szAPDU, (unsigned char*)noSpaceCmd, cmdLen);
-
-    unsigned char* result = NULL;
-    DWORD resultLen = 0;
-
     switch (g_dwActiveProtocol)
     {
     case 1:
-        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T0, szAPDU, cmdLen / 2, NULL, result, &resultLen);
+        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T0, szAPDU, cmdLen / 2, NULL, (unsigned char*)output, (DWORD*)&len);
         break;
     case 2:
-        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T1, szAPDU, cmdLen / 2, NULL, result, &resultLen);
+        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T1, szAPDU, cmdLen / 2, NULL, (unsigned char*)output, (DWORD*)&len);
         break;
     default:
         //Log->Warning("数据传输协议未知 %d", m_dwActiveProtocol);
@@ -254,10 +257,10 @@ int  SendApduCmd(const char* cmd, char* output, int &len)
     }
     if (hRet != SCARD_S_SUCCESS)
     {
-        return -1;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
 //APDU响应报文
@@ -271,13 +274,13 @@ bool GetAPDUResponseCommand(unsigned char SW1, char* szResponse, int& len)
     return SendApduCmd(cmd, szResponse, len);
 }
 
-int  SendApdu(const char* cmd, char* output, int &len)
+int  SendApdu(const char* cmd, char* output, int len)
 {
     bool bResult = false;
     unsigned char SW1, SW2;
-    char* szResponse;
-    DWORD dwResponseLen = 1024;
-    if (!SendApduCmd(cmd, output, len))
+	char szResponse[1024] = {0};
+    int dwResponseLen = 1024;
+    if (!SendApduCmd(cmd, szResponse, len))
     {
         return false;
     }
@@ -287,47 +290,36 @@ int  SendApdu(const char* cmd, char* output, int &len)
 
     if (SW1 == 0x61)	//通过00c0命令获取响应数据, SW2为响应数据返回的长度
     {
-        //memset(szResponse, 0, outputLen);
-        //dwResponseLen = outputLen;
-        bResult = GetAPDUResponseCommand(SW2, szResponse, dwResponseLen);
-        SW1 = szResponse[dwResponseLen - 2];
-        SW2 = szResponse[dwResponseLen - 1];
+        GetAPDUResponseCommand(SW2, szResponse, dwResponseLen);		
     }
     else if (SW1 == 0x6C)	//通过原先的命令获取响应数据, SW2为响应数据返回的长度
     {
-        //memset(szResponse, 0, outputLen);
-        //dwResponseLen = outputLen;
         char temp[3] = { 0 };
         _itoa_s(SW2, temp, 16);
         sprintf_s(temp, 3, "%02X", SW2);
-        strCommand.append(temp);
-        char cmd2[1024] = { 0 };
-
-        bResult = SendApduCmd(strCommand, szResponse, &dwResponseLen);
-        SW1 = szResponse[dwResponseLen - 2];
-        SW2 = szResponse[dwResponseLen - 1];
+       		
+        char cmd2[128] = { 0 };
+		sprintf_s(cmd2, 128, "%s%s", cmd, temp);
+        SendApduCmd(cmd2, szResponse, dwResponseLen);
     }
-    else {
-        bResult = true;
-    }
-    memset(response.data, 0, MAX_DATA_LEN);
-    Tool::BcdToAsc(response.data, (char*)szResponse, dwResponseLen * 2 - 4);
-    response.SW1 = SW1;
-    response.SW2 = SW2;
 
-    return bResult & (SW1 == 0x90 && SW2 == 0x00);
+    Tool::BcdToAsc(szResponse, output, dwResponseLen * 2 - 4);
+
+	int result = atoi(szResponse + dwResponseLen - 2);
+
+	return result;
 }
 
 
 /***********************************************
 * 功能： 通过APDU指令与卡片进行交互
 ************************************************/
-int  SendApdu(const char* cmd)
+int  SendApdu2(const char* cmd)
 {
     return -1;
 }
 
-char* GetLastError(int status)
+char* GetApduError(int status)
 {
     return NULL;
 }

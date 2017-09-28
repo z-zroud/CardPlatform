@@ -15,42 +15,42 @@
 * 参数： count 读卡器接口个数
 * 参数： len   读卡器名称长度
 *****************************************************/
-extern "C" int GetReaders(char** readers, int& count, int len);
+extern "C" PCSC_API int GetReaders(char** readers, int& count);
 
 /*****************************************************
 * 功能： 热复位，SCARD_LEAVE_CARD
 *****************************************************/
-extern "C" bool WarmReset();
+extern "C" PCSC_API bool WarmReset();
 
 /*****************************************************
 * 功能： 冷复位，SCARD_UNPOWER_CARD 断电复位
 *****************************************************/
-extern "C" bool ColdReset();
+extern "C" PCSC_API bool ColdReset();
 
 /*****************************************************
 * 功能： 选择某个读卡器与智能卡进行交互
 *****************************************************/
-extern "C" bool OpenReader(const char* reader);
+extern "C" PCSC_API bool OpenReader(const char* reader);
 
 /*****************************************************
 * 功能： 关闭读卡器
 *****************************************************/
-extern "C" void CloseReader();
+extern "C" PCSC_API void CloseReader();
 
 /*****************************************************
 * 功能： 获取ATR
 *****************************************************/
-extern "C" void GetATR(char* atr, int len);
+extern "C" PCSC_API void GetATR(char* atr, int len);
 
 /*****************************************************
 * 功能： 获取卡片状态
 *****************************************************/
-extern "C" int  GetCardStatus();
+extern "C" PCSC_API int  GetCardStatus();
 
 /*****************************************************
 * 功能： 获取与卡片通讯协议
 *****************************************************/
-extern "C" int  GetTransProtocol();
+extern "C" PCSC_API int  GetTransProtocol();
 
 /*****************************************************
 * 功能： 通过APDU指令与卡片进行交互
@@ -58,19 +58,19 @@ extern "C" int  GetTransProtocol();
 * 参数： output    输出结果，不包含SW1,SW2
 * 返回值： 返回执行结果的状态，通过返回值可以查询结果
 *****************************************************/
-extern "C" int  SendApdu(const char* cmd, char* output, int &len);
+extern "C" PCSC_API int  SendApdu(const char* cmd, char* output, int len);
 
 /*****************************************************
 * 功能： 通过APDU指令与卡片进行交互
 * 参数： cmd APDU指令
 * 返回值： 返回执行结果的状态，通过返回值可以查询结果
 *****************************************************/
-extern "C" int SendApdu(const char* cmd);
+extern "C" PCSC_API int SendApdu2(const char* cmd);
 
 /*****************************************************
 * 功能： 通过APDU指令与卡片进行交互
 * 参数： status SendApdu返回值
 * 返回值： 返回错误描述字符串
 *****************************************************/
-extern "C" char* GetLastError(int status);
+extern "C" PCSC_API char* GetApduError(int status);
 
