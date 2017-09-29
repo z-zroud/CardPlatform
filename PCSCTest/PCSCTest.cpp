@@ -30,7 +30,7 @@ int main()
 	GetCardStatus();
 	GetTransProtocol();
 
-	char output[128] = { 0 };
+	char output[256] = { 0 };
 	SendApdu("00A40400 08 A000000003000000", output, sizeof(output));
 
     return 0;

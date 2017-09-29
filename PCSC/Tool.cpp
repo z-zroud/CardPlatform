@@ -9,7 +9,7 @@ using namespace std;
 
 namespace  Tool 
 {
-	void AscToBcd(byte *bcd, byte *asc, long asc_len)
+	void BcdToAsc(byte *bcd, byte *asc, long asc_len)
 	{
 		long j;
 		unsigned char flag;
@@ -47,14 +47,14 @@ namespace  Tool
 		return result;
 	}
 
-	void BcdToAsc(char *asc, char *bcd, long asc_len)
+	void AscToBcd(char *asc, char *bcd, long bcd_len)
 	{
 		long j;
 		unsigned char   is_first;
 		unsigned char  by = 0;
 
 		is_first = 1;
-		for (j = 0; j<asc_len; j++)
+		for (j = 0; j<bcd_len; j++)
 		{
 			if (is_first)  by = (bcd[j / 2] & 0xf0) >> 4;
 			else

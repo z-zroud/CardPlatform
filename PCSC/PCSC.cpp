@@ -60,7 +60,7 @@ extern "C" int GetReaders(char** readers, int& count)
     }
 
     char* szReaderName = szReaders;
-    int pos = 0;
+    unsigned int pos = 0;
     int num = 0;
     while (szReaderName[pos] != '\0' && pos < nReadersLen)
     {
@@ -242,7 +242,7 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
         return false;
     }
     unsigned char szAPDU[256] = { 0 };
-    Tool::AscToBcd(szAPDU, (unsigned char*)noSpaceCmd, cmdLen);
+    Tool::BcdToAsc(szAPDU, (unsigned char*)noSpaceCmd, cmdLen);
     switch (g_dwActiveProtocol)
     {
     case 1:
@@ -252,7 +252,6 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
         hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T1, szAPDU, cmdLen / 2, NULL, (unsigned char*)output, (DWORD*)&len);
         break;
     default:
-        //Log->Warning("数据传输协议未知 %d", m_dwActiveProtocol);
         return false;
     }
     if (hRet != SCARD_S_SUCCESS)
@@ -278,19 +277,20 @@ int  SendApdu(const char* cmd, char* output, int len)
 {
     bool bResult = false;
     unsigned char SW1, SW2;
-	char szResponse[1024] = {0};
-    int dwResponseLen = 1024;
-    if (!SendApduCmd(cmd, szResponse, len))
+	char response[1024] = {0};
+    int responseLen = 1024;
+
+    if (!SendApduCmd(cmd, response, responseLen))
     {
-        return false;
+        return -1;
     }
 
-    SW1 = output[len - 2];
-    SW2 = output[len - 1];
+    SW1 = response[responseLen - 2];
+    SW2 = response[responseLen - 1];
 
     if (SW1 == 0x61)	//通过00c0命令获取响应数据, SW2为响应数据返回的长度
     {
-        GetAPDUResponseCommand(SW2, szResponse, dwResponseLen);		
+        GetAPDUResponseCommand(SW2, response, responseLen);
     }
     else if (SW1 == 0x6C)	//通过原先的命令获取响应数据, SW2为响应数据返回的长度
     {
@@ -300,12 +300,18 @@ int  SendApdu(const char* cmd, char* output, int len)
        		
         char cmd2[128] = { 0 };
 		sprintf_s(cmd2, 128, "%s%s", cmd, temp);
-        SendApduCmd(cmd2, szResponse, dwResponseLen);
+		if (!SendApduCmd(cmd2, response, responseLen))
+		{
+			return -1;
+		}
     }
+	if (responseLen * 2 - 4 > len)
+	{
+		return 0x1000;	//buff is too small
+	}
+    Tool::AscToBcd(output, response, responseLen * 2 - 4);
 
-    Tool::BcdToAsc(szResponse, output, dwResponseLen * 2 - 4);
-
-	int result = atoi(szResponse + dwResponseLen - 2);
+	int result = atoi(response + responseLen - 2);
 
 	return result;
 }
@@ -321,7 +327,41 @@ int  SendApdu2(const char* cmd)
 
 char* GetApduError(int status)
 {
-    return NULL;
+	switch (status)
+	{
+	case 0x1000:	return "recive buffer is too small";
+	case 0x6281:	return "the relevant data may be corrupted";			
+	case 0x6400:	return "Wrong context(for PK Crypto commands)";				
+	case 0x6581:	return "Write problem / Memory failure (ISO class byte)";		
+	case 0x6700:	return "Incorrect length (Lc or Le)";							
+	case 0x6900:	return "Unable to process";										
+	case 0x6901:	return "Command not allowed, invalid state";					
+	case 0x6981:	return "Command incompatible with file organization";			
+	case 0x6982:	return "Security status not satisfied";							
+	case 0x6983:	return "Authentication method blocked";							
+	case 0x6984:	return "Challenge not present or PIN is blocked";				
+	case 0x6985:	return "Conditions of use not satisfied";						//GemGold R3 PBOC EF15文件是否支持ED/EP等
+	case 0x6986:	return "No current EF selected";								
+	case 0x6987:	return "Secure messaging object missing (that is, MAC missing)"; 
+	case 0x6988:	return "Secure messaging data object incorrect";				
+	case 0x6A80:	return "Incorrect parameters in the data field";				
+	case 0x6A81:	return "Function not supported, invalidated file";				
+	case 0x6A82:	return "File not found";										
+	case 0x6A83:	return "Record not found";										
+	case 0x6A84:	return "Not enough memory space in the file";					
+	case 0x6A86:	return "Incorrect parameters(P1 & P2)";							
+	case 0x6A88:	return "Referenced data not found";								
+	case 0x6D00:	return "Unknown instruction code(command is not present)";		
+	case 0x6E00:	return "Wrong instruction class given in the command";			
+	case 0x6F00:	return "No data available for GET RESPONSE";					
+	case 0x9302:	return "Invalid MAC.";											
+	case 0x9303:	return "Application permanently blocked.";						
+	case 0x9401:	return "Insufficient funds";									
+	case 0x9402:	return "Transaction counter overflow";							
+	case 0x9403:	return "Key Index not supported";								
+	case 0x9406:	return "Requested TAC/MAC not available";						
+		}
+	return "Unkonw error";
 }
 
 
