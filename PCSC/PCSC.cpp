@@ -226,30 +226,32 @@ int  GetTransProtocol()
     return dwProtocol;
 }
 
+/********************************************************
+* 功能：发送原子APDU指令
+*********************************************************/
 bool  SendApduCmd(const char* cmd, char* output, int &len)
 {
     HRESULT hRet = S_FALSE;
 
     //删除字符串中的空格
     int cmdLen = strlen(cmd);
-	char noSpaceCmd[1024] = { 0 };
-
+	char noSpaceCmd[512] = { 0 };
     Tool::DeleteSpace(cmd, noSpaceCmd, sizeof(noSpaceCmd));
-
     cmdLen = strlen(noSpaceCmd);
-    if (cmdLen < 8 || cmdLen % 2 != 0)
+
+    if (cmdLen < 8 || cmdLen % 2 != 0)	//bcd码命令必须包含命令头8字节，必须是偶数字节
     {
         return false;
     }
-    unsigned char szAPDU[256] = { 0 };
-    Tool::BcdToAsc(szAPDU, (unsigned char*)noSpaceCmd, cmdLen);
+    unsigned char apdu[256] = { 0 };
+    Tool::BcdToAsc(apdu, (unsigned char*)noSpaceCmd, cmdLen);
     switch (g_dwActiveProtocol)
     {
     case 1:
-        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T0, szAPDU, cmdLen / 2, NULL, (unsigned char*)output, (DWORD*)&len);
+        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T0, apdu, cmdLen / 2, NULL, (unsigned char*)output, (DWORD*)&len);
         break;
     case 2:
-        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T1, szAPDU, cmdLen / 2, NULL, (unsigned char*)output, (DWORD*)&len);
+        hRet = SCardTransmit(g_scardHandle, SCARD_PCI_T1, apdu, cmdLen / 2, NULL, (unsigned char*)output, (DWORD*)&len);
         break;
     default:
         return false;
@@ -273,11 +275,15 @@ bool GetAPDUResponseCommand(unsigned char SW1, char* szResponse, int& len)
     return SendApduCmd(cmd, szResponse, len);
 }
 
+/********************************************************
+* 功能：发送APDU指令与卡片进行交互
+*********************************************************/
 int  SendApdu(const char* cmd, char* output, int len)
 {
     bool bResult = false;
     unsigned char SW1, SW2;
-	char response[1024] = {0};
+
+	char response[1024] = {0};	//保存APDU返回值
     int responseLen = 1024;
 
     if (!SendApduCmd(cmd, response, responseLen))
@@ -309,22 +315,33 @@ int  SendApdu(const char* cmd, char* output, int len)
 	{
 		return 0x1000;	//buff is too small
 	}
-    Tool::AscToBcd(output, response, responseLen * 2 - 4);
+	char tmp[2048] = { 0 };
+    Tool::AscToBcd(tmp, response, responseLen * 2);
 
-	int result = atoi(response + responseLen - 2);
+	if (strlen(tmp) < 4)
+	{
+		return -1;
+	}
+	memcpy(output, tmp, strlen(tmp) - 4);
+	int result = strtol(tmp + strlen(tmp) - 4, NULL, 16);
 
 	return result;
 }
 
 
 /***********************************************
-* 功能： 通过APDU指令与卡片进行交互
+* 功能： 通过APDU指令与卡片进行交互,类似读取tag指令
+* 不需要返回值，
 ************************************************/
 int  SendApdu2(const char* cmd)
 {
-    return -1;
+	char output[2048] = { 0 };
+	return SendApdu(cmd, output, sizeof(output));
 }
 
+/**********************************************
+* 功能： 通过APUD返回值获取相关描述信息
+***********************************************/
 char* GetApduError(int status)
 {
 	switch (status)

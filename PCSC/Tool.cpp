@@ -9,27 +9,28 @@ using namespace std;
 
 namespace  Tool 
 {
-	void BcdToAsc(byte *bcd, byte *asc, long asc_len)
+	void BcdToAsc(byte *asc, byte *bcd, long bcd_len)
+	//void BcdToAsc(byte *bcd, byte *asc, long asc_len)
 	{
 		long j;
 		unsigned char flag;
 		unsigned char is_high, by;
 
-		is_high = !(asc_len % 2);
-		flag = (asc_len % 2);
-		bcd[0] = 0x00;
+		is_high = !(bcd_len % 2);
+		flag = (bcd_len % 2);
+		asc[0] = 0x00;
 
-		for (j = 0; j<asc_len; j++)
+		for (j = 0; j<bcd_len; j++)
 		{
-			by = asc[j];
+			by = bcd[j];
 			if (by == ' ') by = 0;
 			if (!(by & 0x10) && by) by += 9;
 
-			if (is_high)  bcd[(j + flag) / 2] = by << 4;
+			if (is_high)  asc[(j + flag) / 2] = by << 4;
 			else
 			{
 				by &= 0x0f;
-				bcd[(j + flag) / 2] |= by;
+				asc[(j + flag) / 2] |= by;
 			}
 			is_high = !is_high;
 		}
@@ -47,22 +48,22 @@ namespace  Tool
 		return result;
 	}
 
-	void AscToBcd(char *asc, char *bcd, long bcd_len)
+	void AscToBcd(char *bcd, char *asc, long asc_len)
 	{
 		long j;
 		unsigned char   is_first;
 		unsigned char  by = 0;
 
 		is_first = 1;
-		for (j = 0; j<bcd_len; j++)
+		for (j = 0; j<asc_len; j++)
 		{
-			if (is_first)  by = (bcd[j / 2] & 0xf0) >> 4;
+			if (is_first)  by = (asc[j / 2] & 0xf0) >> 4;
 			else
 			{
-				by = bcd[j / 2] & 0x0F;
+				by = asc[j / 2] & 0x0F;
 			}
 			by += (by >= 0x0a) ? 0x37 : '0';       /* 0x37 = 'A' - 0x0a*/
-			asc[j] = by;
+			bcd[j] = by;
 			is_first = !is_first;
 		}
 		by = by;
