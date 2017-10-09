@@ -52,5 +52,8 @@
                         <VerticalLayout name="outputPanelContainer" minheight="50" height="200" sepheight="-5" sepimm="true"/>
                   </VerticalLayout>
             </HorizontalLayout>
+            <HorizontalLayout>
+                  <RichEdit name="richError" bkcolor="#FF9E9E9E" vscrollbar="true" autovscroll="true" hscrollbar="true" />
+            </HorizontalLayout>
       </VerticalLayout>
 </Window>

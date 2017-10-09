@@ -22,5 +22,6 @@ private:
 
 private:
 	map<CDuiString, bool> m_SysFileMenuInfo;
+	map<CDuiString, bool> m_logMenuInfo;
 };
 

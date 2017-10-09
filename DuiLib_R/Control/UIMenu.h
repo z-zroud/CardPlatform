@@ -15,6 +15,7 @@ struct ContextMenuParam
 	HWND hWnd;
 };
 
+//菜单对齐方式
 enum MenuAlignment
 {
 	eMenuAlignment_Left = 1 << 1,
@@ -24,6 +25,7 @@ enum MenuAlignment
 };
 
 
+//菜单默认设置
 enum MenuItemDefaultInfo
 {
 	ITEM_DEFAULT_HEIGHT = 30,		//每一个item的默认高度（只在竖状排列时自定义）
@@ -236,20 +238,19 @@ public:
 	CMenuUI();
 	virtual ~CMenuUI();
 
-    LPCTSTR GetClass() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
+    LPCTSTR	GetClass() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
 
-	virtual void DoEvent(TEventUI& event);
+	virtual void	DoEvent(TEventUI& event);
 
-    virtual bool Add(CControlUI* pControl);
-    virtual bool AddAt(CControlUI* pControl, int iIndex);
+    virtual bool	Add(CControlUI* pControl);
+    virtual bool	AddAt(CControlUI* pControl, int iIndex);
 
-    virtual int GetItemIndex(CControlUI* pControl) const;
-    virtual bool SetItemIndex(CControlUI* pControl, int iIndex);
-    virtual bool Remove(CControlUI* pControl);
+    virtual int		GetItemIndex(CControlUI* pControl) const;
+    virtual bool	SetItemIndex(CControlUI* pControl, int iIndex);
+    virtual bool	Remove(CControlUI* pControl);
 
 	SIZE EstimateSize(SIZE szAvailable) override;
-
 	void SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue) ;
 };
 
@@ -278,8 +279,11 @@ public:
 	*	@pMenuCheckInfo	保存菜单的单选和复选信息结构指针
 	*	@dwAlignment		菜单的出现位置，默认出现在鼠标的右下侧。
 	*/
-	static CMenuWnd* CreateMenu(CMenuElementUI* pOwner, STRINGorID xml, POINT point,
-		CPaintManagerUI* pMainPaintManager, std::map<CDuiString, bool>* pMenuCheckInfo = NULL,
+	static CMenuWnd* CreateMenu(CMenuElementUI* pOwner, 
+		STRINGorID xml, 
+		POINT point,
+		CPaintManagerUI* pMainPaintManager, 
+		std::map<CDuiString, bool>* pMenuCheckInfo = NULL,
 		DWORD dwAlignment = eMenuAlignment_Left | eMenuAlignment_Top);
 
 	static CDuiString GetClickedMenuName();
@@ -323,6 +327,11 @@ private:
 	static CDuiString	s_clickedMenuItem;	//被单击的菜单项名字
 };
 
+
+/***************************************************************
+* 菜单项类，封装了每个菜单项的属性和行为，每个菜单项也是一个容器，可以
+* 包含子菜单。
+****************************************************************/
 class CListContainerElementUI;
 class UILIB_API CMenuElementUI : public CListContainerElementUI
 {
@@ -331,34 +340,34 @@ public:
     CMenuElementUI();
 	~CMenuElementUI();
 
-    LPCTSTR GetClass() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
-    void DoPaint(HDC hDC, const RECT& rcPaint);
-	void DrawItemText(HDC hDC, const RECT& rcItem);
-	SIZE EstimateSize(SIZE szAvailable);
+    LPCTSTR	GetClass() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
+    void	DoPaint(HDC hDC, const RECT& rcPaint);
+	void	DrawItemText(HDC hDC, const RECT& rcItem);
+	SIZE	EstimateSize(SIZE szAvailable);
 
 	void DoEvent(TEventUI& event);
 
 	CMenuWnd* GetMenuWnd();
 	void CreateMenuWnd();
 	
-	void SetLineType();
-	void SetLineColor(DWORD color);
-	DWORD GetLineColor() const;
-	void SetLinePadding(RECT rcInset);
-	RECT GetLinePadding() const;
-	void SetIcon(LPCTSTR strIcon);
-	void SetIconSize(LONG cx, LONG cy);
-	void DrawItemIcon(HDC hDC, const RECT& rcItem);
-	void SetChecked(bool bCheck = true);
-	bool GetChecked() const;
-	void SetCheckItem(bool bCheckItem = false);
-	bool GetCheckItem() const;
+	void	SetLineType();
+	void	SetLineColor(DWORD color);
+	DWORD	GetLineColor() const;
+	void	SetLinePadding(RECT rcInset);
+	RECT	GetLinePadding() const;
+	void	SetIcon(LPCTSTR strIcon);
+	void	SetIconSize(LONG cx, LONG cy);
+	void	DrawItemIcon(HDC hDC, const RECT& rcItem);
+	void	SetChecked(bool bCheck = true);
+	bool	GetChecked() const;
+	void	SetCheckItem(bool bCheckItem = false);
+	bool	GetCheckItem() const;
 
-	void SetShowExplandIcon(bool bShow);
-	void DrawItemExpland(HDC hDC, const RECT& rcItem);
+	void	SetShowExplandIcon(bool bShow);
+	void	DrawItemExpland(HDC hDC, const RECT& rcItem);
 
-	void SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
+	void	SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
 
 protected:
 	CMenuWnd*	m_pWindow;

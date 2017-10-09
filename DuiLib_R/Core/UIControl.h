@@ -203,7 +203,7 @@ protected:
     bool m_bUpdateNeeded;
     bool m_bMenuUsed;
     RECT m_rcItem;
-    RECT m_rcPadding;
+    RECT m_rcPadding;	//控件外边距
     SIZE m_cXY;			//控件起始位置，相对父控件
     SIZE m_cxyFixed;	//width,height属性
     SIZE m_cxyMin;

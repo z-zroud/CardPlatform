@@ -17,7 +17,7 @@ int main()
 	GetReaders(readers, count);
 	for (int i = 0; i < count; i++)
 	{
-		printf("%s", readers[i]);
+		printf("%s\n", readers[i]);
 	}
 	OpenReader(readers[0]);
 	WarmReset();
@@ -25,13 +25,14 @@ int main()
 
 	char atr[33] = { 0 };
 	GetATR(atr, sizeof(atr));
-	printf("%s", atr);
+	printf("%s\n", atr);
 
 	GetCardStatus();
 	GetTransProtocol();
 
 	char output[256] = { 0 };
 	SendApdu("00A40400 08 A000000003000000", output, sizeof(output));
+	printf("%s\n", output);
 
     return 0;
 }

@@ -128,6 +128,7 @@
     <Xml Include="UI\FileDecrypt.xml" />
     <Xml Include="UI\GEConverter.xml" />
     <Xml Include="UI\HTConverter.xml" />
+    <Xml Include="UI\LogMenu.xml" />
     <Xml Include="UI\TerminalDlg.xml" />
     <Xml Include="UI\TerminalMenu.xml" />
     <Xml Include="UI\YLConfig.xml" />

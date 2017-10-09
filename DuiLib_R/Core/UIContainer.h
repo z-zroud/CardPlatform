@@ -6,19 +6,21 @@
 namespace DuiLib {
 /////////////////////////////////////////////////////////////////////////////////////
 //
-
+/**********************************************************************
+* 容器接口类
+***********************************************************************/
 class IContainerUI
 {
 public:
     virtual CControlUI* GetItemAt(int iIndex) const = 0;
-    virtual int GetItemIndex(CControlUI* pControl) const  = 0;
-    virtual bool SetItemIndex(CControlUI* pControl, int iIndex)  = 0;
-    virtual int GetCount() const = 0;
-    virtual bool Add(CControlUI* pControl) = 0;
-    virtual bool AddAt(CControlUI* pControl, int iIndex)  = 0;
-    virtual bool Remove(CControlUI* pControl) = 0;
-    virtual bool RemoveAt(int iIndex)  = 0;
-    virtual void RemoveAll() = 0;
+    virtual int		GetItemIndex(CControlUI* pControl) const  = 0;
+    virtual bool	SetItemIndex(CControlUI* pControl, int iIndex)  = 0;
+    virtual int		GetCount() const = 0;
+    virtual bool	Add(CControlUI* pControl) = 0;
+    virtual bool	AddAt(CControlUI* pControl, int iIndex)  = 0;
+    virtual bool	Remove(CControlUI* pControl) = 0;
+    virtual bool	RemoveAt(int iIndex)  = 0;
+    virtual void	RemoveAll() = 0;
 };
 
 
@@ -26,6 +28,9 @@ public:
 //
 class CScrollBarUI;
 
+/********************************************************************
+* 容器基础类
+*********************************************************************/
 class UILIB_API CContainerUI : public CControlUI, public IContainerUI
 {
 public:
@@ -33,9 +38,12 @@ public:
     virtual ~CContainerUI();
 
 public:
-    LPCTSTR GetClass() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
+    LPCTSTR	GetClass() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
 
+	/***************************************
+	* 实现IContainerUI接口
+	****************************************/
     CControlUI* GetItemAt(int iIndex) const;
     int GetItemIndex(CControlUI* pControl) const;
     bool SetItemIndex(CControlUI* pControl, int iIndex);
@@ -45,6 +53,7 @@ public:
     bool Remove(CControlUI* pControl);
     bool RemoveAt(int iIndex);
     void RemoveAll();
+
 
     void DoEvent(TEventUI& event);
     void SetVisible(bool bVisible = true);

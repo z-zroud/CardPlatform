@@ -2461,6 +2461,10 @@ LRESULT CRichEditUI::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, boo
                         return 0;
                     }
                 }
+				if (uMsg == WM_RBUTTONUP)
+				{
+					GetManager()->SendNotify(this, DUI_MSGTYPE_RBTN_RICHEDIT);
+				}
                 break;
             }
         }

@@ -24,6 +24,7 @@ private:
 private:
 	map<CDuiString, bool> m_SysFileMenuInfo;
     map<CDuiString, bool> m_terminalMenuInfo;
+	map<CDuiString, bool> m_logMenuInfo;
 	CTabLayoutUI*	m_tabLayoutMainPanel;
     CTabLayoutUI*   m_tabLayoutOutputPanel;
     CComboUI*       m_pComboReader;

@@ -7,6 +7,7 @@ CMainFrame::CMainFrame()
 {
 	m_SysFileMenuInfo.insert(map<CDuiString, bool>::value_type(_T("file_New"), false));
 	m_SysFileMenuInfo.insert(map<CDuiString, bool>::value_type(_T("file_Open"), false));
+	m_logMenuInfo.insert(map<CDuiString, bool>::value_type(_T("xxx"), false));
 }
 
 
@@ -37,6 +38,17 @@ void CMainFrame::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 	else if (msg.sType == _T("valuechanged"))
 	{
 		WindowImplBase::Notify(msg);
+	}
+	else  if (_tcscmp(msg.sType, DUI_MSGTYPE_RBTN_RICHEDIT) == 0)
+	{
+		CRichEditUI* pRichEdit = static_cast<CRichEditUI*>(msg.pSender);
+		if (NULL == pRichEdit)
+			return;
+		POINT pt;
+		GetCursorPos(&pt);
+		CMenuWnd* pMenuWnd = new CMenuWnd();
+		pMenuWnd->CreateMenu(NULL, _T("LogMenu.xml"), pt, &m_PaintManager, &m_logMenuInfo);
+		return;
 	}
 }
 

@@ -77,6 +77,7 @@ union DuiMessageMapFunctions
 #define DUI_MSGTYPE_SELECTCHANGED 		   (_T("selectchanged"))
 #define DUI_MSGTYPE_UNSELECTED	 		   (_T("unselected"))
 
+#define DUI_MSGTYPE_RBTN_RICHEDIT		(_T("rbtn_richedit"))
 //////////////////////////////////////////////////////////////////////////
 
 

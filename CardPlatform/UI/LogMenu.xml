@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window>
+      <Default name="ExplandIcon" value="Icon/menu_expand.png" />
+      <Default name="Menu" value="bordersize=&quot;1&quot; bordercolor=&quot;#FFB5B5B5&quot; inset=&quot;3,4,3,4&quot; itemtextpadding=&quot;25,0,0,0&quot; bkcolor=&quot;#FFDEDFDE&quot; itemselectedbkcolor=&quot;#FFB5B5B5&quot;"/>
+      <Menu name="LogMenu">
+            <MenuElement name="Menu_Copy" text="复制" icon="Icon/copy_paste.png" iconsize="9,9" >
+                  <MenuElement name="Menu_Clear" text="清空" icon="Icon/copy_paste.png" iconsize="9,9" />
+            </MenuElement>
+	      <MenuElement name="Menu_Paste" text="粘贴" icon="Icon/copy_paste.png" iconsize="9,9" />
+	      
+      </Menu>
+</Window>

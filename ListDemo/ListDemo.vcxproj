@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C5EEA673-FBC8-447B-8865-119256F0E332}</ProjectGuid>
+    <ProjectGuid>{034F84C1-331C-46DF-A8D6-55441F8C270E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>DuiLibTest</RootNamespace>
+    <RootNamespace>ListDemo</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -36,7 +36,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -94,9 +94,6 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy /i /e /y $(ProjectDir)UI $(OutDir)DuiLibTestRes</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -129,9 +126,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy /i /e /y $(ProjectDir)UI $(OutDir)DuiLibTestRes</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -153,19 +147,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="MainFrameDlg.h" />
-    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="stdAfx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrameDlg.cpp" />
-    <ClCompile Include="StdAfx.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="UI\FileMenu.xml" />
-    <Xml Include="UI\LogMenu.xml" />
-    <Xml Include="UI\MainFrame.xml">
-      <SubType>Designer</SubType>
-    </Xml>
+    <ClCompile Include="stdAfx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

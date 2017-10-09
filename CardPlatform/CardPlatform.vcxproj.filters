@@ -457,6 +457,9 @@
     <Xml Include="UI\ECLoadScript.xml">
       <Filter>UI</Filter>
     </Xml>
+    <Xml Include="UI\LogMenu.xml">
+      <Filter>UI</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="CardPlatform.rc">

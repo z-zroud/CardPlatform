@@ -156,6 +156,9 @@ BOOL CMenuWnd::Receive(ContextMenuParam param)
 	return TRUE;
 }
 
+/**************************************************
+* 功能：创建菜单窗口
+***************************************************/
 CMenuWnd* CMenuWnd::CreateMenu(CMenuElementUI* pOwner, STRINGorID xml, POINT point, CPaintManagerUI* pMainPaintManager, std::map<CDuiString, bool>* pMenuCheckInfo /*= NULL*/, DWORD dwAlignment /*= eMenuAlignment_Left | eMenuAlignment_Top*/)
 {
 	CMenuWnd* pMenu = new CMenuWnd;
@@ -343,6 +346,7 @@ void CMenuWnd::ResizeMenu()
 #endif
 	SIZE szAvailable = { rcWork.right - rcWork.left, rcWork.bottom - rcWork.top };
 	szAvailable = pRoot->EstimateSize(szAvailable);
+
 	m_pm.SetInitSize(szAvailable.cx, szAvailable.cy);
 
 	//必须是Menu标签作为xml的根节点

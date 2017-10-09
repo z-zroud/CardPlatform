@@ -15,9 +15,10 @@ class CListHeaderUI;
 
 #define UILIST_MAX_COLUMNS 32
 
+//定义了列表属性信息
 typedef struct tagTListInfoUI
 {
-    int		nColumns;
+    int		nColumns;	//定义列单元个数
     RECT	rcColumn[UILIST_MAX_COLUMNS];
     int		nFont;
     UINT	uTextStyle;
@@ -43,7 +44,14 @@ typedef struct tagTListInfoUI
 
 /////////////////////////////////////////////////////////////////////////////////////
 //
-
+/************************************************************
+*List 单元显示文本接口，
+*参数： pList为CListTextElement等继承了IListItemUI接口的对象
+*参数： iItem为第几行
+*参数： iSubItem为第几列
+凡是需要给List添加Item的类都应该实现此接口，并pControl->SetUserData(szBuf);
+ 返回       return pControl->GetUserData();
+*************************************************************/
 class IListCallbackUI
 {
 public:
@@ -96,25 +104,25 @@ class UILIB_API CListUI : public CVerticalLayoutUI, public IListUI
 public:
     CListUI();
 
-    LPCTSTR GetClass() const;
-    UINT GetControlFlags() const;
-    LPVOID GetInterface(LPCTSTR pstrName);
+    LPCTSTR	GetClass() const;
+    UINT	GetControlFlags() const;
+    LPVOID	GetInterface(LPCTSTR pstrName);
 
-    bool GetScrollSelect();
-    void SetScrollSelect(bool bScrollSelect);
-    int GetCurSel() const;
-	int GetCurSelActivate() const;
-	bool SelectItem(int iIndex, bool bTakeFocus = false);
-	bool SelectItemActivate(int iIndex);    // 双击选中
+    bool	GetScrollSelect();
+    void	SetScrollSelect(bool bScrollSelect);
+    int		GetCurSel() const;
+	int		GetCurSelActivate() const;
+	bool	SelectItem(int iIndex, bool bTakeFocus = false);
+	bool	SelectItemActivate(int iIndex);    // 双击选中
 
-    CListHeaderUI* GetHeader() const;  
-    CContainerUI* GetList() const;
-    TListInfoUI* GetListInfo();
+    CListHeaderUI*	GetHeader() const;  
+    CContainerUI*	GetList() const;
+    TListInfoUI*	GetListInfo();
 
-    CControlUI* GetItemAt(int iIndex) const;
-    int GetItemIndex(CControlUI* pControl) const;
-    bool SetItemIndex(CControlUI* pControl, int iIndex);
-    int GetCount() const;
+    CControlUI*	GetItemAt(int iIndex) const;
+    int			GetItemIndex(CControlUI* pControl) const;
+    bool		SetItemIndex(CControlUI* pControl, int iIndex);
+    int			GetCount() const;
     bool Add(CControlUI* pControl);
     bool AddAt(CControlUI* pControl, int iIndex);
     bool Remove(CControlUI* pControl);
@@ -126,7 +134,7 @@ public:
 
 	bool IsDelayedDestroy() const;
 	void SetDelayedDestroy(bool bDelayed);
-    int GetChildPadding() const;
+    int	GetChildPadding() const;
     void SetChildPadding(int iPadding);
 
     void SetItemFont(int index);
@@ -333,6 +341,9 @@ public:
     void SetOwner(CControlUI* pOwner);
     void SetVisible(bool bVisible = true);
 
+	void SetAlign(UINT align);
+	UINT GetAlign();
+
     bool IsSelected() const;
     bool Select(bool bSelect = true);
     bool IsExpanded() const;
@@ -351,6 +362,7 @@ protected:
     bool	m_bSelected;
     UINT	m_uButtonState;
     IListOwnerUI* m_pOwner;
+	UINT		m_textStyle;
 };
 
 
@@ -375,7 +387,11 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////
 //
-
+/******************************************************************
+* CListTextElementUI 可以设置多个列表的Item,但CListLabelElementUI只能
+* 设置第一列，因此对于多列的List,需要采用CListTextElementUI,单列采用
+* CListLabelElementUI。
+*******************************************************************/
 class UILIB_API CListTextElementUI : public CListLabelElementUI
 {
 public:
@@ -405,11 +421,14 @@ protected:
     int				m_nHoverLink;
     IListUI*		m_pOwner;
     CStdPtrArray	m_aTexts;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
 //
-
+/**********************************************************************************
+* 定义了每个List 元素的属性和行为，这里每个item也是一个容器
+***********************************************************************************/
 class UILIB_API CListContainerElementUI : public CHorizontalLayoutUI, public IListItemUI
 {
 public:

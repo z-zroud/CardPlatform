@@ -13,12 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="UI">
-      <UniqueIdentifier>{0b3610f7-9797-44ad-98fd-b3dc8a49b6d2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="StdAfx.h">
+    <ClInclude Include="stdAfx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainFrameDlg.h">
@@ -26,25 +23,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
+    <ClCompile Include="stdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MainFrameDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="UI\MainFrame.xml">
-      <Filter>UI</Filter>
-    </Xml>
-    <Xml Include="UI\FileMenu.xml">
-      <Filter>UI</Filter>
-    </Xml>
-    <Xml Include="UI\LogMenu.xml">
-      <Filter>UI</Filter>
-    </Xml>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

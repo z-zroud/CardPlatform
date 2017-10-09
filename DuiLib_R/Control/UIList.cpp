@@ -1689,7 +1689,8 @@ CListElementUI::CListElementUI() :
 m_iIndex(-1),
 m_pOwner(NULL), 
 m_bSelected(false),
-m_uButtonState(0)
+m_uButtonState(0),
+m_textStyle(0)
 {
 }
 
@@ -1859,9 +1860,33 @@ void CListElementUI::DoEvent(TEventUI& event)
     if( m_pOwner != NULL ) m_pOwner->DoEvent(event); else CControlUI::DoEvent(event);
 }
 
+void CListElementUI::SetAlign(UINT textStyle)
+{
+	m_textStyle = textStyle;
+}
+
+UINT CListElementUI::GetAlign()
+{
+	return m_textStyle;
+}
+
 void CListElementUI::SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue)
 {
     if( _tcscmp(pstrName, _T("selected")) == 0 ) Select();
+	else if (_tcscmp(pstrName, _T("align")) == 0) {
+		if (_tcsstr(pstrValue, _T("left")) != NULL) {
+			m_textStyle &= ~(DT_CENTER | DT_RIGHT);
+			m_textStyle |= DT_LEFT;
+		}
+		if (_tcsstr(pstrValue, _T("center")) != NULL) {
+			m_textStyle &= ~(DT_LEFT | DT_RIGHT);
+			m_textStyle |= DT_CENTER;
+		}
+		if (_tcsstr(pstrValue, _T("right")) != NULL) {
+			m_textStyle &= ~(DT_LEFT | DT_CENTER);
+			m_textStyle |= DT_RIGHT;
+		}
+	}
     else CControlUI::SetAttribute(pstrName, pstrValue);
 }
 
@@ -2050,10 +2075,10 @@ void CListLabelElementUI::DrawItemText(HDC hDC, const RECT& rcItem)
 
     if( pInfo->bShowHtml )
         CRenderEngine::DrawHtmlText(hDC, m_pManager, rcText, m_sText, iTextColor, \
-        NULL, NULL, nLinks, DT_SINGLELINE | pInfo->uTextStyle);
+        NULL, NULL, nLinks, DT_SINGLELINE | pInfo->uTextStyle | GetAlign());
     else
         CRenderEngine::DrawText(hDC, m_pManager, rcText, m_sText, iTextColor, \
-        pInfo->nFont, DT_SINGLELINE | pInfo->uTextStyle);
+        pInfo->nFont, DT_SINGLELINE | pInfo->uTextStyle | GetAlign());
 }
 
 
@@ -2224,10 +2249,10 @@ void CListTextElementUI::DrawItemText(HDC hDC, const RECT& rcItem)
         else strText.Assign(GetText(i));
         if( pInfo->bShowHtml )
             CRenderEngine::DrawHtmlText(hDC, m_pManager, rcItem, strText.GetData(), iTextColor, \
-                &m_rcLinks[m_nLinks], &m_sLinks[m_nLinks], nLinks, DT_SINGLELINE | pInfo->uTextStyle);
+                &m_rcLinks[m_nLinks], &m_sLinks[m_nLinks], nLinks, DT_SINGLELINE | pInfo->uTextStyle | GetAlign());
         else
             CRenderEngine::DrawText(hDC, m_pManager, rcItem, strText.GetData(), iTextColor, \
-            pInfo->nFont, DT_SINGLELINE | pInfo->uTextStyle);
+            pInfo->nFont, DT_SINGLELINE | pInfo->uTextStyle | GetAlign());
 
         m_nLinks += nLinks;
         nLinks = lengthof(m_rcLinks) - m_nLinks; 
