@@ -25,25 +25,26 @@ void CMainFrame::InitWindow()
 		pList->Add(pTextItem);
 		pTextItem->SetAttribute(_T("align"), _T("left"));
 		pTextItem->SetText(0, _T("0"));
-		pTextItem->SetText(4, _T("TT"));
-		pTextItem->SetText(2, _T("Desc"));
+		pTextItem->SetText(2, _T("TT"));
+		pTextItem->SetText(1, _T("Desc"));
 
 		CListLabelElementUI* pLabelItem = new CListLabelElementUI();
 		pList->Add(pLabelItem);
 		pLabelItem->SetAlign(DT_LEFT);
 		pLabelItem->SetText(_T("Desc1"));
 
-		CListContainerElementUI* pContainerItem = new CListContainerElementUI();
-		pList->Add(pContainerItem);
-
-		CCheckBoxUI* pCheckBox = new CCheckBoxUI();
-		CLabelUI* pLabel = new CLabelUI();
-		CButtonUI* pBtn = new CButtonUI();
-
-		pContainerItem->Add(pCheckBox);
-		pContainerItem->Add(pLabel);
-		pContainerItem->Add(pBtn);
-
+		
+		for (int i = 0; i < 20; i++)
+		{
+			CDialogBuilder builder;
+			CListContainerElementUI* pLine = (CListContainerElementUI*)(builder.Create(_T("sigle_list_item_column.xml"), (UINT)0));
+			if (pLine != NULL)
+			{
+				pList->Add(pLine);
+				DeleteObject(pLine);
+				pLine = NULL;
+			}
+		}
 	}
 }
 

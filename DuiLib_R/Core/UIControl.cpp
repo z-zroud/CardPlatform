@@ -15,7 +15,6 @@ m_bMouseEnabled(true),
 m_bKeyboardEnabled(true),
 m_bFloat(false),
 m_bSetPos(false),
-m_bResize(false),
 m_chShortcut('\0'),
 m_pTag(NULL),
 m_dwBackColor(0),
@@ -672,10 +671,6 @@ void CControlUI::SetMouseEnabled(bool bEnabled)
     m_bMouseEnabled = bEnabled;
 }
 
-void CControlUI::SetResize(bool bResize)
-{
-	m_bResize = bResize;
-}
 
 bool CControlUI::IsKeyboardEnabled() const
 {
@@ -968,7 +963,6 @@ void CControlUI::SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue)
     else if( _tcscmp(pstrName, _T("mouse")) == 0 ) SetMouseEnabled(_tcscmp(pstrValue, _T("true")) == 0);
 	else if( _tcscmp(pstrName, _T("keyboard")) == 0 ) SetKeyboardEnabled(_tcscmp(pstrValue, _T("true")) == 0);
     else if( _tcscmp(pstrName, _T("visible")) == 0 ) SetVisible(_tcscmp(pstrValue, _T("true")) == 0);
-	else if (_tcscmp(pstrName, _T("resize")) == 0) SetResize(_tcscmp(pstrValue, _T("true")) == 0);
     else if( _tcscmp(pstrName, _T("float")) == 0 ) SetFloat(_tcscmp(pstrValue, _T("true")) == 0);
     else if( _tcscmp(pstrName, _T("shortcut")) == 0 ) SetShortcut(pstrValue[0]);
     else if( _tcscmp(pstrName, _T("menu")) == 0 ) SetContextMenuUsed(_tcscmp(pstrValue, _T("true")) == 0);

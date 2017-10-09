@@ -148,7 +148,6 @@ public:
     virtual void SetEnabled(bool bEnable = true);
     virtual bool IsMouseEnabled() const;
     virtual void SetMouseEnabled(bool bEnable = true);
-	virtual void SetResize(bool bResize = false);
     virtual bool IsKeyboardEnabled() const;
     virtual void SetKeyboardEnabled(bool bEnable = true);
     virtual bool IsFocused() const;
@@ -245,8 +244,6 @@ protected:
     SIZE m_cxyBorderRound;
     RECT m_rcPaint;
 	RECT m_rcBorderSize;
-
-	bool m_bResize;
 };
 
 } // namespace DuiLib

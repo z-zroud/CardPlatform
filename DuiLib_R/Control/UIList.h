@@ -20,24 +20,24 @@ typedef struct tagTListInfoUI
 {
     int		nColumns;	//定义列单元个数
     RECT	rcColumn[UILIST_MAX_COLUMNS];
-    int		nFont;
-    UINT	uTextStyle;
-    RECT	rcTextPadding;
-    DWORD	dwTextColor;
-    DWORD	dwBkColor;
-	CImageAttribute bkImage;
+    int		nFont;						//字体
+    UINT	uTextStyle;					//文本类型
+    RECT	rcTextPadding;				//文本外边距
+    DWORD	dwTextColor;				//文本颜色
+    DWORD	dwBkColor;					//背景颜色
+	CImageAttribute bkImage;			//背景图片
     bool	bAlternateBk;
-    DWORD	dwSelectedTextColor;
-    DWORD	dwSelectedBkColor;
+    DWORD	dwSelectedTextColor;		//选中的字体颜色
+    DWORD	dwSelectedBkColor;			//选中的背景颜色
 	CImageAttribute selectedImage;
-    DWORD	dwHotTextColor;
-    DWORD	dwHotBkColor;
-	CImageAttribute hotImage;
-    DWORD	dwDisabledTextColor;
-    DWORD	dwDisabledBkColor;
-    CImageAttribute disabledImage;
-    DWORD	dwLineColor;
-    bool	bShowHtml;
+    DWORD	dwHotTextColor;				//鼠标悬浮时的字体颜色
+    DWORD	dwHotBkColor;				//鼠标悬浮时的背景颜色
+	CImageAttribute hotImage;			//鼠标悬浮时的背景图片
+    DWORD	dwDisabledTextColor;		//禁用时字体颜色
+    DWORD	dwDisabledBkColor;			//禁用时背景颜色
+    CImageAttribute disabledImage;		//禁用时背景图片
+    DWORD	dwLineColor;				//边框颜色
+    bool	bShowHtml;					//HTML风格
     bool	bMultiExpandable;
 } TListInfoUI;
 
