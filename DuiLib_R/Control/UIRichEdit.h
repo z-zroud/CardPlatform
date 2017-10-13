@@ -3,6 +3,7 @@
 
 #pragma once
 #include <Imm.h>
+#include <RichOle.h>
 #pragma comment(lib,"imm32.lib")
 
 namespace DuiLib {
@@ -96,6 +97,8 @@ public:
     long StreamOut(int nFormat, EDITSTREAM &es);
 	void SetAccumulateDBCMode(bool bDBCMode);
 	bool IsAccumulateDBCMode();
+
+	LPRICHEDITOLE GetRichEditOle();
 
     void DoInit();
     // 注意：TxSendMessage和SendMessage是有区别的，TxSendMessage没有multibyte和unicode自动转换的功能，

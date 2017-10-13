@@ -2576,6 +2576,34 @@ bool CRichEditUI::IsAccumulateDBCMode()
 	return m_fAccumulateDBC;
 }
 
+//bool CRichEditUI::SetOLECallback(IRichEditOleCallback *pCallback)
+//{
+//	LRESULT lResult;
+//	TxSendMessage(EM_SETOLECALLBACK, 0, (LPARAM)pCallback, &lResult);
+//	if ((BOOL)lResult == TRUE) {
+//		pCallback->AddRef();
+//		m_pCallback = pCallback;
+//		return true;
+//	}
+//	return false;
+//}
+//
+//
+//IRichEditOleCallback *CRichEditUI::GetOLECallback()
+//{
+//	return m_pCallback;
+//}
 
+LPRICHEDITOLE CRichEditUI::GetRichEditOle()
+{
+	IRichEditOle* pRichEditOle = NULL;
+	LRESULT lResult;
+	TxSendMessage(EM_GETOLEINTERFACE, 0, (LPARAM)(LPVOID*)&pRichEditOle, &lResult);
+	if ((BOOL)lResult == TRUE) {
+		pRichEditOle->AddRef();
+		return pRichEditOle;
+	}
+	return NULL;
+}
 
 } // namespace DuiLib

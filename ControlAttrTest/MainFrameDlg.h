@@ -17,6 +17,7 @@ public:
 	void Notify(TNotifyUI& msg);
 
 private:
-	CListUI*	pList;
+	CRichEditUI*	pRichEdit;
+	//CListUI*		pList;
 };
 
