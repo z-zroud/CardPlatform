@@ -8,15 +8,15 @@ namespace DuiLib {
 /////////////////////////////////////////////////////////////////////////////////////
 //
 
-#define UI_WNDSTYLE_CONTAINER  (0)
-#define UI_WNDSTYLE_FRAME      (WS_VISIBLE | WS_OVERLAPPEDWINDOW)
-#define UI_WNDSTYLE_CHILD      (WS_VISIBLE | WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
-#define UI_WNDSTYLE_DIALOG     (WS_VISIBLE | WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
+#define UI_WNDSTYLE_CONTAINER  (0)	//窗口风格
+#define UI_WNDSTYLE_FRAME      (WS_VISIBLE | WS_OVERLAPPEDWINDOW) //包括标题，系统菜单，边框，最大化和最小化按钮
+#define UI_WNDSTYLE_CHILD      (WS_VISIBLE | WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN) //子窗口
+#define UI_WNDSTYLE_DIALOG     (WS_VISIBLE | WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | WS_CLIPSIBLINGS | WS_CLIPCHILDREN) //对话框窗口
 
 #define UI_WNDSTYLE_EX_FRAME   (WS_EX_WINDOWEDGE)
 #define UI_WNDSTYLE_EX_DIALOG  (WS_EX_TOOLWINDOW | WS_EX_DLGMODALFRAME)
 
-#define UI_CLASSSTYLE_CONTAINER  (0)
+#define UI_CLASSSTYLE_CONTAINER  (0) //类别风格
 #define UI_CLASSSTYLE_FRAME      (CS_VREDRAW | CS_HREDRAW)
 #define UI_CLASSSTYLE_CHILD      (CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS | CS_SAVEBITS)
 #define UI_CLASSSTYLE_DIALOG     (CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS | CS_SAVEBITS)
@@ -85,7 +85,7 @@ public:
     void ResizeClient(int cx = -1, int cy = -1);
 
 protected:
-    virtual LPCTSTR GetWindowClassName() const = 0;
+    virtual LPCTSTR GetWindowClassName() const = 0;	//指定注册的窗口类名(不能与系统预定义的窗口类名重合)
     virtual LPCTSTR GetSuperClassName() const;
     virtual UINT GetClassStyle() const;
 

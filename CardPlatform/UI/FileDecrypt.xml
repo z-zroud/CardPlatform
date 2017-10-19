@@ -9,7 +9,7 @@
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbKey" text="密钥类型:" float="true" pos="130,0,200,28"/>
-                  <Combo name="comboEncryptType" float="true" pos="210,3,560,28" droptype="droplist" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Combo name="comboEncryptType" float="true" pos="210,3,560,28" droptype="droplist" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbKey" text="密钥:" float="true" pos="130,0,200,28"/>

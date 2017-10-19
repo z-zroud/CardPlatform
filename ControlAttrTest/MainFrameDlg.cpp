@@ -51,12 +51,29 @@ unsigned int WINAPI DoCircleProgress(LPVOID param)
 	return 0;
 }
 
+unsigned int WINAPI DoChangeTextLen(LPVOID param)
+{
+	CTextUI* pTextCtl = static_cast<CTextUI*>(param);
+	int i = 0; 
+	while (i < 5)
+	{
+		CDuiString value = pTextCtl->GetText();
+		value.Append("Lable");
+		pTextCtl->SetText(value.GetData());
+		pTextCtl->Invalidate();
+	}
+
+	return 0;
+}
+
 void CMainFrame::InitWindow()
 {
 	pProgress = static_cast<CProgressUI*>(m_PaintManager.FindControl(_T("progress")));
 	pCircleProgress = static_cast<CCircleProgressUI*>(m_PaintManager.FindControl(_T("circleProgress")));
+	m_pTextCtl = static_cast<CTextUI*>(m_PaintManager.FindControl(_T("text1")));
 	_beginthreadex(NULL, 0, DoProgress, (void*)pProgress, 0, NULL);
 	_beginthreadex(NULL, 0, DoCircleProgress, (void*)pCircleProgress, 0, NULL);
+	_beginthreadex(NULL, 0, DoChangeTextLen, (void*)m_pTextCtl, 0, NULL);
 }
 
 

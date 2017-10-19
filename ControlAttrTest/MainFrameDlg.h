@@ -21,5 +21,6 @@ private:
 	//CListUI*		pList;
 	CProgressUI*	pProgress;
 	CCircleProgressUI* pCircleProgress;
+	CTextUI*	m_pTextCtl;
 };
 

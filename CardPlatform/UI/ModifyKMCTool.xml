@@ -4,19 +4,19 @@
             <Control height="80" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbAID" text="CM AID:" float="true" pos="200,0,250,28"/>
-                  <Combo name="comboAID" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Combo name="comboAID" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbOldKmc" text="原始KMC:" float="true" pos="200,0,250,28"/>
-                  <Combo name="comboOldKmc" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Combo name="comboOldKmc" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbNewKmc" text="新KMC:" float="true" pos="200,0,250,28"/>
-                  <Combo name="comboNewKmc" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Combo name="comboNewKmc" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
             </HorizontalLayout>
             <HorizontalLayout height="50" bordersize="2,0,0,0">
                   <Label name="lbNewDiv" text="新DIV:" float="true" pos="200,0,250,28"/>
-                  <Combo name="comboNewDiv" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                  <Combo name="comboNewDiv" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
             </HorizontalLayout>
             <Control height="50" bordersize="2,0,0,0"/>
             <HorizontalLayout height="50" bordersize="2,0,0,0">

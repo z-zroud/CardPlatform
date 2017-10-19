@@ -237,21 +237,46 @@ CWindowWnd::operator HWND() const
     return m_hWnd;
 }
 
+/*****************************************************************************************
+* 功能：创建窗口
+* 参数：hwndParent: 父窗口句柄，当dwStyle为UI_WNDSTYLE_CHILD,许指定父句柄，其他设置为NULL即可
+*		pstrWindowName: 窗口名称，若窗口指定了标题栏，则显示为标题栏上
+*		dwStyle:窗口风格：UI_WNDSTYLE_FRAME,UI_WNDSTYLE_CHILD,UI_WNDSTYLE_DIALOG
+*		dwExStyle:窗口扩展风格：UI_WNDSTYLE_EX_FRAME，UI_WNDSTYLE_EX_DIALOG，默认为0
+* 返回：窗口句柄
+******************************************************************************************/
 HWND CWindowWnd::CreateDuiWindow( HWND hwndParent, LPCTSTR pstrWindowName,DWORD dwStyle /*=0*/, DWORD dwExStyle /*=0*/ )
 {
 	return Create(hwndParent,pstrWindowName,dwStyle,dwExStyle,0,0,0,0,NULL);
 }
 
+/*****************************************************************************************
+* 创建窗口，由于rc由xml中window节点属性指定，这里传递参数无效，不建议采用此函数创建窗口
+******************************************************************************************/
 HWND CWindowWnd::Create(HWND hwndParent, LPCTSTR pstrName, DWORD dwStyle, DWORD dwExStyle, const RECT rc, HMENU hMenu)
 {
     return Create(hwndParent, pstrName, dwStyle, dwExStyle, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, hMenu);
 }
 
+/*****************************************************************************************
+* 创建窗口，由于x,y,cy,cy由xml中window节点属性指定，这里传递参数无效，不建议采用此函数创建窗口
+******************************************************************************************/
 HWND CWindowWnd::Create(HWND hwndParent, LPCTSTR pstrName, DWORD dwStyle, DWORD dwExStyle, int x, int y, int cx, int cy, HMENU hMenu)
 {
     if( GetSuperClassName() != NULL && !RegisterSuperclass() ) return NULL;
     if( GetSuperClassName() == NULL && !RegisterWindowClass() ) return NULL;
-    m_hWnd = ::CreateWindowEx(dwExStyle, GetWindowClassName(), pstrName, dwStyle, x, y, cx, cy, hwndParent, hMenu, CPaintManagerUI::GetInstance(), this);
+    m_hWnd = ::CreateWindowEx(dwExStyle, 
+		GetWindowClassName(), 
+		pstrName, 
+		dwStyle, 
+		x, 
+		y, 
+		cx, 
+		cy, 
+		hwndParent, 
+		hMenu, 
+		CPaintManagerUI::GetInstance(), 
+		this);
     ASSERT(m_hWnd!=NULL);
     return m_hWnd;
 }
@@ -285,6 +310,9 @@ void CWindowWnd::ShowWindow(bool bShow /*= true*/, bool bTakeFocus /*= false*/)
     ::ShowWindow(m_hWnd, bShow ? (bTakeFocus ? SW_SHOWNORMAL : SW_SHOWNOACTIVATE) : SW_HIDE);
 }
 
+/*************************************************
+* 模态对话框，表示该窗口为模态对话框
+**************************************************/
 UINT CWindowWnd::ShowModal()
 {
     ASSERT(::IsWindow(m_hWnd));
@@ -358,6 +386,9 @@ void CWindowWnd::CenterWindow()
     ::SetWindowPos(m_hWnd, NULL, xLeft, yTop, -1, -1, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
+/********************************************
+* 设置应用程序图标，参数为资源ID
+*********************************************/
 void CWindowWnd::SetIcon(UINT nRes)
 {
 	HICON hIcon = (HICON)::LoadImage(CPaintManagerUI::GetInstance(), MAKEINTRESOURCE(nRes), IMAGE_ICON,

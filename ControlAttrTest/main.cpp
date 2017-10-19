@@ -17,7 +17,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*l
 	CPaintManagerUI::SetResourcePath(CPaintManagerUI::GetInstancePath() + pMainDlg->GetSkinFolder());
 
 
-	pMainDlg->Create(NULL, _T("DuiLit²âÊÔ"), UI_WNDSTYLE_FRAME, WS_EX_STATICEDGE | WS_EX_APPWINDOW, 0, 0, 600, 800);
+	pMainDlg->CreateDuiWindow(NULL, _T("DuiLit²âÊÔ"), UI_WNDSTYLE_FRAME, 0);
 
 	pMainDlg->CenterWindow();
 	::ShowWindow(*pMainDlg, SW_SHOW);

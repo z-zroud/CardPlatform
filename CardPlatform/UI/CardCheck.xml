@@ -6,7 +6,7 @@
                   <Control height="20" />
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
                         <Label name="lbTransType" text="交易类型:" float="true" pos="120,0,220,28"/>
-                        <Combo name="comboTransType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Combo name="comboTransType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
                         <Label name="lbTouchTrans" float="true" pos="120,0,220,28" text="接触通讯:" />
@@ -14,11 +14,11 @@
                   </HorizontalLayout>
                   <HorizontalLayout name="offlinePanel" height="40" bordersize="2,0,0,0">
                         <Label name="lbOfflineAuthType" text="脱机认证类型:" float="true" pos="120,0,220,28"/>
-                        <Combo name="comboOfflineAuthType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Combo name="comboOfflineAuthType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
                         <Label name="lbEncryptType" text="加密类型:" float="true" pos="120,0,220,28"/>
-                        <Combo name="comboEncryptType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Combo name="comboEncryptType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">                       
                         <Label name="lbSupportOffline" float="true" pos="120,0,220,28" text="支持脱机:" />
@@ -26,7 +26,7 @@
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
                         <Label name="lbKeyType" text="密钥类型:" float="true" pos="120,0,220,28"/>
-                        <Combo name="comboKeyType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Combo name="comboKeyType" float="true" pos="260,3,560,28" droptype="droplist" width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
                   </HorizontalLayout>
                   <HorizontalLayout height="40" bordersize="2,0,0,0">
                         <Label name="lbAC" text="AC:" float="true" pos="120,0,220,28"/>

@@ -17,13 +17,13 @@ class CControlUI;
 // Structure for notifications to the outside world
 typedef struct tagTNotifyUI 
 {
-	CDuiString sType;
-	CDuiString sVirtualWnd;
-	CControlUI* pSender;
-	DWORD dwTimestamp;
-	POINT ptMouse;
-	WPARAM wParam;
-	LPARAM lParam;
+	CDuiString	sType;			//消息类型
+	CDuiString	sVirtualWnd;	//虚拟窗口句柄
+	CControlUI*	pSender;		//消息来源
+	DWORD		dwTimestamp;	//时间戳
+	POINT		ptMouse;		//鼠标位置
+	WPARAM		wParam;			//参数1
+	LPARAM		lParam;			//参数2
 } TNotifyUI;
 
 class CNotifyPump;

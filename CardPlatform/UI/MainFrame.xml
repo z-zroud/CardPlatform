@@ -18,10 +18,10 @@
                         <HorizontalLayout>
                         </HorizontalLayout>
                         <HorizontalLayout width="120">
-                              <Button float="true" pos="0,0,40,30"  name="minbtn" bordersize="0"  normalimage="Icon/min.png" />
-                              <Button float="true" pos="40,0,80,30"  name="restorebtn" visible="false" bordersize="0"  normalimage="Icon/restore_10.png" />
-                              <Button float="true" pos="40,0,80,30"  name="maxbtn" bordersize="0" enabled="false"  normalimage="Icon/max_10.png" />
-                              <Button float="true" pos="80,0,120,30" name="closebtn" bordersize="0" normalimage="Icon/close_10.png" />
+                              <Button float="true" pos="0,0,40,30"  name="minbtn" bordersize="0" normalimage="file='Icon/min.png' dest='12,7,28,24'" />
+                              <Button float="true" pos="40,0,80,30"  name="restorebtn" visible="false" bordersize="0" normalimage="file='Icon/restore_10.png' dest='15,10,25,20'" />
+                              <Button float="true" pos="40,0,80,30"  name="maxbtn" bordersize="0" enabled="false"  normalimage="file='Icon/button_up.png' dest='12,7,28,24'" />
+                              <Button float="true" pos="80,0,120,30" name="closebtn" bordersize="0" normalimage="file='Icon/close_10.png' dest='12,7,28,24'" />
                         </HorizontalLayout>
                   </HorizontalLayout>
 		</HorizontalLayout>
@@ -35,7 +35,7 @@
                   </HorizontalLayout>
                   <HorizontalLayout bordersize="0,0,0,2">
                         <Label name="lbReader" text="读卡器:" textcolor="#FFF2F2F2" float="true" pos="0,0,60,28"/>
-                        <Combo name="comboReaderList" float="true" pos="70,3,370,28"  width="300" height="22" fillpartwidth="20" normalimage="Icon/down_arrow1_8.png"/>
+                        <Combo name="comboReaderList" float="true" pos="70,3,370,28"  width="300" height="22" fillpartwidth="20" normalimage="file='Icon/arrow_drop_down_16.png' dest='2,4,18,18'"/>
                   </HorizontalLayout>
             </HorizontalLayout>
             <!--客户区-->
