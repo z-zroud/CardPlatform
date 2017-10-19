@@ -19,5 +19,7 @@ public:
 private:
 	CRichEditUI*	pRichEdit;
 	//CListUI*		pList;
+	CProgressUI*	pProgress;
+	CCircleProgressUI* pCircleProgress;
 };
 

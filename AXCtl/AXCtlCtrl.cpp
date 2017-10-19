@@ -18,6 +18,8 @@ BEGIN_MESSAGE_MAP(CAXCtlCtrl, COleControl)
 	ON_OLEVERB(AFX_IDS_VERB_PROPERTIES, OnProperties)
 	ON_MESSAGE(WM_CREATE, OnCreate)
 	ON_WM_SIZE()
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONDBLCLK()
 END_MESSAGE_MAP()
 
 // Dispatch map
@@ -97,6 +99,7 @@ CAXCtlCtrl::CAXCtlCtrl()
 {
 	InitializeIIDs(&IID_DAXCtl, &IID_DAXCtlEvents);
 	// TODO: Initialize your control's instance data here.
+	//m_pVideoDlg = new CViewDialog;
 }
 
 // CAXCtlCtrl::~CAXCtlCtrl - Destructor
@@ -117,8 +120,13 @@ void CAXCtlCtrl::OnDraw(
 	// TODO: Replace the following code with your own drawing code.
 	//pdc->FillRect(rcBounds, CBrush::FromHandle((HBRUSH)GetStockObject(WHITE_BRUSH)));
 	//pdc->Ellipse(rcBounds);
-	if(m_VideoDlg)
-		m_VideoDlg.MoveWindow(rcBounds);
+	//static bool inited = false;
+	//if (m_pVideoDlg && !inited)
+	//{
+	//	inited = true;
+	//	m_pVideoDlg->MoveWindow(rcBounds);
+	//}
+		
 }
 
 // CAXCtlCtrl::DoPropExchange - Persistence support
@@ -147,13 +155,18 @@ void CAXCtlCtrl::Fuck2(void)
 }
 
 // CAXCtlCtrl message handlers
+DWORD CAXCtlCtrl::GetControlFlags()
+{
+	DWORD flags = COleControl::GetControlFlags();
 
+	return flags;
+}
 
 LRESULT CAXCtlCtrl::OnCreate(WPARAM wParam, LPARAM lParam)
 {
 
 
-	// TODO:  Add your specialized creation code here
+	//// TODO:  Add your specialized creation code here
 	m_VideoDlg.Create(IDD_MAIN_DIALOG, this);
 	m_VideoDlg.ShowWindow(SW_SHOW);
 	return 0;
@@ -164,8 +177,24 @@ void CAXCtlCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	COleControl::OnSize(nType, cx, cy);
 
-	// TODO: Add your message handler code here
+	//// TODO: Add your message handler code here
 	RECT activeXRect;
 	GetClientRect(&activeXRect);
 	m_VideoDlg.MoveWindow(&activeXRect);
+}
+
+
+void CAXCtlCtrl::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	COleControl::OnMouseMove(nFlags, point);
+}
+
+
+void CAXCtlCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	COleControl::OnLButtonDblClk(nFlags, point);
 }

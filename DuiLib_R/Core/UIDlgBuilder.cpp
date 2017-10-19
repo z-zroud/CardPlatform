@@ -433,6 +433,7 @@ CControlUI* CDialogBuilder::_Parse(CMarkupNode* pRoot, CControlUI* pParent, CPai
             case 14:
                 if( _tcscmp(pstrClass, DUI_CTR_VERTICALLAYOUT) == 0 )         pControl = new CVerticalLayoutUI;
                 else if( _tcscmp(pstrClass, DUI_CTR_LISTHEADERITEM) == 0 )    pControl = new CListHeaderItemUI;
+				else if (_tcsicmp(pstrClass, DUI_CTR_CIRCLEPROGRESS) == 0)   pControl = new CCircleProgressUI;
                 break;
             case 15:
                 if( _tcscmp(pstrClass, DUI_CTR_LISTTEXTELEMENT) == 0 )        pControl = new CListTextElementUI;

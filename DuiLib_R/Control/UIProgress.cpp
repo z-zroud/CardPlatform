@@ -87,11 +87,11 @@ namespace DuiLib
 		if( m_nValue < m_nMin ) m_nValue = m_nMin;
 
 		RECT rc = {0};
-		if( m_bHorizontal ) {
+		if( m_bHorizontal ) {	//水平进度条
 			rc.right = (m_nValue - m_nMin) * (m_rcItem.right - m_rcItem.left) / (m_nMax - m_nMin);
 			rc.bottom = m_rcItem.bottom - m_rcItem.top;
 		}
-		else {
+		else {	//垂直进度条
 			rc.top = (m_rcItem.bottom - m_rcItem.top) * (m_nMax - m_nValue) / (m_nMax - m_nMin);
 			rc.right = m_rcItem.right - m_rcItem.left;
 			rc.bottom = m_rcItem.bottom - m_rcItem.top;

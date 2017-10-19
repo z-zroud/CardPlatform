@@ -13,19 +13,19 @@ namespace DuiLib
 		LPCTSTR GetClass() const;
 		LPVOID GetInterface(LPCTSTR pstrName);
 
-		bool IsHorizontal();
-		void SetHorizontal(bool bHorizontal = true);
-		bool IsStretchForeImage();
-		void SetStretchForeImage(bool bStretchForeImage = true);
-		int GetMinValue() const;
-		void SetMinValue(int nMin);
-		int GetMaxValue() const;
-		void SetMaxValue(int nMax);
-		int GetValue() const;
-		void SetValue(int nValue);
+		bool	IsHorizontal();
+		void	SetHorizontal(bool bHorizontal = true);
+		bool	IsStretchForeImage();
+		void	SetStretchForeImage(bool bStretchForeImage = true);
+		int		GetMinValue() const;
+		void	SetMinValue(int nMin);
+		int		GetMaxValue() const;
+		void	SetMaxValue(int nMax);
+		int		GetValue() const;
+		void	SetValue(int nValue);
 
-		void SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
-		void PaintStatusImage(HDC hDC);
+		void	SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
+		void	PaintStatusImage(HDC hDC);
 
 	protected:
 		bool m_bHorizontal;

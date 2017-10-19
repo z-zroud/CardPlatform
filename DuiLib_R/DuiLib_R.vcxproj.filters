@@ -116,6 +116,9 @@
     <ClCompile Include="Layout\UITileLayout.cpp">
       <Filter>Source Files\Layout</Filter>
     </ClCompile>
+    <ClCompile Include="Control\UICircleProgress.cpp">
+      <Filter>Source Files\Control</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StdAfx.h">
@@ -249,6 +252,9 @@
     </ClInclude>
     <ClInclude Include="Utils\WebBrowserEventHandler.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\UICircleProgress.h">
+      <Filter>Header Files\Control</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

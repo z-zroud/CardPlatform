@@ -18,7 +18,7 @@ public:
 	virtual void OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid);
 	virtual void DoPropExchange(CPropExchange* pPX);
 	virtual void OnResetState();
-
+	virtual DWORD GetControlFlags();
 // Implementation
 protected:
 	~CAXCtlCtrl();
@@ -46,5 +46,7 @@ public:
 	
 	afx_msg LRESULT OnCreate(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 };
 

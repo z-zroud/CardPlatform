@@ -15,22 +15,38 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdAfx.h">
+    <ClInclude Include="host.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainFrameDlg.h">
+    <ClInclude Include="tstxtsrv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AXCtl\AXCtlidl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdAfx.cpp">
+    <ClCompile Include="host.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="WindowlessRE.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainFrameDlg.cpp">
+    <ClCompile Include="..\AXCtl\AXCtl_i.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WindowlessRE.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

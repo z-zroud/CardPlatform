@@ -270,7 +270,7 @@ protected:                                                                \
 
 #define  DUI_CTR_LISTCONTAINERELEMENT            (_T("ListContainerElement"))
 
-///
+#define DUI_CTR_CIRCLEPROGRESS				(_T("CircleProgress"))
 //////////////END控件名称宏定义//////////////////////////////////////////////////
 
 

@@ -11,20 +11,20 @@ namespace DuiLib
 		CTextUI();
 		~CTextUI();
 
-		LPCTSTR GetClass() const;
-		UINT GetControlFlags() const;
-		LPVOID GetInterface(LPCTSTR pstrName);
-		void SetText(LPCTSTR pstrText) override;
+		LPCTSTR	GetClass() const;
+		UINT	GetControlFlags() const;
+		LPVOID	GetInterface(LPCTSTR pstrName);
+		void	SetText(LPCTSTR pstrText) override;
 
 		CDuiString* GetLinkContent(int iIndex);
 
-		void DoEvent(TEventUI& event);
-		SIZE EstimateSize(SIZE szAvailable);
+		void	DoEvent(TEventUI& event);
+		SIZE	EstimateSize(SIZE szAvailable);
 
-		void SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
-		void SetShadowColor(DWORD dwTextColor);
-		DWORD GetShadowColor() const;
-		void PaintText(HDC hDC);
+		void	SetAttribute(LPCTSTR pstrName, LPCTSTR pstrValue);
+		void	SetShadowColor(DWORD dwTextColor);
+		DWORD	GetShadowColor() const;
+		void	PaintText(HDC hDC);
 
 	protected:
 		enum { MAX_LINK = 8 };

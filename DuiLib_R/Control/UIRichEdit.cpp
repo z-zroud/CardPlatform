@@ -255,7 +255,8 @@ CTxtWinHost::~CTxtWinHost()
 
 ////////////////////// Create/Init/Destruct Commands ///////////////////////
 /*****************************************************************
-* 功能： 初始化Text Service服务，初始化richedit默认字体、段落
+* 功能： 初始化Text Service服务，初始化richedit默认字体、段落,创建
+* Windowless Richedit 控件
 ******************************************************************/
 BOOL CTxtWinHost::Init(CRichEditUI *re, const CREATESTRUCT *pcs)
 {
