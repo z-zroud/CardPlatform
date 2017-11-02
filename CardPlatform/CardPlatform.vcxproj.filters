@@ -100,6 +100,12 @@
     <Filter Include="Source Files\CardCheck\PBOC">
       <UniqueIdentifier>{435b5d5a-f17c-4d94-9571-7b233f86240c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\CardCheck\EP">
+      <UniqueIdentifier>{4fbee21c-964b-4bfb-b0ba-e17f33fd31ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CardCheck\EP">
+      <UniqueIdentifier>{40a8ef56-b495-4731-aab7-cbdac09bb37b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp">
@@ -242,6 +248,9 @@
     </ClCompile>
     <ClCompile Include="Source\MainUI\UIEpScriptCheck.cpp">
       <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CardCheck\EP\EpCheck.cpp">
+      <Filter>Source Files\CardCheck\EP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -409,6 +418,9 @@
     </ClInclude>
     <ClInclude Include="Source\MainUI\UIEpScriptCheck.h">
       <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\CardCheck\EP\EpCheck.h">
+      <Filter>Header Files\CardCheck\EP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
