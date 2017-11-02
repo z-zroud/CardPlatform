@@ -9,9 +9,10 @@
 #define TAB_PERSO_CONFIG        4
 #define TAB_DO_PERSONALIZATION	5
 #define TAB_EC_LOAD_SCRIPT      6
-#define TAB_CHARD_CHECK         7
-#define TAB_MODIFY_KMC		    8
-#define TAB_FILE_DECRYPT        9
+#define TAB_CARD_CHECK			7
+#define TAB_EP_CHECK			8
+#define TAB_MODIFY_KMC		    9
+#define TAB_FILE_DECRYPT        10
 
 CTreeViewNav::CTreeViewNav(CPaintManagerUI* pPM)
 {
@@ -66,8 +67,14 @@ void CTreeViewNav::Notify(TNotifyUI& msg) //处理内嵌模块的消息
 			m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_MODIFY_KMC);
 		}
         else if (name == _T("ccCardCheckNode")) {
-            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_CHARD_CHECK);
+            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_CARD_CHECK);
         }
+		else if (name == _T("ccECLoadScriptNode")) {
+			m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_EC_LOAD_SCRIPT);
+		}
+		else if (name == _T("ccEPCheckNode")) {
+			m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_EP_CHECK);
+		}
         else if (name == _T("ylOptionSettingNode")) {
             m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_YL_CONFIG);
         }
@@ -77,8 +84,6 @@ void CTreeViewNav::Notify(TNotifyUI& msg) //处理内嵌模块的消息
         else if (name == _T("fileDecryptNode")) {
             m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_FILE_DECRYPT);
         }
-        else if (name == _T("ccECLoadScriptNode")) {
-            m_pManager->SendNotify(m_rootParentControl, DUI_MSGTYPE_CLICK, (WPARAM)TAB_EC_LOAD_SCRIPT);
-        }
+
     }
 }

@@ -26,6 +26,7 @@
 		<TreeNode name="cardCheckTreeNode" text="卡片检测" height="33" itemattr="align=&quot;left&quot; font=&quot;2&quot;" folderattr="padding=&quot;0,8,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;" >
                   <TreeNode name="ccECLoadScriptNode" text="圈存脚本" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
                   <TreeNode name="ccCardCheckNode" text="卡片检测" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
+                  <TreeNode name="ccEPCheckNode" text="电子钱包检测" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/>
                   <!--TreeNode name="ccExpandAppNode" text="扩展应用" height="25"  itemattr="align=&quot;left&quot; font=&quot;1&quot;"/-->
 		</TreeNode>
 		<TreeNode name="toolTreeNode" text="常用工具" height="33" itemattr="align=&quot;left&quot; font=&quot;2&quot;" folderattr="padding=&quot;0,8,0,0&quot; width=&quot;16&quot; height=&quot;16&quot; normalimage=&quot;file='Icon/treeview_a.png' source='0,0,16,16' &quot; hotimage=&quot;file='Icon/treeview_a.png' source='16,0,32,16' &quot; selectedimage=&quot;file='Icon/treeview_b.png' source='0,0,16,16' &quot; selectedhotimage=&quot;file='Icon/treeview_b.png' source='16,0,32,16' &quot;" >

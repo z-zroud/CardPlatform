@@ -240,6 +240,9 @@
     <ClCompile Include="Source\Util\Tool.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MainUI\UIEpScriptCheck.cpp">
+      <Filter>Source Files\MainUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\StdAfx.h">
@@ -404,6 +407,9 @@
     <ClInclude Include="Source\Util\Tool.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="Source\MainUI\UIEpScriptCheck.h">
+      <Filter>Header Files\MainUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="UI\MainFrame.xml">
@@ -458,6 +464,9 @@
       <Filter>UI</Filter>
     </Xml>
     <Xml Include="UI\LogMenu.xml">
+      <Filter>UI</Filter>
+    </Xml>
+    <Xml Include="UI\EPCheck.xml">
       <Filter>UI</Filter>
     </Xml>
   </ItemGroup>

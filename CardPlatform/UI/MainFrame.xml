@@ -55,6 +55,7 @@
                               <PersonalizationUI />
                               <ECLoadScriptUI />
                               <CardCheckUI />
+                              <EpScriptCheckUI />
                               <ModifyKmcUI />
                               <FileDecryptUI />
                         </TabLayout>

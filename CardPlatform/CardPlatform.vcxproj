@@ -34,6 +34,7 @@
     <ClCompile Include="Source\MainUI\UICardCheck.cpp" />
     <ClCompile Include="Source\MainUI\UIDecryptFile.cpp" />
     <ClCompile Include="Source\MainUI\UIECLoad.cpp" />
+    <ClCompile Include="Source\MainUI\UIEpScriptCheck.cpp" />
     <ClCompile Include="Source\MainUI\UIGEConverter.cpp" />
     <ClCompile Include="Source\MainUI\UIHTConverter.cpp" />
     <ClCompile Include="Source\MainUI\UIPersonalizationConfig.cpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="Source\MainUI\UICardCheck.h" />
     <ClInclude Include="Source\MainUI\UIDecryptFile.h" />
     <ClInclude Include="Source\MainUI\UIECLoad.h" />
+    <ClInclude Include="Source\MainUI\UIEpScriptCheck.h" />
     <ClInclude Include="Source\MainUI\UIGEConverter.h" />
     <ClInclude Include="Source\MainUI\UIHTConverter.h" />
     <ClInclude Include="Source\MainUI\UIPersonalizationConfig.h" />
@@ -125,6 +127,7 @@
   <ItemGroup>
     <Xml Include="UI\CardCheck.xml" />
     <Xml Include="UI\ECLoadScript.xml" />
+    <Xml Include="UI\EPCheck.xml" />
     <Xml Include="UI\FileDecrypt.xml" />
     <Xml Include="UI\GEConverter.xml" />
     <Xml Include="UI\HTConverter.xml" />
