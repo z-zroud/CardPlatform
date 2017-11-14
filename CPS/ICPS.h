@@ -1,14 +1,10 @@
 #pragma once
 
-/*********************************************************
-* 该接口定义了各类DP数据转化为标准CPS数据的统一接口格式，凡是
-* 需要进行DP格式转换都需要实现下面的接口函数。
-**********************************************************/
-
-struct ICPS
-{
-
-};
+/*******************************************************
+* 外界dll需实现的接口，统一的接口名称为：
+* bool HandleDp(const char* fileName);
+********************************************************/
+typedef bool(*PHandleDpCallback)(const char* fileName);
 
 /**********************************************************
 * 定义该dll对外接口
@@ -19,13 +15,17 @@ struct ICPS
 #define CPS_API __declspec(dllimport)
 #endif
 
-/*********************************************************
-* 获取ICPS接口，从而调用其方法
-**********************************************************/
-extern "C" CPS_API ICPS* GetCPSInstance();
+/******************************************************
+* 生成统一CPS文件,便于个人化
+* 参数说明： szDllName 用于处理DP文件的Dll名称
+* 参数说明： szFileName DP文件路径
+* 返回值： DP文件处理成功返回true, 否则返回false
+*******************************************************/
+extern "C" bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFileName);
 
-/*********************************************************
-* 当通过GetCpsInstance()获取接口后，使用完之后需要释放该对象，
-* 避免不必要的内存泄漏
-**********************************************************/
-extern "C" CPS_API void DeleteCPSInstance(ICPS* obj);
+/******************************************************
+* 通过CPS文件，完成卡片个人化
+*******************************************************/
+extern "C" bool DoPersonlization(const char* szCpsFile,const char* iniConfigFile);
+
+extern "C" bool SetPersonlizationConfig(const char* kmc, int divMethod, int secureLevel);

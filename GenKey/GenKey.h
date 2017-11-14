@@ -10,43 +10,69 @@ struct SqlParam
 	vector<char*> result;
 };
 
+#define DIV_NONE	0
+#define DIV_CPG202	1
+#define DIV_CPG212	2
+
+#define SECURE_NONE	0
+#define SECURE_MAC	1
+
 //生成各类子密钥
 class KeyGenerator : public IGenKey
 {
 public:
-	virtual void GenSubKey(const string kmc,	//获取所有KMC子密钥
-		string divData,
-		DIV_METHOD_FLAG divFlag,
-		string &K_DEK,
-		string &K_MAC,
-		string &K_ENC);
+	/*****************************************************************
+	* 功能： 生成KMC子密钥
+	* 参数： divData 分散数据，由InitUpdate命令返回值提供
+	*		divFlag 分散方法
+	*		acKey	K_DEK 数据加密密钥(用于敏感数据的加密)
+	*		macKey	K_MAC 安全通道消息认证码密钥(安全通道MAC校验)
+	*		encKey	K_ENC 安全通道加密密钥(安全通道的认证和加密)
+	* 描述： K_MAC和K_ENC仅仅用于在安全通道初始化过程中生成安全通道会话密钥
+	******************************************************************/
+	virtual void GenKmcSubKey(
+		const string& kmc,
+		int divMethod,
+		const string& divData,
+		string& kmcAuthKey,
+		string& kmcMacKey,
+		string& kmcEncKey);
 
-	virtual string GenK_DEK(const string kmc, string divData, DIV_METHOD_FLAG divFlag);
-	virtual string GenK_MAC(const string kmc, string divData, DIV_METHOD_FLAG divFlag);
-	virtual string GenK_ENC(const string kmc, string divData, DIV_METHOD_FLAG divFlag);
 
-	void GenSessionKey(string cardRandomNum, string termRandomNum, int nSCP,	//获取SKU会话密钥
-		string K_DEK,
-		string K_MAC,
-		string K_ENC,
-		string &sessionDEK,
-		string &sessionMAC,
-		string &sessionENC);
+	/********************************************************************
+	* 功能： 生成子密钥会话密钥
+	*********************************************************************/
+	virtual void GenScureChannelSessionKey(
+		const string kmc,
+		int divMethod,
+		const string& terminalRandom,
+		const string& initialializeUpdateResp,
+		string& sessionAuthKey,
+		string& sessionMacKey,
+		string& sessionEncKey,
+		string& kekKey);
 
-	virtual string GenSessionDEK(string K_DEK, string cardRandom, string termRandom, int scp);
-	virtual string GenSessionMAC(string K_MAC, string cardRandom, string termRandom, int scp);
-	virtual string GenSessionENC(string K_ENC, string cardRandom, string termRandom, int scp);
+private:
+	string GenKmcSubKey(const string& kmc,  string leftDivData,  string rightDivData);
+	string GenKmcAuthKey(const string& kmc,  string leftDivData,  string rightDivData);
+	string GenKmcMacKey(const string& kmc,  string leftDivData,  string rightDivData);
+	string GenKmcEncKey(const string& kmc, string leftDivData, string rightDivData);
 
-	
+	string GenSecureChannelSessionKeyScp1(string kmcSubKey, string cardRandom, string termRandom);
+	string GenSecureChannelSessionKey(const string& kmcSubKey, string leftDivData, string rightDivData);
+	string GenSecureChannelSessionAuthKey(const string& AuthKey, string seqNo);
+	string GenSecureChannelSessionMacKey(const string& macKey, string seqNo);
+	string GenSecureChannelSessionEncKey(const string& encKey, string seqNo);
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+public:	
 	string GenSUDK_DEK(const string sudkAuth, const string ATC);		//获取SUDK_Auth
 	string GenUDK_DEK(const string mdkAuth, const string ATC, const string account, const string cardSeq);	//获取UDK_Auth
 	string GenARPC1(string udkAuth, string AC, string authCode, string atc);
 	string GenARPC2(string mdkAuth, string AC, string authCode, string atc, string cardSeq, string pan);
 	string EvenOddCheck(string input);	//奇偶校验
 	string GenScriptMac(string mac, string atc, string data);
-
-
-
 
 	string GenCAPublicKey(const string caIndex, string rid);
 	void GetCARid(vector<char*> &ridList);
@@ -73,9 +99,9 @@ public:
 
 
 private:
-	string GenKey(const string strKMC, string leftDivFactor, string rightDivFactor);
-	string GenSessionKeyScp1(string key, string cardRandom, string termRandom);
-	string GenSessionKeyScp2(string key, const string leftDivFactor, const string rightDivFactor);
+
+	
+
 	void QueryPcscTable(string sql, sqlite3_callback callbackFunc, SqlParam& sqlParam);
 private:
 	static string m_caPublicKey;

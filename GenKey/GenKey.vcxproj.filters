@@ -33,13 +33,13 @@
     <ClInclude Include="CardBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SM.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Des0.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SHA1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SM.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

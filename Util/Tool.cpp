@@ -119,5 +119,18 @@ namespace  Tool
             }
         }
     }
+
+	void HexStr(const char* bcdLen, char* output, int len)
+	{
+		memset(output, 0, len);
+		sprintf_s(output, len, "%02X", strlen(bcdLen) / 2);
+	}
+
+	void IncreaseStep(const char* strLen, int step, char* output, int len)
+	{
+		memset(output, 0, len);
+		int incLen = stoi(strLen, 0, 16) + step;
+		sprintf_s(output, len, "%02X", incLen);
+	}
 }
 

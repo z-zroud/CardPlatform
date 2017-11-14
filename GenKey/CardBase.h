@@ -49,16 +49,16 @@ string CTPToString(CARD_TRANSMISSION_PROTOCOL CTP);	//enum to string
 #define CARD_TRANSMISSION_PROTOCOL_TO_STRING(CTP)	CTPToString(CTP)
 
 //分散方法
-enum DIV_METHOD_FLAG
-{
-	DIV_MIN = 0,
-	NO_DIV = 0,
-	DIV_CPG202,
-	DIV_CPG212,
-	DIV_MAX
-};
-string DivToString(DIV_METHOD_FLAG flag);	//enum to string
-#define DIV_METHOD_FLAG_TO_STRING(flag)	DivToString(flag)
+//enum DIV_METHOD_FLAG
+//{
+//	DIV_MIN = 0,
+//	NO_DIV = 0,
+//	DIV_CPG202,
+//	DIV_CPG212,
+//	DIV_MAX
+//};
+//string DivToString(DIV_METHOD_FLAG flag);	//enum to string
+//#define DIV_METHOD_FLAG_TO_STRING(flag)	DivToString(flag)
 
 //安全等级
 enum SECURE_LEVEL
@@ -270,13 +270,13 @@ struct INSTALL_PARAM
 	string strToken;
 };
 
-//存储的数据类型
-enum STORE_DATA_TYPE
-{
-	STORE_DATA_COMMON,		//普通数据
-	STORE_DATA_ENCRYPT,		//加密数据
-	STORE_DATA_LAST			//最后一块数据
-};
+////存储的数据类型
+//enum STORE_DATA_TYPE
+//{
+//	STORE_DATA_COMMON,		//普通数据
+//	STORE_DATA_ENCRYPT,		//加密数据
+//	STORE_DATA_LAST			//最后一块数据
+//};
 
 //卡片加密算法类型
 enum ENCRYPT_TYPE

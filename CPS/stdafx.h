@@ -11,6 +11,12 @@
 // Windows Header Files:
 #include <windows.h>
 
+#ifdef _DEBUG
+#pragma comment(lib,"..\\Debug\\ApduCmd.lib")
 
+#elif
+#pragma comment(lib,"..\Release\\ApduCmd.lib")
+
+#endif
 
 // TODO: reference additional headers your program requires here

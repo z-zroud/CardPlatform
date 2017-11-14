@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "PCSC.h"
-#include "Tool.h"
+#include "../Util/Tool.h"
 #include <stdio.h>
 #include <winscard.h>
 
@@ -283,8 +283,8 @@ int  SendApdu(const char* cmd, char* output, int len)
     bool bResult = false;
     unsigned char SW1, SW2;
 
-	char response[1024] = {0};	//保存APDU返回值
-    int responseLen = 1024;
+	char response[2048] = {0};	//保存APDU返回值
+    int responseLen = 2048;
 
     if (!SendApduCmd(cmd, response, responseLen))
     {

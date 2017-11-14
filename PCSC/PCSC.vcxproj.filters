@@ -27,7 +27,7 @@
     <ClInclude Include="PCSC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tool.h">
+    <ClInclude Include="..\Util\Tool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -39,9 +39,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

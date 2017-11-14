@@ -12,18 +12,18 @@ string KeyGenerator::m_caPublicKey = "";
 
 /***************************************************************************/
 
-
-bool SplitDivData(const string kmc,
-	string divData,
-	DIV_METHOD_FLAG divFlag,
-	string& leftDivData,
-	string& rightDivData)
+void KeyGenerator::GenKmcSubKey(
+	const string& kmc,
+	int divMethod,
+	const string& divData,
+	string& kmcAuthKey,
+	string& kmcMacKey,
+	string& kmcEncKey)
 {
-	if (divData.length() != 20)
-	{
-		return false;
-	}
-	switch (divFlag)
+	string leftDivData;
+	string rightDivData;
+
+	switch (divMethod)
 	{
 	case DIV_CPG202:
 		leftDivData = divData.substr(0, 4) + divData.substr(8, 8);
@@ -34,74 +34,55 @@ bool SplitDivData(const string kmc,
 		rightDivData = leftDivData;
 		break;
 	default:
-		//m_Error = "未知的分散方法";
-		return false;
+		kmcAuthKey = kmc;
+		kmcMacKey = kmc;
+		kmcEncKey = kmc;
+		return;
 	}
-
-	return true;
+	kmcAuthKey = GenKmcAuthKey(kmc, leftDivData, rightDivData);
+	kmcMacKey = GenKmcMacKey(kmc, leftDivData, rightDivData);
+	kmcEncKey = GenKmcEncKey(kmc, leftDivData, rightDivData);
 }
 
-string KeyGenerator::GenK_DEK(const string kmc, string divData, DIV_METHOD_FLAG divFlag)
+
+/********************************************************************
+* 功能： 生成子密钥会话密钥
+*********************************************************************/
+void KeyGenerator::GenScureChannelSessionKey(
+	const string kmc,
+	int divMethod,
+	const string& terminalRandom,
+	const string& initialializeUpdateResp,
+	string& sessionAuthKey,
+	string& sessionMacKey,
+	string& sessionEncKey,
+	string& kekKey)
 {
-	string leftDivData, rightDivData;
-	if (!SplitDivData(kmc, divData, divFlag, leftDivData, rightDivData)) {
-		return "";
-	}
-	leftDivData += string("F001");
-	rightDivData += string("0F01");
+	string divData = initialializeUpdateResp.substr(0, 20);
+	string keyVersion = initialializeUpdateResp.substr(20, 2);
+	string scp = initialializeUpdateResp.substr(22, 2);
+	string cardChallenge = initialializeUpdateResp.substr(24, 16);
+	string cardCryptogram = initialializeUpdateResp.substr(40, 56);
+	string kmcAuthKey, kmcMacKey, kmcEncKey;
+	GenKmcSubKey(kmc, divMethod, divData, kmcAuthKey, kmcMacKey, kmcEncKey);
 
-	return GenKey(kmc, leftDivData, rightDivData);
-}
-
-string KeyGenerator::GenK_MAC(const string kmc, string divData, DIV_METHOD_FLAG divFlag)
-{
-	string leftDivData, rightDivData;
-	if (!SplitDivData(kmc, divData, divFlag, leftDivData, rightDivData)) {
-		return "";
-	}
-	leftDivData += string("F002");
-	rightDivData += string("0F02");
-
-	return GenKey(kmc, leftDivData, rightDivData);
-}
-
-string KeyGenerator::GenK_ENC(const string kmc, string divData, DIV_METHOD_FLAG divFlag)
-{
-	string leftDivData, rightDivData;
-	if (!SplitDivData(kmc, divData, divFlag, leftDivData, rightDivData)) {
-		return "";
-	}
-	leftDivData += string("F003");
-	rightDivData += string("0F03");
-
-	return GenKey(kmc, leftDivData, rightDivData);
-}
-
-//生成 子密钥
-void KeyGenerator::GenSubKey(const string kmc,
-	string divData,
-	DIV_METHOD_FLAG divFlag,
-	string &K_DEK,
-	string &K_MAC,
-	string &K_ENC)
-{
-	string leftDivData, rightDivData;
-
-	if (divFlag == NO_DIV)
+	if (scp == "01")
 	{
-		K_DEK = kmc;
-		K_MAC = kmc;
-		K_ENC = kmc;
+		sessionAuthKey = GenSecureChannelSessionKeyScp1(kmcAuthKey, cardChallenge, terminalRandom);
+		sessionMacKey = GenSecureChannelSessionKeyScp1(kmcMacKey, cardChallenge, terminalRandom);
+		sessionEncKey = GenSecureChannelSessionKeyScp1(kmcEncKey, cardChallenge, terminalRandom);
+		kekKey = kmcEncKey;
 	}
 	else {
-		K_DEK = GenK_DEK(kmc, divData, divFlag);
-		K_MAC = GenK_MAC(kmc, divData, divFlag);
-		K_ENC = GenK_ENC(kmc, divData, divFlag);
+		string seqNo = cardChallenge.substr(0, 4);
+		sessionAuthKey = GenSecureChannelSessionAuthKey(seqNo, kmcAuthKey);
+		sessionMacKey = GenSecureChannelSessionMacKey(seqNo, kmcMacKey);
+		sessionEncKey = GenSecureChannelSessionEncKey(seqNo, kmcEncKey);
+		kekKey = sessionEncKey;
 	}
 }
 
-
-string KeyGenerator::GenKey(const string kmc, string leftDivData, string rightDivData)
+string KeyGenerator::GenKmcSubKey(const string& kmc,  string leftDivData,  string rightDivData)
 {
 	char leftSubKey[17] = { 0 };
 	char rightSubKey[17] = { 0 };
@@ -111,78 +92,68 @@ string KeyGenerator::GenKey(const string kmc, string leftDivData, string rightDi
 
 	return string(leftSubKey) + string(rightSubKey);
 }
-//=====================================================================================
-void KeyGenerator::GenSessionKey(
-	string cardRandom,
-	string termRandom,
-	int scp,
-	string K_DEK,
-	string K_MAC,
-	string K_ENC,
-	string &sessionDEK,
-	string &sessionMAC,
-	string &sessionENC)
-{
-	sessionDEK = GenSessionDEK(K_DEK, cardRandom, termRandom, scp);
-	sessionMAC = GenSessionDEK(K_MAC, cardRandom, termRandom, scp);
-	sessionENC = GenSessionDEK(K_ENC, cardRandom, termRandom, scp);
+
+string KeyGenerator::GenKmcAuthKey(const string& kmc,  string leftDivData,  string rightDivData)
+{	
+	leftDivData += string("F001");
+	rightDivData += string("0F01");
+
+	return GenKmcSubKey(kmc, leftDivData, rightDivData);
 }
 
-string KeyGenerator::GenSessionDEK(string K_DEK, string cardRandom, string termRandom, int scp)
+string KeyGenerator::GenKmcMacKey(const string& kmc,  string leftDivData,  string rightDivData)
 {
-	string key;
-	if (scp == 1)
-	{
-		key = GenSessionKeyScp1(K_DEK, cardRandom, termRandom);
-	}
-	else if (scp == 2)
-	{
-		string leftDivFactor = "0182" + cardRandom.substr(0, 4) + "00000000";
-		string rightDivFactor = "0000000000000000";
+	leftDivData += string("F002");
+	rightDivData += string("0F02");
 
-		key = GenSessionKeyScp2(K_DEK, leftDivFactor, rightDivFactor);
-	}
-	
-	return key;
+	return GenKmcSubKey(kmc, leftDivData, rightDivData);
 }
 
-string KeyGenerator::GenSessionMAC(string K_MAC, string cardRandom, string termRandom, int scp)
+string KeyGenerator::GenKmcEncKey(const string& kmc, string leftDivData, string rightDivData)
 {
-	string key;
-	if (scp == 1)
-	{
-		key = GenSessionKeyScp1(K_MAC, cardRandom, termRandom);
-	}
-	else if (scp == 2)
-	{
-		string leftDivFactor = "0101" + cardRandom.substr(0, 4) + "00000000";
-		string rightDivFactor = "0000000000000000";
+	leftDivData += string("F003");
+	rightDivData += string("0F03");
 
-		key = GenSessionKeyScp2(K_MAC, leftDivFactor, rightDivFactor);
-	}
-
-	return key;
+	return GenKmcSubKey(kmc, leftDivData, rightDivData);
 }
 
-string KeyGenerator::GenSessionENC(string K_ENC, string cardRandom, string termRandom, int scp)
+string KeyGenerator::GenSecureChannelSessionKey(const string& key,  string leftDivData,  string rightDivData)
 {
-	string key;
-	if (scp == 1)
-	{
-		key = GenSessionKeyScp1(K_ENC, cardRandom, termRandom);
-	}
-	else if (scp == 2)
-	{
-		string leftDivFactor = "0181" + cardRandom.substr(0, 4) + "00000000";
-		string rightDivFactor = "0000000000000000";
+	char leftDivKey[17] = { 0 };
+	char rightDivKey[17] = { 0 };
 
-		key = GenSessionKeyScp2(K_ENC, leftDivFactor, rightDivFactor);
-	}
+	Des3(leftDivKey, (char*)key.c_str(), (char*)leftDivData.c_str());
+	str_xor(leftDivKey, (char*)rightDivData.c_str(), 16);
+	Des3(rightDivKey, (char*)key.c_str(), leftDivKey);
 
-	return key;
+	return string(leftDivKey) + string(rightDivKey);
 }
 
-string KeyGenerator::GenSessionKeyScp1(string key, string cardRandom, string termRandom)
+string KeyGenerator::GenSecureChannelSessionAuthKey(const string& authKey, string seqNo)
+{
+	string leftDivData = "0182" + seqNo + "00000000";
+	string rightDivData = "0000000000000000";
+
+	return GenSecureChannelSessionKey(authKey, leftDivData, rightDivData);
+}
+
+string KeyGenerator::GenSecureChannelSessionMacKey(const string& macKey, string seqNo)
+{
+	string leftDivData = "0101" + seqNo + "00000000";
+	string rightDivData = "0000000000000000";
+
+	return GenSecureChannelSessionKey(macKey, leftDivData, rightDivData);
+}
+
+string KeyGenerator::GenSecureChannelSessionEncKey(const string& encKey, string seqNo)
+{
+	string leftDivData = "0181" + seqNo + "00000000";
+	string rightDivData = "0000000000000000";
+
+	return GenSecureChannelSessionKey(encKey, leftDivData, rightDivData);
+}
+
+string KeyGenerator::GenSecureChannelSessionKeyScp1(string key, string cardRandom, string termRandom)
 {
 	string leftDivData, rightDivData, DivData;
 	char sessionKey[33] = { 0 };
@@ -196,18 +167,11 @@ string KeyGenerator::GenSessionKeyScp1(string key, string cardRandom, string ter
 	return sessionKey;
 }
 
-//生成 会话密钥
-string KeyGenerator::GenSessionKeyScp2(string key, const string leftDivFactor, const string rightDivFactor)
-{
-	char leftDivKey[17] = { 0 };
-	char rightDivKey[17] = { 0 };
+//=====================================================================================
 
-	Des3(leftDivKey, (char*)key.c_str(), (char*)leftDivFactor.c_str());
-	str_xor(leftDivKey, (char*)rightDivFactor.c_str(), 16);
-	Des3(rightDivKey, (char*)key.c_str(), leftDivKey);
 
-	return string(leftDivKey) + string(rightDivKey);
-}
+
+
 
 //==================================================================================================
 //获取SUDK_Auth

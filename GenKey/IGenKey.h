@@ -15,33 +15,28 @@ struct IGenKey
 	*		encKey	K_ENC 安全通道加密密钥(安全通道的认证和加密)
 	* 描述： K_MAC和K_ENC仅仅用于在安全通道初始化过程中生成安全通道会话密钥
 	******************************************************************/
-	virtual void GenSubKey(const string kmc,	//获取所有KMC子密钥
-		string divData,
-		DIV_METHOD_FLAG divFlag,
-		string &K_DEK,
-		string &K_MAC,
-		string &K_ENC) = 0;
+	virtual void GenKmcSubKey(
+		const string& kmc,
+		int divMethod,
+		const string& divData,
+		string& kmcAuthKey,
+		string& kmcMacKey,
+		string& kmcEncKey) = 0;
 
-	virtual string GenK_DEK(const string kmc, string divData, DIV_METHOD_FLAG divFlag) = 0;
-	virtual string GenK_MAC(const string kmc, string divData, DIV_METHOD_FLAG divFlag) = 0;
-	virtual string GenK_ENC(const string kmc, string divData, DIV_METHOD_FLAG divFlag) = 0;
 
 	/********************************************************************
 	* 功能： 生成子密钥会话密钥
 	*********************************************************************/
-	virtual void GenSessionKey(string cardRandom, 
-		string termRandom, 
-		int scp,
-		string K_DEK,
-		string K_MAC,
-		string K_ENC,
-		string &sessionDEK,
-		string &sessionMAC,
-		string &sessionENC) = 0;
+	virtual void GenScureChannelSessionKey(
+		const string kmc,
+		int divMethod,
+		const string& terminalRandom,
+		const string& initialializeUpdateResp,
+		string& sessionAuthKey,
+		string& sessionMacKey,
+		string& sessionEncKey,
+		string& kekKey) = 0;
 
-	virtual string GenSessionDEK(string K_DEK, string cardRandom, string termRandom, int scp) = 0;
-	virtual string GenSessionMAC(string K_MAC, string cardRandom, string termRandom, int scp) = 0;
-	virtual string GenSessionENC(string K_ENC, string cardRandom, string termRandom, int scp) = 0;
 	/********************************************************************************
 	* 功能：生成会话密钥
 	* 参数：udkAuth: 过程密钥

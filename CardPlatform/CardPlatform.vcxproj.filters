@@ -28,9 +28,6 @@
     <Filter Include="Source Files\Personalization">
       <UniqueIdentifier>{d098fab8-b1b5-4989-a8e5-0b2f15514459}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\CardCheck">
-      <UniqueIdentifier>{ca9bbaa9-c1a7-4e00-a026-7c2a7366ab6e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\DP">
       <UniqueIdentifier>{3bfe43d2-2064-442d-9060-008b74f4838f}</UniqueIdentifier>
     </Filter>
@@ -88,23 +85,26 @@
     <Filter Include="Header Files\CardCheck\EC">
       <UniqueIdentifier>{0b3c84ab-f008-46fd-a751-d87dabc642eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\CardCheck\PBOC">
+      <UniqueIdentifier>{f45e9161-dfee-4c82-ae68-d906ab52b89e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CardCheck\EP">
+      <UniqueIdentifier>{40a8ef56-b495-4731-aab7-cbdac09bb37b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\CardCheck">
+      <UniqueIdentifier>{ca9bbaa9-c1a7-4e00-a026-7c2a7366ab6e}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\CardCheck\EC">
       <UniqueIdentifier>{f2818140-9bf4-4e03-a2cf-662c7ef23b5d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\CardCheck\qPBOC">
       <UniqueIdentifier>{97ec43ae-8ca7-4155-b79a-200dd17ab843}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\CardCheck\PBOC">
-      <UniqueIdentifier>{f45e9161-dfee-4c82-ae68-d906ab52b89e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\CardCheck\PBOC">
       <UniqueIdentifier>{435b5d5a-f17c-4d94-9571-7b233f86240c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\CardCheck\EP">
       <UniqueIdentifier>{4fbee21c-964b-4bfb-b0ba-e17f33fd31ae}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\CardCheck\EP">
-      <UniqueIdentifier>{40a8ef56-b495-4731-aab7-cbdac09bb37b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

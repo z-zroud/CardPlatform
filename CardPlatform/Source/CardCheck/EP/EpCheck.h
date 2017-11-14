@@ -3,5 +3,5 @@
 class EpCheck
 {
 public:
-	void Check
+
 };
