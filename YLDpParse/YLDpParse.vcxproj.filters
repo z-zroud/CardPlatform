@@ -24,22 +24,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GenKey.h">
+    <ClInclude Include="YlDpParse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IGenKey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CardBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SM.hpp">
+    <ClInclude Include="IDpParse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Des0.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SHA1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,16 +38,16 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GenKey.cpp">
+    <ClCompile Include="YLDpParse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SHA1.cpp">
+    <ClCompile Include="DpParse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dllExport.cpp">
+    <ClCompile Include="ExportFunc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -11,9 +11,7 @@
 // Windows Header Files:
 #include <windows.h>
 
-#ifdef _DEBUG
-#pragma comment(lib,"..\\Debug\\Util.lib")
-#elif
-#pragma comment(lib,"..\Release\\Util.lib")
-#endif
+
+#pragma comment(lib,"..\\bin\\Util.lib")
+
 // TODO: reference additional headers your program requires here

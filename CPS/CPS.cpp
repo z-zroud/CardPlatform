@@ -36,7 +36,7 @@ bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFil
 
 
 
-bool SetPersonlizationConfig(const char* kmc, int divMethod, int secureLevel)
+void SetPersonlizationConfig(const char* kmc, int divMethod, int secureLevel)
 {
 	g_kmc = kmc;
 	g_divMethod = divMethod;
@@ -60,7 +60,7 @@ bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
 	{
 		return false;
 	}
-	OpenSecureChannel(g_kmc, g_divMethod, g_secureLevel);
+	OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel);
 	auto DGIs = cpsFile.GetAllNodes();
 
 	//构造TLV DGI分组

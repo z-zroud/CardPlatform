@@ -12,10 +12,10 @@
 #include <windows.h>
 
 #ifdef _DEBUG
-#pragma comment(lib,"..\\Debug\\ApduCmd.lib")
+#pragma comment(lib,"..\\bin\\ApduCmd.lib")
 
 #elif
-#pragma comment(lib,"..\Release\\ApduCmd.lib")
+#pragma comment(lib,"..\\bin\\ApduCmd.lib")
 
 #endif
 

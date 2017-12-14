@@ -21,11 +21,11 @@ typedef bool(*PHandleDpCallback)(const char* fileName);
 * 参数说明： szFileName DP文件路径
 * 返回值： DP文件处理成功返回true, 否则返回false
 *******************************************************/
-extern "C" bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFileName);
+extern "C" CPS_API bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFileName);
 
 /******************************************************
 * 通过CPS文件，完成卡片个人化
 *******************************************************/
-extern "C" bool DoPersonlization(const char* szCpsFile,const char* iniConfigFile);
+extern "C" CPS_API bool DoPersonlization(const char* szCpsFile,const char* iniConfigFile);
 
-extern "C" bool SetPersonlizationConfig(const char* kmc, int divMethod, int secureLevel);
+extern "C" CPS_API void SetPersonlizationConfig(const char* kmc, int divMethod, int secureLevel);

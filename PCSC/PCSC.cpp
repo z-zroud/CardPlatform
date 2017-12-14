@@ -245,6 +245,9 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
     }
     unsigned char apdu[256] = { 0 };
     Tool::BcdToAsc(apdu, (unsigned char*)noSpaceCmd, cmdLen);
+
+	int respLen = 2048;
+
     switch (g_dwActiveProtocol)
     {
     case 1:
@@ -271,7 +274,6 @@ bool GetAPDUResponseCommand(unsigned char SW1, char* szResponse, int& len)
     sprintf_s(szLen, "%02X", SW1);
     char cmd[12] = { 0 };
     sprintf_s(cmd, 12, "00C00000%s", szLen);
-
     return SendApduCmd(cmd, szResponse, len);
 }
 
@@ -296,6 +298,8 @@ int  SendApdu(const char* cmd, char* output, int len)
 
     if (SW1 == 0x61)	//通过00c0命令获取响应数据, SW2为响应数据返回的长度
     {
+		responseLen = 2048;
+		memset(response, 0, responseLen);
         GetAPDUResponseCommand(SW2, response, responseLen);
     }
     else if (SW1 == 0x6C)	//通过原先的命令获取响应数据, SW2为响应数据返回的长度
@@ -304,8 +308,10 @@ int  SendApdu(const char* cmd, char* output, int len)
         _itoa_s(SW2, temp, 16);
         sprintf_s(temp, 3, "%02X", SW2);
        		
-        char cmd2[128] = { 0 };
-		sprintf_s(cmd2, 128, "%s%s", cmd, temp);
+        char cmd2[2048] = { 0 };
+		sprintf_s(cmd2, 2048, "%s%s", cmd, temp);
+		responseLen = 2048;
+		memset(response, 0, responseLen);
 		if (!SendApduCmd(cmd2, response, responseLen))
 		{
 			return -1;

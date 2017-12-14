@@ -2,7 +2,6 @@
 #include "IAPDU.h"
 #include "../PCSC/PCSC.h"
 #include "../Util/Tool.h"
-#include "../GenKey/IGenKey.h"
 #include "Des0.h"
 
 char g_secureChannelSessionAuthKey[KEY_LEN] = { 0 };
@@ -10,21 +9,173 @@ char g_secureChannelSessionMacKey[KEY_LEN] = { 0 };
 char g_secureChannelSessionEncKey[KEY_LEN] = { 0 };
 char g_secureChannelSessionKekKey[KEY_LEN] = { 0 };
 
-void GetScureChannelSessionAuthKey(char* secureChannelSessionAuthKey, int len)
+void GetScureChannelSessionAuthKey(char* secureChannelSessionAuthKey)
 {
-	memcpy(secureChannelSessionAuthKey, g_secureChannelSessionAuthKey, len - 1);
+	strcpy_s(secureChannelSessionAuthKey, KEY_LEN, g_secureChannelSessionAuthKey);
 }
-void GetScureChannelSessionMacKey(char* secureChannelSessionMacKey, int len)
+void GetScureChannelSessionMacKey(char* secureChannelSessionMacKey)
 {
-	memcpy(secureChannelSessionMacKey, g_secureChannelSessionMacKey, len - 1);
+	strcpy_s(secureChannelSessionMacKey, KEY_LEN, g_secureChannelSessionMacKey);
 }
-void GetScureChannelSessionEncKey(char* secureChannelSessionEncKey, int len)
+void GetScureChannelSessionEncKey(char* secureChannelSessionEncKey)
 {
-	memcpy(secureChannelSessionEncKey, g_secureChannelSessionEncKey, len - 1);
+	strcpy_s(secureChannelSessionEncKey, KEY_LEN, g_secureChannelSessionEncKey);
 }
-void GetScureChannelSessionKekKey(char* secureChannelSessionKekKey, int len)
+void GetScureChannelSessionKekKey(char* secureChannelSessionKekKey)
 {
-	memcpy(secureChannelSessionKekKey, g_secureChannelSessionKekKey, len - 1);
+	strcpy_s(secureChannelSessionKekKey, KEY_LEN, g_secureChannelSessionKekKey);
+}
+
+string _GenSecureChannelSessionKey(const string leftDivFactor, const string rightDivFactor, string key)
+{
+	char leftDivKey[17] = { 0 };
+	char rightDivKey[17] = { 0 };
+
+	Des3(leftDivKey, (char*)key.c_str(), (char*)leftDivFactor.c_str());
+	str_xor(leftDivKey, (char*)rightDivFactor.c_str(), 16);
+	Des3(rightDivKey, (char*)key.c_str(), leftDivKey);
+
+	return string(leftDivKey) + string(rightDivKey);
+}
+
+//获取 会话密钥 Auth Key
+string _GenSecureChannelSessionAuthKey(string seqNo, string strAuthKey)
+{
+	string leftDivFactor = "0182" + seqNo + "00000000";
+	string rightDivFactor = "0000000000000000";
+
+	return _GenSecureChannelSessionKey(leftDivFactor, rightDivFactor, strAuthKey);
+}
+
+
+//获取 会话密钥 Mac Key
+string _GenSecureChannelSessionMacKey(string seqNo, string strMacKey)
+{
+	string leftDivFactor = "0101" + seqNo + "00000000";
+	string rightDivFactor = "0000000000000000";
+
+	return _GenSecureChannelSessionKey(leftDivFactor, rightDivFactor, strMacKey);
+}
+//获取 会话密钥 Enc Key
+string _GenSecureChannelSessionEncKey(string seqNo, string strEnKey)
+{
+	string leftDivFactor = "0181" + seqNo + "00000000";
+	string rightDivFactor = "0000000000000000";
+
+	return _GenSecureChannelSessionKey(leftDivFactor, rightDivFactor, strEnKey);
+}
+
+
+string _GenKmcSubKey(const string kmc, string leftDivFactor, string rightDivFactor)
+{
+	char leftDivKey[17] = { 0 };
+	char rightDivKey[17] = { 0 };
+
+	Des3(leftDivKey, (char*)kmc.c_str(), (char*)leftDivFactor.c_str());
+	Des3(rightDivKey, (char*)kmc.c_str(), (char*)rightDivFactor.c_str());
+
+	return string(leftDivKey) + string(rightDivKey);
+}
+
+
+string _GenKmcAuthKey(const string kmc, string partLeftDivFactor, string partRightDivFactor)
+{
+	string leftDivFactor = partLeftDivFactor + string("F001");
+	string rightDivFactor = partRightDivFactor + string("0F01");
+
+	return _GenKmcSubKey(kmc, leftDivFactor, rightDivFactor);
+}
+
+string _GenKmcMacKey(const string kmc, string partLeftDivFactor, string partRightDivFactor)
+{
+	string leftDivFactor = partLeftDivFactor + string("F002");
+	string rightDivFactor = partRightDivFactor + string("0F02");
+
+	return _GenKmcSubKey(kmc, leftDivFactor, rightDivFactor);
+}
+
+string _GenKmcEncKey(const string kmc, string partLeftDivFactor, string partRightDivFactor)
+{
+	string leftDivFactor = partLeftDivFactor + string("F003");
+	string rightDivFactor = partRightDivFactor + string("0F03");
+
+	return _GenKmcSubKey(kmc, leftDivFactor, rightDivFactor);
+}
+
+
+
+void GenKmcSubKey(string kmc, int divMethod, string divData, string &kmcAuthKey, string &kmcMacKey, string &kmcEncKey)
+{
+	string 	leftDivData;
+	string	rightDivData;
+
+	if (divMethod == DIV_CPG202)
+	{
+		leftDivData = divData.substr(0, 4) + divData.substr(8, 8);
+		rightDivData = leftDivData;
+	}
+	else if (divMethod == DIV_CPG212) {
+		leftDivData = divData.substr(8,20);
+		rightDivData = leftDivData;
+	}
+	else {
+		kmcAuthKey = kmc;
+		kmcMacKey = kmc;
+		kmcEncKey = kmc;
+	}
+
+	kmcAuthKey = _GenKmcAuthKey(kmc, leftDivData, rightDivData);
+	kmcMacKey = _GenKmcMacKey(kmc, leftDivData, rightDivData);
+	kmcEncKey = _GenKmcEncKey(kmc, leftDivData, rightDivData);
+}
+
+
+
+
+void GenSecureChannelSessionKey(string kmc,
+	int divMethod,
+	string termialRandom,
+	string initializeUpdateResp,
+	string sessionAuthKey,
+	string sessionMacKey,
+	string sessionEncKey,
+	string kekKey)
+{
+	string leftDivData, rightDivData;
+	string divData = initializeUpdateResp.substr(0, 20);
+	string keyVersion = initializeUpdateResp.substr(20, 2);
+	int scp = stoi(initializeUpdateResp.substr(22, 2));
+	string cardChallenge = initializeUpdateResp.substr(24, 16);
+	string cardCryptogram = initializeUpdateResp.substr(40, 16);
+
+	string kmcAuthKey, kmcMacKey, kmcEncKey;
+	GenKmcSubKey(kmc, divMethod, divData, kmcAuthKey, kmcMacKey, kmcEncKey);
+
+	if (scp == 1) {
+		char szSessionAuthKey[33] = { 0 };
+		char szSessionMacKey[33] = { 0 };
+		char szSessionEncKey[33] = { 0 };
+
+		leftDivData = cardChallenge.substr(8, 8) + termialRandom.substr(0, 8);
+		rightDivData = cardChallenge.substr(0, 8) + termialRandom.substr(8, 8);
+		divData = leftDivData + rightDivData;
+
+		Des3_ECB(szSessionAuthKey, (char*)kmcAuthKey.c_str(), (char*)divData.c_str(), 16);
+		Des3_ECB(szSessionMacKey, (char*)kmcMacKey.c_str(), (char*)divData.c_str(), 16);
+		Des3_ECB(szSessionEncKey, (char*)kmcEncKey.c_str(), (char*)divData.c_str(), 16);
+
+		sessionAuthKey = szSessionAuthKey;
+		sessionMacKey = szSessionMacKey;
+		sessionEncKey = szSessionEncKey;
+		kekKey = kmcEncKey;
+	}
+	else {
+		string seqNo = cardChallenge.substr(0, 4);
+		sessionAuthKey = _GenSecureChannelSessionAuthKey(seqNo, kmcAuthKey);
+		sessionMacKey = _GenSecureChannelSessionMacKey(seqNo, kmcMacKey);
+		sessionEncKey = _GenSecureChannelSessionEncKey(seqNo, kmcEncKey);
+		kekKey = sessionEncKey;
+	}
 }
 
 
@@ -48,9 +199,8 @@ UINT ExternalAuthencationCmd2(const string& kmc, int divMethod, string terminalR
 	memset(g_secureChannelSessionEncKey, 0, KEY_LEN);
 	memset(g_secureChannelSessionKekKey, 0, KEY_LEN);
 
-	IGenKey *pKey = GetGenKeyInstance();
 	string sessionAuthKey, sessionMacKey, sessionEncKey, kekKey;
-	pKey->GenScureChannelSessionKey(kmc, divMethod, terminalRandom, initializeUpdateResp, sessionAuthKey, sessionMacKey, sessionEncKey, kekKey);
+	GenSecureChannelSessionKey(kmc, divMethod, terminalRandom, initializeUpdateResp, sessionAuthKey, sessionMacKey, sessionEncKey, kekKey);
 	string validateMacInput = terminalRandom + cardChanllenge;
 	char validateMac[17] = { 0 };
 	Full_3DES_CBC_MAC((char*)validateMacInput.c_str(), (char*)sessionAuthKey.c_str(), "0000000000000000", validateMac);
@@ -86,10 +236,10 @@ UINT ExternalAuthencationCmd2(const string& kmc, int divMethod, string terminalR
 /******************************************************************
 * 打开安全通道
 *******************************************************************/
-bool OpenSecureChannel(const string &kmc, int divMethod, int secureLevel)
+bool OpenSecureChannel(const char* kmc, int divMethod, int secureLevel)
 {
-	string random = "1122334455667788";
-	string initializeUpdateResp;
+	char random[] = "1122334455667788";
+	char initializeUpdateResp[256] = { 0 };
 	if (APDU_OK != InitializeUpdateCmd(random, initializeUpdateResp))
 	{
 		return false;
@@ -105,7 +255,7 @@ bool OpenSecureChannel(const string &kmc, int divMethod, int secureLevel)
 /***********************************************************
 * 重置安全通道或分散方式
 ************************************************************/
-bool SetKmc(const string &kmc, int divMethod)
+bool SetKmc(const char* kmc, int divMethod)
 {
 	return false;
 }
@@ -113,40 +263,46 @@ bool SetKmc(const string &kmc, int divMethod)
 /***********************************************************
 * 用于打开安全通道更新初始化，
 ************************************************************/
-UINT InitializeUpdateCmd(const string& random, string& resp)
+UINT InitializeUpdateCmd(const char* random, char* resp)
 {
-	char apduResp[APDU_LEN] = { 0 };
-
-	string cmd = "80500000 08" + random;
-	int sw = SendApdu(cmd.c_str(), apduResp, APDU_LEN);
-	resp = apduResp;
-
+	string cmd = "80500000 08" + string(random);
+	int sw = SendApdu(cmd.c_str(), resp, APDU_LEN);
 	return sw;
 }
 /**************************************************
 * 通过AID选择应用
 ***************************************************/
-UINT SelectAppCmd(const string& aid, string& resp)
+UINT SelectAppCmd(const char* aid, char* resp)
 {
-	char apduResp[APDU_LEN] = { 0 };
 	char dataLen[5] = { 0 };
-	Tool::HexStr(aid.c_str(), dataLen, 5);
+	Tool::HexStr(aid, dataLen, 5);
 	
 	string cmd = "00A40400" + string(dataLen) + aid;
-	int sw = SendApdu(cmd.c_str(), apduResp, APDU_LEN);
-	resp = apduResp;
+	int sw = SendApdu(cmd.c_str(), resp, APDU_LEN);
+
 
 	return sw;
 }
 
 /**************************************************
+* 读取记录文件信息
+* 参数： sfi 读取记录文件的短文件标识
+* 参数： recordNum 记录号
+* 返回： 成功返回 0x9000 其他值表示失败
+***************************************************/
+UINT ReadRecordCmd(int sfi, int recordNum)
+{
+
+}
+
+/**************************************************
 * 通过AID删除应用
 ***************************************************/
-UINT DeleteAppCmd(const string& aid)
+UINT DeleteAppCmd(const char* aid)
 {
 	char aidLen[5] = { 0 };
 	char dataLen[5] = { 0 };
-	Tool::HexStr(aid.c_str(), aidLen, 5);
+	Tool::HexStr(aid, aidLen, 5);
 	Tool::IncreaseStep(aidLen, 2, dataLen, 5);
 
 	string cmd = "80E40000" + string(dataLen) + "4F" + aidLen + aid;
@@ -161,7 +317,7 @@ UINT DeleteAppCmd(const string& aid)
 * 参数说明：data 包含了除命令头 及 data长度以外的数据部分
 * 参数说明：type 表明data数据类型
 *****************************************************/
-UINT StoreDataCmd(const string data, int type, bool reset)
+UINT StoreDataCmd(const char* data, int type, bool reset)
 {
 	static int count = 0;
 	
@@ -178,7 +334,7 @@ UINT StoreDataCmd(const string data, int type, bool reset)
 	char szCount[3] = { 0 };
 	char dataLen[3] = { 0 };
 	sprintf_s(szCount, "%02X", count);		//命令头
-	Tool::HexStr(data.c_str(), dataLen, 3);
+	Tool::HexStr(data, dataLen, 3);
 
 	cmd += string(szCount) + string(dataLen) + data;
 	int sw = SendApdu2(cmd.c_str());

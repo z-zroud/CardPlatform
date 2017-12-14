@@ -9,7 +9,20 @@ using namespace std;
 
 namespace  Tool 
 {
-	void BcdToAsc(byte *asc, byte *bcd, long bcd_len)
+	bool SubStr(const char* src, int start, int len, char* dst)
+	{
+		if (strlen(src) < len ||
+			start < 0 || 
+			start > strlen(src))
+		{
+			return false;
+		}
+		strncpy_s(dst, len + 1, src + start, len);
+
+		return true;
+	}
+
+	void BcdToAsc(unsigned char *asc, unsigned char *bcd, long bcd_len)
 	//void BcdToAsc(byte *bcd, byte *asc, long asc_len)
 	{
 		long j;
@@ -86,10 +99,10 @@ namespace  Tool
 		szHex[2] = 0;
 	}
 
-	void StrToHex(byte *pDest, byte *pSrc, int nLen)
+	void StrToHex(unsigned char *pDest, unsigned char *pSrc, int nLen)
 	{
 		char h1, h2;
-		byte s1, s2;
+		unsigned char s1, s2;
 		int i;
 		for (i = 0; i < nLen; i++)
 		{
@@ -125,7 +138,10 @@ namespace  Tool
 		memset(output, 0, len);
 		sprintf_s(output, len, "%02X", strlen(bcdLen) / 2);
 	}
+	void IntToStr(int value, char* hexStr, int hexStrLen)
+	{
 
+	}
 	void IncreaseStep(const char* strLen, int step, char* output, int len)
 	{
 		memset(output, 0, len);

@@ -137,7 +137,12 @@ T GetSMFunc(const char* funcName)
     T ret = NULL;
     if (!isLoaded)
     {
-        hInst = LoadLibrary("./ChineseSM.dll");
+		char appPath[256] = { 0 };
+		GetModuleFileName(NULL, appPath, 256);
+		string temp = appPath;
+		int pos = temp.find_last_of('\\');
+		string dbPath = temp.substr(0, pos) + "\\ChineseSM.dll";
+        hInst = LoadLibrary(dbPath.c_str());
         if (hInst == NULL)
         {
             return ret;
