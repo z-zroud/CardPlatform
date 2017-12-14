@@ -10,6 +10,6 @@
 #include <stdio.h>
 #include <tchar.h>
 
-
+#pragma comment(lib,"..\\bin\\Util.lib")
 
 // TODO: reference additional headers your program requires here

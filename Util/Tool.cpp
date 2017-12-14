@@ -138,10 +138,17 @@ namespace  Tool
 		memset(output, 0, len);
 		sprintf_s(output, len, "%02X", strlen(bcdLen) / 2);
 	}
-	void IntToStr(int value, char* hexStr, int hexStrLen)
-	{
 
+	void IntToStr(int value, char* hexStr, Hex_Len hexLen)
+	{
+		if (hexLen == Two_byte) {
+			sprintf_s(hexStr, 3, "%02X", value);
+		}
+		else {
+			sprintf_s(hexStr, 5, "%04X", value);
+		}
 	}
+
 	void IncreaseStep(const char* strLen, int step, char* output, int len)
 	{
 		memset(output, 0, len);

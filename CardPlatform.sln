@@ -64,6 +64,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataParseTest", "DataParseT
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UtilTest", "UtilTest\UtilTest.vcxproj", "{92B5CD54-B9E0-4FFA-BF4E-BDA25A8F1181}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6C158251-C843-41FE-8B64-5926DFCD2411} = {6C158251-C843-41FE-8B64-5926DFCD2411}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PbocTest", "PbocTest\PbocTest.vcxproj", "{50973624-5FCD-433F-8AE5-FA9F5230AB2F}"
 EndProject

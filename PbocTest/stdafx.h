@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 #include <tchar.h>
-
+#include <Windows.h>
 #pragma comment(lib,"..\\bin\\PCSC.lib")
 #pragma comment(lib,"..\\bin\\ApduCmd.lib")
 #pragma comment(lib,"..\\bin\\DataParse.lib")

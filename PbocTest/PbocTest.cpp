@@ -2,10 +2,49 @@
 //
 
 #include "stdafx.h"
+#include <vector>
 #include "..\PCSC\PCSC.h"
 #include "..\ApduCmd\IApdu.h"
+#include "..\DataParse\IDataParse.h"
+
+using namespace std;
 
 #define SW_9000 0x9000
+
+vector<pair<string, string>> g_Tags;
+
+/****************************************
+* 保存卡片中的Tag值，供后续使用
+*****************************************/
+void SetTags(string tag, string value)
+{
+	bool bExist = false;
+	for (auto& item : g_Tags)
+	{
+		if (item.first == tag) {
+			item.second = value;
+			bExist = true;
+			break;
+		}
+	}
+	if (!bExist) {
+		g_Tags.push_back(pair<string, string>(tag, value));
+	}
+}
+
+/*********************************************
+* 从保存的tag容器中获取指定的tag值
+**********************************************/
+string GetTag(string tag)
+{
+	for (auto item : g_Tags)
+	{
+		if (item.first == tag)
+			return item.second;
+	}
+	return "";
+}
+
 int main()
 {
 	/********************** 打开读卡器 ********************************/
@@ -34,7 +73,9 @@ int main()
 		printf("选择应用失败!\n");
 		return 2;
 	}
-
+	unsigned int tlvCount = 12;
+	TLV tlvs[12];
+	ParseTLV(selectAppResp, tlvs, tlvCount);
     return 0;
 }
 

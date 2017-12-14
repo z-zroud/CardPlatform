@@ -266,7 +266,7 @@ bool SetKmc(const char* kmc, int divMethod)
 UINT InitializeUpdateCmd(const char* random, char* resp)
 {
 	string cmd = "80500000 08" + string(random);
-	int sw = SendApdu(cmd.c_str(), resp, APDU_LEN);
+	int sw = SendApdu(cmd.c_str(), resp, RESP_LEN);
 	return sw;
 }
 /**************************************************
@@ -278,7 +278,7 @@ UINT SelectAppCmd(const char* aid, char* resp)
 	Tool::HexStr(aid, dataLen, 5);
 	
 	string cmd = "00A40400" + string(dataLen) + aid;
-	int sw = SendApdu(cmd.c_str(), resp, APDU_LEN);
+	int sw = SendApdu(cmd.c_str(), resp, RESP_LEN);
 
 
 	return sw;
@@ -290,9 +290,17 @@ UINT SelectAppCmd(const char* aid, char* resp)
 * 参数： recordNum 记录号
 * 返回： 成功返回 0x9000 其他值表示失败
 ***************************************************/
-UINT ReadRecordCmd(int sfi, int recordNum)
+UINT ReadRecordCmd(int sfi, int recordNum, char* resp)
 {
+	
+	char p1[3] = { 0 };
+	char p2[3] = { 0 };
+	Tool::IntToStr(sfi, p1, Two_byte);
+	Tool::IntToStr(recordNum, p2, Two_byte);
 
+	string cmd = string("00B2") + p1 + p2;
+
+	return SendApdu(cmd.c_str(), resp, RESP_LEN);
 }
 
 /**************************************************
