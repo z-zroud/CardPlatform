@@ -27,6 +27,10 @@ using namespace std;
 #define SECURE_NONE	0
 #define SECURE_MAC	1
 
+#define AAC			0x00
+#define ARQC		0x80
+#define TC			0x40
+#define CDA			0x10
 
 
 #ifdef __cplusplus
@@ -40,6 +44,14 @@ APDUCMD_API bool SetKmc(const char* kmc, int divMethod);
 * 通过AID选择应用
 ***************************************************/
 APDUCMD_API	UINT SelectAppCmd(const char* aid, char* resp);
+
+/***********************************************************
+* 终端发送GPO命令
+* 参数： terminalData 由Tag9F38指定的终端数据拼接而成
+* 参数： resp 卡片返回的数据域
+* 返回： 成功返回 0x9000 其他值表示失败
+************************************************************/
+APDUCMD_API UINT GPOCmd(const char* terminalData, char* resp);
 
 /**************************************************
 * 读取记录文件信息
@@ -57,6 +69,30 @@ APDUCMD_API UINT ReadRecordCmd(int sfi, int recordNum, char* resp);
 APDUCMD_API	UINT DeleteAppCmd(const char* aid);
 APDUCMD_API	UINT StoreDataCmd(const char* data, int type, bool reset = false);
 APDUCMD_API	UINT InitializeUpdateCmd(const char* random, char* resp);
+
+/*************************************************************************
+* 内部认证命令，终端发送该命令用来验证卡片的合法性
+* 参数： ddolData 即Tag9F49指定的终端数据
+* 参数： resp 卡片生成的动态数据签名 即Tag9F4B
+**************************************************************************/
+APDUCMD_API UINT InternalAuthencationCmd(const char* ddolData, char* resp);
+
+/*************************************************************************
+* 外部认证命令
+**************************************************************************/
+APDUCMD_API UINT ExternalAuthencationCmd(const char* arpc, const char* authCode, char* resp);
+/***************************************************************************
+* 生成应用密文，终端传送交易相关数据到IC卡中，IC卡计算并返回一个密文
+* 参数：terminalCryptogramType 终端请求的密文类型 AAC/ARQC/TC
+* 参数：cdolData CDOL指定的终端数据
+* 参数：resp 生成的应用密文
+****************************************************************************/
+APDUCMD_API UINT GACCmd(int terminalCryptogramType, const char* cdolData, char* resp);
+
+/****************************************************************
+* 卡片生成动态数据，终端通过该数据使用IC卡公钥
+*****************************************************************/
+APDUCMD_API void GenDynamicData(const char* ddolData, char* resp);
 
 //获取打开安全通道之后的会话密钥，调用前，需调用OpenSecureChannel来打开安全通道
 APDUCMD_API	void GetScureChannelSessionAuthKey(char* scureChannelSessionAuthKey);

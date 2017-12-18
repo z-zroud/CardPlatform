@@ -129,10 +129,6 @@ int GenCAPublicKey(const char* caIndex, const char* rid, char* caPublicKey)
 	int pos = temp.find_last_of('\\');
 	string dbPath = temp.substr(0, pos) + "/Configuration/pcsc.db";
 
-	if (strcmp(caIndex, "03") != 0 || strcmp(caIndex, "65537") != 0)
-	{
-		return 2;	//发卡行公钥指数必须等于3或者65537
-	}
 	//打开数据库
 	if(!db.Open(dbPath.c_str()))
 	{
@@ -167,11 +163,6 @@ int GenDesIssuerPublicKey(
 	char* issuerPublicKey)
 {
 	char recoveryData[2046] = { 0 };
-
-	if (strlen(caPublicKey) != strlen(issuerPublicCert))
-	{
-		return 2;	//发卡行公钥证书的长度 必须等于 CA认证中心公钥模
-	}
 
 	//从发卡行证书中获取恢复数据
 	RSA_STD((char*)caPublicKey, (char*)issuerExponent, (char*)issuerPublicCert, recoveryData);
@@ -216,8 +207,9 @@ int GenDesICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
 	const char* iccRemainder,
-	const char* signedData,
+	const char* sigStaticData,
 	const char* iccExponent,
+	const char* tag82,
 	char* iccPublicKey)
 {
 	char recoveryData[2046] = { 0 };
@@ -233,7 +225,7 @@ int GenDesICCPublicKey(
 	}
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
 	//Log->Info("Recovery Data:[%s]", strRecoveryData.c_str());
-	string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + iccRemainder + iccExponent + signedData;
+	string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + iccRemainder + iccExponent + sigStaticData + tag82;
 	//Log->Info("Hash Input: [%s]", hashDataInput.c_str());
 
 	CSHA1 sha1;
@@ -374,11 +366,11 @@ int SM_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* sigS
 	return 1;
 }
 
-int DES_DDA(const char* iccPublicKey, const char*ipkExponent, const char* tag9F4B, const char* dynamicData)
+int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4B, const char* dynamicData)
 {
 	//从动态签名数据中获取恢复数据
 	char recoveryData[2048] = { 0 };
-	RSA_STD((char*)iccPublicKey, (char*)ipkExponent, (char*)tag9F4B, recoveryData);
+	RSA_STD((char*)iccPublicKey, (char*)iccExponent, (char*)tag9F4B, recoveryData);
 	string strRecoveryData = recoveryData;
 	int recoveryDataLen = strlen(recoveryData);
 	if (recoveryDataLen == 0)

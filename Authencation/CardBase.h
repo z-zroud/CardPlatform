@@ -126,22 +126,22 @@ enum SESSIONKEY
 };
 
 //GAC 引用控制参数
-enum GACControlParam
-{
-	AAC,
-	ARQC,
-	TC,
-	CDA
-};
+//enum GACControlParam
+//{
+//	AAC,
+//	ARQC,
+//	TC,
+//	CDA
+//};
 
 
-//应用文件定位器(AFL)
-struct AFL
-{
-	int SFI;                    //短文件标识符
-	int nRecordNo;              //记录号
-	bool bAcceptAuthencation;   //是否需要参与脱机数据认证
-};
+////应用文件定位器(AFL)
+//struct AFL
+//{
+//	int SFI;                    //短文件标识符
+//	int nRecordNo;              //记录号
+//	bool bAcceptAuthencation;   //是否需要参与脱机数据认证
+//};
 
 
 struct CVMLIST
@@ -197,16 +197,16 @@ enum TERM_TRANS_TYPE
 	TERM_TC
 };
 
-typedef struct TLVEntity
-{
-	unsigned char* Tag;			//标签
-	unsigned char* Length;		//长度
-	unsigned char* Value;		//数据
-	unsigned int TagSize;		//标签占用字节  一般两个字节
-	unsigned int LengthSize;	//数据占用的字节
-	TLVEntity* subTLVEntity;	//嵌套的子TLV结构体,如果有的话，需要递归
-	unsigned int subTLVnum;		//下一级的TLV数量，不包括下下级的TLV（记录subTLVEntity[]的大小）
-}TLV, *PTLV;
+//typedef struct TLVEntity
+//{
+//	unsigned char* Tag;			//标签
+//	unsigned char* Length;		//长度
+//	unsigned char* Value;		//数据
+//	unsigned int TagSize;		//标签占用字节  一般两个字节
+//	unsigned int LengthSize;	//数据占用的字节
+//	TLVEntity* subTLVEntity;	//嵌套的子TLV结构体,如果有的话，需要递归
+//	unsigned int subTLVnum;		//下一级的TLV数量，不包括下下级的TLV（记录subTLVEntity[]的大小）
+//}TLV, *PTLV;
 
 typedef struct BCD_TLVEntity
 {

@@ -295,8 +295,12 @@ UINT ReadRecordCmd(int sfi, int recordNum, char* resp)
 	
 	char p1[3] = { 0 };
 	char p2[3] = { 0 };
-	Tool::IntToStr(sfi, p1, Two_byte);
-	Tool::IntToStr(recordNum, p2, Two_byte);
+
+	Tool::IntToStr(recordNum, p1, Two_byte);
+
+	sfi = (sfi << 3) + 4;
+	Tool::IntToStr(sfi, p2, Two_byte);
+	
 
 	string cmd = string("00B2") + p1 + p2;
 
@@ -351,8 +355,64 @@ UINT StoreDataCmd(const char* data, int type, bool reset)
 	return sw;
 }
 
+UINT GPOCmd(const char* terminalData, char* resp)
+{
+	char terminalDataLen[3] = { 0 };
+	Tool::HexStr(terminalData, terminalDataLen, 3);
+	char dataLen[3] = { 0 };
+	Tool::IncreaseStep(terminalDataLen, 2, dataLen, 3);
 
+	string cmd = "80A80000" + string(dataLen) + "83" + terminalDataLen + terminalData;
 
+	return SendApdu(cmd.c_str(), resp, RESP_LEN);
+}
+
+UINT InternalAuthencationCmd(const char* ddolData, char* resp)
+{
+	char ddolDataLen[3] = { 0 };
+
+	Tool::HexStr(ddolData, ddolDataLen, 3);
+	string cmd = "00880000" + string(ddolDataLen) + ddolData;
+
+	return SendApdu(cmd.c_str(), resp, RESP_LEN);
+}
+
+void GenDynamicData(const char* ddolData, char* resp)
+{
+	char internalAuthencationResp[APDU_LEN] = { 0 };
+	
+	int sw = InternalAuthencationCmd(ddolData, internalAuthencationResp);
+	if (sw != 0x9000)	return;
+
+	char tag9F4B[RESP_LEN] = { 0 };
+	Tool::SubStr(internalAuthencationResp, 6, strlen(internalAuthencationResp) - 6, tag9F4B);
+	strcpy_s(resp, RESP_LEN, tag9F4B);
+}
+
+UINT GACCmd(int terminalCryptogramType, const char* cdolData, char* resp)
+{
+	char p1[3] = { 0 };
+	Tool::IntToStr(terminalCryptogramType, p1, Two_byte);
+
+	char cdolDataLen[3] = { 0 };
+	Tool::HexStr(cdolData, cdolDataLen, 3);
+
+	char p2[] = "00";
+	string cmd = "80AE" + string(p1) + p2 + cdolDataLen + cdolData;
+
+	return SendApdu(cmd.c_str(), resp, RESP_LEN);
+}
+
+UINT ExternalAuthencationCmd(const char* arpc, const char* authCode, char* resp)
+{
+	string extAuthData = string(arpc) + authCode;
+	char extAuthDataLen[3] = { 0 };
+	Tool::HexStr(extAuthData.c_str(), extAuthDataLen, 3);
+
+	string cmd = "00820000" + string(extAuthDataLen) + extAuthData;
+
+	return SendApdu(cmd.c_str(), resp, RESP_LEN);
+}
 ///******************************************************
 //* 根据给定的匹配/查找标准取得发行者安全域、可执行装载文件、
 //* 可执行模块、应用和安全域的生命周期的状态信息。
@@ -440,75 +500,7 @@ UINT StoreDataCmd(const char* data, int type, bool reset)
 //	return SendAPDU(cmd, response);
 //}
 //
-////内部认证 命令
-//bool APDU::InternalAuthCommand(const string &randNumber, APDU_RESPONSE &response)
-//{
-//	char szLen[16] = { 0 };
-//	sprintf_s(szLen, "%02X", randNumber.length() / 2);
-//	string strCommand = "00880000" + string(szLen) + randNumber;
-//
-//	return SendAPDU(strCommand, response);
-//}
-//
-////外部认证 命令
-//bool APDU::ExternalAuthCommand(const string cardRandomNum,
-//	const string termRandomNum,
-//	const string sessionAuthKey,
-//	const string seesionMacKey,
-//	SECURE_LEVEL nSecureLevel,
-//	int nSCP,
-//	APDU_RESPONSE &response)
-//{
-//	//char szMac[17] = { 0 };
-//	//string strCommand;
-//	//string input = cardRandomNum + termRandomNum;
-//	//Full_3DES_CBC_MAC((char*)input.c_str(), (char*)sessionAuthKey.c_str(), "0000000000000000", szMac);
-//	//switch (nSecureLevel)
-//	//{
-//	//case SL_NO_SECURE:	strCommand = "8482000010"; break;
-//	//case SL_MAC:		strCommand = "8482010010"; break;
-//	//case SL_MAC_ENC:	strCommand = "8482030010"; break;
-//	//default:
-//	//	return false;
-//	//}
-//	//strCommand += szMac;
-//	//memset(szMac, 0, sizeof(szMac));
-//	//switch (nSCP)
-//	//{
-//	//case 1: Full_3DES_CBC_MAC((char*)strCommand.c_str(), (char*)sessionAuthKey.c_str(), "0000000000000000", szMac); break;
-//	//case 2: Common_MAC((char*)strCommand.c_str(), (char*)seesionMacKey.c_str(), "0000000000000000", szMac); break;
-//	//default:
-//	//	return false;
-//	//}
-//	//strCommand += szMac;
-//
-//	//return SendAPDU(strCommand, response);
-//}
-//
-////外部认证
-//bool APDU::ExternalAuthcateCommand(const string ARPC, const string authCode, APDU_RESPONSE &response)
-//{
-//	if (ARPC.length() != 16 && authCode.length() != 4)
-//	{
-//		return false;
-//	}
-//	string cmd = "008200000A" + ARPC + authCode;
-//
-//	return SendAPDU(cmd, response);
-//}
-//
-//bool APDU::ReadRecordCommand(const string &SFI, const string strRecordNumber, APDU_RESPONSE &response)
-//{
-//	int temp = (stoi(SFI, 0, 16) << 3) + 4;
-//	char szP2[3] = { 0 };
-//
-//	sprintf_s(szP2, "%02X", temp);
-//
-//	string strCommand = "00B2" + strRecordNumber + string(szP2);
-//
-//	return SendAPDU(strCommand, response);
-//
-//}
+
 //bool APDU::PutDataCommand(const string &tag, const string &value, const string &mac)
 //{
 //	if (mac.length() % 8 != 0)
@@ -550,47 +542,4 @@ UINT StoreDataCmd(const char* data, int type, bool reset)
 //	return false;
 //}
 //
-////获取处理选项 GPO命令
-//bool APDU::GPOCommand(const string &strCommand, APDU_RESPONSE &response)
-//{
-//
-//	int dataLen = strCommand.length() / 2;
-//	int totalLen = dataLen + 2;
-//	char szTotalLen[3] = { 0 };
-//	char szDataLen[3] = { 0 };
-//
-//	sprintf_s(szTotalLen, "%02X", totalLen);
-//	sprintf_s(szDataLen, "%02X", dataLen);
-//
-//	string cmd = "80A80000" + string(szTotalLen) + "83" + string(szDataLen) + strCommand;
-//
-//	return SendAPDU(cmd, response);
-//}
-//
-////生成应用密文 命令
-//bool APDU::GACCommand(GACControlParam parm1, const string terminalData, APDU_RESPONSE &response)
-//{
-//	char szDataLen[3] = { 0 };
-//	sprintf_s(szDataLen, "%02X", terminalData.length() / 2);
-//	string P1;
-//	switch (parm1)
-//	{
-//	case AAC:
-//		P1 = "00";
-//		break;
-//	case ARQC:
-//		P1 = "80";
-//		break;
-//	case TC:
-//		P1 = "40";
-//		break;
-//	case CDA:
-//		P1 = "10";
-//		break;
-//	default:
-//		break;
-//	}
-//	string cmd = "80AE" + P1 + "00" + szDataLen + terminalData;
-//
-//	return SendAPDU(cmd, response);
-//}
+

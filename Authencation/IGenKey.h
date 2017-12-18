@@ -26,17 +26,21 @@ extern "C" GENKEY_API  int GenDesIssuerPublicKey(
 	char* issuerPublicKey);
 
 /********************************************************************************
-* 功能： 获取发卡行公钥
+* 功能： 获取IC卡公钥
 * 参数： issuerPulicCert 发卡行公钥证书
-*		ipkRemainder 发卡行公钥余项
+* 参数： iccPublicCert IC卡公钥证书
+* 参数： iccRemainder IC卡公钥余项
+* 参数： sigStaticData 即：读AFL时，需要签名的数据
+* 参数： iccExponent IC卡公钥指数
 * 返回： 发卡行公钥
 *********************************************************************************/
 extern "C" GENKEY_API  int GenDesICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
 	const char* iccRemainder,
-	const char* signedData,
+	const char* sigStaticData,
 	const char* iccExponent,
+	const char* tag82,
 	char* iccPublicKey);
 
 /********************************************************************************
@@ -77,7 +81,7 @@ extern "C" GENKEY_API int DES_SDA(const char* issuerPublicKey,
 extern "C" GENKEY_API int SM_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* sigStaticData, const char* tag93, const char* tag82);
 
 extern "C" GENKEY_API int DES_DDA(const char* iccPublicKey, 
-	const char*ipkExponent,
+	const char*iccExponent,
 	const char* tag9F4B,
 	const char* dynamicData);
 extern "C" GENKEY_API int SM_DDA(const char* iccPublicKey, const char* dynamicData);
