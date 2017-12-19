@@ -17,7 +17,7 @@ using namespace std;
 *******************************************************************/
 string EvenOddCheck(string input)
 {
-	string strResult;
+	string result;
 	if (input.length() % 2 != 0)
 	{
 		return "";
@@ -38,10 +38,10 @@ string EvenOddCheck(string input)
 		unsigned long res = b.to_ulong();
 		char szResult[3] = { 0 };
 		sprintf_s(szResult, 3, "%02X", res);
-		strResult += szResult;
+		result += szResult;
 	}
 
-	return strResult;
+	return result;
 }
 
 void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey)
@@ -99,6 +99,17 @@ void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* ma
 	string leftSessionMacKey = sessionMacKey.substr(0, 16);
 	string rightSessionMacKey = sessionMacKey.substr(16);
 	string calcData = data;
+
+	if (calcData.length() % 16 == 0)
+	{
+		calcData += "8000000000000000";
+	}
+	else {
+		calcData += "80";
+		int remaindZero = calcData.length() % 16;
+		calcData.append(remaindZero, '0');
+	}
+	//printf("MAC: %s", calcData);
 
 	int blocks = calcData.length() / 16;
 	char szOutput[17] = { 0 };

@@ -15,12 +15,13 @@ typedef bool(*PHandleDpCallback)(const char* fileName);
 #define CPS_API __declspec(dllimport)
 #endif
 
-/******************************************************
+/**********************************************************
 * 生成统一CPS文件,便于个人化
 * 参数说明： szDllName 用于处理DP文件的Dll名称
+* 参数说明： szFuncName 调用第三方dll解析DP文件的函数接口名称
 * 参数说明： szFileName DP文件路径
 * 返回值： DP文件处理成功返回true, 否则返回false
-*******************************************************/
+***********************************************************/
 extern "C" CPS_API bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFileName);
 
 /******************************************************

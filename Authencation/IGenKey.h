@@ -106,7 +106,7 @@ extern "C" GENKEY_API void GenUdk(const char* mdk,const char* cardNo,const char*
 * 参数： udkAcSessionKey 为UDK_AC生成的会话密钥
 * 参数：ac 应用密文
 *************************************************************************************************/
-extern "C" GENKEY_API void GenArpc(const char* udkAcSessionKey, const char* ac, const char* authCode, char* arpc);
+extern "C" GENKEY_API void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc);
 
 /*******************************************************************************************************
 * 生成发卡行脚本MAC

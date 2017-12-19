@@ -413,6 +413,22 @@ UINT ExternalAuthencationCmd(const char* arpc, const char* authCode, char* resp)
 
 	return SendApdu(cmd.c_str(), resp, RESP_LEN);
 }
+
+UINT PutDataCmd(const char* tag, const char* value, const char* mac)
+{
+	string cmd = "04DA";
+	if (strlen(tag) == 2)
+	{
+		cmd += "00";
+	}
+	cmd += tag;
+	char dataLen[3] = { 0 };
+	string data = string(value) + mac;
+	Tool::HexStr(data.c_str(), dataLen, 3);	
+	cmd += dataLen + data;
+
+	return SendApdu2(cmd.c_str());
+}
 ///******************************************************
 //* 根据给定的匹配/查找标准取得发行者安全域、可执行装载文件、
 //* 可执行模块、应用和安全域的生命周期的状态信息。
@@ -501,20 +517,6 @@ UINT ExternalAuthencationCmd(const char* arpc, const char* authCode, char* resp)
 //}
 //
 
-//bool APDU::PutDataCommand(const string &tag, const string &value, const string &mac)
-//{
-//	if (mac.length() % 8 != 0)
-//	{
-//		return false;
-//	}
-//	string cmd = _T("04DA");
-//	cmd += tag;
-//	string dataLen = Base::GetDataHexLen(value + mac);
-//	cmd += dataLen + value + mac;
-//	APDU_RESPONSE response;
-//
-//	return SendAPDU(cmd, response) && (response.SW1 == 0x90 && response.SW2 == 0x00);
-//}
 //
 //bool APDU::PutKeyCommand(const string keyVersion,
 //	const string authKeyWithKcv,

@@ -232,12 +232,12 @@ int main()
 	char tag9F27[32] = { 0 };
 	char tag9F36[32] = { 0 };
 	char tag9F26[32] = { 0 };
-	char tag9F10[32] = { 0 };
+	char tag9F10[128] = { 0 };
 
-	Tool::SubStr(resp, 0, 2, tag9F27);
-	Tool::SubStr(resp, 2, 4, tag9F36);
-	Tool::SubStr(resp, 6, 16, tag9F26);
-	Tool::SubStr(resp, 22, strlen(resp) - 22, tag9F10);
+	Tool::SubStr(resp, 4, 2, tag9F27);
+	Tool::SubStr(resp, 6, 4, tag9F36);
+	Tool::SubStr(resp, 10, 16, tag9F26);
+	Tool::SubStr(resp, 26, strlen(resp) - 26, tag9F10);
 
 	SetTags("9F27", tag9F27);
 	SetTags("9F36", tag9F36);
@@ -247,19 +247,66 @@ int main()
 	/***************************** 发卡行认证 ***************************/
 	char udkSessionKey[128] = { 0 };
 	string atc = GetTag("9F36");
-	char* udkAuthKey = "705B91528064988C925EE6AEA2FEA123";
+	char* udkAuthKey = "9EE66BE0F25DA4D308978CDF643BD00D";
 	GenUdkSessionKey(udkAuthKey, atc.c_str(), udkSessionKey);
 
 	char arpc[128] = { 0 };
 	char* authCode = "3030";
 	string ac = GetTag("9F26");	
-	GenArpc(udkSessionKey, ac.c_str(), authCode, arpc);
+	GenArpc(udkSessionKey, (char*)ac.c_str(), authCode, arpc);
 
 	memset(resp, 0, 1024);
 	sw = ExternalAuthencationCmd(arpc, authCode, resp);
 	if (sw != SW_9000)
 	{
 		printf("外部认证 失败!\n");
+		return 2;
+	}
+	/****************************** 交易结束 ******************************/
+	//发送GAC2命令
+
+	string cdol2 = GetTag("8D"); //动态数据认证数据对象列表DDOL
+	TL cdol2TL[32];
+	unsigned int cdol2Count = 32;
+	ParseTL((char*)cdol2.c_str(), cdol2TL, cdol2Count);
+	string cdol2Data;
+	//for (int i = 0; i < cdol2Count; i++)	//这些值由终端根据交易检查结果指定，省略这些处理，填写固定值
+	//{
+	//	cdol2Data += GetTerminalData(cdol1TL[i]);	
+	//}
+	cdol2Data = "30300000000001000000000000000156000004600001561712150002A943E7100429677579756875612D476F6C647061632032303132";
+	memset(resp, 0, 1024);
+	//缺省 接受
+	sw = GACCmd(TC, cdol2Data.c_str(), resp);
+	if (sw != SW_9000)
+	{
+		printf("GAC2 失败!\n");
+		return 2;
+	}
+
+	Tool::SubStr(resp, 4, 2, tag9F27);
+	Tool::SubStr(resp, 6, 4, tag9F36);
+	//Tool::SubStr(resp, 10, 16, tag9F26);
+	Tool::SubStr(resp, 26, strlen(resp) - 26, tag9F10);
+
+	SetTags("9F27", tag9F27);
+	SetTags("9F36", tag9F36);
+	//SetTags("9F26", tag9F26);
+	SetTags("9F10", tag9F10);
+
+	/***************************** 发卡行脚本处理 ****************************/
+	//圈存500
+	char mac[32] = { 0 };
+	char udkMacKey[] = "C1D9DC08546E2FD5D6709D49800DB910";
+	char udkMacSessionKey[33] = { 0 };
+	GenUdkSessionKey(udkMacKey, atc.c_str(), udkMacSessionKey);
+
+	string data = "04DA9F790A" + GetTag("9F36") + GetTag("9F26") + "000000050000";
+	GenIssuerScriptMac(udkMacSessionKey, data.c_str(), mac);
+	sw = PutDataCmd("9F79", "000000050000", mac);
+	if (sw != SW_9000)
+	{
+		printf("圈存 失败!\n");
 		return 2;
 	}
     return 0;

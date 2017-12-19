@@ -62,6 +62,15 @@ APDUCMD_API UINT GPOCmd(const char* terminalData, char* resp);
 ***************************************************/
 APDUCMD_API UINT ReadRecordCmd(int sfi, int recordNum, char* resp);
 
+/******************************************************************************
+* 设置tag值命令
+* 参数： tag 要修改的数据对象的标签
+* 参数： value 数据对象的新值
+* 参数： mac 由MAC session获得MAC校验码
+* 返回： 成功返回 0x9000 其他值表示失败
+*******************************************************************************/
+APDUCMD_API UINT PutDataCmd(const char* tag, const char* value, const char* mac);
+
 /**************************************************
 * 通过AID删除应用
 * 参数： aid 被删除的应用的AID
