@@ -27,9 +27,6 @@
     <ClInclude Include="YlDpParse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IDpParse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Des0.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -42,9 +39,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DpParse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ExportFunc.cpp">

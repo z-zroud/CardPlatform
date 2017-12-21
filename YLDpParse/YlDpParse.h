@@ -1,7 +1,8 @@
 #pragma once
 #include <map>
 #include <vector>
-#include "IDpParse.h"
+#include <string>
+#include "../DpParse//IDpParse.h"
 using namespace std;
 
 
@@ -13,20 +14,15 @@ public:
 	bool HandleDp(const char* szFileName);
 
 private:
-	bool			IsValueOnlyDGI(unsigned short sDGINO);
-	bool			IsEncryptDGI(string tag);
-	void			ReadDGIName(ifstream &dpFile, streamoff offset);						//读取DGI名称
-	char			ReadDGIStartTag(ifstream &dpFile, streamoff offset);					//读取起始标签
-	unsigned short	ReadFollowedDataLength(ifstream &dpFile, streamoff offset);			//读取数据长度
-	int				ReadCardSequence(ifstream &dpFile, streamoff offset);				//读取卡片序列号
-	int				ReadCardPersonalizedTotelLen(ifstream &dpFile, streamoff offset);	//读取卡片个人化数据总长度
-	unsigned short	ReadDGISequence(ifstream &dpFile, streamoff offset);					//读取卡片DGI分组序号
+	void			ReadDGIName(ifstream &dpFile);						//读取DGI名称
+	char			ReadDGIStartTag(ifstream &dpFile);					//读取起始标签
+	unsigned short	GetFollowedDataLen(ifstream &dpFile);			//读取数据长度
+	int				GetOneCardDpDataLen(ifstream &dpFile);	//读取卡片个人化数据总长度
+	string			GetDgiSeq(ifstream &dpFile);					//读取卡片DGI分组序号
 	char			ReadRecordTemplate(ifstream &dpFile, streamoff offset);				//读取记录模板
-	void			ParseTLV(char* buffer, int nBufferLen, Dict& tlvs);		//解析TLV结构
-	bool			CheckFolderExist(const string &strPath);
-	void			FilterDpData();
+	void			ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs);		//解析TLV结构
 	string			DecrptData(string tag, string value);
-
+	int				ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem);	//分析PSE PPSE
 private:
 
 	vector<string>              m_vecDGI;

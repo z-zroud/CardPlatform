@@ -10,123 +10,100 @@ using namespace std;
 #define DGI_LEN		2
 
 
+int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
+{
+	if (0x86 != (unsigned char)ReadDGIStartTag(dpFile)) {
+		return 1;
+	}
+	int nFollowedDataLen = GetFollowedDataLen(dpFile);
+	if (dgiItem.dgi == "DGIF001") {
+
+		string dgi;
+		GetBCDBuffer(dpFile, dgi, 2);	//读取该DGI序号
+
+		int nFollowedDataLen = GetFollowedDataLen(dpFile);
+		if (nFollowedDataLen > 0)
+		{
+			char* buffer = new char[nFollowedDataLen];
+			memset(buffer, 0, nFollowedDataLen);
+			dpFile.read(buffer, nFollowedDataLen);
+			string value = StrToHex(buffer, nFollowedDataLen);
+			dgiItem.value.InsertItem(dgiItem.dgi, value);
+		}
+	}
+	else {
+		char* buffer = new char[nFollowedDataLen];
+		memset(buffer, 0, nFollowedDataLen);
+		dpFile.read(buffer, nFollowedDataLen);
+		string value = StrToHex(buffer, nFollowedDataLen);	//直接保存，不用解析TLV结构
+		dgiItem.value.InsertItem(dgiItem.dgi, value);
+	}
+
+	return 0;
+}
 
 /********************************************************************
 * 解析银联DP数据
 ********************************************************************/
-bool YLDpParser::HandleDp(const char* szFileName)
+bool YLDpParser::HandleDp(const char* fileName)
 {
-	int pos = string(szFileName).find_last_of('\\');
-	string path = string(szFileName).substr(0, pos + 1);
 	ifstream dpFile;
-	dpFile.open(szFileName, ios::in | ios::binary);
-	if (!dpFile.is_open())
-		return false;
-	dpFile.seekg(0, ios::end);
-	long dpFileSize = static_cast<long>(dpFile.tellg());
-	if (dpFileSize <= m_reserved)   //检查文件是否异常
-	{
-		//Log->Error("银联DP文件大小异常! 检查DP文件大小[%l]", dpFileSize);
+	if (!OpenDpFile(fileName, dpFile)) {
 		return false;
 	}
-	dpFile.seekg(m_reserved, ios::beg);  //重置文件指针至保留数据末尾位置
-
-	//第一步： 读取DGI分组
-	ReadDGIName(dpFile, dpFile.tellg());
-
+	long dpFileSize = GetFileSize(dpFile);
+	if (dpFileSize <= m_reserved){
+		return false;
+	}
+	ReadDGIName(dpFile);		//第一步： 读取DGI分组
 
 	vector<CPS_ITEM> vecCpsItem;
-	//第二步： 遍历后续数据，每一次遍历解析一个卡片数据
-	// 注意，一个DP文件可能包含几张卡片的数据
-	while (dpFile.tellg() < dpFileSize)
+	while (dpFile.tellg() < dpFileSize)		//遍历后续数据，每一次遍历解析一个卡片数据
 	{
-		//第三步： 读取卡片序列号
-		ReadCardSequence(dpFile, dpFile.tellg());
-
-		//第四步： 读取该卡片个人化数据内容总长度
-		ReadCardPersonalizedTotelLen(dpFile, dpFile.tellg());
-
-		//解析每张卡片数据
+		string cardSeq;
+		GetBCDBuffer(dpFile, cardSeq, 4);	//读取卡片序列号		
+		int oneCardDataLen = GetOneCardDpDataLen(dpFile); //读取该卡片个人化数据内容总长度
+		
 		CPS_ITEM cpsItem;
-		for (unsigned int i = 0; i < m_vecDGI.size(); i++)
-		{   //解析每一张卡片数据
+		for (unsigned int i = 0; i < m_vecDGI.size(); i++)	//解析每张卡片数据
+		{   
 			DGI_ITEM dgiItem;
-			dgiItem.dgi = m_vecDGI[i];
-
-			//对于DGIF001和PSE/PPSE数据，需要特殊处理
-			if (dgiItem.dgi == "DGIF001" || dgiItem.dgi.substr(0, 3) != "DGI")
+			dgiItem.dgi = m_vecDGI[i];			
+			if (dgiItem.dgi == "DGIF001" || dgiItem.dgi.substr(0, 3) != "DGI")	//对于DGIF001和PSE/PPSE数据，需要特殊处理
 			{
-				char tag = ReadDGIStartTag(dpFile, dpFile.tellg());
-				if ((unsigned char)tag != 0x86)
-				{
-					//Log->Error("获取DGI分组标识[%X]错误", tag);
-					return false;
-				}
-				int nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
-				if (dgiItem.dgi == "DGIF001") {
-
-					ReadDGISequence(dpFile, dpFile.tellg()); //此时sDgi == 0xF001
-
-					int nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
-					if (nFollowedDataLen > 0)
-					{
-						char* buffer = new char[nFollowedDataLen];
-						memset(buffer, 0, nFollowedDataLen);
-						dpFile.read(buffer, nFollowedDataLen);
-						string value = StrToHex(buffer, nFollowedDataLen);
-						dgiItem.value.InsertItem(dgiItem.dgi, value);
-					}
-				}
-				else {
-					
-					/*if (dgiItem.dgi == "Store_PSE_1") {	//不用管模板，直接写数据
-						ReadRecordTemplate(dpFile, dpFile.tellg());
-						nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
-					}*/
-					char* buffer = new char[nFollowedDataLen];
-					memset(buffer, 0, nFollowedDataLen);
-					dpFile.read(buffer, nFollowedDataLen);
-					string value = StrToHex(buffer, nFollowedDataLen);	//直接保存，不用解析TLV结构
-					dgiItem.value.InsertItem(dgiItem.dgi, value);
-				}
+				ParsePSE(dpFile, dgiItem);
 				cpsItem.items.push_back(dgiItem);
 				continue;
 			}
+		
+			if (0x86 != (unsigned char)ReadDGIStartTag(dpFile)) { //读取DGI起始标志
+				return false;	
+			}			
+			int nFollowedDataLen = GetFollowedDataLen(dpFile);	//读取该DGI总数据长度(包含了该DGI序号)
 
-			//第五步： 读取DGI起始标志
-			char tag = ReadDGIStartTag(dpFile, dpFile.tellg());
-			if ((unsigned char)tag != 0x86)
+			unsigned short sDgi;			
+			string dgi;
+			GetBCDBuffer(dpFile, dgi, 2);	//读取该DGI序号
+			sDgi = stoi(dgi);
+			
+			nFollowedDataLen = GetFollowedDataLen(dpFile);	// 读取后续数据长度(该DGI数据部分)		
+			if (sDgi < 0x0b01)		// 读取记录模板(该模板仅当DGI序号小于0x0B01时出现)
 			{
-				//Log->Error("获取DGI分组标识[%X]错误", tag);
-				return false;
-			}
-
-			//第六步： 读取该DGI总数据长度(包含了该DGI序号)
-			int nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
-
-			unsigned short sDgi;
-
-			//第七步： 读取该DGI序号
-			sDgi = ReadDGISequence(dpFile, dpFile.tellg());
-
-			//第八步： 读取后续数据长度(该DGI数据部分)
-			nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
-
-
-			//第九步： 读取记录模板(该模板仅当DGI序号小于0x0B01时出现)
-			if (sDgi < 0x0b01)
-			{
-				ReadRecordTemplate(dpFile, dpFile.tellg());
-				nFollowedDataLen = ReadFollowedDataLength(dpFile, dpFile.tellg());
+				string templateTag;
+				GetBCDBuffer(dpFile, templateTag, 1);
+				if (templateTag != "70") {
+					return false;
+				}
+				nFollowedDataLen = GetFollowedDataLen(dpFile);
 			}
 
 			char* buffer = new char[nFollowedDataLen];
 			memset(buffer, 0, nFollowedDataLen);
 			dpFile.read(buffer, nFollowedDataLen);
 
-			//第十一步： 判断是否仅包含数据内容，不是标准的TLV结构
+			//判断是否仅包含数据内容，不是标准的TLV结构
 			if (IsTlvStruct((unsigned char*)buffer,nFollowedDataLen)){
-				ParseTLV(buffer, nFollowedDataLen, dgiItem.value);
+				ParseTLVEx(buffer, nFollowedDataLen, dgiItem.value);
 			}else{  
 				char szTag[5] = { 0 };
 				sprintf_s(szTag, "%X", sDgi);
@@ -135,7 +112,7 @@ bool YLDpParser::HandleDp(const char* szFileName)
 			}			
 			cpsItem.items.push_back(dgiItem);			
 		}
-		cpsItem.fileName = path + "yinlian\\" + m_currentAccount;
+		//cpsItem.fileName = path + "yinlian\\" + m_currentAccount;
 		Save(cpsItem);
 		vecCpsItem.push_back(cpsItem);
 	}
@@ -156,7 +133,7 @@ YLDpParser::YLDpParser()
 /********************************************************************
 * 功能：读取DGI起始标准符
 *********************************************************************/
-char YLDpParser::ReadDGIStartTag(ifstream &dpFile, streamoff offset)
+char YLDpParser::ReadDGIStartTag(ifstream &dpFile)
 {
 	char cDGIStartTag;
 
@@ -168,7 +145,7 @@ char YLDpParser::ReadDGIStartTag(ifstream &dpFile, streamoff offset)
 /********************************************************************
 * 功能：读取DGI后续数据长度
 *********************************************************************/
-unsigned short YLDpParser::ReadFollowedDataLength(ifstream &dpFile, streamoff offset)
+unsigned short YLDpParser::GetFollowedDataLen(ifstream &dpFile)
 {
 	unsigned char szBehindLen = '\0';
 	dpFile.read((char*)&szBehindLen, 1);
@@ -178,23 +155,11 @@ unsigned short YLDpParser::ReadFollowedDataLength(ifstream &dpFile, streamoff of
 	return (unsigned short)szBehindLen;
 }
 
-/********************************************************************
-* 功能：读取卡片序列号
-*********************************************************************/
-int YLDpParser::ReadCardSequence(ifstream &dpFile, streamoff offset)
-{
-	char szCardSeq[4] = { 0 };
-	dpFile.read(szCardSeq, 4);
-	int *pCardSeq = (int*)(szCardSeq);
-	//m_oneCardDpData.nCardSequence = *pCardSeq;
-
-	return *pCardSeq;
-}
 
 /********************************************************************
 * 功能：读取每一张卡片的个人化总数据长度
 *********************************************************************/
-int YLDpParser::ReadCardPersonalizedTotelLen(ifstream &dpFile, streamoff offset)
+int YLDpParser::GetOneCardDpDataLen(ifstream &dpFile)
 {
 	char szPersonlizedDataLen[3] = { 0 };
 	dpFile.read(szPersonlizedDataLen, 2);
@@ -206,7 +171,7 @@ int YLDpParser::ReadCardPersonalizedTotelLen(ifstream &dpFile, streamoff offset)
 /********************************************************************
 * 功能：读取DGI分组名称
 *********************************************************************/
-void YLDpParser::ReadDGIName(ifstream &dpFile, streamoff offset)
+void YLDpParser::ReadDGIName(ifstream &dpFile)
 {
 	char szDGICount[DGI_NUMBER] = { 0 };
 	dpFile.read(szDGICount, DGI_NUMBER);
@@ -228,17 +193,12 @@ void YLDpParser::ReadDGIName(ifstream &dpFile, streamoff offset)
 /********************************************************************
 * 功能：读取DGI需要，也就是DGI名称
 *********************************************************************/
-unsigned short YLDpParser::ReadDGISequence(ifstream &dpFile, streamoff offset)
+string YLDpParser::GetDgiSeq(ifstream &dpFile)
 {
-	char szDGISeq[2] = { 0 };
-	dpFile.read(szDGISeq, 2);
+	string dgi;
+	GetBCDBuffer(dpFile, dgi, 2);
 
-	char temp[2] = { 0 };
-	temp[0] = szDGISeq[1];
-	temp[1] = szDGISeq[0];
-	unsigned short *sDGISeq = (unsigned short*)temp;
-
-	return *sDGISeq;
+	return dgi;
 }
 
 /********************************************************************
@@ -255,21 +215,21 @@ char YLDpParser::ReadRecordTemplate(ifstream &dpFile, streamoff offset)
 /********************************************************************
 * 功能：解析标准TLV结构，并保存到DGI数据结构中
 *********************************************************************/
-void YLDpParser::ParseTLV(char* buffer, int nBufferLen, Dict& tlvs)
+void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
 {
 	TLVEntity entities[1024] = { 0 };
 	unsigned int entitiesCount = 0;
-	TLVConstruct((unsigned char*)buffer, nBufferLen, entities, entitiesCount);
+	ParseTLV((unsigned char*)buffer, nBufferLen, entities, entitiesCount);
 	unsigned char parseBuf[4096] = { 0 };
 	unsigned int buf_count;
 	//解析TLV   
-	TLVParseAndFindError(entities, entitiesCount, parseBuf, buf_count);
+	//TLVParseAndFindError(entities, entitiesCount, parseBuf, buf_count);
 	for (unsigned int i = 0; i < entitiesCount; i++)
 	{
-		string strTag = StrToHex((char*)entities[i].Tag, entities[i].TagSize);
-		string strLen = StrToHex((char*)entities[i].Length, entities[i].LengthSize);
+		string strTag = StrToHex((char*)entities[i].tag, entities[i].tagSize);
+		string strLen = StrToHex((char*)entities[i].length, entities[i].lengthSize);
 		int nLen = std::stoi(strLen, 0, 16);
-		string strValue = StrToHex((char*)entities[i].Value, nLen);
+		string strValue = StrToHex((char*)entities[i].value, nLen);
 
 		/****************小插曲，用于生成文件的文件名********************/
 		string temp = DeleteSpace(strTag);

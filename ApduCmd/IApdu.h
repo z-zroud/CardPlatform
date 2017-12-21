@@ -76,6 +76,15 @@ APDUCMD_API UINT PutDataCmd(const char* tag, const char* value, const char* mac)
 * 参数： aid 被删除的应用的AID
 ***************************************************/
 APDUCMD_API	UINT DeleteAppCmd(const char* aid);
+
+
+APDUCMD_API	UINT InstallAppCmd(const char* package,
+	const char* applet,
+	const char* instance,
+	const char* privilege,
+	const char* installParam,
+	const char* token);
+
 APDUCMD_API	UINT StoreDataCmd(const char* data, int type, bool reset = false);
 APDUCMD_API	UINT InitializeUpdateCmd(const char* random, char* resp);
 

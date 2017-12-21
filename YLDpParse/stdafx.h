@@ -12,5 +12,5 @@
 #include <windows.h>
 
 #pragma comment(lib,"../lib/Des0.lib")
-
+#pragma comment(lib,"../bin/DpParse.lib")
 // TODO: reference additional headers your program requires here

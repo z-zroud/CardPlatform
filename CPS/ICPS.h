@@ -24,9 +24,24 @@ typedef bool(*PHandleDpCallback)(const char* fileName);
 ***********************************************************/
 extern "C" CPS_API bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFileName);
 
+
+/**********************************************************
+* 设置个人化时的KMC信息
+***********************************************************/
+extern "C" CPS_API void SetPersonlizationConfig(const char* isd, const char* kmc, int divMethod, int secureLevel);
+
 /******************************************************
 * 通过CPS文件，完成卡片个人化
+* 参数： szCpsFile CPS文件路径
+* 参数： iniConfigFile 个人化配置信息(相关应用参数配置)
 *******************************************************/
-extern "C" CPS_API bool DoPersonlization(const char* szCpsFile,const char* iniConfigFile);
+extern "C" CPS_API bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile);
 
-extern "C" CPS_API void SetPersonlizationConfig(const char* kmc, int divMethod, int secureLevel);
+/******************************************************
+* 通过CPS文件，完成卡片个人化
+* 参数： szCpsFile CPS文件路径
+* 参数： iniConfigFile 个人化配置信息(相关应用参数配置)
+* 注意：此CPS文件没有细分DGI中的tag值，而是将这些tag拼接之后的
+*      字符串作为DGI的值
+*******************************************************/
+extern "C" CPS_API int DoPersonlizationWithOrderdDGI(const char* szCpsFile, const char* iniConfigFile);

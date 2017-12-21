@@ -4,13 +4,38 @@
 #include "stdafx.h"
 #include "ICPS.h"
 #include "IniConfig.h"
+#include "Des0.h"
 #include "../ApduCmd/IApdu.h"
 
 string g_kmc;
+string g_isd;
 int g_divMethod = 0;
 int g_secureLevel = 0;
 
+struct InstallParam
+{
+	string packageAid;
+	string appletAid;
+	string instanceAid;
+	string privilege;
+	string installParam;
+	string token;
+};
 
+void GetInstallParam(IniConfig cfg, string appType, InstallParam& param)
+{
+	param.packageAid = cfg.GetValue(appType, "PackageAid");
+	param.appletAid = cfg.GetValue(appType, "AppletAid");
+	param.instanceAid = cfg.GetValue(appType, "InstanceAid");
+	param.privilege = cfg.GetValue(appType, "Privilege");
+	param.installParam = cfg.GetValue(appType, "InstallParam");
+	param.token = cfg.GetValue(appType, "Token");
+}
+
+int InstallApp(InstallParam& param)
+{
+	return InstallAppCmd(param.packageAid.c_str(), param.appletAid.c_str(), param.instanceAid.c_str(), param.privilege.c_str(), param.installParam.c_str(), param.token.c_str());
+}
 /******************************************************
 * 生成统一CPS文件,便于个人化
 * 参数说明： szDllName 用于处理DP文件的Dll名称
@@ -36,11 +61,184 @@ bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFil
 
 
 
-void SetPersonlizationConfig(const char* kmc, int divMethod, int secureLevel)
+void SetPersonlizationConfig(const char* isd,const char* kmc, int divMethod, int secureLevel)
 {
+	g_isd = isd;
 	g_kmc = kmc;
 	g_divMethod = divMethod;
 	g_secureLevel = secureLevel;
+}
+
+string DecryptDGIData(string encSessionKey, string dgi, string data)
+{
+	if (dgi == "8201" ||
+		dgi == "8202" ||
+		dgi == "8203" ||
+		dgi == "8204" ||
+		dgi == "8205")
+	{
+		if (data.length() % 16 == 0)
+		{
+			data += "8000000000000000";
+		}
+		else {
+			data += "80";
+			int remaindZero = data.length() % 16;
+			data.append(remaindZero, '0');
+		}
+	}
+	char decryptData[2048] = { 0 };
+	Des3_ECB(decryptData, (char*)encSessionKey.c_str(), (char*)data.c_str(), data.length());
+
+	return decryptData;
+}
+
+bool IsNeedDecrypt(string dgi)
+{
+	vector<string> vecDGIs = { "8000","8201","8202","8203" ,"8204","8205","8020" };
+	for (auto item : vecDGIs) {
+		if (dgi == item)
+			return true;
+	}
+
+	return false;
+}
+
+int DoPersonlizationWithOrderdDGI(const char* szCpsFile, const char* iniConfigFile)
+{
+	IniConfig cpsFile;
+
+	IniConfig cfgFile;
+	if (!cfgFile.Read(iniConfigFile))
+	{
+		return 1;
+	}
+	//获取相关配置信息
+	if (!cpsFile.Read(szCpsFile))
+	{
+		return 2;
+	}
+
+	char resp[RESP_LEN] = { 0 };
+	int sw = SelectAppCmd(g_isd.c_str(), resp);
+	if (sw != 0x9000) {
+		return false;
+	}
+	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
+		return 3;
+	}
+	//安装PSE
+	InstallParam pseParam;
+	GetInstallParam(cfgFile, "PSE", pseParam);
+	sw = InstallApp(pseParam);
+	if (sw != 0x9000) {
+		return sw;
+	}
+	//安装PPSE
+	InstallParam ppseParam;
+	GetInstallParam(cfgFile, "PPSE", ppseParam);
+	sw = InstallApp(ppseParam);
+	if (sw != 0x9000) {
+		return sw;
+	}
+	//安装金融APP
+	InstallParam appParam;
+	GetInstallParam(cfgFile, "APP", appParam);
+	sw = InstallApp(appParam);
+	if (sw != 0x9000) {
+		return sw;
+	}
+	//个人化PSE
+	sw = SelectAppCmd(pseParam.instanceAid.c_str(), resp);
+	if (sw != 0x9000) {
+		return sw;
+	}
+	if (!OpenSecureChannel(g_kmc.c_str(),g_divMethod,g_secureLevel)) {
+		return 3;
+	}
+	vector<pair<string, string>> pseDGIs;
+	cpsFile.GetValue("PSE", pseDGIs);
+	int dgiSize = pseDGIs.size();
+	if (dgiSize == 1) {
+		StoreDataCmd(pseDGIs[0].second.c_str(), STORE_DATA_END, true);
+	}
+	else {
+		StoreDataCmd(pseDGIs[0].second.c_str(), STORE_DATA_PLANT, true);
+		for (int i = 1; i < dgiSize - 1; i++) {
+			StoreDataCmd(pseDGIs[i].second.c_str(), STORE_DATA_PLANT, false);
+		}
+		StoreDataCmd(pseDGIs[dgiSize - 1].second.c_str(), STORE_DATA_END, false);
+	}
+	
+	//个人化PPSE
+	sw = SelectAppCmd(ppseParam.instanceAid.c_str(), resp);
+	if (sw != 0x9000) {
+		return sw;
+	}
+	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
+		return 3;
+	}
+
+	vector<pair<string, string>> ppseDGIs;
+	cpsFile.GetValue("PPSE", ppseDGIs);
+	dgiSize = ppseDGIs.size();
+	if (dgiSize == 1) {
+		StoreDataCmd(ppseDGIs[0].second.c_str(), STORE_DATA_END, true);
+	}
+	else {
+		StoreDataCmd(ppseDGIs[0].second.c_str(), STORE_DATA_PLANT, true);
+		for (int i = 1; i < dgiSize - 1; i++) {
+			StoreDataCmd(ppseDGIs[i].second.c_str(), STORE_DATA_PLANT, false);
+		}
+		StoreDataCmd(ppseDGIs[dgiSize - 1].second.c_str(), STORE_DATA_END, false);
+	}
+	//个人化APP
+	
+	sw = SelectAppCmd(appParam.instanceAid.c_str(), resp);
+	if (sw != 0x9000) {
+		return sw;
+	}
+	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
+		return 3;
+	}
+	char encSessionKey[33] = { 0 };
+	GetScureChannelSessionEncKey(encSessionKey);
+	vector<pair<string, string>> appDGIs;
+	cpsFile.GetValue("APP", appDGIs);
+	string firstDGI = appDGIs.begin()->first;
+	string lastDGI = appDGIs.rbegin()->first;
+	for (auto item : appDGIs) {
+		//判断是否为加密类型，并转换
+		int storeType = STORE_DATA_PLANT;
+		bool bReset = false;
+		string data = item.second;
+		if (IsNeedDecrypt(item.first)) {
+			data = DecryptDGIData(encSessionKey, item.first, data);
+			storeType = STORE_DATA_ENCRYPT;
+		}
+		if (item.first == firstDGI) {
+			bReset = true;
+		}
+		if (item.first == lastDGI) {
+			storeType = STORE_DATA_END;
+		}
+		if (data.length() / 2 < 0xFC) {
+			StoreDataCmd(data.c_str(), storeType, bReset);
+		}
+		else {
+			string data1 = data.substr(0, 0xDD * 2);
+			StoreDataCmd(data.c_str(), storeType, bReset);
+			int remaindDataLen = data.length() - 0xDD * 2;
+			while (remaindDataLen > 0) {
+				string storeData = data.substr(0xDD * 2, 0xDD * 2);
+				StoreDataCmd(data.c_str(), storeType, bReset);
+			}
+		}
+		
+	}
+	
+	
+	return true;
 }
 
 /******************************************************
@@ -102,108 +300,6 @@ bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
 			//StoreDataCmd(data,)
 		}
 	}
-	//bool bResult = SetSelectedApplication(aid.GetData());
-	//if (!bResult)
-	//	return;
-
-	////删除当前应用
-	//pAPDU->GetAppStatusCmd(status, reponse);
-	//for (auto v : status)
-	//{
-	//	pAPDU->DeleteAppCmd(v.strAID);
-	//}
-
-	////重新安装应用
-	//CDuiString instCfgPath = m_pPM->GetInstancePath() + _T("Configuration\\InstallParams\\") + instCfg;
-	//CInstallCfg cfg(instCfgPath.GetData());
-	//for (int i = INSTALL_APP; i < INSTALL_MAX; i++)
-	//{
-	//	INSTALL_PARAM param;
-	//	cfg.GetInstallCfg((INSTALL_TYPE)i, param);
-	//	pAPDU->InstallAppCmd(param.strExeLoadFileAID,
-	//		param.strExeModuleAID,
-	//		param.strApplicationAID,
-	//		param.strPrivilege,
-	//		param.strInstallParam,
-	//		param.strToken,
-	//		reponse);
-	//}
-	//IniParser ini;
-	//if (!ini.Read(cpfFile.GetData()))
-	//{
-	//	return;     //读取CPS文件失败
-	//}
-
-	////个人化PSE
-	//string pseAid = cfg.GetApplicationAID(INSTALL_PSE);
-	//if (!SetSelectedApplication(pseAid))
-	//	return;
-	//string pse1 = ini.GetValue("Store_PSE_1", "Store_PSE_1");
-	//pse1 = "0101" + Base::GetDataHexLen(pse1) + pse1;
-
-	//string pse2 = ini.GetValue("Store_PSE_2", "Store_PSE_2");
-	//string pse2Len = Base::GetDataHexLen(pse2);
-	//pse2 = _T("9102") + Base::Increase(pse2Len, 5) + _T("A5") + Base::Increase(pse2Len, 3) + _T("88") + _T("0101") + pse2;
-	////if (!pAPDU->StorePSEData(pse1, STORE_DATA_COMMON, true))
-	////{
-	////    return;     //个人化PSE失败
-	////}
-	////if (!pAPDU->StorePSEData(pse2, STORE_DATA_LAST, false))
-	////{
-	////    return;     //个人化PSE失败
-	////}
-
-	////个人化PPSE
-	//string ppseAid = cfg.GetApplicationAID(INSTALL_PPSE);
-	//if (!SetSelectedApplication(ppseAid))
-	//	return;
-	//string ppse = ini.GetValue("Store_PPSE", "Store_PPSE");
-	//string ppseLen = Base::GetDataHexLen(ppse);
-	//ppse = _T("9102") + Base::Increase(ppseLen, 5) + _T("A5") + Base::Increase(ppseLen, 3) + _T("BF0C") + ppseLen + ppse;
-	////if (!pAPDU->StorePSEData(ppse, STORE_DATA_LAST, true))
-	////{
-	////    return;     // 个人化PPSE失败
-	////}
-
-	////个人化PBOC
-	//string pbocAid = cfg.GetApplicationAID(INSTALL_APP);
-	//if (!SetSelectedApplication(pbocAid))
-	//	return;
-	//auto vec = ConcatNodeWithSameSection(ini);
-	//int nVecCount = 0;
-	//for (auto v : vec)
-	//{
-	//	nVecCount++;
-	//	if (v.first == "Store_PSE_1" || v.first == "Store_PSE_2" || v.first == "Store_PPSE")
-	//	{
-	//		continue;
-	//	}
-	//	else {
-
-	//		string sDataLen;
-	//		if (v.second.length() > 0xFE)
-	//		{
-	//			sDataLen = _T("81") + Base::GetDataHexLen(v.second);
-	//		}
-	//		else {
-	//			sDataLen = Base::GetDataHexLen(v.second);
-	//		}
-
-	//		int nDGI = stoi(v.first, 0, 16);
-	//		if (nDGI <= 0x0501) //小于0x0501的GDI分组需要添加70模板
-	//		{
-	//			v.second = _T("70") + sDataLen + v.second;
-	//		}
-
-	//		STORE_DATA_TYPE type;
-	//		if (vec.size() - 2 == nVecCount)    //PSE及PPSE在文件尾，减之。
-	//		{
-	//			type = STORE_DATA_LAST;
-	//		}
-	//		else {
-	//			type = GetStoreDataType(v.first);
-	//		}
-
 	//		if (type == STORE_DATA_ENCRYPT)
 	//		{   //处理特殊数据
 	//			string encKey = m_pPCSC->GetSessionEncKey(); //m_pPCSC->GetEncKey();

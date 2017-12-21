@@ -151,6 +151,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Des0.h" />
     <ClInclude Include="ICPS.h" />
     <ClInclude Include="IniConfig.h" />
     <ClInclude Include="stdafx.h" />

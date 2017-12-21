@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <tchar.h>
 
-
+#pragma comment(lib,"..//bin//CPS.lib")
+#pragma comment(lib,"..//bin//PCSC.lib")
 
 // TODO: reference additional headers your program requires here

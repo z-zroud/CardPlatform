@@ -122,6 +122,8 @@ void GenKmcSubKey(string kmc, int divMethod, string divData, string &kmcAuthKey,
 		kmcAuthKey = kmc;
 		kmcMacKey = kmc;
 		kmcEncKey = kmc;
+
+		return;
 	}
 
 	kmcAuthKey = _GenKmcAuthKey(kmc, leftDivData, rightDivData);
@@ -136,10 +138,10 @@ void GenSecureChannelSessionKey(string kmc,
 	int divMethod,
 	string termialRandom,
 	string initializeUpdateResp,
-	string sessionAuthKey,
-	string sessionMacKey,
-	string sessionEncKey,
-	string kekKey)
+	string& sessionAuthKey,
+	string& sessionMacKey,
+	string& sessionEncKey,
+	string& kekKey)
 {
 	string leftDivData, rightDivData;
 	string divData = initializeUpdateResp.substr(0, 20);
@@ -188,7 +190,7 @@ UINT ExternalAuthencationCmd2(const string& kmc, int divMethod, string terminalR
 		cmd = "84820100";
 	}
 	else {
-		cmd = "84830000";
+		cmd = "84820000";
 	}
 	string scp = initializeUpdateResp.substr(22, 2);
 	string cardChanllenge = initializeUpdateResp.substr(24, 16);
@@ -219,7 +221,7 @@ UINT ExternalAuthencationCmd2(const string& kmc, int divMethod, string terminalR
 	string hostChallengeInput = cardChanllenge + terminalRandom;
 	Full_3DES_CBC_MAC((char*)hostChallengeInput.c_str(), (char*)sessionAuthKey.c_str(), "0000000000000000", szMac);
 
-	cmd += szMac;
+	cmd += string("10") + szMac;
 	memset(szMac, 0, sizeof(szMac));
 	if (scp == "01")
 	{
@@ -248,7 +250,7 @@ bool OpenSecureChannel(const char* kmc, int divMethod, int secureLevel)
 	{
 		return false;
 	}
-	return false;
+	return true;
 }
 
 
@@ -429,6 +431,46 @@ UINT PutDataCmd(const char* tag, const char* value, const char* mac)
 
 	return SendApdu2(cmd.c_str());
 }
+
+//******************************************************
+//* 安装实例命令
+//*******************************************************/
+UINT InstallAppCmd(const char* package,
+	const char* applet,
+	const char* instance,
+	const char* privilege,
+	const char* installParam,
+	const char* token)
+{
+	char packageLen[3] = { 0 };
+	char appletLen[3] = { 0 };
+	char instanceLen[3] = { 0 };
+	char privilegeLen[3] = { 0 };
+	char installParamLen[3] = { 0 };
+	//char tokenLen[3] = { 0 };
+	char dataLen[3] = { 0 };	//数据总长度
+
+	Tool::HexStr(package, packageLen, 3);
+	Tool::HexStr(applet, appletLen, 3);
+	Tool::HexStr(instance, instanceLen, 3);
+	Tool::HexStr(privilege, privilegeLen, 3);
+	Tool::HexStr(installParam, installParamLen, 3);
+	//Tool::HexStr(token, tokenLen, 3);
+
+	string data = string(packageLen) + package +
+		appletLen + applet +
+		instanceLen + instance +
+		privilegeLen + privilege +
+		installParamLen + installParam + token;
+
+
+	Tool::HexStr(data.c_str(), dataLen, 3);
+
+	string cmd = string("80E60C00") + dataLen + data;
+
+	return SendApdu2(cmd.c_str());
+}
+
 ///******************************************************
 //* 根据给定的匹配/查找标准取得发行者安全域、可执行装载文件、
 //* 可执行模块、应用和安全域的生命周期的状态信息。
@@ -460,42 +502,7 @@ UINT PutDataCmd(const char* tag, const char* value, const char* mac)
 //}
 //
 
-///******************************************************
-//* 安装实例命令
-//*******************************************************/
-//bool APDU::InstallAppCmd(const string& package,
-//	const string& applet,
-//	const string& instance,
-//	const string& privilege,
-//	const string& installParam,
-//	const string& token,
-//	APDU_RESPONSE& response)
-//{
-//	char totalDataLen[3] = { 0 };	//数据总长度
-//	string packageLen = Tool::GetStringLen(package);
-//	string appletLen = Tool::GetStringLen(applet);
-//	string instanceLen = Tool::GetStringLen(instance);
-//	string privilegeLen = Tool::GetStringLen(privilege);
-//	string installParamLen = Tool::GetStringLen(installParam);
-//	string tokenLen = Tool::GetStringLen(token);
-//
-//	sprintf_s(totalDataLen, "%02X", 6 + package.length() / 2 +
-//		applet.length() / 2 +
-//		instance.length() / 2 +
-//		privilege.length() / 2 +
-//		installParam.length() / 2 +
-//		token.length() / 2);
-//
-//	string cmd = "80E60C00" + string(totalDataLen) +
-//		packageLen + package +
-//		appletLen + applet +
-//		instanceLen + instance +
-//		privilegeLen + privilege +
-//		installParamLen + installParam +
-//		tokenLen + token;
-//
-//	return SendAPDU(cmd, response);
-//}
+
 //
 ///****************************************************************
 //* 读取tag命令

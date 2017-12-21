@@ -30,6 +30,9 @@
     <ClInclude Include="IniConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Des0.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "IDpParse.h"
+#include "Des0.h"
 #include <fstream>
 
 
 
-///**********************************************************
+//**********************************************************
 //* 功能： 检查目录是否存在
 //***********************************************************/
 bool  CheckFolderExist(const string &strPath)
@@ -74,6 +75,8 @@ string DeleteSpace(string s)
 	return strResult;
 }
 
+
+
 /*****************************************************
 * 保存CPS数据
 ******************************************************/
@@ -100,11 +103,92 @@ void IDpParse::Save(CPS_ITEM cpsItem)
 	outputFile.clear();
 }
 
+string IDpParse::DecryptDGI(string tk, string encryptData, bool padding80)
+{
+	string strResult;
 
+	if (padding80)
+	{
+		if (encryptData.length() % 16 == 0)
+		{
+			encryptData += "8000000000000000";
+		}
+		else {
+			encryptData += "80";
+			int remaindZero = encryptData.length() % 16;
+			encryptData.append(remaindZero, '0');
+		}
+	}
+
+	int len = encryptData.length();
+	int unit = 16;
+	for (int i = 0; i < len; i += unit)
+	{
+		char* pOutput = new char[unit + 1];
+		memset(pOutput, 0, unit + 1);
+		_Des3(pOutput, (char*)tk.c_str(), (char*)encryptData.substr(i, unit).c_str());
+		strResult += string(pOutput);
+	}
+
+	return strResult;
+}
+
+/******************************************************************
+* 获取文件大小
+*******************************************************************/
+long IDpParse::GetFileSize(ifstream& dpFile)
+{
+	dpFile.seekg(0, ios::end);
+	long dpFileSize = static_cast<long>(dpFile.tellg());
+	dpFile.seekg(0, ios::beg);  //重置文件指针至保留数据末尾位置
+
+	return dpFileSize;
+}
+
+/******************************************************************
+* 打开文件
+*******************************************************************/
+bool IDpParse::OpenDpFile(const char* fileName, ifstream& dpFile)
+{
+	int pos = string(fileName).find_last_of('\\');
+	string path = string(fileName).substr(0, pos + 1);
+	dpFile.open(fileName, ios::in | ios::binary);
+	if (!dpFile.is_open())
+		return false;
+
+	return true;
+}
+
+
+/******************************************************************
+* 获取DP文件中，从当前流指针位置到bufferLen长的数据，返回流指针位置
+*******************************************************************/
+streampos IDpParse::GetBuffer(ifstream &dpFile, char* buffer, int bufferLen)
+{
+	dpFile.read(buffer, bufferLen);
+
+	return dpFile.tellg();
+}
+
+streampos IDpParse::GetBCDBuffer(ifstream &dpFile, string& buffer, int len)
+{
+	char * readBuffer = new char[len + 1];
+	memset(readBuffer, 0, len + 1);
+
+	dpFile.read(readBuffer, len);
+	buffer = StrToHex(readBuffer, len);
+	delete[] readBuffer;
+
+	return dpFile.tellg();
+}
+
+/****************************************************************
+* 判断某段数据是否为TLV结构
+*****************************************************************/
 bool IDpParse::IsTlvStruct(unsigned char* buffer, unsigned int bufferLength)
 {
 	unsigned int currentIndex = 0;							//用于标记buffer
-	//判断是Tag是否为多字节,字节的1--5位是否都为1，是的话有后续字节
+															//判断是Tag是否为多字节,字节的1--5位是否都为1，是的话有后续字节
 	while (currentIndex < bufferLength)
 	{
 		if ((buffer[currentIndex] & 0x1f) == 0x1f)  //tag为多字节
@@ -139,13 +223,16 @@ bool IDpParse::IsTlvStruct(unsigned char* buffer, unsigned int bufferLength)
 		}
 		currentIndex += lenSize + dataLen;
 	}
-	
+
 	return currentIndex == bufferLength;
 }
 
-void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串	
+/**********************************************************************
+* 解析TLV数据结构
+***********************************************************************/
+void IDpParse::ParseTLV(unsigned char *buffer,			//TLV字符串	
 	unsigned int bufferLength,		//TLV字符串长度
-	PTLV PTlvEntity,					//TLV指针
+	PTLVEntity PTlvEntity,					//TLV指针
 	unsigned int& entitySize			//TLV结构数量，解析时用到
 	)
 {
@@ -161,7 +248,7 @@ void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串
 		{
 		case 'T':
 			valueSize = 0; //清零
-			//判断TLV是否为单一结构,字节的第6位是否为1
+						   //判断TLV是否为单一结构,字节的第6位是否为1
 			if ((buffer[currentIndex] & 0x20) != 0x20)
 			{
 				//单一结构
@@ -175,22 +262,22 @@ void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串
 					while ((buffer[++endTagIndex] & 0x80) == 0x80); //最后一个字节的最高位为0
 					int tagSize = endTagIndex - currentIndex + 1; //计算标签所占用字节
 
-					PTlvEntity[currentTLVIndex].Tag = (unsigned char *)malloc(tagSize);
-					memcpy(PTlvEntity[currentTLVIndex].Tag, buffer + currentIndex, tagSize);
-					PTlvEntity[currentTLVIndex].Tag[tagSize] = 0;//字符串末尾置0
+					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
+					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, tagSize);
+					PTlvEntity[currentTLVIndex].tag[tagSize] = 0;//字符串末尾置0
 
-					PTlvEntity[currentTLVIndex].TagSize = tagSize;
+					PTlvEntity[currentTLVIndex].tagSize = tagSize;
 
 					currentIndex += tagSize;
 				}
 				else
 				{
 					//Tag占用1个字节
-					PTlvEntity[currentTLVIndex].Tag = (unsigned char *)malloc(1);
-					memcpy(PTlvEntity[currentTLVIndex].Tag, buffer + currentIndex, 1);
-					PTlvEntity[currentTLVIndex].Tag[1] = 0;
+					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(1);
+					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, 1);
+					PTlvEntity[currentTLVIndex].tag[1] = 0;
 
-					PTlvEntity[currentTLVIndex].TagSize = 1;
+					PTlvEntity[currentTLVIndex].tagSize = 1;
 
 					currentIndex += 1;
 				}
@@ -205,21 +292,21 @@ void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串
 					while ((buffer[++endTagIndex] & 0x80) == 0x80);
 					int tagSize = endTagIndex - currentIndex + 1;
 
-					PTlvEntity[currentTLVIndex].Tag = (unsigned char *)malloc(tagSize);
-					memcpy(PTlvEntity[currentTLVIndex].Tag, buffer + currentIndex, tagSize);
-					PTlvEntity[currentTLVIndex].Tag[tagSize] = 0;
+					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
+					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, tagSize);
+					PTlvEntity[currentTLVIndex].tag[tagSize] = 0;
 
-					PTlvEntity[currentTLVIndex].TagSize = tagSize;
+					PTlvEntity[currentTLVIndex].tagSize = tagSize;
 
 					currentIndex += tagSize;
 				}
 				else
 				{
-					PTlvEntity[currentTLVIndex].Tag = (unsigned char *)malloc(1);
-					memcpy(PTlvEntity[currentTLVIndex].Tag, buffer + currentIndex, 1);
-					PTlvEntity[currentTLVIndex].Tag[1] = 0;
+					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(1);
+					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, 1);
+					PTlvEntity[currentTLVIndex].tag[1] = 0;
 
-					PTlvEntity[currentTLVIndex].TagSize = 1;
+					PTlvEntity[currentTLVIndex].tagSize = 1;
 
 					currentIndex += 1;
 				}
@@ -227,7 +314,7 @@ void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串
 				//分析子TLV中的Tag
 				int subTlvLength = 0;			//子TLV长度
 				unsigned char * temp;			//子TLV所包含的数据
-				//先判断length域的长度,length域字节如果最高位为1，后续字节代表长度，为0，1--7位代表数据长度
+												//先判断length域的长度,length域字节如果最高位为1，后续字节代表长度，为0，1--7位代表数据长度
 				if ((buffer[currentIndex] & 0x80) == 0x80)
 				{
 					//最高位为1
@@ -261,8 +348,8 @@ void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串
 
 				unsigned int oSize;//输出有多少个同等级的子TLV，解析时也应该用到
 								   //不清楚子TLV同等级的TLV有多少个，申请100TLV大小的内存肯定够用
-				PTlvEntity[currentTLVIndex].subTLVEntity = (PTLV)malloc(sizeof(TLV[100]));
-				TLVConstruct(temp, subTlvLength, PTlvEntity[currentTLVIndex].subTLVEntity, oSize);
+				PTlvEntity[currentTLVIndex].subTLVEntity = (PTLVEntity)malloc(sizeof(PTLVEntity[100]));
+				ParseTLV(temp, subTlvLength, PTlvEntity[currentTLVIndex].subTLVEntity, oSize);
 
 				PTlvEntity[currentTLVIndex].subTLVnum = oSize; //填入子TLV的数量
 
@@ -280,32 +367,32 @@ void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串
 				{
 					valueSize += buffer[currentIndex + index] << ((lengthSize - 1 - index) * 8); //计算Length域的长度
 				}
-				PTlvEntity[currentTLVIndex].Length = (unsigned char *)malloc(lengthSize);
-				memcpy(PTlvEntity[currentTLVIndex].Length, buffer + currentIndex, lengthSize);
-				PTlvEntity[currentTLVIndex].Length[lengthSize] = 0;
-				PTlvEntity[currentTLVIndex].LengthSize = lengthSize;
+				PTlvEntity[currentTLVIndex].length = (unsigned char *)malloc(lengthSize);
+				memcpy(PTlvEntity[currentTLVIndex].length, buffer + currentIndex, lengthSize);
+				PTlvEntity[currentTLVIndex].length[lengthSize] = 0;
+				PTlvEntity[currentTLVIndex].lengthSize = lengthSize;
 
 				currentIndex += lengthSize;
 			}
 			else
 			{
 				//最高位0
-				PTlvEntity[currentTLVIndex].Length = (unsigned char *)malloc(1);
-				memcpy(PTlvEntity[currentTLVIndex].Length, buffer + currentIndex, 1);
-				PTlvEntity[currentTLVIndex].Length[1] = 0;
-				PTlvEntity[currentTLVIndex].LengthSize = 1;
+				PTlvEntity[currentTLVIndex].length = (unsigned char *)malloc(1);
+				memcpy(PTlvEntity[currentTLVIndex].length, buffer + currentIndex, 1);
+				PTlvEntity[currentTLVIndex].length[1] = 0;
+				PTlvEntity[currentTLVIndex].lengthSize = 1;
 
-				valueSize = PTlvEntity[currentTLVIndex].Length[0];
+				valueSize = PTlvEntity[currentTLVIndex].length[0];
 
 				currentIndex += 1;
 			}
 			currentStatus = 'V';
 			break;
 		case 'V':
-			PTlvEntity[currentTLVIndex].Value = (unsigned char *)malloc(valueSize);
-			memset(PTlvEntity[currentTLVIndex].Value, 0, valueSize);
-			memcpy(PTlvEntity[currentTLVIndex].Value, buffer + currentIndex, valueSize);
-			PTlvEntity[currentTLVIndex].Value[valueSize] = 0;
+			PTlvEntity[currentTLVIndex].value = (unsigned char *)malloc(valueSize);
+			memset(PTlvEntity[currentTLVIndex].value, 0, valueSize);
+			memcpy(PTlvEntity[currentTLVIndex].value, buffer + currentIndex, valueSize);
+			PTlvEntity[currentTLVIndex].value[valueSize] = 0;
 
 			currentIndex += valueSize;
 
@@ -319,69 +406,14 @@ void IDpParse::TLVConstruct(unsigned char *buffer,			//TLV字符串
 	entitySize = currentTLVIndex;
 }
 
-bool IDpParse::TLVParseAndFindError(
-	PTLV PTlvEntity,					//输入的TLV结构体
-	unsigned int entitySize,			//TLV结构体的数量
-	unsigned char* buffer,				//输出的字符串
-	unsigned int& bufferLength			//字符串的长度
-	)
-{
-	int currentIndex = 0;
-	unsigned int currentTLVIndex = 0;
-	unsigned long valueSize = 0;
-
-	while (currentTLVIndex < entitySize)
-	{
-		valueSize = 0;
-		TLVEntity entity = PTlvEntity[currentTLVIndex];
-
-		memcpy(buffer + currentIndex, entity.Tag, entity.TagSize);  //解析Tag
-		currentIndex += entity.TagSize;
-
-		for (unsigned int index = 0; index < entity.LengthSize; index++)
-		{
-			//大端显示数据
-			valueSize += entity.Length[index] << ((entity.LengthSize - 1 - index) * 8); //计算Length域的长度
-		}
-		if (valueSize > 127)									//还原length  当最高位为1的情况
-		{
-			buffer[currentIndex] = 0x80 | entity.LengthSize;
-			currentIndex += 1;/******************************************/
-		}
-
-		memcpy(buffer + currentIndex, entity.Length, entity.LengthSize);    //解析Length
-		currentIndex += entity.LengthSize;
-		//判断是否包含子嵌套TLV
-		if (entity.subTLVEntity == NULL)
-		{
-			//不包含
-			memcpy(buffer + currentIndex, entity.Value, valueSize); //解析Value
-			currentIndex += valueSize;
-		}
-		else
-		{
-			unsigned int oLength;
-			TLVParseAndFindError(entity.subTLVEntity, entity.subTLVnum, buffer + currentIndex, oLength); //解析子嵌套TLV
-			currentIndex += oLength;
-		}
-
-		currentTLVIndex++;
-	}
-	buffer[currentIndex] = 0;
-	bufferLength = currentIndex;
-
-	return true;
-}
-
-
 void IDpParse::HandleRule(IRule ruleObj, string ruleConfig, CPS_ITEM& cpsItem)
 {
-	ruleObj.ParseRule(ruleConfig);
+	ruleObj.SetRule(ruleConfig);
 	ruleObj.HandleRule(cpsItem);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-void IRule::ParseRule(const string& ruleConfig)
+void IRule::SetRule(const string& ruleConfig)
 {
 
 }
