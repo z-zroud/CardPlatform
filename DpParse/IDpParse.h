@@ -118,6 +118,14 @@ struct IDpParse
 	virtual streampos GetBCDBuffer(ifstream &dpFile, string& buffer, int len);
 
 	/***************************************************************
+	* 获取的指定的数据长度的buffer转换成整数类型
+	* 参数：dpFile DP文件句柄
+	* 参数：dataLen 指定长度的buffer转换成的整数值
+	* 参数：len 指定buffer的长度
+	****************************************************************/
+	virtual streampos GetLenTypeBuffer(ifstream &dpFile, int &dataLen, int len);
+
+	/***************************************************************
 	* 处理DP文件生成CPS规则
 	****************************************************************/
 	virtual void HandleRule(IRule ruleObj, string ruleConfig, CPS_ITEM& cpsItem);

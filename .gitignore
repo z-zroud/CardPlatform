@@ -3,8 +3,13 @@
 *.sdf 
 *.exp
 *.opendb
+*.vcxproj.user
+*.ilk
 
 #¹ıÂËÎÄ¼ş¼ĞDebug,Release,obj  
 Debug/  
 Release/  
 obj/
+ipch/
+.vs/
+bin/

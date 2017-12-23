@@ -300,25 +300,7 @@ bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
 			//StoreDataCmd(data,)
 		}
 	}
-	//		if (type == STORE_DATA_ENCRYPT)
-	//		{   //处理特殊数据
-	//			string encKey = m_pPCSC->GetSessionEncKey(); //m_pPCSC->GetEncKey();
-	//			char szEncryptData[1024] = { 0 };
-	//			if (v.first != "8000")
-	//			{
-	//				v.second += "8000000000000000";
-	//			}
-	//			Des3_ECB(szEncryptData, (char*)encKey.c_str(), (char*)v.second.c_str(), v.second.length());
-	//			v.second = szEncryptData;
-	//		}
-	//		APDU_RESPONSE response;
-	//		//存储个人化数据
-	//		if (!pAPDU->StoreDataCmd(v.first, v.second, type, false, response))
-	//		{
-	//			return;     // 个人化PBOC失败
-	//		}
-	//	}
-	//}
+
 	//个人化任务成功
 return false;
 }

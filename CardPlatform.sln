@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DuiLibTest", "DuiLibTest\DuiLibTest.vcxproj", "{C5EEA673-FBC8-447B-8865-119256F0E332}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -45,7 +45,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CPS", "CPS\CPS.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Util", "Util\Util.vcxproj", "{6C158251-C843-41FE-8B64-5926DFCD2411}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YLDpParse", "YLDpParse\YLDpParse.vcxproj", "{F0920F78-6936-4119-B9C0-5E4BEC46A01B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DpParse_YL", "YLDpParse\YLDpParse.vcxproj", "{F0920F78-6936-4119-B9C0-5E4BEC46A01B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ADCCA255-8163-4939-9DE7-F5CBC4F801D1} = {ADCCA255-8163-4939-9DE7-F5CBC4F801D1}
 	EndProjectSection
@@ -53,6 +53,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AuthencationTest", "AuthencationTest\AuthencationTest.vcxproj", "{27080C4F-CD30-44E5-A613-EB8DE4C158CF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{02EFE104-181E-4B73-8CAE-DEE1A398650F} = {02EFE104-181E-4B73-8CAE-DEE1A398650F}
+		{8F57EF1E-46FD-4B9F-924A-6C9C42A9EAAA} = {8F57EF1E-46FD-4B9F-924A-6C9C42A9EAAA}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ApduCmdTest", "ApduCmdTest\ApduCmdTest.vcxproj", "{8BB8DABB-EBFE-4EEA-BDCE-03F2D26C172B}"
@@ -85,6 +86,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PersonalizedTest", "Persona
 		{0E85CB25-097A-42CE-BC0E-1512BB6AA07A} = {0E85CB25-097A-42CE-BC0E-1512BB6AA07A}
 		{ADCCA255-8163-4939-9DE7-F5CBC4F801D1} = {ADCCA255-8163-4939-9DE7-F5CBC4F801D1}
 		{F0920F78-6936-4119-B9C0-5E4BEC46A01B} = {F0920F78-6936-4119-B9C0-5E4BEC46A01B}
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327} = {BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DpParse", "DpParse\DpParse.vcxproj", "{ADCCA255-8163-4939-9DE7-F5CBC4F801D1}"
@@ -93,6 +95,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DpParse_DXT", "DpParse_DXT\
 	ProjectSection(ProjectDependencies) = postProject
 		{ADCCA255-8163-4939-9DE7-F5CBC4F801D1} = {ADCCA255-8163-4939-9DE7-F5CBC4F801D1}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DpParse_ZJ_TL", "DpParse_ZJ_TL\DpParse_ZJ_TL.vcxproj", "{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -425,8 +429,27 @@ Global
 		{0E85CB25-097A-42CE-BC0E-1512BB6AA07A}.UnicodeRelease|x64.Build.0 = Release|x64
 		{0E85CB25-097A-42CE-BC0E-1512BB6AA07A}.UnicodeRelease|x86.ActiveCfg = Release|Win32
 		{0E85CB25-097A-42CE-BC0E-1512BB6AA07A}.UnicodeRelease|x86.Build.0 = Release|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Debug|x64.ActiveCfg = Debug|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Debug|x64.Build.0 = Debug|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Debug|x86.ActiveCfg = Debug|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Debug|x86.Build.0 = Debug|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Release|x64.ActiveCfg = Release|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Release|x64.Build.0 = Release|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Release|x86.ActiveCfg = Release|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.Release|x86.Build.0 = Release|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeDebug|x64.ActiveCfg = Debug|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeDebug|x64.Build.0 = Debug|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeDebug|x86.ActiveCfg = Debug|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeDebug|x86.Build.0 = Debug|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeRelease|x64.ActiveCfg = Release|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeRelease|x64.Build.0 = Release|x64
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeRelease|x86.ActiveCfg = Release|Win32
+		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeRelease|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E93F331A-6B54-46C4-AFAF-BD6FB590CCD4}
 	EndGlobalSection
 EndGlobal

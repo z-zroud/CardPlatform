@@ -55,6 +55,7 @@ bool YLDpParser::HandleDp(const char* fileName)
 	if (dpFileSize <= m_reserved){
 		return false;
 	}
+	dpFile.seekg(m_reserved);
 	ReadDGIName(dpFile);		//第一步： 读取DGI分组
 
 	vector<CPS_ITEM> vecCpsItem;
@@ -173,6 +174,18 @@ int YLDpParser::GetOneCardDpDataLen(ifstream &dpFile)
 *********************************************************************/
 void YLDpParser::ReadDGIName(ifstream &dpFile)
 {
+	//int dgiNum;
+	//GetLenTypeBuffer(dpFile, dgiNum, 4);
+
+	//for (int i = 0; i < dgiNum; i++)
+	//{
+	//	int dgiLen;
+	//	GetLenTypeBuffer(dpFile, dgiLen, 2);
+	//	char dgiName[12] = { 0 };
+	//	GetBuffer(dpFile, dgiName, dgiLen);
+	//	m_vecDGI.push_back(dgiName);
+	//}
+
 	char szDGICount[DGI_NUMBER] = { 0 };
 	dpFile.read(szDGICount, DGI_NUMBER);
 	int *nDGICount = (int*)szDGICount;
@@ -191,28 +204,6 @@ void YLDpParser::ReadDGIName(ifstream &dpFile)
 }
 
 /********************************************************************
-* 功能：读取DGI需要，也就是DGI名称
-*********************************************************************/
-string YLDpParser::GetDgiSeq(ifstream &dpFile)
-{
-	string dgi;
-	GetBCDBuffer(dpFile, dgi, 2);
-
-	return dgi;
-}
-
-/********************************************************************
-* 功能：读取每一张卡片的记录模板("70")
-*********************************************************************/
-char YLDpParser::ReadRecordTemplate(ifstream &dpFile, streamoff offset)
-{
-	char cRecordTemplate;
-	dpFile.read(&cRecordTemplate, 1);
-
-	return cRecordTemplate;
-}
-
-/********************************************************************
 * 功能：解析标准TLV结构，并保存到DGI数据结构中
 *********************************************************************/
 void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
@@ -221,9 +212,6 @@ void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
 	unsigned int entitiesCount = 0;
 	ParseTLV((unsigned char*)buffer, nBufferLen, entities, entitiesCount);
 	unsigned char parseBuf[4096] = { 0 };
-	unsigned int buf_count;
-	//解析TLV   
-	//TLVParseAndFindError(entities, entitiesCount, parseBuf, buf_count);
 	for (unsigned int i = 0; i < entitiesCount; i++)
 	{
 		string strTag = StrToHex((char*)entities[i].tag, entities[i].tagSize);
@@ -244,34 +232,6 @@ void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
 		/*************************************************************/
 		tlvs.InsertItem(strTag, strValue);
 	}
-}
-
-/***********************************************************
-* 功能： 解密指定的tag
-************************************************************/
-string YLDpParser::DecrptData(string tag, string value)
-{
-	string strResult;
-	int len = value.length();
-	if (len % 16 != 0)	//若解密字符串不为16字节整除，则后面添加0已补齐
-	{
-		int padding = 16 - len % 16;
-		for (int i = 0; i < padding; i++)
-		{
-			value += "0";
-		}
-		len = value.length();
-	}
-	int unit = 16;
-	for (int i = 0; i < len; i += unit)
-	{
-		char* pOutput = new char[unit + 1];
-		memset(pOutput, 0, unit + 1);
-		_Des3(pOutput, (char*)m_key.c_str(), (char*)value.substr(i, unit).c_str());
-		strResult += string(pOutput);
-	}
-
-	return strResult;
 }
 
 

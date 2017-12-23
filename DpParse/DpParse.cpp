@@ -182,6 +182,15 @@ streampos IDpParse::GetBCDBuffer(ifstream &dpFile, string& buffer, int len)
 	return dpFile.tellg();
 }
 
+streampos IDpParse::GetLenTypeBuffer(ifstream &dpFile, int &dataLen, int len)
+{
+	string buffer;
+	GetBCDBuffer(dpFile, buffer, len);
+	dataLen = stoi(buffer, 0, 16);
+
+	return dpFile.tellg();
+}
+
 /****************************************************************
 * 判断某段数据是否为TLV结构
 *****************************************************************/

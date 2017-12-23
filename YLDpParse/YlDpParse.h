@@ -5,7 +5,14 @@
 #include "../DpParse//IDpParse.h"
 using namespace std;
 
+#ifdef YLDPPARSE_EXPORTS
+#define YLDPPARSE_API __declspec(dllexport)
+#else
+#define YLDPPARSE_API __declspec(dllimport)
+#endif
 
+
+extern "C" YLDPPARSE_API bool HandleDp(const char* szFileName);
 
 class YLDpParser : public IDpParse
 {
@@ -18,10 +25,7 @@ private:
 	char			ReadDGIStartTag(ifstream &dpFile);					//读取起始标签
 	unsigned short	GetFollowedDataLen(ifstream &dpFile);			//读取数据长度
 	int				GetOneCardDpDataLen(ifstream &dpFile);	//读取卡片个人化数据总长度
-	string			GetDgiSeq(ifstream &dpFile);					//读取卡片DGI分组序号
-	char			ReadRecordTemplate(ifstream &dpFile, streamoff offset);				//读取记录模板
 	void			ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs);		//解析TLV结构
-	string			DecrptData(string tag, string value);
 	int				ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem);	//分析PSE PPSE
 private:
 
