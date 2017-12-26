@@ -2,7 +2,7 @@
 #include "IDpParse.h"
 #include "Des0.h"
 #include <fstream>
-
+#include "../Util/IniConfig.h"
 
 
 //**********************************************************
@@ -75,7 +75,44 @@ string DeleteSpace(string s)
 	return strResult;
 }
 
+bool ExistedInList(string value, vector<string> collection)
+{
+    for (auto item : collection)
+    {
+        if (item == value) {
+            return true;
+        }
+    }
+    return false;
+}
 
+string Dict::GetItem()
+{
+    if (m_vecItems.size() > 1)
+        return m_vecItems[0].second;
+    
+    return "";
+}
+
+void Dict::ReplaceItem(string key, string value)
+{
+    for (auto& item : m_vecItems) {
+        if (item.first == key) {
+            item.second = value;
+            break;
+        }
+    }
+}
+
+void Dict::DeleteItem(string key)
+{
+    for (auto iter = m_vecItems.begin(); iter != m_vecItems.end(); iter++) {
+        if (iter->first == key) {
+            m_vecItems.erase(iter);
+            break;
+        }
+    }
+}
 
 /*****************************************************
 * 保存CPS数据
@@ -91,13 +128,17 @@ void IDpParse::Save(CPS_ITEM cpsItem)
 	ofstream outputFile(cpsItem.fileName.c_str());
 	if (!outputFile)
 		return;
+    string privousDGI = "";
 	for (auto iter : cpsItem.items)
 	{
-		outputFile << "[" << iter.dgi << "]" << endl;
+        if (iter.dgi != privousDGI) {
+            outputFile << "[" << iter.dgi << "]" << endl;
+        }
 		for (auto tlvData : iter.value.GetItems())
 		{
 			outputFile << tlvData.first << "=" << tlvData.second << endl;
 		}
+        privousDGI = iter.dgi;
 	}
 	outputFile.close();
 	outputFile.clear();
@@ -182,6 +223,22 @@ streampos IDpParse::GetBCDBuffer(ifstream &dpFile, string& buffer, int len)
 	return dpFile.tellg();
 }
 
+streampos IDpParse::GetBCDBufferLittleEnd(ifstream &dpFile, string &buffer, int len)
+{
+    string data;
+    streampos pos = GetBCDBuffer(dpFile, data, len);
+    if (data.length() % 2 != 0) {
+        return pos;
+    }
+    int i = data.length() - 2;
+    while(i >= 0) {
+        buffer += data.substr(i, 2);
+        i -= 2;
+    }
+
+    return pos;
+}
+
 streampos IDpParse::GetLenTypeBuffer(ifstream &dpFile, int &dataLen, int len)
 {
 	string buffer;
@@ -191,6 +248,14 @@ streampos IDpParse::GetLenTypeBuffer(ifstream &dpFile, int &dataLen, int len)
 	return dpFile.tellg();
 }
 
+streampos IDpParse::GetLenTypeBufferLittleEnd(ifstream &dpFile, int &dataLen, int len)
+{
+    string buffer;
+    GetBCDBufferLittleEnd(dpFile, buffer, len);
+    dataLen = stoi(buffer, 0, 16);
+
+    return dpFile.tellg();
+}
 /****************************************************************
 * 判断某段数据是否为TLV结构
 *****************************************************************/
@@ -415,27 +480,63 @@ void IDpParse::ParseTLV(unsigned char *buffer,			//TLV字符串
 	entitySize = currentTLVIndex;
 }
 
-void IDpParse::HandleRule(IRule ruleObj, string ruleConfig, CPS_ITEM& cpsItem)
+void IDpParse::HandleRule(string ruleConfig, CPS_ITEM& cpsItem)
 {
+    IRule ruleObj;
 	ruleObj.SetRule(ruleConfig);
 	ruleObj.HandleRule(cpsItem);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-void IRule::SetRule(const string& ruleConfig)
+/**********************************************************
+用于解析ruleFile文件
+***********************************************************/
+void IRule::SetRule(const string& ruleFile)
 {
+    IniConfig ruleCfg;
+    if (ruleCfg.Read(ruleFile)) 
+    {
+        m_tk = ruleCfg.GetValue("TK", "key");
 
+        vector<pair<string, string>> deleteDGIs;
+        ruleCfg.GetValue("DeleteDGI", deleteDGIs);
+        for (auto item : deleteDGIs) {
+            m_vecDGIDelete.push_back(item.second);
+        }
+
+        vector<pair<string, string>> encryptDGIs;
+        ruleCfg.GetValue("EncryptDGI", encryptDGIs);
+        for (auto item : encryptDGIs) {
+            m_vecDGIEncrypt.push_back(item.second);
+        }
+
+        vector<pair<string, string>> padding80DGIs;
+        ruleCfg.GetValue("EncryptDGIPadding80", padding80DGIs);
+        for (auto item : padding80DGIs) {
+            m_vecDGIpadding80.push_back(item.second);
+        }
+
+        ruleCfg.GetValue("ExchangeDGIData", m_vecDGIExchange);
+        ruleCfg.GetValue("DGIMap", m_vecDGIMap);
+        ruleCfg.GetValue("DeleteTag", m_vecTagDelete);
+    }
 }
+
 void IRule::HandleRule(CPS_ITEM& cpsItem)
 {
-
+    //处理顺序：DGI映射-->DGI交换-->DGI删除-->DGI解密-->DGI删除tag
+    HandleDGIMap(cpsItem);
+    HandleDGIExchange(cpsItem);
+    HandleDGIDelete(cpsItem);
+    //HandleDGIEncrypt(cpsItem);
+    HandleTagDelete(cpsItem);
 }
 
-void IRule::HandleDGIMap()
+void IRule::HandleDGIMap(CPS_ITEM& cpsItem)
 {
 	for (auto item : m_vecDGIMap)
 	{
-		for (auto& dgiItem : m_cpsItem.items)
+		for (auto& dgiItem : cpsItem.items)
 		{
 			if (item.first == dgiItem.dgi)
 			{
@@ -445,52 +546,87 @@ void IRule::HandleDGIMap()
 		}
 	}
 }
-void IRule::HandleDGIExchange()
+void IRule::HandleDGIExchange(CPS_ITEM& cpsItem)
 {
 	for (auto item : m_vecDGIExchange)
 	{
 		int firstIndex = 0;
 		int secondIndex = 0;
-		while (item.first != m_cpsItem.items[firstIndex].dgi)
+		while (item.first != cpsItem.items[firstIndex].dgi)
 			firstIndex++;
-		while (item.second != m_cpsItem.items[secondIndex].dgi)
+		while (item.second != cpsItem.items[secondIndex].dgi)
 			secondIndex++;
-		m_cpsItem.items[firstIndex].dgi = item.second;
-		m_cpsItem.items[secondIndex].dgi = item.first;
+        cpsItem.items[firstIndex].dgi = item.second;
+        cpsItem.items[secondIndex].dgi = item.first;
 	}
 }
 
-void IRule::HandleDGIDecrypt()
+/***************************************************************
+* 解密DGI数据，注意该DGI只应只有一个tag=encryptData, 并且tag==DGI
+****************************************************************/
+void IRule::HandleDGIEncrypt(CPS_ITEM& cpsItem)
 {
+    string decryptedData;
+    for (auto& item : cpsItem.items)
+    {
+        if (ExistedInList(item.dgi, m_vecDGIEncrypt))
+        {
+            string encryptData = item.value.GetItem();
+            if (ExistedInList(item.dgi,m_vecDGIpadding80))
+            {
+                if (encryptData.length() % 16 == 0)
+                {
+                    encryptData += "8000000000000000";
+                }
+                else {
+                    encryptData += "80";
+                    int remaindZero = encryptData.length() % 16;
+                    encryptData.append(remaindZero, '0');
+                }
+            }
 
+            int len = encryptData.length();
+            int unit = 16;
+            for (int i = 0; i < len; i += unit)
+            {
+                char* pOutput = new char[unit + 1];
+                memset(pOutput, 0, unit + 1);
+                _Des3(pOutput, (char*)m_tk.c_str(), (char*)encryptData.substr(i, unit).c_str());
+                decryptedData += string(pOutput);
+            }
+            item.value.ReplaceItem(item.dgi, decryptedData);
+        }
+    }
 }
 
-void IRule::HandleDGIDelete()
+void IRule::HandleDGIDelete(CPS_ITEM& cpsItem)
 {
 	for (auto item : m_vecDGIDelete)
 	{
-		for (auto iter = m_cpsItem.items.begin(); iter != m_cpsItem.items.end(); iter++)
+		for (auto iter = cpsItem.items.begin(); iter != cpsItem.items.end(); iter++)
 		{
 			if (item == iter->dgi)
 			{
-				iter = m_cpsItem.items.erase(iter);
+				iter = cpsItem.items.erase(iter);
+                break;
 			}
-			iter++;
 		}
 	}
 }
-void IRule::HandleTagDelete()
+
+void IRule::HandleTagDelete(CPS_ITEM& cpsItem)
 {
-	//for (auto item : m_vecTagDelete)
-	//{
-	//	for (auto &dgiItem : m_cpsItem.items)
-	//	{
-	//		if (item.first == dgiItem.dgi)
-	//		{
-	//			for(auto& value : dgiItem.value.)
-	//		}
-	//	}
-	//}
+	for (auto item : m_vecTagDelete)
+	{
+		for (auto &dgiItem : cpsItem.items)
+		{
+			if (item.first == dgiItem.dgi)
+			{
+                dgiItem.value.DeleteItem(item.second);
+                break;
+			}
+		}
+	}
 }
 
 

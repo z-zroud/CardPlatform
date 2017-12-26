@@ -133,10 +133,42 @@ namespace  Tool
         }
     }
 
-	void HexStr(const char* bcdLen, char* output, int len)
+    //删除字符串中的空格
+    string Trim(string str)
+    {
+        string result;
+        int len = str.length();
+        for (auto c : str)
+        {
+            if (c != ' ')
+            {
+                result.push_back(c);
+            }
+        }
+        return result;
+        int index = 0;
+        if (!str.empty())
+        {
+            while ((index = str.find(' ', index)) != string::npos)
+            {
+                str.erase(index, 1);
+            }
+        }
+        return result;
+    }
+
+    /************************************************************
+    * 只考虑长度在0-0xFFFF之间
+    *************************************************************/
+	void GetBcdDataLen(const char* data, char* output, int len)
 	{
 		memset(output, 0, len);
-		sprintf_s(output, len, "%02X", strlen(bcdLen) / 2);
+        if (strlen(data) > 0xFF * 2) {
+            sprintf_s(output, len, "%04X", strlen(data) / 2);
+        }
+        else {
+            sprintf_s(output, len, "%02X", strlen(data) / 2);
+        }		
 	}
 
 	void IntToStr(int value, char* hexStr, Hex_Len hexLen)
@@ -155,5 +187,6 @@ namespace  Tool
 		int incLen = stoi(strLen, 0, 16) + step;
 		sprintf_s(output, len, "%02X", incLen);
 	}
+
 }
 

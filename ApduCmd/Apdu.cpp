@@ -277,7 +277,7 @@ UINT InitializeUpdateCmd(const char* random, char* resp)
 UINT SelectAppCmd(const char* aid, char* resp)
 {
 	char dataLen[5] = { 0 };
-	Tool::HexStr(aid, dataLen, 5);
+	Tool::GetBcdDataLen(aid, dataLen, 5);
 	
 	string cmd = "00A40400" + string(dataLen) + aid;
 	int sw = SendApdu(cmd.c_str(), resp, RESP_LEN);
@@ -316,7 +316,7 @@ UINT DeleteAppCmd(const char* aid)
 {
 	char aidLen[5] = { 0 };
 	char dataLen[5] = { 0 };
-	Tool::HexStr(aid, aidLen, 5);
+	Tool::GetBcdDataLen(aid, aidLen, 5);
 	Tool::IncreaseStep(aidLen, 2, dataLen, 5);
 
 	string cmd = "80E40000" + string(dataLen) + "4F" + aidLen + aid;
@@ -348,7 +348,7 @@ UINT StoreDataCmd(const char* data, int type, bool reset)
 	char szCount[3] = { 0 };
 	char dataLen[3] = { 0 };
 	sprintf_s(szCount, "%02X", count);		//命令头
-	Tool::HexStr(data, dataLen, 3);
+	Tool::GetBcdDataLen(data, dataLen, 3);
 
 	cmd += string(szCount) + string(dataLen) + data;
 	int sw = SendApdu2(cmd.c_str());
@@ -360,7 +360,7 @@ UINT StoreDataCmd(const char* data, int type, bool reset)
 UINT GPOCmd(const char* terminalData, char* resp)
 {
 	char terminalDataLen[3] = { 0 };
-	Tool::HexStr(terminalData, terminalDataLen, 3);
+	Tool::GetBcdDataLen(terminalData, terminalDataLen, 3);
 	char dataLen[3] = { 0 };
 	Tool::IncreaseStep(terminalDataLen, 2, dataLen, 3);
 
@@ -373,7 +373,7 @@ UINT InternalAuthencationCmd(const char* ddolData, char* resp)
 {
 	char ddolDataLen[3] = { 0 };
 
-	Tool::HexStr(ddolData, ddolDataLen, 3);
+	Tool::GetBcdDataLen(ddolData, ddolDataLen, 3);
 	string cmd = "00880000" + string(ddolDataLen) + ddolData;
 
 	return SendApdu(cmd.c_str(), resp, RESP_LEN);
@@ -397,7 +397,7 @@ UINT GACCmd(int terminalCryptogramType, const char* cdolData, char* resp)
 	Tool::IntToStr(terminalCryptogramType, p1, Two_byte);
 
 	char cdolDataLen[3] = { 0 };
-	Tool::HexStr(cdolData, cdolDataLen, 3);
+	Tool::GetBcdDataLen(cdolData, cdolDataLen, 3);
 
 	char p2[] = "00";
 	string cmd = "80AE" + string(p1) + p2 + cdolDataLen + cdolData;
@@ -409,7 +409,7 @@ UINT ExternalAuthencationCmd(const char* arpc, const char* authCode, char* resp)
 {
 	string extAuthData = string(arpc) + authCode;
 	char extAuthDataLen[3] = { 0 };
-	Tool::HexStr(extAuthData.c_str(), extAuthDataLen, 3);
+	Tool::GetBcdDataLen(extAuthData.c_str(), extAuthDataLen, 3);
 
 	string cmd = "00820000" + string(extAuthDataLen) + extAuthData;
 
@@ -426,7 +426,7 @@ UINT PutDataCmd(const char* tag, const char* value, const char* mac)
 	cmd += tag;
 	char dataLen[3] = { 0 };
 	string data = string(value) + mac;
-	Tool::HexStr(data.c_str(), dataLen, 3);	
+	Tool::GetBcdDataLen(data.c_str(), dataLen, 3);	
 	cmd += dataLen + data;
 
 	return SendApdu2(cmd.c_str());
@@ -450,12 +450,12 @@ UINT InstallAppCmd(const char* package,
 	//char tokenLen[3] = { 0 };
 	char dataLen[3] = { 0 };	//数据总长度
 
-	Tool::HexStr(package, packageLen, 3);
-	Tool::HexStr(applet, appletLen, 3);
-	Tool::HexStr(instance, instanceLen, 3);
-	Tool::HexStr(privilege, privilegeLen, 3);
-	Tool::HexStr(installParam, installParamLen, 3);
-	//Tool::HexStr(token, tokenLen, 3);
+	Tool::GetBcdDataLen(package, packageLen, 3);
+	Tool::GetBcdDataLen(applet, appletLen, 3);
+	Tool::GetBcdDataLen(instance, instanceLen, 3);
+	Tool::GetBcdDataLen(privilege, privilegeLen, 3);
+	Tool::GetBcdDataLen(installParam, installParamLen, 3);
+	//Tool::GetBcdDataLen(token, tokenLen, 3);
 
 	string data = string(packageLen) + package +
 		appletLen + applet +
@@ -464,7 +464,7 @@ UINT InstallAppCmd(const char* package,
 		installParamLen + installParam + token;
 
 
-	Tool::HexStr(data.c_str(), dataLen, 3);
+	Tool::GetBcdDataLen(data.c_str(), dataLen, 3);
 
 	string cmd = string("80E60C00") + dataLen + data;
 

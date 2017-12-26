@@ -42,12 +42,18 @@
     <ClInclude Include="rapidxml\rapidxml_utils.hpp">
       <Filter>Header Files\rapidxml</Filter>
     </ClInclude>
+    <ClInclude Include="IniConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Tool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="IniConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

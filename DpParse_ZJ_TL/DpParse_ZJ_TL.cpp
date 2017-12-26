@@ -7,13 +7,13 @@
 #define DGI_NUMBER	4
 #define DGI_LEN		2
 
-bool HandleDp(const char* szFileName)
+bool HandleDp(const char* szFileName, const char* ruleFile)
 {
 	ZJTLDpParse parse;
-	return parse.HandleDp(szFileName);
+	return parse.HandleDp(szFileName, ruleFile);
 }
 
-bool ZJTLDpParse::HandleDp(const char* fileName)
+bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile)
 {
 	ifstream dpFile;
 	if (!OpenDpFile(fileName, dpFile)) {

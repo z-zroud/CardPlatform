@@ -4,7 +4,7 @@
 * 外界dll需实现的接口，统一的接口名称为：
 * bool HandleDp(const char* fileName);
 ********************************************************/
-typedef bool(*PHandleDpCallback)(const char* fileName);
+typedef bool(*PHandleDpCallback)(const char* dpFile,const char* ruleFile);
 
 /**********************************************************
 * 定义该dll对外接口
@@ -22,7 +22,7 @@ typedef bool(*PHandleDpCallback)(const char* fileName);
 * 参数说明： szFileName DP文件路径
 * 返回值： DP文件处理成功返回true, 否则返回false
 ***********************************************************/
-extern "C" CPS_API bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szFileName);
+extern "C" CPS_API bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szDpFile, const char* szRuleFile);
 
 
 /**********************************************************

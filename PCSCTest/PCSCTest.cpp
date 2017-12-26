@@ -66,7 +66,7 @@ int main()
 	//	pNode = pNode->next_sibling();
 	//}
 
-	GenCpsFile("YLDpParse.dll", "HandleDp", "F:\\CardPlatform\\Debug\\yinlian.DP");
+	GenCpsFile("YLDpParse.dll", "HandleDp", "F:\\CardPlatform\\Debug\\yinlian.DP",NULL);
     return 0;
 }
 

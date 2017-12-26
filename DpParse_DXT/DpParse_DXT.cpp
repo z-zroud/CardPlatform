@@ -4,13 +4,13 @@
 #include "stdafx.h"
 #include "DpParse_DXT.h"
 
-bool HandleDp(const char* szFileName)
+bool HandleDp(const char* szFileName, const char* szRuleFile)
 {
 	DXTDpParse parse;
-	return parse.HandleDp(szFileName);
+	return parse.HandleDp(szFileName, szRuleFile);
 }
 
-bool DXTDpParse::HandleDp(const char* szFileName)
+bool DXTDpParse::HandleDp(const char* szFileName, const char* szRuleFile)
 {
 	ifstream dpFile;
 	dpFile.open(szFileName, ios::in | ios::binary);

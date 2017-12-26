@@ -9,10 +9,10 @@ enum Hex_Len
 
 
 using namespace std;
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+//#ifdef __cplusplus
+//extern "C"
+//{
+//#endif
 namespace Tool 
 {
 	//typedef unsigned char byte;
@@ -21,11 +21,12 @@ namespace Tool
 	void AscToBcd(char *bcd, char *asc, long asc_len);	//BCD×ªAscii
 	void StrToHex(unsigned char *pDest, unsigned char *pSrc, int nLen);
     void DeleteSpace(const char* src, char* dest, int len);
+    string Trim(string str);
 
 	/**********************************************************
 	* ¹¦ÄÜ£º
 	***********************************************************/
-	void HexStr(const char* bcdLen, char* output, int len);
+	void GetBcdDataLen(const char* bcdLen, char* output, int len);
 	void IncreaseStep(const char* strLen, int step, char* output, int len);
 
 	/***********************************************************
@@ -46,7 +47,7 @@ namespace Tool
 	void IntToStr(int value, char* hexStr, Hex_Len hexLen);
 }
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 

@@ -35,10 +35,10 @@ struct SubNode
 { 
     void InsertElement(string key, string value)
     {
-        m_Dict.push_back(pair<string, string>(key, value));
+        m_collection.push_back(pair<string, string>(key, value));
     }
 
-    vector<pair<string, string>> m_Dict;
+    vector<pair<string, string>> m_collection;
 }; 
 
   
@@ -50,6 +50,7 @@ public:
 	IniConfig(string path);
 public: 
     bool Read(string path); 
+    bool IsOpened() { return m_bOpened; }
 	int Read();
     string GetValue(string root, string key); 
     void GetValue(string root, vector<pair<string,string>>& nodes);
@@ -67,6 +68,7 @@ private:
 private: 
     vector < pair<string, SubNode>> m_vecSection;
 	string m_filePath;
+    bool m_bOpened;
 }; 
 
 #endif // INI_PARSER_H 

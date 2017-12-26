@@ -13,6 +13,7 @@
 
 
 #pragma comment(lib,"..\\bin\\ApduCmd.lib")
+#pragma comment(lib,"..\\bin\\Util.lib")
 #pragma comment(lib,"..\\lib\\Des0.lib")
 
 

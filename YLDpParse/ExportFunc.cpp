@@ -3,8 +3,8 @@
 #include "YlDpParse.h"
 
 
-bool HandleDp(const char* szFileName)
+bool HandleDp(const char* szFileName, const char* szRuleFile)
 {
 	YLDpParser parse;
-	return parse.HandleDp(szFileName);
+	return parse.HandleDp(szFileName, szRuleFile);
 }

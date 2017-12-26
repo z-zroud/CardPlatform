@@ -15,8 +15,10 @@ public:
 	{
 		m_vecItems.push_back(pair<string, string>(key, value));
 	}
+    void ReplaceItem(string key, string value);
+    void DeleteItem(string key);
 	vector<pair<string, string>> GetItems() { return m_vecItems; }
-
+    string GetItem();
 private:
 	vector<pair<string, string>> m_vecItems;
 };
@@ -74,20 +76,21 @@ public:
 	virtual void SetRule(const string& ruleConfig);
 	virtual void HandleRule(CPS_ITEM& cpsItem);
 protected:
-	void HandleDGIMap();
-	void HandleDGIExchange();
-	void HandleDGIDecrypt();
-	void HandleDGIDelete();
-	void HandleTagDelete();
+	void HandleDGIMap(CPS_ITEM& cpsItem);           //处理DGI映射关系
+	void HandleDGIExchange(CPS_ITEM& cpsItem);      //处理DGI交换关系
+	void HandleDGIEncrypt(CPS_ITEM& cpsItem);       //处理DGI加密
+	void HandleDGIDelete(CPS_ITEM& cpsItem);        //处理删除DGI
+	void HandleTagDelete(CPS_ITEM& cpsItem);        //处理删除DGI某个tag
 private:
-	CPS_ITEM m_cpsItem;
 
-	vector<pair<string, string>> m_vecDGIMap;
-	vector<string> m_vecDGIDelete;
-	vector<pair<string, string>> m_vecDGIExchange;
-	vector<string> m_vecDGIDecrypt;
-	vector<pair<string, string>> m_vecTagDelete;
-	vector<pair<string, string>> m_vecTagAdd;
+    string  m_tk;
+    vector<string>                  m_vecDGIpadding80;
+	vector<pair<string, string>>    m_vecDGIMap;       // src --> dst
+	vector<string>                  m_vecDGIDelete;
+	vector<pair<string, string>>    m_vecDGIExchange;  // DGI1 <--> DGI2
+	vector<string>                  m_vecDGIEncrypt;
+	vector<pair<string, string>>    m_vecTagDelete;    // DGI --> tag
+	vector<pair<string, string>>    m_vecTagAdd;       // DGI --> tag
 };
 
 /******************************************************************
@@ -98,7 +101,7 @@ struct IDpParse
 	/**************************************************************
 	* 每一个继承IDpParse的类都需要实现如何解析DP文件接口
 	***************************************************************/
-	virtual bool HandleDp(const char* szFileName) = 0;
+	virtual bool HandleDp(const char* szFileName, const char* ruleFile) = 0;
 	
 	/**************************************************************
 	* 获取文件大小
@@ -114,8 +117,8 @@ struct IDpParse
 	* 获取DP文件中，从当前流指针位置到bufferLen长的数据，返回流指针位置
 	***************************************************************/
 	virtual streampos GetBuffer(ifstream &dpFile, char* buffer, int bufferLen);
-
 	virtual streampos GetBCDBuffer(ifstream &dpFile, string& buffer, int len);
+    virtual streampos GetBCDBufferLittleEnd(ifstream &dpFile, string &buffer, int len);
 
 	/***************************************************************
 	* 获取的指定的数据长度的buffer转换成整数类型
@@ -124,11 +127,12 @@ struct IDpParse
 	* 参数：len 指定buffer的长度
 	****************************************************************/
 	virtual streampos GetLenTypeBuffer(ifstream &dpFile, int &dataLen, int len);
+    virtual streampos GetLenTypeBufferLittleEnd(ifstream &dpFile, int &dataLen, int len);
 
 	/***************************************************************
 	* 处理DP文件生成CPS规则
 	****************************************************************/
-	virtual void HandleRule(IRule ruleObj, string ruleConfig, CPS_ITEM& cpsItem);
+	virtual void HandleRule(string ruleConfig, CPS_ITEM& cpsItem);
 
 	/***************************************************************
 	* 保存CPS数据到本地文件，该文件默认为DP数据的下级目录文件
@@ -147,8 +151,6 @@ struct IDpParse
 	* 解析TLV数据结构
 	*****************************************************************/
 	void ParseTLV(unsigned char* buffer, unsigned int bufferLength, PTLVEntity PTlvEntity, unsigned int& entityNum);
-
-	
 
 	/****************************************************************
 	* 判断某段数据是否为TLV结构

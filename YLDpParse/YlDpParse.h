@@ -12,21 +12,21 @@ using namespace std;
 #endif
 
 
-extern "C" YLDPPARSE_API bool HandleDp(const char* szFileName);
+extern "C" YLDPPARSE_API bool HandleDp(const char* szFileName,const char* ruleFile);
 
 class YLDpParser : public IDpParse
 {
 public:
 	YLDpParser();
-	bool HandleDp(const char* szFileName);
+	bool HandleDp(const char* szFileName,const char* szRuleFile);
 
 private:
-	void			ReadDGIName(ifstream &dpFile);						//读取DGI名称
-	char			ReadDGIStartTag(ifstream &dpFile);					//读取起始标签
-	unsigned short	GetFollowedDataLen(ifstream &dpFile);			//读取数据长度
-	int				GetOneCardDpDataLen(ifstream &dpFile);	//读取卡片个人化数据总长度
-	void			ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs);		//解析TLV结构
-	int				ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem);	//分析PSE PPSE
+	void			ReadDGIName(ifstream &dpFile);                          //读取DGI名称
+	char			ReadDGIStartTag(ifstream &dpFile);                      //读取起始标签
+	int	            GetFollowedDataLen(ifstream &dpFile);                   //读取数据长度
+	int				GetOneCardDpDataLen(ifstream &dpFile);	                //读取卡片个人化数据总长度
+	void			ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs);   //解析TLV结构
+	int				ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem);          //分析PSE PPSE
 private:
 
 	vector<string>              m_vecDGI;

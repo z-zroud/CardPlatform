@@ -9,6 +9,10 @@ using namespace std;
 #define DGI_NUMBER	4
 #define DGI_LEN		2
 
+YLDpParser::YLDpParser()
+{
+}
+
 
 int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 {
@@ -20,7 +24,7 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 
 		string dgi;
 		GetBCDBuffer(dpFile, dgi, 2);	//读取该DGI序号
-
+        dgiItem.dgi = "F001";
 		int nFollowedDataLen = GetFollowedDataLen(dpFile);
 		if (nFollowedDataLen > 0)
 		{
@@ -32,6 +36,12 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 		}
 	}
 	else {
+        if (dgiItem.dgi == "Store_PSE_1" || dgiItem.dgi == "Store_PSE_2") {
+            dgiItem.dgi = "PSE";
+        }
+        else {
+            dgiItem.dgi = "PPSE";
+        }
 		char* buffer = new char[nFollowedDataLen];
 		memset(buffer, 0, nFollowedDataLen);
 		dpFile.read(buffer, nFollowedDataLen);
@@ -45,7 +55,7 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 /********************************************************************
 * 解析银联DP数据
 ********************************************************************/
-bool YLDpParser::HandleDp(const char* fileName)
+bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile)
 {
 	ifstream dpFile;
 	if (!OpenDpFile(fileName, dpFile)) {
@@ -62,7 +72,7 @@ bool YLDpParser::HandleDp(const char* fileName)
 	while (dpFile.tellg() < dpFileSize)		//遍历后续数据，每一次遍历解析一个卡片数据
 	{
 		string cardSeq;
-		GetBCDBuffer(dpFile, cardSeq, 4);	//读取卡片序列号		
+		GetBCDBufferLittleEnd(dpFile, cardSeq, 4);	//读取卡片序列号		
 		int oneCardDataLen = GetOneCardDpDataLen(dpFile); //读取该卡片个人化数据内容总长度
 		
 		CPS_ITEM cpsItem;
@@ -84,14 +94,18 @@ bool YLDpParser::HandleDp(const char* fileName)
 
 			unsigned short sDgi;			
 			string dgi;
-			GetBCDBuffer(dpFile, dgi, 2);	//读取该DGI序号
-			sDgi = stoi(dgi);
-			
+            streampos pos;
+            pos = GetBCDBuffer(dpFile, dgi, 2);	//读取该DGI序号
+            sDgi = stoi(dgi, 0, 16);
+            if (dgi != dgiItem.dgi.substr(3)) {
+                return false;   //对应的DGI有误
+            }
+            dgiItem.dgi = dgi;  //去掉"DGI"字符
 			nFollowedDataLen = GetFollowedDataLen(dpFile);	// 读取后续数据长度(该DGI数据部分)		
 			if (sDgi < 0x0b01)		// 读取记录模板(该模板仅当DGI序号小于0x0B01时出现)
 			{
 				string templateTag;
-				GetBCDBuffer(dpFile, templateTag, 1);
+                GetBCDBufferLittleEnd(dpFile, templateTag, 1);
 				if (templateTag != "70") {
 					return false;
 				}
@@ -113,22 +127,22 @@ bool YLDpParser::HandleDp(const char* fileName)
 			}			
 			cpsItem.items.push_back(dgiItem);			
 		}
-		//cpsItem.fileName = path + "yinlian\\" + m_currentAccount;
+
+        //解析完成之后，调用规则
+        if (ruleFile){
+            HandleRule(ruleFile, cpsItem);
+        }
+
+        //保存数据
+        int pos = string(fileName).find_last_of('\\');
+        string path = string(fileName).substr(0, pos + 1);
+		cpsItem.fileName = path + "conv\\" + m_currentAccount + ".txt";
 		Save(cpsItem);
 		vecCpsItem.push_back(cpsItem);
 	}
 
 	return true;
 }
-
-//特殊DGI分组
-YLDpParser::YLDpParser()
-{
-	//m_ValueOnlyDGI = { 0x8000,0x9000,0x8010,0x9010,0x8201,0x9103,
-	//	0x8202,0x8203,0x8204,0x8205,0x9102, };
-	//m_encryptTag = { "8000","8201","8202","8203" ,"8204","8205" };
-}
-
 
 
 /********************************************************************
@@ -146,14 +160,18 @@ char YLDpParser::ReadDGIStartTag(ifstream &dpFile)
 /********************************************************************
 * 功能：读取DGI后续数据长度
 *********************************************************************/
-unsigned short YLDpParser::GetFollowedDataLen(ifstream &dpFile)
+int YLDpParser::GetFollowedDataLen(ifstream &dpFile)
 {
-	unsigned char szBehindLen = '\0';
-	dpFile.read((char*)&szBehindLen, 1);
-	if (szBehindLen == 0x81)
-		dpFile.read((char*)&szBehindLen, 1);
+	int dataLen = 0;
 
-	return (unsigned short)szBehindLen;
+    GetLenTypeBufferLittleEnd(dpFile, dataLen, 1);
+	if (dataLen == 0x81)
+        GetLenTypeBufferLittleEnd(dpFile, dataLen, 1);
+    else if (dataLen == 0x82) {
+        GetLenTypeBufferLittleEnd(dpFile, dataLen, 2);
+    }
+
+	return dataLen;
 }
 
 
@@ -174,18 +192,6 @@ int YLDpParser::GetOneCardDpDataLen(ifstream &dpFile)
 *********************************************************************/
 void YLDpParser::ReadDGIName(ifstream &dpFile)
 {
-	//int dgiNum;
-	//GetLenTypeBuffer(dpFile, dgiNum, 4);
-
-	//for (int i = 0; i < dgiNum; i++)
-	//{
-	//	int dgiLen;
-	//	GetLenTypeBuffer(dpFile, dgiLen, 2);
-	//	char dgiName[12] = { 0 };
-	//	GetBuffer(dpFile, dgiName, dgiLen);
-	//	m_vecDGI.push_back(dgiName);
-	//}
-
 	char szDGICount[DGI_NUMBER] = { 0 };
 	dpFile.read(szDGICount, DGI_NUMBER);
 	int *nDGICount = (int*)szDGICount;

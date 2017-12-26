@@ -91,12 +91,13 @@ bool IniConfig::Read(string path)
 		else {
 			m_vecSection.push_back(pair<string, SubNode>(strRoot, sn));
 			strRoot = iter.m_Root;
-			sn.m_Dict.clear();
+			sn.m_collection.clear();
 			sn.InsertElement(iter.m_Key, iter.m_Value);
 		}
 	}
 	//插入最后一个节点
 	m_vecSection.push_back(pair<string, SubNode>(strRoot, sn));
+    m_bOpened = true;
     return true; 
 } 
  
@@ -108,8 +109,8 @@ string IniConfig::GetValue(string root, string key)
     {
         if (v.first == root)
         {
-            auto subIter = IsExisted(v.second.m_Dict, key);
-            if (subIter == v.second.m_Dict.end())
+            auto subIter = IsExisted(v.second.m_collection, key);
+            if (subIter == v.second.m_collection.end())
             {
                 return "";
             }
@@ -129,7 +130,7 @@ void IniConfig::GetValue(string root, vector<pair<string,string>>& nodes)
     {
         if (v.first == root)
         {
-            for (auto item : v.second.m_Dict)
+            for (auto item : v.second.m_collection)
             {
                 nodes.push_back(item);
             }
@@ -157,7 +158,7 @@ int IniConfig::Save(string path)
             flag = iter->first;
         }
 		
-       for(auto subIter = iter->second.m_Dict.begin(); subIter != iter->second.m_Dict.end(); ++subIter)
+       for(auto subIter = iter->second.m_collection.begin(); subIter != iter->second.m_collection.end(); ++subIter)
        { 
 		   iniFile << subIter->first << "=" << subIter->second << endl;
        } 
@@ -186,8 +187,8 @@ bool IniConfig::IsExisted(string root, string key)
     {
         if (v.first == root)
         {
-            auto m = IsExisted(v.second.m_Dict, key);
-            if (m != v.second.m_Dict.end())
+            auto m = IsExisted(v.second.m_collection, key);
+            if (m != v.second.m_collection.end())
             {
                 return true;
             }
@@ -206,8 +207,8 @@ vector<IniNode>::size_type IniConfig::SetValue(string root, string key, string v
         {
             if (v.first == root)
             {
-                auto m = IsExisted(v.second.m_Dict, key);
-                if (m != v.second.m_Dict.end())
+                auto m = IsExisted(v.second.m_collection, key);
+                if (m != v.second.m_collection.end())
                 {
                     m->second = value;
                 }

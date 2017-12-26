@@ -11,7 +11,7 @@
 class ZJTLDpParse : public IDpParse
 {
 public:
-	virtual bool HandleDp(const char* szFileName);
+	virtual bool HandleDp(const char* szFileName, const char* ruleFile);
 
 protected:
 	void ReadDGIName(ifstream &dpFile);

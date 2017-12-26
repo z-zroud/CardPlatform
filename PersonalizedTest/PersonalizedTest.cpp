@@ -32,7 +32,8 @@ int main()
 	//GetATR(atr, sizeof(atr));
 	//printf("%s\n", atr);
 
-	GenCpsFile("DpParse_YL.dll", "HandleDp", "F:\\\Goldpac\\test.DP");
+	GenCpsFile("DpParse_YL.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\yinlian2.DP","F:\\CardPlatform\\bin\\Configuration\\Rule\\projectName.cfg");
+    //GenCpsFile("DpParse_YL.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\yinlian2.DP", NULL);
 	//SetPersonlizationConfig("A000000003000000", "404142434445464748494A4B4C4D4E4F", DIV_NONE, SECURE_NONE);
 	//DoPersonlizationWithOrderdDGI("F:\\CardPlatform\\bin\\huaxin.txt", "F:\\CardPlatform\\bin\\Configuration\\InstallParams\\DMT_G87140034_PBOC.txt");
     return 0;
