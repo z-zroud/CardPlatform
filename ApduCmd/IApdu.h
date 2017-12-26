@@ -32,6 +32,13 @@ using namespace std;
 #define TC			0x40
 #define CDA			0x10
 
+struct AppInfo
+{
+    char aid[128];
+    char lifeCycleStatus[3];
+    char privilege[3];
+};
+
 
 #ifdef __cplusplus
 extern "C"
@@ -76,6 +83,8 @@ APDUCMD_API UINT PutDataCmd(const char* tag, const char* value, const char* mac)
 * 参数： aid 被删除的应用的AID
 ***************************************************/
 APDUCMD_API	UINT DeleteAppCmd(const char* aid);
+
+APDUCMD_API UINT GetAppStatusCmd(AppInfo* apps, int& count);
 
 
 APDUCMD_API	UINT InstallAppCmd(const char* package,

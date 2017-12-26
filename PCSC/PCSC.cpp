@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "PCSC.h"
 #include "../Util/Tool.h"
+#include "../Util/Log.h"
 #include <stdio.h>
 #include <winscard.h>
 
@@ -154,12 +155,12 @@ void GetATR(char* atr, int len)
     DWORD			dwProtocol;
     DWORD			dwState;
 
-    HRESULT hRet = SCardStatus(g_scardHandle,			//智能卡连接句柄
-        g_readerName,	//读卡器名称
-        &szReaderNameLenght, //读卡器名称长度
-        &dwState,	//智能卡的状态
-        &dwProtocol, //智能卡的协议，当前卡的状态须是SCARD_SPECIFIC
-        szATR,	//32字节的ATR字符串
+    HRESULT hRet = SCardStatus(g_scardHandle,   //智能卡连接句柄
+        g_readerName,                           //读卡器名称
+        &szReaderNameLenght,                    //读卡器名称长度
+        &dwState,                               //智能卡的状态
+        &dwProtocol,                            //智能卡的协议，当前卡的状态须是SCARD_SPECIFIC
+        szATR,                                  //32字节的ATR字符串
         &dwATRLen);
     if (hRet != SCARD_S_SUCCESS)
     {
@@ -185,12 +186,12 @@ int  GetCardStatus()
     DWORD			dwProtocol;
     DWORD			dwState;
 
-    HRESULT hRet = SCardStatus(g_scardHandle,			//智能卡连接句柄
-        g_readerName,	//读卡器名称
-        &szReaderNameLenght, //读卡器名称长度
-        &dwState,	//智能卡的状态
-        &dwProtocol, //智能卡的协议，当前卡的状态须是SCARD_SPECIFIC
-        szATR,	//32字节的ATR字符串
+    HRESULT hRet = SCardStatus(g_scardHandle,   //智能卡连接句柄
+        g_readerName,                           //读卡器名称
+        &szReaderNameLenght,                    //读卡器名称长度
+        &dwState,                               //智能卡的状态
+        &dwProtocol,                            //智能卡的协议，当前卡的状态须是SCARD_SPECIFIC
+        szATR,                                  //32字节的ATR字符串
         &dwATRLen);
     if (hRet != SCARD_S_SUCCESS)
     {
@@ -211,12 +212,12 @@ int  GetTransProtocol()
     DWORD			dwATRLen;
     DWORD			dwProtocol;
     DWORD			dwState;
-    HRESULT hRet = SCardStatus(g_scardHandle,			//智能卡连接句柄
-        g_readerName,	//读卡器名称
-        &szReaderNameLenght, //读卡器名称长度
-        &dwState,	//智能卡的状态
-        &dwProtocol, //智能卡的协议，当前卡的状态须是SCARD_SPECIFIC
-        szATR,	//32字节的ATR字符串
+    HRESULT hRet = SCardStatus(g_scardHandle,   //智能卡连接句柄
+        g_readerName,                           //读卡器名称
+        &szReaderNameLenght,                    //读卡器名称长度
+        &dwState,                               //智能卡的状态
+        &dwProtocol,                            //智能卡的协议，当前卡的状态须是SCARD_SPECIFIC
+        szATR,                                  //32字节的ATR字符串
         &dwATRLen);
     if (hRet != SCARD_S_SUCCESS)
     {
@@ -235,15 +236,21 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
 
     //删除字符串中的空格
     int cmdLen = strlen(cmd);
-	char noSpaceCmd[512] = { 0 };
+	char noSpaceCmd[2048] = { 0 };
     Tool::DeleteSpace(cmd, noSpaceCmd, sizeof(noSpaceCmd));
     cmdLen = strlen(noSpaceCmd);
+
+    char cmdHeader[10] = { 0 };
+    char szCmdLen[3] = { 0 };
+    strncpy_s(cmdHeader, 10, noSpaceCmd, 8);
+    strncpy_s(szCmdLen, 3, noSpaceCmd + 8, 2);
+    Log->Debug("APDU: %s %s %s", cmdHeader, szCmdLen, noSpaceCmd + 10);
 
     if (cmdLen < 8 || cmdLen % 2 != 0)	//bcd码命令必须包含命令头8字节，必须是偶数字节
     {
         return false;
     }
-    unsigned char apdu[256] = { 0 };
+    unsigned char apdu[2048] = { 0 };
     Tool::BcdToAsc(apdu, (unsigned char*)noSpaceCmd, cmdLen);
 
 	int respLen = 2048;

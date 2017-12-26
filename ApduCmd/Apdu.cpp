@@ -471,36 +471,38 @@ UINT InstallAppCmd(const char* package,
 	return SendApdu2(cmd.c_str());
 }
 
-///******************************************************
+//******************************************************
 //* 根据给定的匹配/查找标准取得发行者安全域、可执行装载文件、
 //* 可执行模块、应用和安全域的生命周期的状态信息。
 //*******************************************************/
-//bool APDU::GetAppStatusCmd(vector<APP_STATUS> &status, APDU_RESPONSE& response)
-//{
-//	string cmd = "80F24000 02 4F00";
-//
-//	if (SendAPDU(cmd, response))
-//	{
-//		string strResponse = response.data;
-//		unsigned int i = 0;
-//		while (i < strResponse.length())
-//		{
-//			APP_STATUS applicationStatus;
-//			int len = 2 * stoi(strResponse.substr(i, 2), 0, 16);
-//			applicationStatus.strAID = strResponse.substr(i + 2, len);
-//			applicationStatus.lifeCycleStatus = strResponse.substr(i + 2 + len, 2);
-//			applicationStatus.privilege = strResponse.substr(i + 4 + len, 2);
-//			status.push_back(applicationStatus);
-//
-//			i += 6 + len;
-//		}
-//
-//		return true;
-//	}
-//
-//	return false;
-//}
-//
+UINT GetAppStatusCmd(AppInfo* apps, int& count)
+{
+    char* cmd = "80F24000 02 4F00";
+    char resp[RESP_LEN] = { 0 };
+    int sw = SendApdu(cmd, resp, RESP_LEN);
+    if (0x9000 == sw)
+    {
+        int respLen = strlen(resp);
+        int i = 0;
+        int appCount = 0;
+        while (i < respLen)
+        {
+            char szAppLen[3] = { 0 };
+            strncpy_s(szAppLen, 3, resp + i, 2);
+            int appLen = stoi(szAppLen, 0, 16) * 2;
+            if (appCount > count - 1) {
+                return 1;
+            }
+            strncpy_s(apps[appCount].aid, 128, resp + i + 2, appLen);
+            strncpy_s(apps[appCount].lifeCycleStatus, 3, resp + i + 2 + appLen, 2);
+            strncpy_s(apps[appCount].privilege, 3, resp + i + 4 + appLen, 2);
+            appCount++;
+            i += appLen + 6;
+        }
+        count = appCount;
+    }
+    return sw;
+}
 
 
 //

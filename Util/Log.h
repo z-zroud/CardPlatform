@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
-#include "../../DuiLib_R/UIlib.h"
+
 using namespace std;
-using namespace DuiLib;
+
 //日志输出等级
 enum LOG_LEVEL
 {
@@ -28,8 +28,7 @@ enum LOG_LEVEL
 class SimpleLog
 {
 public:
-	static SimpleLog* GetInstance(LOG_LEVEL level=LEVEL_DEBUG, int outputType = OUT_CONTROL | OUT_FILE);
-    void SetLogControl(CRichEditUI* pControl) { m_pControl = pControl; }
+	static SimpleLog* GetInstance(LOG_LEVEL level = LEVEL_DEBUG, int outputType = OUT_CONSOLE | OUT_FILE);
 	void SetLogLevel(LOG_LEVEL level);
 	void SetLogOutputType(int outputType);
 	void Info(char* szFormatString, ...);
@@ -41,7 +40,8 @@ public:
     vector<string> GetWarningLog() { return m_vecWarningLog; }
     vector<string> GetDebugLog() { return m_vecDebugLog; }
     vector<string> GetErrorLog() { return m_vecErrorLog; }
-private:
+
+protected:
 	void WriteLog(char* szLogHeader, char* szFormatString);
 
 private:
@@ -53,13 +53,13 @@ private:
 	FILE*           m_file;             //文件句柄
 	LOG_LEVEL       m_level;            //日志等级
 	int             m_outputType;       //输出方式
+    char            m_logFile[256];     //日志文件
     vector<string>  m_vecLog;           //保存所有日志到内存中
     vector<string>  m_vecInfoLog;       //保存所有Info日志
     vector<string>  m_vecWarningLog;    //保存Warning日志
     vector<string>  m_vecDebugLog;      //保存Debug日志
     vector<string>  m_vecErrorLog;      //保存Error日志
 
-    CRichEditUI*     m_pControl;         //将日志输出到该控件上
 };
 
 #define Log SimpleLog::GetInstance() 

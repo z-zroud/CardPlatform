@@ -42,11 +42,11 @@ bool GetInstallParam(IniConfig cfg, string appType, InstallParam& param)
         param.token == "00";
     }
 
-    return param.packageAid.empty() ||
-        param.appletAid.empty() ||
-        param.instanceAid.empty() ||
-        param.privilege.empty() ||
-        param.installParam.empty();
+    return !param.packageAid.empty() &&
+        !param.appletAid.empty() &&
+        !param.instanceAid.empty() &&
+        !param.privilege.empty() &&
+        !param.installParam.empty();
 }
 
 /************************************************************
@@ -266,7 +266,10 @@ bool PersonlizePSE(IniConfig cpsFile, string app)
         vector<pair<string, string>> personlizeDGIs;
         cpsFile.GetValue(app, personlizeDGIs);
         if (personlizeDGIs.size() == 1) {   //如果DGI数量为1的情况
-            if (0x9000 != StoreDataCmd(personlizeDGIs[0].second.c_str(), STORE_DATA_END, true)) {
+            char dataLen[5] = { 0 };
+            Tool::GetBcdDataLen(personlizeDGIs[0].second.c_str(), dataLen, 5);
+            string data = personlizeDGIs[0].first + dataLen + personlizeDGIs[0].second;
+            if (0x9000 != StoreDataCmd(data.c_str(), STORE_DATA_END, true)) {
                 return false;
             }
         }
@@ -274,18 +277,21 @@ bool PersonlizePSE(IniConfig cpsFile, string app)
             auto firstDGI = personlizeDGIs.begin();
             auto lastDGI = personlizeDGIs.rbegin();
             for (auto DGI : personlizeDGIs) {
+                char dataLen[5] = { 0 };
+                Tool::GetBcdDataLen(DGI.second.c_str(), dataLen, 5);
+                string data = DGI.first + dataLen + DGI.second;
                 if (*firstDGI == DGI) {
-                    if (0x9000 != StoreDataCmd(DGI.second.c_str(), STORE_DATA_PLANT, true)) {
+                    if (0x9000 != StoreDataCmd(data.c_str(), STORE_DATA_PLANT, true)) {
                         return false;
                     }
                 }
                 else if (*lastDGI == DGI) {
-                    if (0x9000 != StoreDataCmd(DGI.second.c_str(), STORE_DATA_END, false)) {
+                    if (0x9000 != StoreDataCmd(data.c_str(), STORE_DATA_END, false)) {
                         return false;
                     }
                 }
                 else {
-                    if (0x9000 != StoreDataCmd(DGI.second.c_str(), STORE_DATA_PLANT, false)) {
+                    if (0x9000 != StoreDataCmd(data.c_str(), STORE_DATA_PLANT, false)) {
                         return false;
                     }
                 }
@@ -379,6 +385,15 @@ bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
 	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
 		return false;
 	}
+    //删除实例(全部删除)
+    AppInfo apps[12] = { 0 };
+    int appCount = 12;
+    GetAppStatusCmd(apps, appCount);
+    for (int i = 0; i < appCount; i++) {
+        if (0x9000 != DeleteAppCmd(apps[i].aid)) {
+            return false;
+        }
+    }
 	//安装应用
     vector<pair<string, string>> InstallApps;
     cfgFile.GetValue("InstallApp", InstallApps);

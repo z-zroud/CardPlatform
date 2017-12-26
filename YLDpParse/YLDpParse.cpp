@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <string>
 #include <fstream>
+#include "../Util/Tool.h"
 using namespace std;
 
 #define DGI_NUMBER	4
@@ -36,17 +37,27 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 		}
 	}
 	else {
-        if (dgiItem.dgi == "Store_PSE_1" || dgiItem.dgi == "Store_PSE_2") {
-            dgiItem.dgi = "PSE";
-        }
-        else {
-            dgiItem.dgi = "PPSE";
-        }
 		char* buffer = new char[nFollowedDataLen];
 		memset(buffer, 0, nFollowedDataLen);
 		dpFile.read(buffer, nFollowedDataLen);
 		string value = StrToHex(buffer, nFollowedDataLen);	//直接保存，不用解析TLV结构
-		dgiItem.value.InsertItem(dgiItem.dgi, value);
+
+        if (dgiItem.dgi == "Store_PSE_1") {
+            dgiItem.dgi = "PSE";
+            dgiItem.value.InsertItem("0101", value);
+        }
+        else if (dgiItem.dgi == "Store_PSE_2") {
+            dgiItem.dgi = "PSE";
+            value = "880101" + value;
+            char dataLen[3] = { 0 };
+            Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
+            value = "A5" + string(dataLen) + value;
+            dgiItem.value.InsertItem("9102", value);
+        }
+        else {
+            dgiItem.dgi = "PPSE";
+            dgiItem.value.InsertItem("9102", value);
+        }
 	}
 
 	return 0;
@@ -225,6 +236,12 @@ void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
 		int nLen = std::stoi(strLen, 0, 16);
 		string strValue = StrToHex((char*)entities[i].value, nLen);
 
+        if (nLen > 0xFF * 2) {
+            char dataLen[5] = { 0 };
+            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+            strLen = "82" + string(dataLen);
+            
+        }
 		/****************小插曲，用于生成文件的文件名********************/
 		string temp = DeleteSpace(strTag);
 		if (temp.substr(0, 2).compare("57") == 0)
@@ -235,6 +252,7 @@ void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
 				m_currentAccount = strValue.substr(0, index);
 			}
 		}
+        strValue = strTag + strLen + strValue;
 		/*************************************************************/
 		tlvs.InsertItem(strTag, strValue);
 	}
