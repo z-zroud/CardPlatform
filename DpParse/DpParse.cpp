@@ -88,7 +88,7 @@ bool ExistedInList(string value, vector<string> collection)
 
 string Dict::GetItem()
 {
-    if (m_vecItems.size() > 1)
+    if (m_vecItems.size() > 0)
         return m_vecItems[0].second;
     
     return "";
@@ -99,6 +99,16 @@ void Dict::ReplaceItem(string key, string value)
     for (auto& item : m_vecItems) {
         if (item.first == key) {
             item.second = value;
+            break;
+        }
+    }
+}
+
+void Dict::ReplaceKey(string oldKey, string newKey)
+{
+    for (auto& item : m_vecItems) {
+        if (item.first == oldKey) {
+            item.first = newKey;
             break;
         }
     }
@@ -528,7 +538,7 @@ void IRule::HandleRule(CPS_ITEM& cpsItem)
     HandleDGIMap(cpsItem);
     HandleDGIExchange(cpsItem);
     HandleDGIDelete(cpsItem);
-    //HandleDGIEncrypt(cpsItem);
+    HandleDGIEncrypt(cpsItem);
     HandleTagDelete(cpsItem);
 }
 
@@ -541,6 +551,7 @@ void IRule::HandleDGIMap(CPS_ITEM& cpsItem)
 			if (item.first == dgiItem.dgi)
 			{
 				dgiItem.dgi = item.second;
+                dgiItem.value.ReplaceKey(item.first, item.second);
 				break;
 			}
 		}
@@ -557,7 +568,9 @@ void IRule::HandleDGIExchange(CPS_ITEM& cpsItem)
 		while (item.second != cpsItem.items[secondIndex].dgi)
 			secondIndex++;
         cpsItem.items[firstIndex].dgi = item.second;
+        cpsItem.items[firstIndex].value.ReplaceKey(item.first, item.second);
         cpsItem.items[secondIndex].dgi = item.first;
+        cpsItem.items[secondIndex].value.ReplaceKey(item.second, item.first);
 	}
 }
 
@@ -566,9 +579,10 @@ void IRule::HandleDGIExchange(CPS_ITEM& cpsItem)
 ****************************************************************/
 void IRule::HandleDGIEncrypt(CPS_ITEM& cpsItem)
 {
-    string decryptedData;
+   
     for (auto& item : cpsItem.items)
     {
+        string decryptedData;
         if (ExistedInList(item.dgi, m_vecDGIEncrypt))
         {
             string encryptData = item.value.GetItem();

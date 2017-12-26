@@ -16,6 +16,7 @@ public:
 		m_vecItems.push_back(pair<string, string>(key, value));
 	}
     void ReplaceItem(string key, string value);
+    void ReplaceKey(string oldKey, string newKey);
     void DeleteItem(string key);
 	vector<pair<string, string>> GetItems() { return m_vecItems; }
     string GetItem();
