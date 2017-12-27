@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>6ef928ff-7e24-4f6a-a745-cd29f3d5c544</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PyScript.py</StartupFile>
+    <StartupFile>Util\ApduCmd.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,8 +22,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="pboc\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PyScript.py" />
     <Compile Include="Util\ApduCmd.py" />
+    <Compile Include="Util\Authencation.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Util\TlvParse.py" />
     <Compile Include="Util\Tool.py" />
     <Compile Include="Util\Des.py" />
@@ -40,6 +46,7 @@
     <InterpreterReference Include="Global|PythonCore|3.6-32" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="pboc\" />
     <Folder Include="Util\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

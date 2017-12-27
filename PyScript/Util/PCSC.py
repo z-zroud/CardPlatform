@@ -3,7 +3,7 @@ import sys
 from ctypes import *
 from .PCSCEnum import PCSCStatus
 from .PCSCEnum import SCARD_PROTOCOL
-from .Base import SW
+from .Tool import SW
 
 dllName = 'PCSC.dll'
 dllPath = os.path.dirname(os.path.abspath(__file__))

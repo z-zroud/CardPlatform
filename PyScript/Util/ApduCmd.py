@@ -1,10 +1,70 @@
 # This module define a collection of apdu command and some
 # basic function reletive to apdu command.
 from .PCSC import SendApdu
-from .Base import HexDataLen,HexStr
+from .Tool import HexDataLen,HexStr
 from .PCSCEnum import DIV_METHOD,SECURE_LEVEL
-from . import KeyGenerator
+from . import Kmc
 from . import Des
+from ctypes import *
+
+dllName = 'ApduCmd.dll'
+dllPath = os.path.dirname(os.path.abspath(__file__))
+#print(dllPath)
+dirList = dllPath.split(os.path.sep)
+#print(dirList)
+dllPath = os.path.sep.join(dirList[0:len(dirList) - 1]) + os.path.sep + "dll" + os.path.sep + dllName
+
+ApduLib = CDLL(dllPath)
+
+resp_len = 2048
+
+#########################################################################
+#           Wrap ApduCmd.dll function
+#########################################################################
+def GPOCmd(terminalData):
+    resp = create_string_buffer(resp_len)
+    btyesTerminalData = str.encode(terminalData)
+    sw = ApduLib.GPOCmd(btyesTerminalData,resp)
+    return sw,bytes.decode(resp.value)
+
+
+def PutDataCmd(tag,value,mac):
+    bytesTag = str.encode(tag)
+    bytesValue = str.encode(value)
+    bytesMac = str.encode(mac)
+    sw = ApduLib.PutDataCmd(bytesTag,bytesValue,bytesMac)
+    return sw,""
+
+def DeleteAppCmd(aid):
+    bytesAid = str.encode(aid)
+    sw = ApduLib.DeleteAppCmd(bytesAid)
+    return sw,""
+
+def InternalAuthencationCmd(ddolData):
+    bytesDdolData = str.encode(ddolData)
+    resp = create_string_buffer(resp_len)
+    sw = ApduLib.InternalAuthencationCmd(bytesDdolData,resp)
+    return sw,bytes.decode(resp.value)
+
+def ExternalAuthencationCmd(arpc,authCode):
+    bytesArpc = str.encode(arpc)
+    bytesAuthCode = str.encode(authCode)
+    resp = create_string_buffer(resp_len)
+    sw = ApduLib.ExternalAuthencationCmd(bytesArpc,bytesAuthCode,resp)
+    return sw,bytes.decode(resp.value)
+
+def GACCmd(terminalCryptogramType,cdolData):
+    cTerminalCryptogramType = c_int(terminalCryptogramType)
+    bytesCdolData = str.encode(cdolData)
+    resp = create_string_buffer(resp_len)
+    sw = ApduLib.GACCmd(cTerminalCryptogramType,bytesCdolData,resp)
+    return sw,bytes.decode(resp.value)
+
+def GenDynamicData(ddolData):
+    bytesDdolData = str.encode(ddolData)
+    resp = create_string_buffer(resp_len)
+    return bytes.decode(resp.value)
+
 
 # Used for selecting an application
 def Select(aid):
@@ -17,7 +77,7 @@ def SelectByName(name):
 	return SendApdu(cmd)
 
 # Read record, p1 and sfi are string type
-def ReadRecord(p1, sfi):
+def ReadRecordCmd(p1, sfi):
 	tmp = int(sfi,base=16)
 	p2 = (tmp << 3) + 4
 	p2Str = HexStr(p2)

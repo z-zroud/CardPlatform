@@ -5,6 +5,7 @@
 *.opendb
 *.vcxproj.user
 *.ilk
+*.log
 
 #¹ıÂËÎÄ¼ş¼ĞDebug,Release,obj  
 Debug/  
@@ -13,3 +14,4 @@ obj/
 ipch/
 .vs/
 bin/
+dll/
