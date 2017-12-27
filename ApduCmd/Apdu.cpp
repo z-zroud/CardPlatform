@@ -479,12 +479,14 @@ UINT GetAppStatusCmd(AppInfo* apps, int& count)
 {
     char* cmd = "80F24000 02 4F00";
     char resp[RESP_LEN] = { 0 };
+    int appCount = 0;
     int sw = SendApdu(cmd, resp, RESP_LEN);
+    
     if (0x9000 == sw)
     {
         int respLen = strlen(resp);
         int i = 0;
-        int appCount = 0;
+        
         while (i < respLen)
         {
             char szAppLen[3] = { 0 };
@@ -498,9 +500,9 @@ UINT GetAppStatusCmd(AppInfo* apps, int& count)
             strncpy_s(apps[appCount].privilege, 3, resp + i + 4 + appLen, 2);
             appCount++;
             i += appLen + 6;
-        }
-        count = appCount;
+        }      
     }
+    count = appCount;
     return sw;
 }
 

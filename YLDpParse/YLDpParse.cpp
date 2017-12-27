@@ -56,6 +56,11 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
         }
         else {
             dgiItem.dgi = "PPSE";
+            char dataLen[3] = { 0 };
+            Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
+            value = "BF0C" + string(dataLen) + value;
+            Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
+            value = "A5" + string(dataLen) + value;
             dgiItem.value.InsertItem("9102", value);
         }
 	}
@@ -236,11 +241,15 @@ void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
 		int nLen = std::stoi(strLen, 0, 16);
 		string strValue = StrToHex((char*)entities[i].value, nLen);
 
-        if (nLen > 0xFF * 2) {
+        if (nLen > 0xFF) {
             char dataLen[5] = { 0 };
             Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
             strLen = "82" + string(dataLen);
             
+        }else if (nLen > 0x79) {
+            char dataLen[5] = { 0 };
+            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+            strLen = "81" + string(dataLen);
         }
 		/****************小插曲，用于生成文件的文件名********************/
 		string temp = DeleteSpace(strTag);

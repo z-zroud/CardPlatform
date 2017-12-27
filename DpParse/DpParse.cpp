@@ -158,18 +158,18 @@ string IDpParse::DecryptDGI(string tk, string encryptData, bool padding80)
 {
 	string strResult;
 
-	if (padding80)
-	{
-		if (encryptData.length() % 16 == 0)
-		{
-			encryptData += "8000000000000000";
-		}
-		else {
-			encryptData += "80";
-			int remaindZero = encryptData.length() % 16;
-			encryptData.append(remaindZero, '0');
-		}
-	}
+	//if (padding80)
+	//{
+	//	if (encryptData.length() % 16 == 0)
+	//	{
+	//		encryptData += "8000000000000000";
+	//	}
+	//	else {
+	//		encryptData += "80";
+	//		int remaindZero = encryptData.length() % 16;
+	//		encryptData.append(remaindZero, '0');
+	//	}
+	//}
 
 	int len = encryptData.length();
 	int unit = 16;

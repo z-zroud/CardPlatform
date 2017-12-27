@@ -105,7 +105,7 @@ bool ExistedInList(string value, vector<pair<string, string>> collection)
     return false;
 }
 
-string DecryptDGIData(string encSessionKey, string dgi, string data)
+string EncryptDGIData(string encSessionKey, string dgi, string data)
 {
     char decryptData[2048] = { 0 };
     if (g_cfgFile.IsOpened())
@@ -128,7 +128,7 @@ string DecryptDGIData(string encSessionKey, string dgi, string data)
 	return decryptData;
 }
 
-bool IsNeedDecrypt(string dgi)
+bool IsNeedEncrypt(string dgi)
 {
     if (g_cfgFile.IsOpened())
     {
@@ -326,12 +326,28 @@ bool PersonlizePBOC(IniConfig cpsFile)
             for (auto item : cpsNodes[i].second.m_collection) {
                 data += item.second;    //拼接DGI分组下所有Tag的值
             }
-            if (IsNeedDecrypt(cpsNodes[i].first)) { //数据是否需要解密
+            if (IsNeedEncrypt(cpsNodes[i].first)) { //数据是否需要解密
                 char encSessionKey[33];
-                GetScureChannelSessionAuthKey(encSessionKey);
-                data = DecryptDGIData(encSessionKey, cpsNodes[i].first, data);
+                GetScureChannelSessionEncKey(encSessionKey);
+                data = EncryptDGIData(encSessionKey, cpsNodes[i].first, data);
                 dataType = STORE_DATA_ENCRYPT;
             }
+            int sDgi = stoi(cpsNodes[i].first, 0, 16);
+            if (sDgi <= 0x0B01) {   //数据需要加70模板
+                char noTemplateDataLen[5] = { 0 };
+                Tool::GetBcdDataLen(data.c_str(), noTemplateDataLen, 5);
+                if (data.length() > 0xFF * 2) {
+                    data = "7082" + string(noTemplateDataLen) + data;
+                }
+                else if (data.length() > 0x79 * 2) {
+                    data = "7081" + string(noTemplateDataLen) + data;
+                }
+                else {
+                    data = "70" + string(noTemplateDataLen) + data;
+                }
+               
+            }
+
             if (i == 0) {   //第一条数据
                 bReset = true;
             }
@@ -373,13 +389,13 @@ bool PersonlizePBOC(IniConfig cpsFile)
 bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
 {
 	IniConfig cpsFile;
-    IniConfig cfgFile;
+    //IniConfig cfgFile;
 
 	//获取相关配置信息
 	if (!cpsFile.Read(szCpsFile)){
 		return false;
 	}
-	if (!cfgFile.Read(iniConfigFile)){
+	if (!g_cfgFile.Read(iniConfigFile)){
 		return false;
 	}
 	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
@@ -396,16 +412,16 @@ bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
     }
 	//安装应用
     vector<pair<string, string>> InstallApps;
-    cfgFile.GetValue("InstallApp", InstallApps);
+    g_cfgFile.GetValue("InstallApp", InstallApps);
     for (auto app : InstallApps) {
-        if (0x9000 != InstallApp(cfgFile, app.second)) {
+        if (0x9000 != InstallApp(g_cfgFile, app.second)) {
             return false;
         }
     }
     //应用个人化
     for (auto app : InstallApps) {
         char resp[RESP_LEN] = { 0 };
-        string aid = cfgFile.GetValue(app.second, "InstanceAid");
+        string aid = g_cfgFile.GetValue(app.second, "InstanceAid");
         if (0x9000 != SelectAppCmd(aid.c_str(), resp)) {
             return false;
         }
