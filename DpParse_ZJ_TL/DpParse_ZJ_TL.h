@@ -25,4 +25,4 @@ private:
 	string                      m_key;              //Ω‚√‹√‹‘ø
 };
 
-extern "C" DPPARSE_ZJ_TL_API bool HandleDp(const char* szFileName);
+extern "C" DPPARSE_ZJ_TL_API bool HandleDp(const char* szFileName, const char* ruleFile);

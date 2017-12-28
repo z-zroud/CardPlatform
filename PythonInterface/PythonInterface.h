@@ -13,3 +13,5 @@
 
 extern "C" PYTHONINTERFACE_API bool InitPythonEnv();
 extern "C" PYTHONINTERFACE_API void ClosePythonEnv();
+extern "C" PYTHONINTERFACE_API bool InitWorkingEnv(const char* dir);
+extern "C" PYTHONINTERFACE_API void SetReaderName(const char* readerName);

@@ -22,6 +22,18 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CInterface.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="emv\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="mot\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="param.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="pboc\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -46,6 +58,8 @@
     <InterpreterReference Include="Global|PythonCore|3.6-32" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="emv\" />
+    <Folder Include="mot\" />
     <Folder Include="pboc\" />
     <Folder Include="Util\" />
   </ItemGroup>
