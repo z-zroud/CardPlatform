@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>6ef928ff-7e24-4f6a-a745-cd29f3d5c544</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Util\ApduCmd.py</StartupFile>
+    <StartupFile>Util\DataParse.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -40,6 +40,9 @@
     <Compile Include="PyScript.py" />
     <Compile Include="Util\ApduCmd.py" />
     <Compile Include="Util\Authencation.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Util\DataParse.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Util\TlvParse.py" />

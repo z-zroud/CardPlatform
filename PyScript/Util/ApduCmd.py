@@ -5,6 +5,8 @@ from .Tool import HexDataLen,HexStr
 from .PCSCEnum import DIV_METHOD,SECURE_LEVEL
 from . import Kmc
 from . import Des
+import os
+import sys
 from ctypes import *
 
 dllName = 'ApduCmd.dll'
