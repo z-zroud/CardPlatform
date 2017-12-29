@@ -1,7 +1,9 @@
 # This module define a collection of apdu command and some
 # basic function reletive to apdu command.
 from .PCSC import SendApdu
-from .Tool import HexDataLen,HexStr
+from .Tool import SW
+from .Tool import GetBcdDataLen
+from .Tool import IntToStr
 from .PCSCEnum import DIV_METHOD,SECURE_LEVEL
 from . import Kmc
 from . import Des
@@ -69,20 +71,20 @@ def GenDynamicData(ddolData):
 
 
 # Used for selecting an application
-def Select(aid):
-	cmd = '00A40400' + HexDataLen(len(aid)) + aid
-	return SendApdu(cmd)
+def SelectAppCmd(aid):
+    cmd = '00A40400' + GetBcdDataLen(aid) + aid
+    return SendApdu(cmd)
 
 # Use fid to select an application
 def SelectByName(name):
-	cmd = '00A40000' + HexDataLen(len(name)) + name
+	cmd = '00A40000' + GetBcdDataLen(name) + name
 	return SendApdu(cmd)
 
 # Read record, p1 and sfi are string type
 def ReadRecordCmd(p1, sfi):
 	tmp = int(sfi,base=16)
 	p2 = (tmp << 3) + 4
-	p2Str = HexStr(p2)
+	p2Str = IntToStr(p2)
 	cmd = "00B2" + p1 + p2Str
 	return SendApdu(cmd)
 
@@ -91,7 +93,7 @@ def ReadRecordCmd(p1, sfi):
 # a Secure Channel Session
 def InitializeUpdate(terminalRandom, keyVersionNum='00', keyIdentifier='00'):	
 	cmd = '8050' + keyVersionNum + keyIdentifier
-	cmd += HexDataLen(len(terminalRandom)) + terminalRandom
+	cmd += GetBcdDataLen(terminalRandom) + terminalRandom
 	return SendApdu(cmd)
 	
 def ExternalAuthenticate(kmc, divMethod,terminalRandom, secureLevel, InitializeUpdateResp):

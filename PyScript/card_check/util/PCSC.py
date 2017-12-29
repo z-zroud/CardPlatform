@@ -7,12 +7,12 @@ from .Tool import SW
 
 dllName = 'PCSC.dll'
 dllPath = os.path.dirname(os.path.abspath(__file__))
-#print(dllPath)
+print(dllPath)
 dirList = dllPath.split(os.path.sep)
-#print(dirList)
+print(dirList)
 dllPath = os.path.sep.join(dirList[0:len(dirList) - 1]) + os.path.sep + "dll" + os.path.sep + dllName
 
-#print(dllPath)
+print(dllPath)
 ReaderLib = CDLL(dllPath)
 
 
@@ -24,7 +24,7 @@ def GetReaders():
 	readerNum = c_int(10)
 	ReaderLib.GetReaders(readerNameArr,byref(readerNum))
 	for count in range(readerNum.value):
-		readers.append(readerNameArr[count])
+		readers.append(bytes.decode(readerNameArr[count]))
 		#print(readerNameArr[count])
 	return readers
 
@@ -33,9 +33,10 @@ def GetReaders():
 # Note: reader name must be bytes type
 # if sucess, OpenReader return True, otherwise return false
 def OpenReader(readerName):
-	print('selected reader: ' + bytes.decode(readerName))
-	result = ReaderLib.OpenReader(readerName)
-	return bool(result)
+    print('selected reader: ', readerName)
+    name = str.encode(readerName)
+    result = ReaderLib.OpenReader(name)
+    return bool(result)
 
 # Close reader and release relative resource
 def CloseReader():

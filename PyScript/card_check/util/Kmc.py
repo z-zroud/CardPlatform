@@ -1,8 +1,8 @@
 # This module generate various of sub key and session key.
 # eg. kmc sub key and session key
 # eg. udk sub key and session key
-from PCSCEnum import DIV_METHOD
-import Des
+from .PCSCEnum import DIV_METHOD
+from . import Des
 
 # This method generate three kmc sub key tuple
 # tuple(auth,mac,enc)
