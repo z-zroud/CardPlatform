@@ -98,14 +98,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DpParse_DXT", "DpParse_DXT\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DpParse_ZJ_TL", "DpParse_ZJ_TL\DpParse_ZJ_TL.vcxproj", "{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}"
 EndProject
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyScript", "PyScript\PyScript.pyproj", "{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonInterface", "PythonInterface\PythonInterface.vcxproj", "{439981DD-FA57-41F8-8839-DA90DB2A8320}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonInterfaceTest", "PythonInterfaceTest\PythonInterfaceTest.vcxproj", "{99F11B21-8101-4A24-A116-E504EB6C21D7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{439981DD-FA57-41F8-8839-DA90DB2A8320} = {439981DD-FA57-41F8-8839-DA90DB2A8320}
 	EndProjectSection
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PyScript", "PyScript\PyScript.pyproj", "{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -624,18 +624,6 @@ Global
 		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeRelease|x64.Build.0 = Release|x64
 		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeRelease|x86.ActiveCfg = Release|Win32
 		{BBB70DB2-5F1F-45CE-BF6E-8D944D7FF327}.UnicodeRelease|x86.Build.0 = Release|Win32
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.Release|x64.ActiveCfg = Release|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.Release|x86.ActiveCfg = Release|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.UnicodeDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.UnicodeDebug|x64.ActiveCfg = Debug|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.UnicodeDebug|x86.ActiveCfg = Debug|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.UnicodeRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.UnicodeRelease|x64.ActiveCfg = Release|Any CPU
-		{6EF928FF-7E24-4F6A-A745-CD29F3D5C544}.UnicodeRelease|x86.ActiveCfg = Release|Any CPU
 		{439981DD-FA57-41F8-8839-DA90DB2A8320}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{439981DD-FA57-41F8-8839-DA90DB2A8320}.Debug|x64.ActiveCfg = Debug|x64
 		{439981DD-FA57-41F8-8839-DA90DB2A8320}.Debug|x64.Build.0 = Debug|x64
@@ -680,6 +668,18 @@ Global
 		{99F11B21-8101-4A24-A116-E504EB6C21D7}.UnicodeRelease|x64.Build.0 = Release|x64
 		{99F11B21-8101-4A24-A116-E504EB6C21D7}.UnicodeRelease|x86.ActiveCfg = Release|Win32
 		{99F11B21-8101-4A24-A116-E504EB6C21D7}.UnicodeRelease|x86.Build.0 = Release|Win32
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.Release|x64.ActiveCfg = Release|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.Release|x86.ActiveCfg = Release|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.UnicodeDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.UnicodeDebug|x64.ActiveCfg = Debug|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.UnicodeDebug|x86.ActiveCfg = Debug|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.UnicodeRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.UnicodeRelease|x64.ActiveCfg = Release|Any CPU
+		{3AEC9EE0-D1D8-4B78-8340-AEDB2D4CF6D3}.UnicodeRelease|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

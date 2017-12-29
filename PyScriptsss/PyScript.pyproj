@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>3aec9ee0-d1d8-4b78-8340-aedb2d4cf6d3</ProjectGuid>
+    <ProjectGuid>6ef928ff-7e24-4f6a-a745-cd29f3d5c544</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>card_check\PyScript.py</StartupFile>
     <SearchPath>
@@ -22,36 +22,29 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.6-32" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="card_check\" />
-    <Folder Include="card_check\emv\" />
-    <Folder Include="card_check\mot\" />
-    <Folder Include="card_check\pboc\" />
-    <Folder Include="card_check\pboc\cases\" />
-    <Folder Include="card_check\pboc\transaction\" />
-    <Folder Include="card_check\pboc\util\" />
-    <Folder Include="card_check\util\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="card_check\CInterface.py" />
-    <Compile Include="card_check\emv\__init__.py">
+    <Compile Include="card_check\emv\__init__.py" />
+    <Compile Include="card_check\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\CInterface.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="card_check\mot\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="card_check\param.py" />
-    <Compile Include="card_check\pboc\cases\__init__.py">
+    <Compile Include="card_check\param.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="card_check\pboc\transaction\contactlessTrans.py" />
-    <Compile Include="card_check\pboc\transaction\contactTrans.py" />
+    <Compile Include="card_check\pboc\case\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\pboc\transaction\contactlessTrans.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\pboc\transaction\contactTrans.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="card_check\pboc\transaction\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="card_check\pboc\util\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="card_check\pboc\__init__.py">
@@ -59,24 +52,35 @@
     </Compile>
     <Compile Include="card_check\PyScript.py" />
     <Compile Include="card_check\util\ApduCmd.py" />
-    <Compile Include="card_check\util\ApduOutput.py" />
-    <Compile Include="card_check\util\Authencation.py" />
-    <Compile Include="card_check\util\DataParse.py" />
+    <Compile Include="card_check\util\Authencation.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\util\DataParse.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\util\TlvParse.py" />
+    <Compile Include="card_check\util\Tool.py" />
     <Compile Include="card_check\util\Des.py" />
     <Compile Include="card_check\util\Kmc.py" />
-    <Compile Include="card_check\util\learn_test.py" />
     <Compile Include="card_check\util\MotCmd.py" />
     <Compile Include="card_check\util\PCSC.py" />
     <Compile Include="card_check\util\PCSCEnum.py" />
     <Compile Include="card_check\util\SM.py" />
-    <Compile Include="card_check\util\TlvParse.py" />
-    <Compile Include="card_check\util\Tool.py" />
     <Compile Include="card_check\util\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="card_check\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|PythonCore|3.6-32" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="card_check\" />
+    <Folder Include="F:\CardPlatform\PyScript\card_check\emv\" />
+    <Folder Include="F:\CardPlatform\PyScript\card_check\mot\" />
+    <Folder Include="F:\CardPlatform\PyScript\card_check\pboc\" />
+    <Folder Include="F:\CardPlatform\PyScript\card_check\pboc\case\" />
+    <Folder Include="F:\CardPlatform\PyScript\card_check\pboc\transaction\" />
+    <Folder Include="F:\CardPlatform\PyScript\card_check\util\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
