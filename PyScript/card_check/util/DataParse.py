@@ -21,22 +21,37 @@ class AFL(Structure):
                 ("bSigStaticData",c_bool)
         ]
 
-class TLV(Structure):
+class TLVEntity(Structure):
     pass
 
-TLV._fields_ = [("tag",c_char_p),
+TLVEntity._fields_ = [("tag",c_char_p),
                 ("length",c_char_p),
                 ("value",c_char_p),
                 ("tagSize",c_uint),
                 ("lenSize",c_uint),
                 ("isTemplate",c_bool),
-                ("subTLVEntity",POINTER(TLV)),
+                ("subTLVEntity",POINTER(TLVEntity)),
                 ("subTLVnum",c_uint)
         ]
 
+class _TLV(Structure):
+    _fields_ = [("isTemplate",c_bool),
+                ("level",c_int),
+                ("tag",c_char_p),
+                ("length",c_uint),
+                ("value",c_char_p)
+        ]
+
+class TLV:
+    def __init__(self):
+        self.isTemplate = False
+        self.level = 0
+        self.tag = ''
+        self.length = 0
+        self.value = ''
+
 def ParseTL(buffer):
     bytesBuffer = str.encode(buffer)
-    #tls = []
     TLArr = TL * 10
     tls = TLArr()
     tlsCount = c_int(10)
@@ -51,15 +66,28 @@ def ParseAFL(buffer):
     DpLib.ParseAFL(bytesBuffer,afls,byref(aflCount))
     return aflCount.value
 
-def ParseTLV(buffer):
+def ParseTLV(buffer, tlvList):
     bytesBuffer = str.encode(buffer)
-    TLVArr = TLV * 20
+    TLVArr = _TLV * 30
     tlvs = TLVArr()
-    tlvCount = c_int(20)
-    DpLib.ParseTLV(bytesBuffer,tlvs,byref(tlvCount))
-    return tlvCount.value
+    tlvCount = c_uint(30)
+    DpLib.ParseTLV.restype = c_bool
+    ret = DpLib.ParseTLV(bytesBuffer,tlvs,byref(tlvCount))
+    if ret is False:
+        return ret
+    for index in range(tlvCount.value):
+        _tlv = TLV()
+        _tlv.isTemplate = tlvs[index].isTemplate
+        _tlv.length = tlvs[index].length
+        _tlv.level = tlvs[index].level
+        _tlv.tag = bytes.decode(tlvs[index].tag)
+        _tlv.value = bytes.decode(tlvs[index].value)
+        tlvList.append(_tlv)
+    return ret
+
 
 if __name__ == '__main__':
     print(ParseTL("9F1F055F2D04"))
-    ParseTLV("6F558408A000000333010101A549500E556E696F6E5061792044656269748701019F380C9F7A019F02065F2A02DF69015F2D027A689F1101019F120E556E696F6E506179204465626974BF0C0A9F4D020B0ADF4D020C0A")
+    tlvs = []
+    ParseTLV("6F27840E315041592E5359532E4444463031A5158801015F2D027A68BF0C0A9F4D020B0ADF4D020C0A",tlvs)
 

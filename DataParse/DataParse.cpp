@@ -5,36 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #include "IDataParse.h"
-
+#include "../Util/ParseTLV.h"
+#include "../Util/Tool.h"
 using namespace std;
-
+using namespace Tool;
 //将字符串型十六进制转为整形
-int ctoi(unsigned char c)
-{
-	switch (toupper(c))
-	{
-	case '0':		return 0;
-	case '1':		return 1;
-	case '2':		return 2;
-	case '3':		return 3;
-	case '4':		return 4;
-	case '5':		return 5;
-	case '6':		return 6;
-	case '7':		return 7;
-	case '8':		return 8;
-	case '9':		return 9;
-	case 'A':		return 10;
-	case 'B':		return 11;
-	case 'C':		return 12;
-	case 'D':		return 13;
-	case 'E':		return 14;
-	case 'F':		return 15;
-	default:		return -1;
-	}
 
-	return -1;
-}
 
 void ParseTL(char* buffer, PTL pTls, unsigned int& count)
 {
@@ -121,185 +99,61 @@ void ParseTL(char* buffer, PTL pTls, unsigned int& count)
 }
 
 
-
-
-
-void ParseTLV(char* buffer, PTLV pTlvs, unsigned int& count)
+void _ParseTLVEx(PBCD_TLV ptlvs, unsigned int tlvCount, int level, vector<TLV>& vecTlv)
 {
-	unsigned int	currentIndex = 0;				//用于标记buffer
-	unsigned long	dataSize = 0;					//数据长度
-	int				currentTLVIndex = 0;			//当前TLV结构标记
-	int				currentStatus = 'T';			//状态字符
-	unsigned int bufferLen = strlen(buffer);
+    for (int i = 0; i < tlvCount; i++)
+    {
+        int count = 0;
+        if (ptlvs[i].isTemplate)
+        {
+            TLV tlv;
+            tlv.isTemplate = true;
+            tlv.level = level;
+            tlv.tag = ptlvs[i].tag;
+            tlv.value = ptlvs[i].value;
+            tlv.length = stoi((char*)ptlvs[i].length, 0, 16);
+            vecTlv.push_back(tlv);
 
-	while (currentIndex < bufferLen)
-	{
-		switch (currentStatus)
-		{
-		case 'T':
-			dataSize = 0; //清零			
-			if (ctoi(buffer[currentIndex]) & 0x02)	//判断TLV是否为单一结构,字节的第6位是否为1
-			{//复合结构 说明是模板				
-				pTlvs[currentTLVIndex].isTemplate = true;				
-				unsigned int tempIndex = currentIndex;
-				if ((ctoi(buffer[tempIndex]) & 0x01) && (ctoi(buffer[++tempIndex]) == 0x0F))	//判断tag是否为多字节
-				{//tag为多字节					
-					int endTagIndex = tempIndex + 1;
-					while (ctoi(buffer[endTagIndex]) & 0x08)
-					{
-						endTagIndex += 2;
-					}
-					int tagSize = endTagIndex - currentIndex + 2;
-
-					pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
-					memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, tagSize);
-					pTlvs[currentTLVIndex].tagSize = tagSize;
-					currentIndex += tagSize;
-				}
-				else
-				{ //tag为单字节
-					pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(2);
-					memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, 2);
-					pTlvs[currentTLVIndex].tag[2] = 0;
-					pTlvs[currentTLVIndex].tagSize = 2;
-					currentIndex += 2;
-				}
-
-				//分析子TLV中的Tag
-				int subTlvLength = 0;			//子TLV长度
-				unsigned char * temp;			//子TLV所包含的数据
-				//先判断length域的长度,length域字节如果最高位为1，后续字节代表长度，为0，1--7位代表数据长度
-				unsigned int nStartIndex = currentIndex;
-				if (ctoi(buffer[nStartIndex]) & 0x08)
-				{
-					//最高位1
-					int height = (ctoi(buffer[nStartIndex]) & 0x07) * 8;
-					int low = ctoi(buffer[++nStartIndex]) & 0x0f;
-					unsigned int lengthSize = 2 * (height + low);
-
-					nStartIndex += 1; //从下一个字节开始算Length域
-					pTlvs[currentTLVIndex].length = (unsigned char *)malloc(lengthSize);
-					memcpy(pTlvs[currentTLVIndex].length, buffer + nStartIndex, lengthSize);
-					pTlvs[currentTLVIndex].length[lengthSize] = 0;
-					pTlvs[currentTLVIndex].lenSize = lengthSize;
-
-					subTlvLength = 2 * std::stoi((char*)pTlvs[currentTLVIndex].length, 0, 16);
-
-					//申请一段subTlvlength大小的内存存放该TLV的内容
-					temp = (unsigned char *)malloc(subTlvLength);
-					memcpy(temp, buffer + nStartIndex + lengthSize, subTlvLength);
-				}
-				else
-				{
-					//最高位为0
-					char subTlvLen[3] = { 0 };
-					memcpy(subTlvLen, &buffer[currentIndex], 2);
-					subTlvLength = 2 * std::stoi(subTlvLen, 0, 16);
-					temp = (unsigned char *)malloc(subTlvLength);
-					memset(temp, 0, subTlvLength);
-					memcpy(temp, buffer + currentIndex + 2, subTlvLength);
-
-				}
-				temp[subTlvLength] = 0;
-
-				unsigned int oSize;//输出有多少个同等级的子TLV，解析时也应该用到
-
-				//不清楚子TLV同等级的TLV有多少个，申请32TLV大小的内存肯定够用
-				pTlvs[currentTLVIndex].subTLVEntity = (PTLV)malloc(sizeof(TLV[32]));
-				ParseTLV((char*)temp, pTlvs[currentTLVIndex].subTLVEntity, oSize);
-
-				pTlvs[currentTLVIndex].subTLVnum = oSize; //填入子TLV的数量
-			}
-			else
-			{
-				//单一结构
-				pTlvs[currentTLVIndex].isTemplate = false;
-				pTlvs[currentTLVIndex].subTLVEntity = NULL;
-				pTlvs[currentTLVIndex].subTLVnum = 0;
-
-				unsigned int tempIndex = currentIndex;
-				if ((ctoi(buffer[tempIndex]) & 0x01) && (ctoi(buffer[++tempIndex]) == 0x0F))
-				{
-					//多字节
-					int endTagIndex = tempIndex + 1;
-					while (ctoi(buffer[endTagIndex]) & 0x08)
-					{
-						endTagIndex += 2;
-					}
-					int tagSize = endTagIndex - currentIndex + 2;
-
-					pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
-					memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, tagSize);
-					pTlvs[currentTLVIndex].tag[tagSize] = 0;
-
-					pTlvs[currentTLVIndex].tagSize = tagSize;
-
-					currentIndex += tagSize;
-				}
-				else
-				{
-					//单字节
-					pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(2);
-					memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, 2);
-					pTlvs[currentTLVIndex].tag[2] = 0;
-
-					pTlvs[currentTLVIndex].tagSize = 2;
-
-					currentIndex += 2;
-				}
-			}
-			currentStatus = 'L';
-			break;
-		case 'L':
-			//判断长度字节的最高位是否为1，如果为1，则该字节为长度扩展字节，由下一个字节开始决定长度
-			if (ctoi(buffer[currentIndex]) & 0x08)
-			{
-				//最高位1
-				int height = (ctoi(buffer[currentIndex]) & 0x07) * 8;
-				int low = ctoi(buffer[++currentIndex]) & 0x0f;
-				unsigned int lengthSize = 2 * (height + low);
-
-				currentIndex += 1; //从下一个字节开始算Length域
-				pTlvs[currentTLVIndex].length = (unsigned char *)malloc(lengthSize);
-				memcpy(pTlvs[currentTLVIndex].length, buffer + currentIndex, lengthSize);
-				pTlvs[currentTLVIndex].length[lengthSize] = 0;
-				pTlvs[currentTLVIndex].lenSize = lengthSize;
-				dataSize = 2 * std::stoi((char*)pTlvs[currentTLVIndex].length, 0, 16);
-
-				currentIndex += lengthSize;
-
-			}
-			else
-			{
-				//最高位0
-				pTlvs[currentTLVIndex].length = (unsigned char *)malloc(2);
-				memcpy(pTlvs[currentTLVIndex].length, buffer + currentIndex, 2);
-				pTlvs[currentTLVIndex].length[2] = 0;
-				pTlvs[currentTLVIndex].lenSize = 2;
-
-				dataSize = 2 * std::stoi((char*)pTlvs[currentTLVIndex].length, 0, 16);
-
-				currentIndex += 2;
-			}
-			currentStatus = 'V';
-			break;
-		case 'V':
-			pTlvs[currentTLVIndex].value = (unsigned char *)malloc(dataSize);
-			memset(pTlvs[currentTLVIndex].value, 0, dataSize);
-			memcpy(pTlvs[currentTLVIndex].value, buffer + currentIndex, dataSize);
-			pTlvs[currentTLVIndex].value[dataSize] = 0;
-
-			currentIndex += dataSize;
-
-			//进入下一个TLV构造循环
-			currentTLVIndex += 1;
-
-			currentStatus = 'T';
-			break;
-		}
-	}
-	count = currentTLVIndex;
+            int subLevel = level + 1;
+            _ParseTLVEx(ptlvs[i].subTLVEntity, ptlvs[i].subTLVnum, subLevel, vecTlv);
+        }
+        else {
+           // Log->Info("[%s]=%s", entities[i].Tag, entities[i].Value);
+            TLV tlv;
+            tlv.isTemplate = false;
+            tlv.level = level;
+            tlv.tag = ptlvs[i].tag;
+            tlv.value = ptlvs[i].value;
+            tlv.length = stoi((char*)ptlvs[i].length, 0, 16);
+            vecTlv.push_back(tlv);
+        }
+    }
 }
+
+bool ParseTLV(char* buffer, PTLV pTlvs, unsigned int& count)
+{
+    BCD_TLV tlvs[32] = { 0 };
+    unsigned int tlvCount = 32;
+    if (!ParseBcdTLV(buffer, tlvs, tlvCount)) {
+        return false;
+    }
+    vector<TLV> vecTlvs;
+    _ParseTLVEx(tlvs, tlvCount, 0, vecTlvs);
+    int tlvExSize = vecTlvs.size();
+    for (int i = 0; i < tlvExSize; i++) {
+        if (i >= count) {
+            return false;
+        }
+        pTlvs[i] = vecTlvs[i];
+        //printf("tag=%s,len=%d,value=%s,level=%d,isTemplate=%d\n", pTlvEx[i].tag, pTlvEx[i].length, pTlvEx[i].value, pTlvEx[i].level, pTlvEx[i].isTemplate);
+    }
+    count = tlvExSize;
+
+    
+    return true;
+}
+
+
 
 void ParseAFL(char* buffer, PAFL pAfls, unsigned int& count)
 {

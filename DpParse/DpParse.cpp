@@ -3,7 +3,8 @@
 #include "Des0.h"
 #include <fstream>
 #include "../Util/IniConfig.h"
-
+#include "../Util/Tool.h"
+#include "../Util/ParseTLV.h"
 
 //**********************************************************
 //* 功能： 检查目录是否存在
@@ -158,19 +159,6 @@ string IDpParse::DecryptDGI(string tk, string encryptData, bool padding80)
 {
 	string strResult;
 
-	//if (padding80)
-	//{
-	//	if (encryptData.length() % 16 == 0)
-	//	{
-	//		encryptData += "8000000000000000";
-	//	}
-	//	else {
-	//		encryptData += "80";
-	//		int remaindZero = encryptData.length() % 16;
-	//		encryptData.append(remaindZero, '0');
-	//	}
-	//}
-
 	int len = encryptData.length();
 	int unit = 16;
 	for (int i = 0; i < len; i += unit)
@@ -266,229 +254,73 @@ streampos IDpParse::GetLenTypeBufferLittleEnd(ifstream &dpFile, int &dataLen, in
 
     return dpFile.tellg();
 }
-/****************************************************************
-* 判断某段数据是否为TLV结构
-*****************************************************************/
-bool IDpParse::IsTlvStruct(unsigned char* buffer, unsigned int bufferLength)
+
+void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, bool bigEnd)
 {
-	unsigned int currentIndex = 0;							//用于标记buffer
-															//判断是Tag是否为多字节,字节的1--5位是否都为1，是的话有后续字节
-	while (currentIndex < bufferLength)
-	{
-		if ((buffer[currentIndex] & 0x1f) == 0x1f)  //tag为多字节
-		{
-			int endTagIndex = currentIndex;
-			while ((buffer[++endTagIndex] & 0x80) == 0x80); //最后一个字节的最高位为0
-			int tagSize = endTagIndex - currentIndex + 1; //计算标签所占用字节
-			currentIndex += tagSize;
-		}
-		else       //tag为单字节
-		{
-			currentIndex += 1;
-		}
-
-		int dataLen = 0;
-		unsigned int lenSize = 0;
-		//计算Length域长度
-		if ((buffer[currentIndex] & 0x80) == 0x80)
-		{
-			//最高位为1
-			lenSize = buffer[currentIndex] & 0x7f;
-			for (unsigned int index = 0; index < lenSize; index++)
-			{
-				dataLen += buffer[currentIndex + 1 + index] << ((lenSize - 1 - index) * 8);
-			}
-			lenSize += 1;
-		}
-		else  //最高位为0
-		{
-			dataLen = buffer[currentIndex];
-			lenSize = 1;
-		}
-		currentIndex += lenSize + dataLen;
-	}
-
-	return currentIndex == bufferLength;
+    BCD_TLV entities[1024] = { 0 };
+    unsigned int entitiesCount = 0;
+    ParseBcdTLV(dgiBuffer, entities, entitiesCount);
+    unsigned char parseBuf[4096] = { 0 };
+    for (unsigned int i = 0; i < entitiesCount; i++)
+    {
+        string strLen;
+        string strValue = (char*)entities[i].value;
+        string strTag = (char*)entities[i].tag;
+        int nLen = std::stoi((char*)entities[i].length, 0, 16);
+        if (nLen > 0xFF) {
+            char dataLen[5] = { 0 };
+            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+            strLen = "82" + string(dataLen);
+        
+        }
+        else if (nLen > 0x79) {
+            char dataLen[5] = { 0 };
+            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+            strLen = "81" + string(dataLen);
+        }
+        
+        strValue = strTag + strLen + strValue;
+        tlvs.InsertItem(strTag, strValue);
+    }
 }
 
-/**********************************************************************
-* 解析TLV数据结构
-***********************************************************************/
-void IDpParse::ParseTLV(unsigned char *buffer,			//TLV字符串	
-	unsigned int bufferLength,		//TLV字符串长度
-	PTLVEntity PTlvEntity,					//TLV指针
-	unsigned int& entitySize			//TLV结构数量，解析时用到
-	)
+bool IDpParse::IsTlvStruct(char* buffer, unsigned int bufferLength)
 {
-	unsigned int currentIndex = 0;							//用于标记buffer
-	int currentTLVIndex = 0;						//当前TLV结构标记
-	int currentStatus = 'T';						//状态字符
-
-	unsigned long valueSize = 0;					//数据长度
-
-	while (currentIndex < bufferLength)
-	{
-		switch (currentStatus)
-		{
-		case 'T':
-			valueSize = 0; //清零
-						   //判断TLV是否为单一结构,字节的第6位是否为1
-			if ((buffer[currentIndex] & 0x20) != 0x20)
-			{
-				//单一结构
-				PTlvEntity[currentTLVIndex].subTLVEntity = NULL;
-				PTlvEntity[currentTLVIndex].subTLVnum = 0;		//子TLV的数量为零
-																//判断是Tag是否为多字节,字节的1--5位是否都为1，是的话有后续字节
-				if ((buffer[currentIndex] & 0x1f) == 0x1f)
-				{
-					//Tag为多字节
-					int endTagIndex = currentIndex;
-					while ((buffer[++endTagIndex] & 0x80) == 0x80); //最后一个字节的最高位为0
-					int tagSize = endTagIndex - currentIndex + 1; //计算标签所占用字节
-
-					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
-					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, tagSize);
-					PTlvEntity[currentTLVIndex].tag[tagSize] = 0;//字符串末尾置0
-
-					PTlvEntity[currentTLVIndex].tagSize = tagSize;
-
-					currentIndex += tagSize;
-				}
-				else
-				{
-					//Tag占用1个字节
-					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(1);
-					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, 1);
-					PTlvEntity[currentTLVIndex].tag[1] = 0;
-
-					PTlvEntity[currentTLVIndex].tagSize = 1;
-
-					currentIndex += 1;
-				}
-			}
-			else
-			{
-				//复合结构
-				//判断是否为多字节
-				if ((buffer[currentIndex] & 0x1f) == 0x1f)
-				{
-					int endTagIndex = currentIndex;
-					while ((buffer[++endTagIndex] & 0x80) == 0x80);
-					int tagSize = endTagIndex - currentIndex + 1;
-
-					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
-					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, tagSize);
-					PTlvEntity[currentTLVIndex].tag[tagSize] = 0;
-
-					PTlvEntity[currentTLVIndex].tagSize = tagSize;
-
-					currentIndex += tagSize;
-				}
-				else
-				{
-					PTlvEntity[currentTLVIndex].tag = (unsigned char *)malloc(1);
-					memcpy(PTlvEntity[currentTLVIndex].tag, buffer + currentIndex, 1);
-					PTlvEntity[currentTLVIndex].tag[1] = 0;
-
-					PTlvEntity[currentTLVIndex].tagSize = 1;
-
-					currentIndex += 1;
-				}
-
-				//分析子TLV中的Tag
-				int subTlvLength = 0;			//子TLV长度
-				unsigned char * temp;			//子TLV所包含的数据
-												//先判断length域的长度,length域字节如果最高位为1，后续字节代表长度，为0，1--7位代表数据长度
-				if ((buffer[currentIndex] & 0x80) == 0x80)
-				{
-					//最高位为1
-					unsigned int lengthSize = buffer[currentIndex] & 0x7f;
-					for (unsigned int index = 0; index < lengthSize; index++)
-					{
-						//大端显示数据
-						subTlvLength += buffer[currentIndex + 1 + index] << ((lengthSize - 1 - index) * 8);
-
-						/* 如果是小端的话
-						subTlvLength += buffer[currentIndex + 1 + index] << (index * 8);
-						*/
-					}
-
-
-					//申请一段subTlvlength大小的内存存放该TLV的内容
-					temp = (unsigned char *)malloc(subTlvLength);
-					memcpy(temp, buffer + currentIndex + 1 + lengthSize, subTlvLength);
-
-				}
-				else
-				{
-					//最高位为0
-					subTlvLength = buffer[currentIndex];
-					temp = (unsigned char *)malloc(subTlvLength);
-
-					memcpy(temp, buffer + currentIndex + 1, subTlvLength);
-
-				}
-				temp[subTlvLength] = 0;
-
-				unsigned int oSize;//输出有多少个同等级的子TLV，解析时也应该用到
-								   //不清楚子TLV同等级的TLV有多少个，申请100TLV大小的内存肯定够用
-				PTlvEntity[currentTLVIndex].subTLVEntity = (PTLVEntity)malloc(sizeof(PTLVEntity[100]));
-				ParseTLV(temp, subTlvLength, PTlvEntity[currentTLVIndex].subTLVEntity, oSize);
-
-				PTlvEntity[currentTLVIndex].subTLVnum = oSize; //填入子TLV的数量
-
-			}
-			currentStatus = 'L';
-			break;
-		case 'L':
-			//判断长度字节的最高位是否为1，如果为1，则该字节为长度扩展字节，由下一个字节开始决定长度
-			if ((buffer[currentIndex] & 0x80) == 0x80)
-			{
-				//最高位1
-				unsigned int lengthSize = buffer[currentIndex] & 0x7f;
-				currentIndex += 1; //从下一个字节开始算Length域
-				for (unsigned int index = 0; index < lengthSize; index++)
-				{
-					valueSize += buffer[currentIndex + index] << ((lengthSize - 1 - index) * 8); //计算Length域的长度
-				}
-				PTlvEntity[currentTLVIndex].length = (unsigned char *)malloc(lengthSize);
-				memcpy(PTlvEntity[currentTLVIndex].length, buffer + currentIndex, lengthSize);
-				PTlvEntity[currentTLVIndex].length[lengthSize] = 0;
-				PTlvEntity[currentTLVIndex].lengthSize = lengthSize;
-
-				currentIndex += lengthSize;
-			}
-			else
-			{
-				//最高位0
-				PTlvEntity[currentTLVIndex].length = (unsigned char *)malloc(1);
-				memcpy(PTlvEntity[currentTLVIndex].length, buffer + currentIndex, 1);
-				PTlvEntity[currentTLVIndex].length[1] = 0;
-				PTlvEntity[currentTLVIndex].lengthSize = 1;
-
-				valueSize = PTlvEntity[currentTLVIndex].length[0];
-
-				currentIndex += 1;
-			}
-			currentStatus = 'V';
-			break;
-		case 'V':
-			PTlvEntity[currentTLVIndex].value = (unsigned char *)malloc(valueSize);
-			memset(PTlvEntity[currentTLVIndex].value, 0, valueSize);
-			memcpy(PTlvEntity[currentTLVIndex].value, buffer + currentIndex, valueSize);
-			PTlvEntity[currentTLVIndex].value[valueSize] = 0;
-
-			currentIndex += valueSize;
-
-			//进入下一个TLV构造循环
-			currentTLVIndex += 1;
-
-			currentStatus = 'T';
-			break;
-		}
-	}
-	entitySize = currentTLVIndex;
+    return IsAsciiTlvStruct((unsigned char*)buffer, bufferLength);
 }
+
+//void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs)
+//{
+//    BCD_TLV entities[1024] = { 0 };
+//    unsigned int entitiesCount = 0;
+//    ParseBcdTLV(dgiBuffer, entities, entitiesCount);
+//    unsigned char parseBuf[4096] = { 0 };
+//    for (unsigned int i = 0; i < entitiesCount; i++)
+//    {
+//        if(entities[i].)
+//        string strTag = StrToHex((char*)entities[i].tag, entities[i].tagSize);
+//        string strLen = StrToHex((char*)entities[i].length, entities[i].lengthSize);
+//        int nLen = std::stoi(strLen, 0, 16);
+//        string strValue = StrToHex((char*)entities[i].value, nLen);
+//
+//        if (nLen > 0xFF) {
+//            char dataLen[5] = { 0 };
+//            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+//            strLen = "82" + string(dataLen);
+//
+//        }
+//        else if (nLen > 0x79) {
+//            char dataLen[5] = { 0 };
+//            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+//            strLen = "81" + string(dataLen);
+//        }
+//
+//        strValue = strTag + strLen + strValue;
+//        tlvs.InsertItem(strTag, strValue);
+//    }
+//}
+
+
 
 void IDpParse::HandleRule(string ruleConfig, CPS_ITEM& cpsItem)
 {

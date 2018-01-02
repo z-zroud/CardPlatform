@@ -22,7 +22,7 @@ namespace Tool
 	void StrToHex(unsigned char *pDest, unsigned char *pSrc, int nLen);
     void DeleteSpace(const char* src, char* dest, int len);
     string Trim(string str);
-
+    int ctoi(unsigned char c);
 	/**********************************************************
 	* ¹¦ÄÜ£º
 	***********************************************************/

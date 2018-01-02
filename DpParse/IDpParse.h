@@ -43,24 +43,6 @@ struct CPS_ITEM
 	vector<DGI_ITEM> items;
 };
 
-
-/**************************************************************
-* TLV解析格式(用于DP数据文件的解析)
-***************************************************************/
-typedef struct TLVEntity
-{
-	unsigned char* tag;			//标签
-	unsigned char* length;		//长度
-	unsigned char* value;		//数据
-	unsigned int tagSize;		//标签占用字节  一般两个字节
-	unsigned int lengthSize;	//数据占用的字节
-	TLVEntity* subTLVEntity;	//嵌套的子TLV结构体,如果有的话，需要递归
-	unsigned int subTLVnum;		//下一级的TLV数量，不包括下下级的TLV（记录subTLVEntity[]的大小）
-}*PTLVEntity;
-
-
-
-
 int ctoi(unsigned char c);
 bool  CheckFolderExist(const string &strPath);
 string StrToHex(const char* strBin, int len, bool bIsUpper = true);
@@ -148,14 +130,15 @@ struct IDpParse
 	*****************************************************************/
 	virtual string DecryptDGI(string tk, string encryptData, bool padding80);
 
-	/****************************************************************
-	* 解析TLV数据结构
-	*****************************************************************/
-	void ParseTLV(unsigned char* buffer, unsigned int bufferLength, PTLVEntity PTlvEntity, unsigned int& entityNum);
+    /****************************************************************
+    * 解析TLV数据结构
+    * buffer中不应该包含70模板
+    *****************************************************************/
+    void ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, bool bigEnd);
 
 	/****************************************************************
 	* 判断某段数据是否为TLV结构
 	*****************************************************************/
-	bool IsTlvStruct(unsigned char* buffer, unsigned int bufferLength);
+	bool IsTlvStruct(char* buffer, unsigned int bufferLength);
 };
 

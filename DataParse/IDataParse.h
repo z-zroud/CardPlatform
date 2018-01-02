@@ -6,19 +6,17 @@
 #define DATAPARSE_EXPORTS_API __declspec(dllimport)
 #endif
 
-
-
+/*****************************************************
+* 定义此TLV结构，有利于阅读及解析
+******************************************************/
 typedef struct TLV
 {
-	unsigned char*	tag;			//标签
-	unsigned char*	length;			//长度
-	unsigned char*	value;			//数据
-	unsigned int	tagSize;		//标签占用字节  一般两个字节
-	unsigned int	lenSize;		//数据占用的字节
-	bool			isTemplate;		//是否为复合结构，也就是这个tag就是template
-	TLV*			subTLVEntity;	//嵌套的子TLV结构体,如果有的话，需要递归
-	unsigned int	subTLVnum;		//下一级的TLV数量，不包括下下级的TLV（记录subTLVEntity[]的大小）
-} *PTLV;
+    bool            isTemplate;     //是否是模板
+    int             level;          //层级
+    unsigned char*  tag;            //标签
+    unsigned int    length;         //长度
+    unsigned char*  value;          //值
+}*PTLV;
 
 typedef struct TL
 {
@@ -40,15 +38,26 @@ typedef struct AFL
 * 参数： pTls 解析之后的TL数组
 * 参数： count 包含TL的个数
 **********************************************************************/
-extern "C" DATAPARSE_EXPORTS_API void ParseTL(char* buffer, PTL pTls, unsigned int& count);
+extern "C" DATAPARSE_EXPORTS_API void ParseTL(char* bcdBuffer, PTL pTls, unsigned int& count);
 
 /**********************************************************************
 * 解析TLV数据结构
 * 参数： buffer 待解析的TLV数据
 * 参数： pTlvs 解析之后的TLV数组
 * 参数： count 包含TLV的个数
+* 返回： true 说明解析成功，false TLV格式不正确
 **********************************************************************/
-extern "C" DATAPARSE_EXPORTS_API void ParseTLV(char* buffer, PTLV pTlvs, unsigned int& count);
+//extern "C" DATAPARSE_EXPORTS_API bool ParseTLV(char* bcdBuffer, PTLV pTlvs, unsigned int& count);
+
+
+/*********************************************************************
+* 解析TLV数据结构
+*
+* 返回： true 说明解析成功，false TLV格式不正确
+**********************************************************************/
+extern "C" DATAPARSE_EXPORTS_API bool ParseTLV(char* bcdBuffer, PTLV pTlv, unsigned int& count);
+
+
 
 /**********************************************************************
 * 解析AFL结构，方便后续读取记录数据
@@ -56,4 +65,4 @@ extern "C" DATAPARSE_EXPORTS_API void ParseTLV(char* buffer, PTLV pTlvs, unsigne
 * 参数： pTlvs 解析之后的TLV数组
 * 参数： count 包含TLV的个数
 **********************************************************************/
-extern "C" DATAPARSE_EXPORTS_API void ParseAFL(char* buffer, PAFL pAfls, unsigned int& count);
+extern "C" DATAPARSE_EXPORTS_API void ParseAFL(char* bcdBuffer, PAFL pAfls, unsigned int& count);

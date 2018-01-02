@@ -1,11 +1,8 @@
 import param
 import sys
-print(sys.path)
-print(param.readerName)
 from card_check.pboc.transaction import contactTrans
-print(param.readerName)
 from card_check.util import PCSC
-print(param.readerName)
+
 
 
 def OpenCardReader(readerName):
