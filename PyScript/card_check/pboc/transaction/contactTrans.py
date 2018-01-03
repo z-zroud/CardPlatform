@@ -4,6 +4,8 @@ from card_check.util import Authencation
 from card_check.pboc.cases import CaseSelectApp
 from card_check import param
 
+tags = []   #store TV key-value pair
+
 def SelectPSE():
     sw,resp = ApduCmd.SelectAppCmd("315041592E5359532E4444463031")
     print("SW=",sw,"resp=",resp)
@@ -11,6 +13,7 @@ def SelectPSE():
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")
         return False
+    DataParse.SaveTlv(tlvs,tags)
     CaseSelectApp.PBOC_sPSE_SJHGX_001(resp)
     CaseSelectApp.PBOC_sPSE_SJHGX_003(tlvs)
 
@@ -21,6 +24,7 @@ def SelectPPSE():
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")
         return False
+    DataParse.SaveTlv(tlvs,tags)
     CaseSelectApp.PBOC_sPSE_SJHGX_001(resp)
     CaseSelectApp.PBOC_sPSE_SJHGX_003(tlvs)
 
@@ -30,6 +34,7 @@ def SelectApp(aid):
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")
         return False
+    DataParse.SaveTlv(tlvs,tags)
 
 def InitApp():
     sw,

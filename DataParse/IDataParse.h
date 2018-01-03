@@ -21,7 +21,7 @@ typedef struct TLV
 typedef struct TL
 {
 	unsigned char* tag;		//标签
-	unsigned char* len;		//长度
+	unsigned int len;		//长度
 }*PTL;
 
 //应用文件定位器(AFL)

@@ -69,11 +69,12 @@ void ParseTL(char* buffer, PTL pTls, unsigned int& count)
 				unsigned int lengthSize = 2 * ((buffer[currentIndex] & 0x07) * 8 + (buffer[++currentIndex] & 0x0f));
 
 				currentIndex += 1; //从下一个字节开始算Length域
-				pTls[currentTLVIndex].len = (unsigned char *)malloc(lengthSize);
-				memcpy(pTls[currentTLVIndex].len, buffer + currentIndex, lengthSize);
-				pTls[currentTLVIndex].len[lengthSize] = 0;
+				//pTls[currentTLVIndex].len = (unsigned char *)malloc(lengthSize);
+                char szLen[5] = { 0 };
+				memcpy(szLen, buffer + currentIndex, lengthSize);
+				//pTls[currentTLVIndex].len[lengthSize] = 0;
 
-				valueSize = 2 * std::stoi((char*)pTls[currentTLVIndex].len, 0, 16);
+                pTls[currentTLVIndex].len = std::stoi(szLen, 0, 16);
 
 				currentIndex += lengthSize;
 
@@ -81,11 +82,12 @@ void ParseTL(char* buffer, PTL pTls, unsigned int& count)
 			else
 			{
 				//最高位0
-				pTls[currentTLVIndex].len = (unsigned char *)malloc(2);
-				memcpy(pTls[currentTLVIndex].len, buffer + currentIndex, 2);
-				pTls[currentTLVIndex].len[2] = 0;
+				//pTls[currentTLVIndex].len = (unsigned char *)malloc(2);
+                char szLen[5] = { 0 };
+				memcpy(szLen, buffer + currentIndex, 2);
+				//pTls[currentTLVIndex].len[2] = 0;
 
-				valueSize = 2 * std::stoi((char*)pTls[currentTLVIndex].len, 0, 16);
+                pTls[currentTLVIndex].len = std::stoi(szLen, 0, 16);
 
 				currentIndex += 2;
 			}

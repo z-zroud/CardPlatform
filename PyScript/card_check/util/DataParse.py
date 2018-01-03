@@ -12,8 +12,13 @@ dllPath = os.path.sep.join(dirList[0:len(dirList) - 1]) + os.path.sep + "dll" + 
 DpLib = CDLL(dllPath)
 
 
-class TL(Structure):
-    _fields_ = [("tag",c_char_p),("len",c_char_p)]
+class _TL(Structure):
+    _fields_ = [("tag",c_char_p),("len",c_uint)]
+
+class TL:
+    def __init__(self):
+        self.tag = ''
+        self.len = 0
 
 class AFL(Structure):
     _fields_ = [("sfi",c_int),
@@ -50,13 +55,22 @@ class TLV:
         self.length = 0
         self.value = ''
 
-def ParseTL(buffer):
+class TV:
+    def __init__(self):
+        self.tag = ''
+        self.value = ''
+
+def ParseTL(buffer,tls):
     bytesBuffer = str.encode(buffer)
-    TLArr = TL * 10
-    tls = TLArr()
-    tlsCount = c_int(10)
-    DpLib.ParseTL(bytesBuffer,tls,byref(tlsCount))
-    return tlsCount.value
+    TLArr = _TL * 30
+    _tls = TLArr()
+    tlsCount = c_int(30)
+    DpLib.ParseTL(bytesBuffer,_tls,byref(tlsCount))
+    for index in range(tlsCount.value):
+        tl = TL()
+        tl.tag = bytes.decode(_tls[index].tag)
+        tl.len = _tls[index].len
+        tls.append(tl)
 
 def ParseAFL(buffer):
     bytesBuffer = str.encode(buffer)
@@ -96,8 +110,24 @@ def FormatTlv(tlvs):
     return formatStr
 
 
+def SaveTlv(tlvs, tags):
+    for tlv in tlvs:
+        if tlv.isTemplate is False:
+            tv = TV()
+            tv.tag = tlv.tag
+            tv.value = tlv.value
+            tags.append(tv)
+
+def GetTagValue(tag,tags):
+    for item in tags:
+        if tag == item.tag:
+            return item.value
+    return ''
+
+
 if __name__ == '__main__':
-    print(ParseTL("9F1F055F2D04"))
+    tls = []
+    print(ParseTL("9F1F055F2D04",tls))
     tlvs = []
     ParseTLV("6F27840E315041592E5359532E4444463031A5158801015F2D027A68BF0C0A9F4D020B0ADF4D020C0A",tlvs)
     for tlv in tlvs:
