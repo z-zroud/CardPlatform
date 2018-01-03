@@ -1,7 +1,7 @@
-import param
 import sys
 from card_check.pboc.transaction import contactTrans
 from card_check.util import PCSC
+from card_check.util import param
 
 
 

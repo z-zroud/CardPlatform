@@ -37,6 +37,13 @@ def SelectApp(aid):
     DataParse.SaveTlv(tlvs,tags)
 
 def InitApp():
-    sw,
+    tag9F38 = DataParse.GetTagValue("9F38",tags)
+    tls = []
+    DataParse.ParseTL(tag9F38,tls)
+    gpoData = ""
+    for tl in tls:
+        gpoData += tl.tag
+    sw,resp = ApduCmd.GPOCmd(gpoData)
+
 
 

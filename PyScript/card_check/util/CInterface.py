@@ -1,13 +1,23 @@
 # This module define interface witch communicate with C++
 # or dynamiclly generated some data
-from . import param
+from card_check.util import param
 import time
 import random
+import sys
 
+############### This Function will used by C++ to set param ##################
 def GetReaderName(name):
     param.readerName = name
 
-def GetTerm95():
+
+def GetSMMark(bMark):
+    if bMark is True:
+        param.termParams["DF69"] = "01"
+    else:
+        param.termParams["DF69"] = "00"
+##############################################################################
+
+def GetTerm9A():
     return time.strftime("%y%m%d",time.localtime(time.time()))
 
 def GetTerm9F37():
@@ -15,7 +25,17 @@ def GetTerm9F37():
     snap = random.sample(seed,8)
     return ''.join(snap)
 
+def GetTermTag(tag):
+    if tag in param.termParams:
+        return param.termParams.get(tag)
+    else:
+        funcName = "GetTerm" + tag
+        pFunc = getattr(sys.modules[__name__],funcName)
+        return pFunc()
+
 
 if __name__ == '__main__':
-    print(GetTerm95())
+    print(GetTerm9A())
     print(GetTerm9F37())
+    print(GetTermTag("9F02"))
+    print(GetTermTag("9F37"))
