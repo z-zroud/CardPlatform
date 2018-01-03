@@ -87,10 +87,13 @@ bool ExistedInList(string value, vector<string> collection)
     return false;
 }
 
-string Dict::GetItem()
+string Dict::GetItem(string tag)
 {
-    if (m_vecItems.size() > 0)
-        return m_vecItems[0].second;
+    for (auto item : m_vecItems) {
+        if (item.first == tag) {
+            return item.second;
+        }
+    }
     
     return "";
 }
@@ -255,7 +258,7 @@ streampos IDpParse::GetLenTypeBufferLittleEnd(ifstream &dpFile, int &dataLen, in
     return dpFile.tellg();
 }
 
-void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, bool bigEnd)
+void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, bool littleEnd)
 {
     BCD_TLV entities[1024] = { 0 };
     unsigned int entitiesCount = 0;
@@ -263,15 +266,14 @@ void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, boo
     unsigned char parseBuf[4096] = { 0 };
     for (unsigned int i = 0; i < entitiesCount; i++)
     {
-        string strLen;
+        string strLen = (char*)entities[i].length;
         string strValue = (char*)entities[i].value;
         string strTag = (char*)entities[i].tag;
         int nLen = std::stoi((char*)entities[i].length, 0, 16);
         if (nLen > 0xFF) {
             char dataLen[5] = { 0 };
             Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
-            strLen = "82" + string(dataLen);
-        
+            strLen = "82" + string(dataLen);        
         }
         else if (nLen > 0x79) {
             char dataLen[5] = { 0 };
@@ -284,43 +286,25 @@ void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, boo
     }
 }
 
-bool IDpParse::IsTlvStruct(char* buffer, unsigned int bufferLength)
+string IDpParse::GetAccount(CPS_ITEM& cpsItem)
 {
-    return IsAsciiTlvStruct((unsigned char*)buffer, bufferLength);
+    for (auto item : cpsItem.items) {
+        string tag57 = item.value.GetItem("57");
+        if (tag57.length()) {
+            int index = tag57.find('D');
+            if (index != string::npos)
+            {
+                return tag57.substr(4, index - 4);
+            }
+        }
+    }
+    return "";
 }
 
-//void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs)
-//{
-//    BCD_TLV entities[1024] = { 0 };
-//    unsigned int entitiesCount = 0;
-//    ParseBcdTLV(dgiBuffer, entities, entitiesCount);
-//    unsigned char parseBuf[4096] = { 0 };
-//    for (unsigned int i = 0; i < entitiesCount; i++)
-//    {
-//        if(entities[i].)
-//        string strTag = StrToHex((char*)entities[i].tag, entities[i].tagSize);
-//        string strLen = StrToHex((char*)entities[i].length, entities[i].lengthSize);
-//        int nLen = std::stoi(strLen, 0, 16);
-//        string strValue = StrToHex((char*)entities[i].value, nLen);
-//
-//        if (nLen > 0xFF) {
-//            char dataLen[5] = { 0 };
-//            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
-//            strLen = "82" + string(dataLen);
-//
-//        }
-//        else if (nLen > 0x79) {
-//            char dataLen[5] = { 0 };
-//            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
-//            strLen = "81" + string(dataLen);
-//        }
-//
-//        strValue = strTag + strLen + strValue;
-//        tlvs.InsertItem(strTag, strValue);
-//    }
-//}
-
-
+bool IDpParse::IsTlvStruct(char* buffer, unsigned int bufferLength, bool littleEnd)
+{
+    return IsBcdTlvStruct(buffer, bufferLength);
+}
 
 void IDpParse::HandleRule(string ruleConfig, CPS_ITEM& cpsItem)
 {
@@ -417,7 +401,7 @@ void IRule::HandleDGIEncrypt(CPS_ITEM& cpsItem)
         string decryptedData;
         if (ExistedInList(item.dgi, m_vecDGIEncrypt))
         {
-            string encryptData = item.value.GetItem();
+            string encryptData = item.value.GetItem(item.dgi);
             if (ExistedInList(item.dgi,m_vecDGIpadding80))
             {
                 if (encryptData.length() % 16 == 0)

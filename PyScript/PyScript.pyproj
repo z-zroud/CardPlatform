@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3aec9ee0-d1d8-4b78-8340-aedb2d4cf6d3</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>card_check\util\DataParse.py</StartupFile>
+    <StartupFile>PyScript.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -34,14 +34,17 @@
     <Folder Include="card_check\util\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CInterface.py" />
+    <Compile Include="card_check\pboc\cases\CaseSelectApp.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\util\CInterface.py" />
     <Compile Include="card_check\emv\__init__.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="card_check\mot\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="param.py" />
+    <Compile Include="card_check\util\param.py" />
     <Compile Include="card_check\pboc\cases\__init__.py">
       <SubType>Code</SubType>
     </Compile>

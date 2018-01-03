@@ -42,12 +42,7 @@ void SetTags(PTLV tlvs, int num)
 {
 	for (int i = 0; i < num; i++)
 	{
-		if (tlvs[i].isTemplate) {
-			SetTags(tlvs[i].subTLVEntity, tlvs[i].subTLVnum);
-		}
-		else {
-			SetTags((char*)tlvs[i].tag, (char*)tlvs[i].value);
-		}
+        SetTags((char*)tlvs[i].tag, (char*)tlvs[i].value);
 	}
 }
 

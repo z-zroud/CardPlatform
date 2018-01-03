@@ -85,9 +85,22 @@ def ParseTLV(buffer, tlvList):
         tlvList.append(_tlv)
     return ret
 
+def FormatTlv(tlvs):
+    formatStr = ""
+    for tlv in tlvs:
+        formatStr += '    ' * tlv.level
+        if tlv.isTemplate is True:
+            formatStr += "<" + tlv.tag + ">\n"
+        else:
+            formatStr += "[" + tlv.tag + "]=" + tlv.value + '\n'
+    return formatStr
+
 
 if __name__ == '__main__':
     print(ParseTL("9F1F055F2D04"))
     tlvs = []
     ParseTLV("6F27840E315041592E5359532E4444463031A5158801015F2D027A68BF0C0A9F4D020B0ADF4D020C0A",tlvs)
+    for tlv in tlvs:
+        print("tag=",tlv.tag,"len=",tlv.length,"value=",tlv.value,"level=",tlv.level,"isTemplate=",tlv.isTemplate)
+    print(FormatTlv(tlvs))
 

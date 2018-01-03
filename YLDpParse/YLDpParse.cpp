@@ -29,19 +29,14 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 		int nFollowedDataLen = GetFollowedDataLen(dpFile);
 		if (nFollowedDataLen > 0)
 		{
-			char* buffer = new char[nFollowedDataLen];
-			memset(buffer, 0, nFollowedDataLen);
-			dpFile.read(buffer, nFollowedDataLen);
-			string value = StrToHex(buffer, nFollowedDataLen);
+            string value;
+            GetBCDBuffer(dpFile, value, nFollowedDataLen);
 			dgiItem.value.InsertItem(dgiItem.dgi, value);
 		}
 	}
 	else {
-		char* buffer = new char[nFollowedDataLen];
-		memset(buffer, 0, nFollowedDataLen);
-		dpFile.read(buffer, nFollowedDataLen);
-		string value = StrToHex(buffer, nFollowedDataLen);	//直接保存，不用解析TLV结构
-
+        string value;
+        GetBCDBuffer(dpFile, value, nFollowedDataLen);
         if (dgiItem.dgi == "Store_PSE_1") {
             dgiItem.dgi = "PSE";
             dgiItem.value.InsertItem("0101", value);
@@ -128,18 +123,16 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile)
 				nFollowedDataLen = GetFollowedDataLen(dpFile);
 			}
 
-			char* buffer = new char[nFollowedDataLen];
-			memset(buffer, 0, nFollowedDataLen);
-			dpFile.read(buffer, nFollowedDataLen);
+            string buffer;
+            GetBCDBuffer(dpFile, buffer, nFollowedDataLen);
 
 			//判断是否仅包含数据内容，不是标准的TLV结构
-			if (IsTlvStruct((unsigned char*)buffer,nFollowedDataLen)){
-				ParseTLVEx(buffer, nFollowedDataLen, dgiItem.value);
+			if (IsTlvStruct((char*)buffer.c_str(),nFollowedDataLen * 2)){
+                ParseTLV((char*)buffer.c_str(), nFollowedDataLen * 2, dgiItem.value);
 			}else{  
 				char szTag[5] = { 0 };
 				sprintf_s(szTag, "%X", sDgi);
-				string value = StrToHex(buffer, nFollowedDataLen);
-				dgiItem.value.InsertItem(szTag, value);
+				dgiItem.value.InsertItem(szTag, buffer);
 			}			
 			cpsItem.items.push_back(dgiItem);			
 		}
@@ -152,7 +145,7 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile)
         //保存数据
         int pos = string(fileName).find_last_of('\\');
         string path = string(fileName).substr(0, pos + 1);
-		cpsItem.fileName = path + "conv\\" + m_currentAccount + ".txt";
+		cpsItem.fileName = path + "conv\\" + GetAccount(cpsItem) + ".txt";
 		Save(cpsItem);
 		vecCpsItem.push_back(cpsItem);
 	}
@@ -222,48 +215,6 @@ void YLDpParser::ReadDGIName(ifstream &dpFile)
 		dpFile.read(DGIName, *len);
 		m_vecDGI.push_back(DGIName);
 		delete DGIName;
-	}
-}
-
-/********************************************************************
-* 功能：解析标准TLV结构，并保存到DGI数据结构中
-*********************************************************************/
-void YLDpParser::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
-{
-	TLVEntity entities[1024] = { 0 };
-	unsigned int entitiesCount = 0;
-	ParseTLV((unsigned char*)buffer, nBufferLen, entities, entitiesCount);
-	unsigned char parseBuf[4096] = { 0 };
-	for (unsigned int i = 0; i < entitiesCount; i++)
-	{
-		string strTag = StrToHex((char*)entities[i].tag, entities[i].tagSize);
-		string strLen = StrToHex((char*)entities[i].length, entities[i].lengthSize);
-		int nLen = std::stoi(strLen, 0, 16);
-		string strValue = StrToHex((char*)entities[i].value, nLen);
-
-        if (nLen > 0xFF) {
-            char dataLen[5] = { 0 };
-            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
-            strLen = "82" + string(dataLen);
-            
-        }else if (nLen > 0x79) {
-            char dataLen[5] = { 0 };
-            Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
-            strLen = "81" + string(dataLen);
-        }
-		/****************小插曲，用于生成文件的文件名********************/
-		string temp = DeleteSpace(strTag);
-		if (temp.substr(0, 2).compare("57") == 0)
-		{
-			int index = strValue.find('D');
-			if (index != string::npos)
-			{
-				m_currentAccount = strValue.substr(0, index);
-			}
-		}
-        strValue = strTag + strLen + strValue;
-		/*************************************************************/
-		tlvs.InsertItem(strTag, strValue);
 	}
 }
 

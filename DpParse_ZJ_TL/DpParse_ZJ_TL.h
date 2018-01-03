@@ -15,7 +15,6 @@ public:
 
 protected:
 	void ReadDGIName(ifstream &dpFile);
-	void ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs);
 private:
 	vector<string>              m_vecDGI;
 	string						m_currentAccount;

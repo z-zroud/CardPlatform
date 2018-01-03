@@ -33,7 +33,8 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                     }
                     int tagSize = endTagIndex - currentIndex + 2;
 
-                    pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
+                    pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(tagSize + 1);
+                    memset(pTlvs[currentTLVIndex].tag, 0, tagSize + 1);
                     memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, tagSize);
                     pTlvs[currentTLVIndex].tagSize = tagSize;
                     currentIndex += tagSize;
@@ -197,6 +198,62 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
     }
     count = currentTLVIndex;
     return true;
+}
+
+bool IsBcdTlvStruct(char* buffer, unsigned int bufferLength)
+{
+    unsigned int currentIndex = 0;							//用于标记buffer
+                                                            //判断是Tag是否为多字节,字节的1--5位是否都为1，是的话有后续字节
+    while (currentIndex < bufferLength)
+    {
+        unsigned int tempIndex = currentIndex;
+        if ((Tool::ctoi(buffer[tempIndex]) & 0x01) && (Tool::ctoi(buffer[++tempIndex]) == 0x0F))  //tag为多字节
+        {
+            int endTagIndex = tempIndex + 1;
+            while (Tool::ctoi(buffer[endTagIndex]) & 0x08)
+            {
+                endTagIndex += 2;
+            }
+            int tagSize = endTagIndex - currentIndex + 2;
+            currentIndex += tagSize;
+        }
+        else       //tag为单字节
+        {
+            currentIndex += 2;
+        }
+
+        //计算Length域长度
+        int dataLen = 0;
+        unsigned int lenSize = 0;
+        if (Tool::ctoi(buffer[currentIndex]) & 0x08)
+        {
+            //最高位为1
+            int height = (Tool::ctoi(buffer[currentIndex]) & 0x07) * 8;
+            int low = Tool::ctoi(buffer[++currentIndex]) & 0x0f;
+            lenSize = 2 * (height + low);
+            
+            currentIndex += 1;
+            //currentIndex += lenSize;
+        }
+        else  //最高位为0
+        {
+            lenSize = 2;
+            //currentIndex += lenSize;           
+        }
+        if (lenSize > 4) {
+            return false;   //暂时不支持65535长度的TLV
+        }
+        char* szDataLen = new char[lenSize + 1];
+        memset(szDataLen, 0, lenSize + 1);
+        memcpy(szDataLen, buffer + currentIndex, lenSize);
+        dataLen = 2 * stoi(szDataLen, 0, 16);
+        if (dataLen + currentIndex + lenSize > bufferLength) {
+            return false;
+        }
+        currentIndex += lenSize + dataLen;
+    }
+
+    return currentIndex == bufferLength;
 }
 
 

@@ -145,11 +145,9 @@ bool ParseTLV(char* buffer, PTLV pTlvs, unsigned int& count)
             return false;
         }
         pTlvs[i] = vecTlvs[i];
-        //printf("tag=%s,len=%d,value=%s,level=%d,isTemplate=%d\n", pTlvEx[i].tag, pTlvEx[i].length, pTlvEx[i].value, pTlvEx[i].level, pTlvEx[i].isTemplate);
+        printf("tag=%s,len=%d,value=%s,level=%d,isTemplate=%d\n", pTlvs[i].tag, pTlvs[i].length, pTlvs[i].value, pTlvs[i].level, pTlvs[i].isTemplate);
     }
-    count = tlvExSize;
-
-    
+    count = tlvExSize;  
     return true;
 }
 

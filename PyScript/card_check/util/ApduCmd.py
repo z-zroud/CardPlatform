@@ -72,8 +72,10 @@ def GenDynamicData(ddolData):
 
 # Used for selecting an application
 def SelectAppCmd(aid):
-    cmd = '00A40400' + GetBcdDataLen(aid) + aid
-    return SendApdu(cmd)
+    bytesAid = str.encode(aid)
+    resp = create_string_buffer(resp_len)
+    sw = ApduLib.SelectAppCmd(bytesAid,resp)
+    return sw,bytes.decode(resp.value)
 
 # Use fid to select an application
 def SelectByName(name):

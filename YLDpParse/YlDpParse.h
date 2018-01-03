@@ -25,7 +25,7 @@ private:
 	char			ReadDGIStartTag(ifstream &dpFile);                      //读取起始标签
 	int	            GetFollowedDataLen(ifstream &dpFile);                   //读取数据长度
 	int				GetOneCardDpDataLen(ifstream &dpFile);	                //读取卡片个人化数据总长度
-	void			ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs);   //解析TLV结构
+	//void			ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs);   //解析TLV结构
 	int				ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem);          //分析PSE PPSE
 private:
 

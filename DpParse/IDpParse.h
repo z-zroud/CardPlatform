@@ -19,7 +19,7 @@ public:
     void ReplaceKey(string oldKey, string newKey);
     void DeleteItem(string key);
 	vector<pair<string, string>> GetItems() { return m_vecItems; }
-    string GetItem();
+    string GetItem(string tag);
 private:
 	vector<pair<string, string>> m_vecItems;
 };
@@ -117,6 +117,11 @@ struct IDpParse
 	****************************************************************/
 	virtual void HandleRule(string ruleConfig, CPS_ITEM& cpsItem);
 
+    /***************************************************************
+    * 从cpsItem中提取account作为文件名称
+    ****************************************************************/
+    virtual string GetAccount(CPS_ITEM& cpsItem);
+
 	/***************************************************************
 	* 保存CPS数据到本地文件，该文件默认为DP数据的下级目录文件
 	****************************************************************/
@@ -134,11 +139,11 @@ struct IDpParse
     * 解析TLV数据结构
     * buffer中不应该包含70模板
     *****************************************************************/
-    void ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, bool bigEnd);
+    void ParseTLV(char* buffer, unsigned int bufferLen, Dict& tlvs, bool littleEnd = true);
 
 	/****************************************************************
 	* 判断某段数据是否为TLV结构
 	*****************************************************************/
-	bool IsTlvStruct(char* buffer, unsigned int bufferLength);
+	bool IsTlvStruct(char* buffer, unsigned int bufferLength, bool littleEnd = true);
 };
 

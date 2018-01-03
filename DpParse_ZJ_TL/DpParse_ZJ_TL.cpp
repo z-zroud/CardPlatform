@@ -100,37 +100,22 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile)
 				}
 			}
 
-
-			char* buffer = new char[dgiLen];
-			memset(buffer, 0, dgiLen);
-			dpFile.read(buffer, dgiLen);
-			vector<string> vecDGIs = { "8000","8201","8202","8203" ,"8204","8205","8020","8001","8402" };
+            string buffer;
+            GetBCDBuffer(dpFile, buffer, dgiLen);
 			//判断是否仅包含数据内容，不是标准的TLV结构
-			if (IsTlvStruct((unsigned char*)buffer, dgiLen)) {
-				ParseTLVEx(buffer, dgiLen, dgiItem.value);
+			if (IsTlvStruct((char*)buffer.c_str(), dgiLen * 2)) {
+				ParseTLV((char*)buffer.c_str(), dgiLen * 2, dgiItem.value);
 			}
 			else {
-				string dgiValue = StrToHex(buffer, dgiLen);
-				//for (auto encryptDGI : vecDGIs)
-				//{
-				//	if (dgi == encryptDGI) {
-				//		if (dgi == "8000" || dgi == "8020" || dgi == "8001") {
-				//			dgiValue = DecryptDGI("9D705E435B267F2AA4AE62DCEFA13E07", dgiValue, false);
-				//		}
-				//		else {
-				//			dgiValue = DecryptDGI("9D705E435B267F2AA4AE62DCEFA13E07", dgiValue, true);
-				//		}
-
-				//		break;
-				//	}
-				//}
-				dgiItem.value.InsertItem(dgiItem.dgi, dgiValue);
+				
+				dgiItem.value.InsertItem(dgiItem.dgi, buffer);
 			}
 			cpsItem.items.push_back(dgiItem);
 		}
 		int pos = string(fileName).find_last_of('\\');
 		string path = string(fileName).substr(0, pos + 1);
-		cpsItem.fileName = path + "conv\\" + m_currentAccount;
+
+        cpsItem.fileName = path + "conv\\" + GetAccount(cpsItem) + ".txt";
 		Save(cpsItem);
 		vecCpsItem.push_back(cpsItem);
 	}
@@ -157,34 +142,4 @@ void ZJTLDpParse::ReadDGIName(ifstream &dpFile)
 }
 
 
-/********************************************************************
-* 功能：解析标准TLV结构，并保存到DGI数据结构中
-*********************************************************************/
-void ZJTLDpParse::ParseTLVEx(char* buffer, int nBufferLen, Dict& tlvs)
-{
-	TLVEntity entities[1024] = { 0 };
-	unsigned int entitiesCount = 0;
-	ParseTLV((unsigned char*)buffer, nBufferLen, entities, entitiesCount);
-	unsigned char parseBuf[4096] = { 0 };
-	for (unsigned int i = 0; i < entitiesCount; i++)
-	{
-		string strTag = StrToHex((char*)entities[i].tag, entities[i].tagSize);
-		string strLen = StrToHex((char*)entities[i].length, entities[i].lengthSize);
-		int nLen = std::stoi(strLen, 0, 16);
-		string strValue = StrToHex((char*)entities[i].value, nLen);
-
-		/****************小插曲，用于生成文件的文件名********************/
-		string temp = DeleteSpace(strTag);
-		if (temp.substr(0, 2).compare("57") == 0)
-		{
-			int index = strValue.find('D');
-			if (index != string::npos)
-			{
-				m_currentAccount = strValue.substr(0, index);
-			}
-		}
-		/*************************************************************/
-		tlvs.InsertItem(strTag, strValue);
-	}
-}
 

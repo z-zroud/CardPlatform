@@ -34,3 +34,4 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count);
 void ParseAsciiTLV(unsigned char *buffer, unsigned int bufferLength, PASCII_TLV PTlvEntity, unsigned int& entitySize);
 
 bool IsAsciiTlvStruct(unsigned char* buffer, unsigned int bufferLength);
+bool IsBcdTlvStruct(char* buffer, unsigned int bufferLength);

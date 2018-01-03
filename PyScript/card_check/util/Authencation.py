@@ -2,7 +2,7 @@ import os
 import sys
 from ctypes import *
 
-dllName = 'Authencation.dll'
+dllName = "Authencation.dll"
 dllPath = os.path.dirname(os.path.abspath(__file__))
 #print(dllPath)
 dirList = dllPath.split(os.path.sep)
