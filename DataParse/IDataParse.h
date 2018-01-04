@@ -13,9 +13,9 @@ typedef struct TLV
 {
     bool            isTemplate;     //是否是模板
     int             level;          //层级
-    unsigned char*  tag;            //标签
+    char*           tag;            //标签
     unsigned int    length;         //长度
-    unsigned char*  value;          //值
+    char*           value;          //值
 }*PTLV;
 
 typedef struct TL

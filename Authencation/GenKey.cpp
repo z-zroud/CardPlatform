@@ -139,7 +139,7 @@ int GenCAPublicKey(const char* caIndex, const char* rid, char* caPublicKey)
 	string temp = appPath;
 	int pos = temp.find_last_of('\\');
 	string dbPath = temp.substr(0, pos) + "/Configuration/pcsc.db";
-
+    printf("DB PATH=%s", dbPath.c_str());
 	//打开数据库
 	if(!db.Open(dbPath.c_str()))
 	{
@@ -354,7 +354,7 @@ int DES_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* tag
 		return 0;
 	}
 
-	return 1;
+	return 5;
 }
 
 int SM_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* sigStaticData, const char* tag93, const char* tag82)
@@ -386,7 +386,7 @@ int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4
 	int recoveryDataLen = strlen(recoveryData);
 	if (recoveryDataLen == 0)
 	{
-		return 1;
+		return 3;
 	}
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
 	string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + dynamicData;
@@ -397,7 +397,7 @@ int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4
 	{
 		return 0;
 	}
-	return 1;
+	return 2;
 }
 
 int SM_DDA(const char* iccPublicKey, const char* dynamicData)

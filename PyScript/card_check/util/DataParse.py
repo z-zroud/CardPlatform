@@ -20,11 +20,17 @@ class TL:
         self.tag = ''
         self.len = 0
 
-class AFL(Structure):
+class _AFL(Structure):
     _fields_ = [("sfi",c_int),
                 ("recordNumber",c_int),
                 ("bSigStaticData",c_bool)
         ]
+
+class AFL:
+    def __init__(self):
+        self.sfi = 0
+        self.recordNumber = 0
+        self.bSigStaticData = False
 
 class TLVEntity(Structure):
     pass
@@ -56,9 +62,9 @@ class TLV:
         self.value = ''
 
 class TV:
-    def __init__(self):
-        self.tag = ''
-        self.value = ''
+    def __init__(self,tag,value):
+        self.tag = tag
+        self.value = value
 
 def ParseTL(buffer,tls):
     bytesBuffer = str.encode(buffer)
@@ -72,13 +78,18 @@ def ParseTL(buffer,tls):
         tl.len = _tls[index].len
         tls.append(tl)
 
-def ParseAFL(buffer):
+def ParseAFL(buffer,afls):
     bytesBuffer = str.encode(buffer)
-    AFLArr = AFL * 20
-    afls = AFLArr()
-    aflCount = c_int(20)
-    DpLib.ParseAFL(bytesBuffer,afls,byref(aflCount))
-    return aflCount.value
+    AFLArr = _AFL * 30
+    _afls = AFLArr()
+    aflCount = c_int(30)
+    DpLib.ParseAFL(bytesBuffer,_afls,byref(aflCount))
+    for index in range(aflCount.value):
+        afl = AFL()
+        afl.bSigStaticData = _afls[index].bSigStaticData
+        afl.recordNumber = _afls[index].recordNumber
+        afl.sfi = _afls[index].sfi
+        afls.append(afl)
 
 def ParseTLV(buffer, tlvList):
     bytesBuffer = str.encode(buffer)
@@ -113,10 +124,8 @@ def FormatTlv(tlvs):
 def SaveTlv(tlvs, tags):
     for tlv in tlvs:
         if tlv.isTemplate is False:
-            tv = TV()
-            tv.tag = tlv.tag
-            tv.value = tlv.value
-            tags.append(tv)
+            tags.append(TV(tlv.tag,tlv.value))
+            print("Save Tag: ", tlv.tag)
 
 def GetTagValue(tag,tags):
     for item in tags:
@@ -126,11 +135,14 @@ def GetTagValue(tag,tags):
 
 
 if __name__ == '__main__':
+    afls = []
+    print(ParseAFL("08010100100103011010100018010400",afls))
     tls = []
     print(ParseTL("9F1F055F2D04",tls))
-    tlvs = []
-    ParseTLV("6F27840E315041592E5359532E4444463031A5158801015F2D027A68BF0C0A9F4D020B0ADF4D020C0A",tlvs)
-    for tlv in tlvs:
-        print("tag=",tlv.tag,"len=",tlv.length,"value=",tlv.value,"level=",tlv.level,"isTemplate=",tlv.isTemplate)
+    for i in range(100):
+        tlvs = []
+        ParseTLV("6F27840E315041592E5359532E4444463031A5158801015F2D027A68BF0C0A9F4D020B0ADF4D020C0A",tlvs)
+        for tlv in tlvs:
+            print("tag=",tlv.tag,"len=",tlv.length,"value=",tlv.value,"level=",tlv.level,"isTemplate=",tlv.isTemplate)
     print(FormatTlv(tlvs))
 

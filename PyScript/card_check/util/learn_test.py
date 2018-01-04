@@ -1,4 +1,4 @@
-from Base import HexStr
+from card_check.util import Tool
 # b = b"example"
 # s = "example"
 # sb = bytes(s, encoding="utf8")
@@ -28,7 +28,7 @@ from Base import HexStr
 def ReadRecord(p1, sfi):
 	tmp = int(sfi,base=16)
 	p2 = (tmp << 3) + 4
-	p2Str = HexStr(p2)
+	p2Str = Tool.IntToStr(p2)
 	cmd = "00B2" + p1 + p2Str
 	print(cmd)
 

@@ -22,6 +22,11 @@ ApduLib = CDLL(dllPath)
 
 resp_len = 2048
 
+AAC     = 0x00
+ARQC    = 0x80
+TC      = 0x40
+CDA     = 0x10
+
 #########################################################################
 #           Wrap ApduCmd.dll function
 #########################################################################
@@ -67,6 +72,7 @@ def GACCmd(terminalCryptogramType,cdolData):
 def GenDynamicData(ddolData):
     bytesDdolData = str.encode(ddolData)
     resp = create_string_buffer(resp_len)
+    sw = ApduLib.GenDynamicData(bytesDdolData,resp)
     return bytes.decode(resp.value)
 
 
@@ -82,8 +88,16 @@ def SelectByName(name):
 	cmd = '00A40000' + GetBcdDataLen(name) + name
 	return SendApdu(cmd)
 
+def ReadRecordCmd(sfi,recordNum):
+    _sfi = c_int(sfi)
+    _recordNum = c_int(recordNum)
+    resp = create_string_buffer(resp_len)
+    sw = ApduLib.ReadRecordCmd(_sfi,_recordNum,resp)
+    return sw,bytes.decode(resp.value)
+
+
 # Read record, p1 and sfi are string type
-def ReadRecordCmd(p1, sfi):
+def ReadRecordCmd1(p1, sfi):
 	tmp = int(sfi,base=16)
 	p2 = (tmp << 3) + 4
 	p2Str = IntToStr(p2)

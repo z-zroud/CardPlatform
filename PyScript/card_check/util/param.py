@@ -2,6 +2,9 @@
 
 readerName = b''
 
+udkAuthKey = ""
+udkMacKey = ""
+udkEncKey = ""
 
 termParams = {"9F02":"000000000100",
              "9F03":"000000000000",

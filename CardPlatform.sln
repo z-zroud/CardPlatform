@@ -61,6 +61,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Authencation", "Authencation\Authencation.vcxproj", "{02EFE104-181E-4B73-8CAE-DEE1A398650F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataParse", "DataParse\DataParse.vcxproj", "{E84D2073-E8DB-42DF-A15A-F18B426AB4F8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6C158251-C843-41FE-8B64-5926DFCD2411} = {6C158251-C843-41FE-8B64-5926DFCD2411}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataParseTest", "DataParseTest\DataParseTest.vcxproj", "{3484C8B1-5DF8-4F29-9A99-4749FE08345E}"
 	ProjectSection(ProjectDependencies) = postProject

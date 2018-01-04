@@ -33,7 +33,7 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                     }
                     int tagSize = endTagIndex - currentIndex + 2;
 
-                    pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(tagSize + 1);
+                    pTlvs[currentTLVIndex].tag = (char *)malloc(tagSize + 1);
                     memset(pTlvs[currentTLVIndex].tag, 0, tagSize + 1);
                     memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, tagSize);
                     pTlvs[currentTLVIndex].tagSize = tagSize;
@@ -41,18 +41,19 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                 }
                 else
                 { //tag为单字节
-                    pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(2);
+                    pTlvs[currentTLVIndex].tag = (char *)malloc(3);
+                    memset(pTlvs[currentTLVIndex].tag, 0, 3);
                     memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, 2);
-                    pTlvs[currentTLVIndex].tag[2] = 0;
                     pTlvs[currentTLVIndex].tagSize = 2;
                     currentIndex += 2;
                 }
 
                 //分析子TLV中的Tag
                 int subTlvLength = 0;			//子TLV长度
-                unsigned char * temp;			//子TLV所包含的数据
+                char * temp;			//子TLV所包含的数据
                                                 //先判断length域的长度,length域字节如果最高位为1，后续字节代表长度，为0，1--7位代表数据长度
                 unsigned int nStartIndex = currentIndex;
+                int lenOffset = 0;
                 if (Tool::ctoi(buffer[nStartIndex]) & 0x08)
                 {
                     //最高位1
@@ -61,17 +62,19 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                     unsigned int lengthSize = 2 * (height + low);
 
                     nStartIndex += 1; //从下一个字节开始算Length域
-                    pTlvs[currentTLVIndex].length = (unsigned char *)malloc(lengthSize);
+                    pTlvs[currentTLVIndex].length = (char *)malloc(lengthSize + 1);
+                    memset(pTlvs[currentTLVIndex].length, 0, lengthSize + 1);
                     memcpy(pTlvs[currentTLVIndex].length, buffer + nStartIndex, lengthSize);
-                    pTlvs[currentTLVIndex].length[lengthSize] = 0;
                     pTlvs[currentTLVIndex].lenSize = lengthSize;
 
                     subTlvLength = 2 * std::stoi((char*)pTlvs[currentTLVIndex].length, 0, 16);
 
 
                     //申请一段subTlvlength大小的内存存放该TLV的内容
-                    temp = (unsigned char *)malloc(subTlvLength);
+                    temp = (char *)malloc(subTlvLength + 1);
+                    memset(temp, 0, subTlvLength + 1);
                     memcpy(temp, buffer + nStartIndex + lengthSize, subTlvLength);
+                    lenOffset = nStartIndex - currentIndex;
                 }
                 else
                 {
@@ -79,13 +82,13 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                     char subTlvLen[3] = { 0 };
                     memcpy(subTlvLen, &buffer[currentIndex], 2);
                     subTlvLength = 2 * std::stoi(subTlvLen, 0, 16);
-                    temp = (unsigned char *)malloc(subTlvLength);
-                    memset(temp, 0, subTlvLength);
+                    temp = (char *)malloc(subTlvLength + 1);
+                    memset(temp, 0, subTlvLength + 1);
                     memcpy(temp, buffer + currentIndex + 2, subTlvLength);
                     pTlvs[currentTLVIndex].lenSize = 2;
 
                 }
-                if (subTlvLength + currentIndex + pTlvs[currentTLVIndex].lenSize != bufferLen) {
+                if (subTlvLength + currentIndex + lenOffset + pTlvs[currentTLVIndex].lenSize != bufferLen) {
                     return false;
                 }
                 temp[subTlvLength] = 0;
@@ -93,7 +96,8 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                 unsigned int oSize;//输出有多少个同等级的子TLV，解析时也应该用到
 
                                    //不清楚子TLV同等级的TLV有多少个，申请32TLV大小的内存肯定够用
-                pTlvs[currentTLVIndex].subTLVEntity = (PBCD_TLV)malloc(sizeof(PBCD_TLV[32]));
+                pTlvs[currentTLVIndex].subTLVEntity = new BCD_TLV[sizeof(PBCD_TLV[32])];
+                memset(pTlvs[currentTLVIndex].subTLVEntity, 0, sizeof(PBCD_TLV[32]));
                 if (!ParseBcdTLV((char*)temp, pTlvs[currentTLVIndex].subTLVEntity, oSize)) {
                     return false;
                 }
@@ -118,9 +122,10 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                     }
                     int tagSize = endTagIndex - currentIndex + 2;
 
-                    pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(tagSize);
+                    pTlvs[currentTLVIndex].tag = (char *)malloc(tagSize + 1);
+                    memset(pTlvs[currentTLVIndex].tag, 0, tagSize + 1);
                     memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, tagSize);
-                    pTlvs[currentTLVIndex].tag[tagSize] = 0;
+                    
 
                     pTlvs[currentTLVIndex].tagSize = tagSize;
 
@@ -129,9 +134,10 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                 else
                 {
                     //单字节
-                    pTlvs[currentTLVIndex].tag = (unsigned char *)malloc(2);
+                    pTlvs[currentTLVIndex].tag = (char *)malloc(3);
+                    memset(pTlvs[currentTLVIndex].tag, 0, 3);
                     memcpy(pTlvs[currentTLVIndex].tag, buffer + currentIndex, 2);
-                    pTlvs[currentTLVIndex].tag[2] = 0;
+                    
 
                     pTlvs[currentTLVIndex].tagSize = 2;
 
@@ -150,9 +156,10 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                 unsigned int lengthSize = 2 * (height + low);
 
                 currentIndex += 1; //从下一个字节开始算Length域
-                pTlvs[currentTLVIndex].length = (unsigned char *)malloc(lengthSize);
+                pTlvs[currentTLVIndex].length = (char *)malloc(lengthSize + 1);
+                memset(pTlvs[currentTLVIndex].length, 0, lengthSize + 1);
                 memcpy(pTlvs[currentTLVIndex].length, buffer + currentIndex, lengthSize);
-                pTlvs[currentTLVIndex].length[lengthSize] = 0;
+                
                 pTlvs[currentTLVIndex].lenSize = lengthSize;
                 dataSize = 2 * std::stoi((char*)pTlvs[currentTLVIndex].length, 0, 16);
 
@@ -162,9 +169,10 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
             else
             {
                 //最高位0
-                pTlvs[currentTLVIndex].length = (unsigned char *)malloc(2);
+                pTlvs[currentTLVIndex].length = (char *)malloc(3);
+                memset(pTlvs[currentTLVIndex].length, 0, 3);
                 memcpy(pTlvs[currentTLVIndex].length, buffer + currentIndex, 2);
-                pTlvs[currentTLVIndex].length[2] = 0;
+                
                 pTlvs[currentTLVIndex].lenSize = 2;
 
                 dataSize = 2 * std::stoi((char*)pTlvs[currentTLVIndex].length, 0, 16);
@@ -182,10 +190,10 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
             currentStatus = 'V';
             break;
         case 'V':
-            pTlvs[currentTLVIndex].value = (unsigned char *)malloc(dataSize);
-            memset(pTlvs[currentTLVIndex].value, 0, dataSize);
+            pTlvs[currentTLVIndex].value = (char *)malloc(dataSize + 1);
+            memset(pTlvs[currentTLVIndex].value, 0, dataSize + 1);
             memcpy(pTlvs[currentTLVIndex].value, buffer + currentIndex, dataSize);
-            pTlvs[currentTLVIndex].value[dataSize] = 0;
+            
 
             currentIndex += dataSize;
 

@@ -12,12 +12,22 @@ def OpenCardReader(readerName):
 
 def DoPbocContactless():
     contactTrans.SelectPPSE()
+    contactTrans.SelectApp()
+    contactTrans.InitApp()
+    contactTrans.ReadRecord()
+    contactTrans.OfflineAuth()
+    contactTrans.TerminalActionAnalyse()
+    contactTrans.IssuerAuthencation()
+    contactTrans.EndTransaction()
+    contactTrans.HandleIssuerScript()
 
 
 
 
 
 if __name__ == '__main__':
+    import os
+    print(os.getcwd())
     from card_check.util import PCSC
     readers = PCSC.GetReaders()
     for reader in readers:
