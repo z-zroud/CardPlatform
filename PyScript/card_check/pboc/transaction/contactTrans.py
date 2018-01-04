@@ -15,16 +15,28 @@ def SelectPSE():
         print("TLV format is not correct!")
         return False
     DataParse.SaveTlv(tlvs,tags)
+    tag88 = DataParse.GetTagValue("88",tags)
+    sfi = int(tag88,base=16)
+    recordNumber = 1
+    while True:
+        sw,resp = ApduCmd.ReadRecordCmd(sfi,recordNumber)
+        if sw != 0x9000:
+            break
+        recordNumber += 1
+        tlvs = []
+        if DataParse.ParseTLV(resp,tlvs) is False:
+            print("TLV format is not correct!")
+            return False
+        DataParse.SaveTlv(tlvs,tags)
     CaseSelectApp.PBOC_sPSE_SJHGX_001(resp)
     CaseSelectApp.PBOC_sPSE_SJHGX_003(tlvs)
 
 def SelectPPSE():
-    sw,resp = ApduCmd.SelectAppCmd("325041592E5359532E4444463031")
-    print("SW=",sw,"resp=",resp)
-    tlvs = []
+    sw,resp = ApduCmd.SelectAppCmd("325041592E5359532E4444463031")   
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")
         return False
+    tlvs = []
     DataParse.SaveTlv(tlvs,tags)
     CaseSelectApp.PBOC_sPSE_SJHGX_001(resp)
     CaseSelectApp.PBOC_sPSE_SJHGX_003(tlvs)
@@ -107,9 +119,9 @@ def TerminalActionAnalyse():
     for tl in tls:
         cdol1Data += CInterface.GetTermTag(tl.tag)
     sw,resp = ApduCmd.GACCmd(ApduCmd.ARQC,cdol1Data)
-    tag9F27 = resp[4,6]
-    tag9F36 = resp[6,10]
-    tag9F26 = resp[10,26]
+    tag9F27 = resp[4:6]
+    tag9F36 = resp[6:10]
+    tag9F26 = resp[10:26]
     tag9F10 = resp[26:]
     tags.append(DataParse.TV("9F27",tag9F27))
     tags.append(DataParse.TV("9F36",tag9F36))
@@ -123,6 +135,8 @@ def IssuerAuthencation():
     ac = DataParse.GetTagValue("9F26",tags)
     arpc = Authencation.GenArpc(udkSessionKey,ac,authCode)
     sw,resp = ApduCmd.ExternalAuthencationCmd(arpc,authCode)
+    if sw != 0x9000:
+        return False
 
 def EndTransaction():
     cdol2 = DataParse.GetTagValue("8D",tags)
@@ -132,8 +146,8 @@ def EndTransaction():
     for tl in tls:
         cdol2Data += CInterface.GetTermTag(tl.tag)
     sw,resp = ApduCmd.GACCmd(ApduCmd.TC,cdol2Data)
-    tag9F27 = resp[4,6]
-    tag9F36 = resp[6,10]
+    tag9F27 = resp[4:6]
+    tag9F36 = resp[6:10]
     tag9F10 = resp[26:]
     tags.append(DataParse.TV("9F27",tag9F27))
     tags.append(DataParse.TV("9F36",tag9F36))
@@ -146,4 +160,6 @@ def HandleIssuerScript():
     scriptData = "04DA9F790A" + atc + ac + "000000050000"
     mac = Authencation.GenIssuerScriptMac(udkMacSessionKey,scriptData)
     sw,resp = ApduCmd.PutDataCmd("9F79","000000050000",mac)
+    if sw != 0x9000:
+        return False
 

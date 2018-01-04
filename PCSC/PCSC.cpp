@@ -245,7 +245,7 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
     strncpy_s(cmdHeader, 10, noSpaceCmd, 8);
     strncpy_s(szCmdLen, 3, noSpaceCmd + 8, 2);
     Log->Debug("APDU: %s %s %s", cmdHeader, szCmdLen, noSpaceCmd + 10);
-
+    printf("APDU: %s %s %s", cmdHeader, szCmdLen, noSpaceCmd + 10);
     if (cmdLen < 8 || cmdLen % 2 != 0)	//bcd码命令必须包含命令头8字节，必须是偶数字节
     {
         return false;

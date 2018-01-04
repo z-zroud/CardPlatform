@@ -16,14 +16,23 @@ def GetSMMark(bMark):
     else:
         param.termParams["DF69"] = "00"
 
-def GetUdkAuthKey(key):
+def SetUdkAuthKey(key):
     param.udkAuthKey = key
 
-def GetUdkMacKey(key):
+def GetUdkAuthKey():
+    return param.udkAuthKey
+
+def SetUdkMacKey(key):
     param.udkMacKey = key
 
-def GetUdkEncKey(key):
+def GetUdkMacKey():
+    return param.udkMacKey
+
+def SetUdkEncKey(key):
     param.udkEncKey = key
+
+def GetUdkEncKey():
+    return param.udkEncKey
 ##############################################################################
 
 def GetTerm9A():

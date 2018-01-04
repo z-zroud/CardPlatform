@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3aec9ee0-d1d8-4b78-8340-aedb2d4cf6d3</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>card_check\util\CInterface.py</StartupFile>
+    <StartupFile>PyScript.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

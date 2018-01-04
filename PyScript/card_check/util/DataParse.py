@@ -77,6 +77,7 @@ def ParseTL(buffer,tls):
         tl.tag = bytes.decode(_tls[index].tag)
         tl.len = _tls[index].len
         tls.append(tl)
+        print("TL tag=",tl.tag," len=",tl.len)
 
 def ParseAFL(buffer,afls):
     bytesBuffer = str.encode(buffer)

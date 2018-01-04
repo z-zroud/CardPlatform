@@ -86,7 +86,7 @@ def GenUdkSessionKey(udkSubKey,atc):
     bytesUdkSubKey = str.encode(udkSubKey)
     bytesAtc = str.encode(atc)
     AuthLib.GenUdkSessionKey(bytesUdkSubKey,bytesAtc,udkSessionKey)
-    return bytes.decode(udkSessionKey)
+    return bytes.decode(udkSessionKey.value)
 
 def GenUdk(mdk,cardNo,cardSequence):
     bytesMdk = str.encode(mdk)

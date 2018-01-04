@@ -11,7 +11,7 @@ def OpenCardReader(readerName):
         print(PCSC.GetATR())
 
 def DoPbocContactless():
-    contactTrans.SelectPPSE()
+    contactTrans.SelectPSE()
     contactTrans.SelectApp()
     contactTrans.InitApp()
     contactTrans.ReadRecord()
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     readers = PCSC.GetReaders()
     for reader in readers:
         print(reader)
-    if PCSC.OpenReader(readers[0]) is True:
+    if PCSC.OpenReader(readers[1]) is True:
         print(PCSC.GetATR())
         DoPbocContactless()
 
