@@ -53,8 +53,6 @@ def ReadRecord():
 
 def OfflineAuth():
     caIndex = DataParse.GetTagValue("8F",tags)
-    for tag in tags:
-        print("TAG=",tag.value)
     caPublicKey = Authencation.GenCAPublicKey(caIndex,"A000000333")
     print("CA Public Key=",caPublicKey)
     issuerPublicCert = DataParse.GetTagValue("90",tags)

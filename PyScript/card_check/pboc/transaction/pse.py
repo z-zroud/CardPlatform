@@ -6,7 +6,8 @@ tags = []
 
 def SelectPSE():
     sw,resp = ApduCmd.SelectAppCmd("315041592E5359532E4444463031")
-    print("SW=",sw,"resp=",resp)
+    if sw != 0x9000:
+        return False
     tlvs = []
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")
@@ -29,9 +30,9 @@ def SelectPSE():
     CaseSelectPse.PBOC_sPSE_SJHGX_003(tlvs)
 
 def SelectPPSE():
-    print("select ppse:")
-    sw,resp = ApduCmd.SelectAppCmd("325041592E5359532E4444463031") 
-    print("resp=",resp)
+    sw,resp = ApduCmd.SelectAppCmd("325041592E5359532E4444463031")
+    if sw != 0x9000:
+        return
     tlvs = []
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")
