@@ -139,7 +139,7 @@ int GenCAPublicKey(const char* caIndex, const char* rid, char* caPublicKey)
 	string temp = appPath;
 	int pos = temp.find_last_of('\\');
 	string dbPath = temp.substr(0, pos) + "/Configuration/pcsc.db";
-    printf("DB PATH=%s", dbPath.c_str());
+    //printf("DB PATH=%s", dbPath.c_str());
 	//打开数据库
 	if(!db.Open(dbPath.c_str()))
 	{

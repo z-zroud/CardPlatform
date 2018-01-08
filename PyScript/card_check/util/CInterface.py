@@ -6,33 +6,34 @@ import random
 import sys
 
 ############### This Function will used by C++ to set param ##################
-def GetReaderName(name):
-    param.readerName = bytes.decode(name)
+def SetReaderName(name):
+    param.readerName = name
 
-
+def GetReaderName():
+    return param.readerName
 
 #set udk sub key
 def SetUdkAuthKey(key):
-    param.udkAuthKey = bytes.decode(key)
+    param.udkAuthKey = key
 
 def GetUdkAuthKey():
     return param.udkAuthKey
 
 def SetUdkMacKey(key):
-    param.udkMacKey = bytes.decode(key)
+    param.udkMacKey = key
 
 def GetUdkMacKey():
     return param.udkMacKey
 
 def SetUdkEncKey(key):
-    param.udkEncKey = bytes.decode(key)
+    param.udkEncKey = key
 
 def GetUdkEncKey():
     return param.udkEncKey
 
 #set application aid
 def SetAid(aid):
-    param.aid = bytes.decode(aid)
+    param.aid = aid
 def GetAid():
     return param.aid
 ##############################################################################

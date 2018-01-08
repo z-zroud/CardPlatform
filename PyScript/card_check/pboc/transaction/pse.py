@@ -29,7 +29,9 @@ def SelectPSE():
     CaseSelectPse.PBOC_sPSE_SJHGX_003(tlvs)
 
 def SelectPPSE():
-    sw,resp = ApduCmd.SelectAppCmd("325041592E5359532E4444463031")   
+    print("select ppse:")
+    sw,resp = ApduCmd.SelectAppCmd("325041592E5359532E4444463031") 
+    print("resp=",resp)
     tlvs = []
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")

@@ -14,10 +14,12 @@ def SelectApp(aid):
     tags.append(DataParse.TV("4F",aid))
     sw,resp = ApduCmd.SelectAppCmd(aid)
     tlvs = []
+    print("resp=",resp)
     if DataParse.ParseTLV(resp,tlvs) is False:
         print("TLV format is not correct!")
         return False
     DataParse.SaveTlv(tlvs,tags)
+    print(DataParse.FormatTlv(tlvs))
 
 def InitApp():
     tag9F38 = DataParse.GetTagValue("9F38",tags)
@@ -29,10 +31,10 @@ def InitApp():
     sw,resp = ApduCmd.GPOCmd(gpoData)
     if sw != 0x9000:
         return False
-    tag82 = resp[4:8]
-    tag94 = resp[8:]
-    tags.append(DataParse.TV("82",tag82))
-    tags.append(DataParse.TV("94",tag94))
+    tlvs = []
+    DataParse.ParseTLV(resp,tlvs)
+    DataParse.SaveTlv(tlvs,tags)
+    print(DataParse.FormatTlv(tlvs))
     return True
 
 def ReadRecord():
@@ -45,11 +47,14 @@ def ReadRecord():
         tlvs = []
         DataParse.ParseTLV(resp,tlvs)
         DataParse.SaveTlv(tlvs,tags)
+        print(DataParse.FormatTlv(tlvs))
         if afl.bSigStaticData is True:
             sigStaticData += resp[6:]
 
 def OfflineAuth():
     caIndex = DataParse.GetTagValue("8F",tags)
+    for tag in tags:
+        print("TAG=",tag.value)
     caPublicKey = Authencation.GenCAPublicKey(caIndex,"A000000333")
     print("CA Public Key=",caPublicKey)
     issuerPublicCert = DataParse.GetTagValue("90",tags)

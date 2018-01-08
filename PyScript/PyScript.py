@@ -5,6 +5,7 @@ from card_check.pboc.transaction import ec as pbocEc
 from card_check.pboc.transaction import qPboc
 from card_check.util import PCSC
 from card_check.util import CInterface
+from card_check.util import ApduCmd
 
 
 
@@ -30,6 +31,18 @@ def DoPbocEC():
     pbocEc.TerminalActionAnalyse()
 
 def DoPbocContactless():
+    pbocPse.SelectPPSE()
+    pbocContactTrans.SelectApp(CInterface.GetAid())
+    pbocContactTrans.InitApp()
+    pbocContactTrans.ReadRecord()
+    pbocContactTrans.OfflineAuth()
+    pbocContactTrans.TerminalActionAnalyse()
+    pbocContactTrans.IssuerAuthencation()
+    pbocContactTrans.EndTransaction()
+    pbocContactTrans.HandleIssuerScript()
+
+
+def DoPbocContact():
     pbocPse.SelectPSE()
     pbocContactTrans.SelectApp(CInterface.GetAid())
     pbocContactTrans.InitApp()
@@ -41,9 +54,6 @@ def DoPbocContactless():
     pbocContactTrans.HandleIssuerScript()
 
 
-
-
-
 if __name__ == '__main__':
     import os
     print(os.getcwd())
@@ -53,6 +63,6 @@ if __name__ == '__main__':
         print(reader)
     if PCSC.OpenReader(readers[0]) is True:
         print(PCSC.GetATR())
-        #DoPbocContactless()
-        DoPbocQPBOCTrans()
+        DoPbocContactless()
+        #DoPbocQPBOCTrans()
 

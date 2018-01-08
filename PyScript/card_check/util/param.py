@@ -1,6 +1,6 @@
 # This module define some fixed data which used by PBOC test
 
-readerName = b''
+readerName = ""
 
 udkAuthKey = "8A58D9DCD5520DC494C40761CDA82F7F"
 udkMacKey = "BC0D7915A4C245B01A2919F1751CC449"
