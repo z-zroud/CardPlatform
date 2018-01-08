@@ -1,3 +1,4 @@
+
 from card_check.util import ApduCmd
 from card_check.util import DataParse
 from card_check.util import Authencation
@@ -80,6 +81,10 @@ def OfflineAuth():
         return False
 
 
+def TerminalRiskManagement():
+    pass
+
+
 def TerminalActionAnalyse():
     cdol1 = DataParse.GetTagValue("8C",tags)
     tls = []
@@ -97,38 +102,4 @@ def TerminalActionAnalyse():
     tags.append(DataParse.TV("9F26",tag9F26))
     tags.append(DataParse.TV("9F10",tag9F10))
 
-def IssuerAuthencation():
-    atc = DataParse.GetTagValue("9F36",tags)
-    udkSessionKey = Authencation.GenUdkSessionKey(CInterface.GetUdkAuthKey(),atc)
-    authCode = "3030"
-    ac = DataParse.GetTagValue("9F26",tags)
-    arpc = Authencation.GenArpc(udkSessionKey,ac,authCode)
-    sw,resp = ApduCmd.ExternalAuthencationCmd(arpc,authCode)
-    if sw != 0x9000:
-        return False
-
-def EndTransaction():
-    cdol2 = DataParse.GetTagValue("8D",tags)
-    tls = []
-    DataParse.ParseTL(cdol2,tls)
-    cdol2Data = ""
-    for tl in tls:
-        cdol2Data += CInterface.GetTermTag(tl.tag)
-    sw,resp = ApduCmd.GACCmd(ApduCmd.TC,cdol2Data)
-    tag9F27 = resp[4:6]
-    tag9F36 = resp[6:10]
-    tag9F10 = resp[26:]
-    tags.append(DataParse.TV("9F27",tag9F27))
-    tags.append(DataParse.TV("9F36",tag9F36))
-    tags.append(DataParse.TV("9F10",tag9F10))
-
-def HandleIssuerScript():
-    atc = DataParse.GetTagValue("9F36",tags)
-    ac = DataParse.GetTagValue("9F26",tags)
-    udkMacSessionKey = Authencation.GenUdkSessionKey(CInterface.GetUdkMacKey(),atc)
-    scriptData = "04DA9F790A" + atc + ac + "000000050000"
-    mac = Authencation.GenIssuerScriptMac(udkMacSessionKey,scriptData)
-    sw,resp = ApduCmd.PutDataCmd("9F79","000000050000",mac)
-    if sw != 0x9000:
-        return False
 

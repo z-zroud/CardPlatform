@@ -77,7 +77,7 @@ def ParseTL(buffer,tls):
         tl.tag = bytes.decode(_tls[index].tag)
         tl.len = _tls[index].len
         tls.append(tl)
-        print("TL tag=",tl.tag," len=",tl.len)
+        #print("TL tag=",tl.tag," len=",tl.len)
 
 def ParseAFL(buffer,afls):
     bytesBuffer = str.encode(buffer)
@@ -126,7 +126,7 @@ def SaveTlv(tlvs, tags):
     for tlv in tlvs:
         if tlv.isTemplate is False:
             tags.append(TV(tlv.tag,tlv.value))
-            print("Save Tag: ", tlv.tag)
+            print("Tag: ", tlv.tag, "Value:",tlv.value)
 
 def GetTagValue(tag,tags):
     for item in tags:

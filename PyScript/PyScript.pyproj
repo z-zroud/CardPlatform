@@ -37,6 +37,18 @@
     <Compile Include="card_check\pboc\cases\CaseSelectApp.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="card_check\pboc\cases\CaseSelectPse.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\pboc\transaction\ec.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\pboc\transaction\pse.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\pboc\transaction\qPboc.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="card_check\util\CInterface.py" />
     <Compile Include="card_check\emv\__init__.py">
       <SubType>Code</SubType>

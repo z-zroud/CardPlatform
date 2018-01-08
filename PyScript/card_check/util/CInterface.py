@@ -7,33 +7,47 @@ import sys
 
 ############### This Function will used by C++ to set param ##################
 def GetReaderName(name):
-    param.readerName = name
+    param.readerName = bytes.decode(name)
 
 
-def GetSMMark(bMark):
-    if bMark is True:
-        param.termParams["DF69"] = "01"
-    else:
-        param.termParams["DF69"] = "00"
 
+#set udk sub key
 def SetUdkAuthKey(key):
-    param.udkAuthKey = key
+    param.udkAuthKey = bytes.decode(key)
 
 def GetUdkAuthKey():
     return param.udkAuthKey
 
 def SetUdkMacKey(key):
-    param.udkMacKey = key
+    param.udkMacKey = bytes.decode(key)
 
 def GetUdkMacKey():
     return param.udkMacKey
 
 def SetUdkEncKey(key):
-    param.udkEncKey = key
+    param.udkEncKey = bytes.decode(key)
 
 def GetUdkEncKey():
     return param.udkEncKey
+
+#set application aid
+def SetAid(aid):
+    param.aid = bytes.decode(aid)
+def GetAid():
+    return param.aid
 ##############################################################################
+# Set terminal params
+def SetSmMark(bMark):
+    if bMark:
+        param.termParams["DF69"] = "01"
+    else:
+        param.termParams["DF69"] = "00"
+
+def SetEcMark(bMark):
+    if bMark:
+        param.termParams["DF7A"] = "01"
+    else:
+        param.termParams["DF7A"] = "00"
 
 def GetTerm9A():
     return time.strftime("%y%m%d",time.localtime(time.time()))

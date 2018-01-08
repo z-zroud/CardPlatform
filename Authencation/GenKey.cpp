@@ -390,7 +390,7 @@ int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4
 	}
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
 	string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + dynamicData;
-
+    printf("hash input: %s", hashDataInput.c_str());
 	CSHA1 sha1;
 	string hashResult = sha1.GetBCDHash(hashDataInput);
 	if (hashResult == hashData)

@@ -147,7 +147,7 @@ bool ParseTLV(char* buffer, PTLV pTlvs, unsigned int& count)
             return false;
         }
         pTlvs[i] = vecTlvs[i];
-        printf("tag=%s,len=%d,value=%s,level=%d,isTemplate=%d\n", pTlvs[i].tag, pTlvs[i].length, pTlvs[i].value, pTlvs[i].level, pTlvs[i].isTemplate);
+        //printf("tag=%s,len=%d,value=%s,level=%d,isTemplate=%d\n", pTlvs[i].tag, pTlvs[i].length, pTlvs[i].value, pTlvs[i].level, pTlvs[i].isTemplate);
     }
     count = tlvExSize;  
     return true;
@@ -172,12 +172,14 @@ void ParseAFL(char* buffer, PAFL pAfls, unsigned int& count)
 		int endRecord			= stoi(strEndRecord, 0, 16);
 		int nAcceptAuthencation	= stoi(strNeedValidate, 0, 16);
 
+        int needSigRecord = 0;
 		for (int k = startRecord; k <= endRecord; k++)
 		{
 			afl.recordNumber = k;
-			if (nAcceptAuthencation >= k)
+			if (nAcceptAuthencation > 0 && needSigRecord < nAcceptAuthencation)
 			{
 				afl.bSigStaticData = true;
+                needSigRecord++;
 			}
 			else {
 				afl.bSigStaticData = false;
