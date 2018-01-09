@@ -68,6 +68,9 @@
     <Compile Include="card_check\pboc\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="card_check\util\SockClient.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PyScript.py" />
     <Compile Include="card_check\util\ApduCmd.py" />
     <Compile Include="card_check\util\ApduOutput.py" />

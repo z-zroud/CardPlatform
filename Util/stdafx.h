@@ -6,10 +6,12 @@
 #pragma once
 
 #include "targetver.h"
+#include <winsock2.h>
+
 #include <Windows.h>
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 //#define _CRT_SECURE_NO_WARNINGS
 
-
+#pragma comment(lib,"ws2_32.lib")
 // TODO: reference additional headers your program requires here
