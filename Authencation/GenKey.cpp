@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "GenKey.h"
-#include "Des0.h"
-#include "SHA1.h"
 #include "..\Util\Tool.h"
 #include "SqliteDB.h"
-#include "SM.hpp"
+#include "..\Util\Des0.h"
+#include "..\Util\SHA1.h"
+#include "..\Util\SM.hpp"
 #include <string>
 #include <bitset>
 

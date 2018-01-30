@@ -11,11 +11,13 @@ def Connect(host,port):
     sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     sock.connect((host,port))
 
-def Send(buffer):
-    sock.sendall(buffer)
+def Send(record):
+    header = "[start]"
+    end = "[end]"
+    bytesBuffer = str.encode(header + record + end)
+    sock.sendall(bytesBuffer)
 
 
 if __name__ == '__main__':
     Connect("127.0.0.1",8888)
-    Send(b"hello server\nbitch\n")
-    print(b'shit')
+    Send("hello server\nbitch\n")

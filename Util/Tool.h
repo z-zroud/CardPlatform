@@ -45,6 +45,11 @@ namespace Tool
 	* 参数： 指定输出的长度 Two_byte 或者 Four_byte
 	**********************************************************/
 	void IntToStr(int value, char* hexStr, Hex_Len hexLen);
+
+    /**********************************************************
+    * 功能：将BCD码转换为string字符串
+    ************************************************************/
+    void BcdToStr(const char* bcd, char* str, int strLen);
 }
 
 //#ifdef __cplusplus

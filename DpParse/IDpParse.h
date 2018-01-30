@@ -43,7 +43,6 @@ struct CPS_ITEM
 	vector<DGI_ITEM> items;
 };
 
-int ctoi(unsigned char c);
 bool  CheckFolderExist(const string &strPath);
 string StrToHex(const char* strBin, int len, bool bIsUpper = true);
 string DeleteSpace(string s);
@@ -133,7 +132,9 @@ struct IDpParse
 	* 参数：encryptData 密文
 	* 返回 明文
 	*****************************************************************/
-	virtual string DecryptDGI(string tk, string encryptData, bool padding80);
+	virtual string DecryptDGI(string tk, string encryptData);
+
+    virtual string SMDecryptDGI(string tk, string encryptData1);
 
     /****************************************************************
     * 解析TLV数据结构

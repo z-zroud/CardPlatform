@@ -16,7 +16,7 @@ void SockServer::ReleaseLibrary()
     WSACleanup();
 }
 
-char * readline(SOCKET *client)
+void HandleData(SOCKET& client, pReciveCallBack pReciveFunc)
 {
     vector<char> theVector;
     char buffer;
@@ -24,7 +24,7 @@ char * readline(SOCKET *client)
 
     while (true)
     {
-        rVal = recv(*(client), &buffer, 1, 0);
+        rVal = recv(client, &buffer, 1, 0);
         if (rVal == SOCKET_ERROR)
         {
             int errorVal = WSAGetLastError();
@@ -48,7 +48,7 @@ char * readline(SOCKET *client)
             }
 
             //cout << data << endl;
-            return data;
+            //return data;
         }
         else
         {
@@ -57,10 +57,8 @@ char * readline(SOCKET *client)
     }
 }
 
-void SockServer::Recive()
+void SockServer::Recive(pReciveCallBack pReciveFunc)
 {
-    int count = 0;
-    char rcvBuffer[1024] = { 0 };
     while (true)
     {
         SOCKADDR_IN clientAddr;
@@ -69,9 +67,9 @@ void SockServer::Recive()
         SOCKET clientSock = accept(m_serverSock, (SOCKADDR*)&clientAddr, &addrLen);
         char clientIp[32] = { 0 };
         inet_ntop(AF_INET, (void*)&clientAddr.sin_addr, clientIp, 32);
-        printf("Accepted client:%s:%d\n", clientIp, ntohs(clientAddr.sin_port));
-        //count = recv(clientSock, rcvBuffer, 1024, INFINITE);
-        readline(&clientSock);
+        //printf("Accepted client:%s:%d\n", clientIp, ntohs(clientAddr.sin_port));
+
+        HandleData(clientSock, pReciveFunc);
     }  
 }
 

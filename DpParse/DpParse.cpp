@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "IDpParse.h"
-#include "Des0.h"
+#include "../Util/Des0.h"
+#include "../Util/SM.hpp"
 #include <fstream>
 #include "../Util/IniConfig.h"
 #include "../Util/Tool.h"
@@ -158,7 +159,23 @@ void IDpParse::Save(CPS_ITEM cpsItem)
 	outputFile.clear();
 }
 
-string IDpParse::DecryptDGI(string tk, string encryptData, bool padding80)
+string IDpParse::SMDecryptDGI(string tk, string encryptData)
+{
+    string result;
+    PDllSM4_CBC_DEC SM4_CBC_DEC = GetSMFunc<PDllSM4_CBC_DEC>("dllSM4_CBC_DEC");
+    int len = encryptData.length();
+    char* decryptedData = new char[len];
+    memset(decryptedData, 0, len);
+    if (SM4_CBC_DEC)
+    {
+        SM4_CBC_DEC((char*)tk.c_str(), (char*)encryptData.c_str(), decryptedData);
+        result = decryptedData;
+        delete [] decryptedData;
+    }
+    return result;
+}
+
+string IDpParse::DecryptDGI(string tk, string encryptData)
 {
 	string strResult;
 

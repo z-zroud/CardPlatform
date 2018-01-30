@@ -123,12 +123,13 @@ bool DXTDpParse::HandleDp(const char* szFileName, const char* szRuleFile)
                 for (auto encryptDGI : vecDGIs)
                 {
                     if (dgi == encryptDGI) {
-                        if (dgi == "8000" || dgi == "8020" || dgi == "8002") {
+                        dgiValue = DecryptDGI("3E0D1C0E9DF146380B346EE3C2FD979D", dgiValue);
+                        /*if (dgi == "8000" || dgi == "8020" || dgi == "8002") {
                             dgiValue = DecryptDGI("3E0D1C0E9DF146380B346EE3C2FD979D", dgiValue, false);
                         }
                         else {
                             dgiValue = DecryptDGI("3E0D1C0E9DF146380B346EE3C2FD979D", dgiValue, true);
-                        }
+                        }*/
 
                         break;
                     }

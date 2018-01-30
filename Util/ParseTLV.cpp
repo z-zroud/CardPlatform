@@ -211,8 +211,15 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
 bool IsBcdTlvStruct(char* buffer, unsigned int bufferLength)
 {
     unsigned int currentIndex = 0;							//用于标记buffer
-                                                            //判断是Tag是否为多字节,字节的1--5位是否都为1，是的话有后续字节
-    while (currentIndex < bufferLength)
+    if (bufferLength < 2) {
+        return false;
+    }
+    char appTag[3] = { 0 };
+    strncpy(appTag, buffer, 2);
+    if (stoi(appTag, 0, 16) < 0x4F) {   //不应该出现Universal类型的tag,这里应该只包含应用类型的tag
+        return false;
+    }
+    while (currentIndex < bufferLength)//判断是Tag是否为多字节,字节的1--5位是否都为1，是的话有后续字节
     {
         unsigned int tempIndex = currentIndex;
         if ((Tool::ctoi(buffer[tempIndex]) & 0x01) && (Tool::ctoi(buffer[++tempIndex]) == 0x0F))  //tag为多字节

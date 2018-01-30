@@ -9,6 +9,24 @@ using namespace std;
 
 namespace  Tool 
 {
+    void BcdToStr(const char* bcd, char* str, int strLen)
+    {
+        int bcdLen = strlen(bcd);
+        if (bcdLen % 2 != 0) {
+            return;
+        }
+        string strBcd = bcd;
+        memset(str, 0, strLen);
+        for (int i = 0; i < bcdLen; i += 2) {
+            int ascii = stoi(strBcd.substr(i, 2), 0, 16);
+            if (ascii > 0 && ascii < 128)
+            {
+                str[i / 2] = ascii;
+            }
+        }
+    }
+
+
 	bool SubStr(const char* src, int start, int len, char* dst)
 	{
 		if (strlen(src) < len ||
