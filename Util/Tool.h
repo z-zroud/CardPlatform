@@ -50,6 +50,11 @@ namespace Tool
     * 功能：将BCD码转换为string字符串
     ************************************************************/
     void BcdToStr(const char* bcd, char* str, int strLen);
+
+    /***********************************************************
+    * 获取文件所在目录路径
+    ************************************************************/
+    string GetDirectory(const char* filePath);
 }
 
 //#ifdef __cplusplus

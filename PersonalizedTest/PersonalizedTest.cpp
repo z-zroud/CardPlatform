@@ -26,6 +26,9 @@ int main()
 	//GetATR(atr, sizeof(atr));
 	//printf("%s\n", atr);
 
+    IRule rule;
+    rule.SetRuleCfg("F:\\CardPlatform\\bin\\Configuration\\Rule\\rule.xml");
+
     GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\HuaTeng.dp", NULL);
     //GenCpsFile("DpParse_DXT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\huaxin3.dat", NULL);
 	//GenCpsFile("DpParse_YL.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\石嘴山.DP","F:\\CardPlatform\\bin\\Configuration\\Rule\\石嘴山.cfg");

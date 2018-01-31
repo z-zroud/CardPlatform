@@ -9,6 +9,14 @@ using namespace std;
 
 namespace  Tool 
 {
+    string GetDirectory(const char* filePath)
+    {
+        string path = filePath;
+        int index = path.find_last_of('\\');
+
+        return path.substr(0, index + 1);
+    }
+
     void BcdToStr(const char* bcd, char* str, int strLen)
     {
         int bcdLen = strlen(bcd);

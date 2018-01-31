@@ -12,5 +12,6 @@
 
 #pragma comment(lib,"..//bin//CPS.lib")
 #pragma comment(lib,"..//bin//PCSC.lib")
+#pragma comment(lib,"..//bin//DpParse.lib")
 
 // TODO: reference additional headers your program requires here

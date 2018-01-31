@@ -52,27 +52,82 @@ string DeleteSpace(string s);
 /************************************************************
 //定义DGI转换的基本规则，DP解析库调用该接口实现DGI的转换
 *************************************************************/
+
+struct DGIEncrypt
+{
+    string dgi;     
+    string type;
+    string key;
+};
+
+struct DGIMap
+{
+    string srcDgi;
+    string dstDgi;
+};
+
+struct DGIExchange
+{
+    string srcDgi;
+    string exchangedDgi;
+};
+
+struct AddTagFromDGI
+{
+    string srcDgi;
+    string dstDgi;
+    string dstTag;
+};
+
+struct AddFixedTagValue
+{
+    string srcDgi;
+    string tag;
+    string tagValue;
+};
+
+struct DGIDeleteTag
+{
+    string srcDgi;
+    string tag;
+};
+
+
+
+
 class IRule
 {
 public:
-	virtual void SetRule(const string& ruleConfig);
+	virtual bool SetRuleCfg(const char* szRuleConfig);
 	virtual void HandleRule(CPS_ITEM& cpsItem);
 protected:
 	void HandleDGIMap(CPS_ITEM& cpsItem);           //处理DGI映射关系
 	void HandleDGIExchange(CPS_ITEM& cpsItem);      //处理DGI交换关系
-	void HandleDGIEncrypt(CPS_ITEM& cpsItem);       //处理DGI加密
-	void HandleDGIDelete(CPS_ITEM& cpsItem);        //处理删除DGI
+	void HandleDGIDecrypt(CPS_ITEM& cpsItem);       //处理DGI解密
+    void HandleDGIDelete(CPS_ITEM& cpsItem);        //处理删除DGI
+    void HandleDGIAddTag(CPS_ITEM& cpsItem);        //处理DGI添加Tag
+    void HandleDGIAddFixedTag(CPS_ITEM& cpsItem);   //处理DGI添加固定值的Tag
 	void HandleTagDelete(CPS_ITEM& cpsItem);        //处理删除DGI某个tag
+
+    /***************************************************************
+    * 对DP分组数据进行解密
+    * 参数：tk 数据传输密钥
+    * 参数：encryptData 密文
+    * 返回 明文
+    *****************************************************************/
+    string DesDecryptDGI(string tk, string encryptData);
+    string SMDecryptDGI(string tk, string encryptData1);
+
 private:
 
-    string  m_tk;
-    vector<string>                  m_vecDGIpadding80;
-	vector<pair<string, string>>    m_vecDGIMap;       // src --> dst
-	vector<string>                  m_vecDGIDelete;
-	vector<pair<string, string>>    m_vecDGIExchange;  // DGI1 <--> DGI2
-	vector<string>                  m_vecDGIEncrypt;
-	vector<pair<string, string>>    m_vecTagDelete;    // DGI --> tag
-	vector<pair<string, string>>    m_vecTagAdd;       // DGI --> tag
+
+	vector<DGIMap>              m_vecDGIMap;
+	vector<string>              m_vecDGIDelete;
+	vector<DGIExchange>         m_vecDGIExchange;
+	vector<DGIEncrypt>          m_vecDGIEncrypt;
+	vector<AddTagFromDGI>       m_vecAddTagFromDGI;
+	vector<AddFixedTagValue>    m_vecFixedTagAdd;
+    vector<DGIDeleteTag>        m_vecTagDelete;
 };
 
 /******************************************************************
@@ -114,7 +169,7 @@ struct IDpParse
 	/***************************************************************
 	* 处理DP文件生成CPS规则
 	****************************************************************/
-	virtual void HandleRule(string ruleConfig, CPS_ITEM& cpsItem);
+	virtual void HandleRule(const char* szRuleConfig, CPS_ITEM& cpsItem);
 
     /***************************************************************
     * 从cpsItem中提取account作为文件名称
@@ -126,15 +181,7 @@ struct IDpParse
 	****************************************************************/
 	virtual void Save(CPS_ITEM cpsItem);
 
-	/***************************************************************
-	* 对DP分组数据进行解密
-	* 参数：tk 数据传输密钥
-	* 参数：encryptData 密文
-	* 返回 明文
-	*****************************************************************/
-	virtual string DecryptDGI(string tk, string encryptData);
 
-    virtual string SMDecryptDGI(string tk, string encryptData1);
 
     /****************************************************************
     * 解析TLV数据结构

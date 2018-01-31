@@ -7,6 +7,10 @@
 
 int main()
 {
+    //Test GetDirectory
+    const char* filePath = "a\\b\\c.txt";
+    string dir = Tool::GetDirectory(filePath);
+
     //Test BcdToStr
     char* bcd = "50525950463030303031";
     char str[32] = { 0 };

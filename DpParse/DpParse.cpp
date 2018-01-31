@@ -6,6 +6,10 @@
 #include "../Util/IniConfig.h"
 #include "../Util/Tool.h"
 #include "../Util/ParseTLV.h"
+#include "../Util/rapidxml/rapidxml.hpp"
+#include "../Util/rapidxml/rapidxml_utils.hpp"
+
+using namespace rapidxml;
 
 //**********************************************************
 //* 功能： 检查目录是否存在
@@ -159,39 +163,6 @@ void IDpParse::Save(CPS_ITEM cpsItem)
 	outputFile.clear();
 }
 
-string IDpParse::SMDecryptDGI(string tk, string encryptData)
-{
-    string result;
-    PDllSM4_CBC_DEC SM4_CBC_DEC = GetSMFunc<PDllSM4_CBC_DEC>("dllSM4_CBC_DEC");
-    int len = encryptData.length();
-    char* decryptedData = new char[len];
-    memset(decryptedData, 0, len);
-    if (SM4_CBC_DEC)
-    {
-        SM4_CBC_DEC((char*)tk.c_str(), (char*)encryptData.c_str(), decryptedData);
-        result = decryptedData;
-        delete [] decryptedData;
-    }
-    return result;
-}
-
-string IDpParse::DecryptDGI(string tk, string encryptData)
-{
-	string strResult;
-
-	int len = encryptData.length();
-	int unit = 16;
-	for (int i = 0; i < len; i += unit)
-	{
-		char* pOutput = new char[unit + 1];
-		memset(pOutput, 0, unit + 1);
-		_Des3(pOutput, (char*)tk.c_str(), (char*)encryptData.substr(i, unit).c_str());
-		strResult += string(pOutput);
-	}
-
-	return strResult;
-}
-
 /******************************************************************
 * 获取文件大小
 *******************************************************************/
@@ -323,10 +294,10 @@ bool IDpParse::IsTlvStruct(char* buffer, unsigned int bufferLength, bool littleE
     return IsBcdTlvStruct(buffer, bufferLength);
 }
 
-void IDpParse::HandleRule(string ruleConfig, CPS_ITEM& cpsItem)
+void IDpParse::HandleRule(const char* szRuleConfig, CPS_ITEM& cpsItem)
 {
     IRule ruleObj;
-	ruleObj.SetRule(ruleConfig);
+	ruleObj.SetRuleCfg(szRuleConfig);
 	ruleObj.HandleRule(cpsItem);
 }
 
@@ -334,35 +305,69 @@ void IDpParse::HandleRule(string ruleConfig, CPS_ITEM& cpsItem)
 /**********************************************************
 用于解析ruleFile文件
 ***********************************************************/
-void IRule::SetRule(const string& ruleFile)
+bool IRule::SetRuleCfg(const char* szRuleConfig)
 {
-    IniConfig ruleCfg;
-    if (ruleCfg.Read(ruleFile)) 
+    //使用rapidxml::file读取文件更方便  
+    rapidxml::file<char> fdoc(szRuleConfig);
+
+    rapidxml::xml_document<> doc;
+    doc.parse<0>(fdoc.data());
+
+    //在XML文档中寻找第一个节点  
+    const rapidxml::xml_node<> *root = doc.first_node("Rule");
+    if (NULL == root)
     {
-        m_tk = ruleCfg.GetValue("TK", "key");
-
-        vector<pair<string, string>> deleteDGIs;
-        ruleCfg.GetValue("DeleteDGI", deleteDGIs);
-        for (auto item : deleteDGIs) {
-            m_vecDGIDelete.push_back(item.second);
-        }
-
-        vector<pair<string, string>> encryptDGIs;
-        ruleCfg.GetValue("EncryptDGI", encryptDGIs);
-        for (auto item : encryptDGIs) {
-            m_vecDGIEncrypt.push_back(item.second);
-        }
-
-        vector<pair<string, string>> padding80DGIs;
-        ruleCfg.GetValue("EncryptDGIPadding80", padding80DGIs);
-        for (auto item : padding80DGIs) {
-            m_vecDGIpadding80.push_back(item.second);
-        }
-
-        ruleCfg.GetValue("ExchangeDGIData", m_vecDGIExchange);
-        ruleCfg.GetValue("DGIMap", m_vecDGIMap);
-        ruleCfg.GetValue("DeleteTag", m_vecTagDelete);
+        return false;
     }
+    for (rapidxml::xml_node<> *node = root->first_node(); node != NULL; node = node->next_sibling())
+    {
+        string nodeName = node->name();
+        if (nodeName == "Encrypt") {
+            DGIEncrypt encryptDGI;
+            encryptDGI.dgi = node->first_attribute("DGI")->value();
+            encryptDGI.type = node->first_attribute("type")->value();
+            encryptDGI.key = node->first_attribute("key")->value();
+            m_vecDGIEncrypt.push_back(encryptDGI);
+        }
+        else if (nodeName == "Map") {
+            DGIMap mappedDGI;
+            mappedDGI.srcDgi = node->first_attribute("srcDGI")->value();
+            mappedDGI.dstDgi = node->first_attribute("dstDGI")->value();
+            m_vecDGIMap.push_back(mappedDGI);
+        }
+        else if (nodeName == "Exchange") {
+            DGIExchange exchangedDGI;
+            exchangedDGI.srcDgi = node->first_attribute("srcDGI")->value();
+            exchangedDGI.exchangedDgi = node->first_attribute("exchangedDGI")->value();
+            m_vecDGIExchange.push_back(exchangedDGI);
+        }
+        else if (nodeName == "AddTagFromDGI") {
+            AddTagFromDGI vecDGI;
+            vecDGI.srcDgi = node->first_attribute("srcDGI")->value();
+            vecDGI.dstDgi = node->first_attribute("dstDGI")->value();
+            vecDGI.dstTag = node->first_attribute("dstTag")->value();
+            m_vecAddTagFromDGI.push_back(vecDGI);
+        }
+        else if (nodeName == "AddFixedTag") {
+            AddFixedTagValue vecDGI;
+            vecDGI.srcDgi = node->first_attribute("srcDGI")->value();
+            vecDGI.tag = node->first_attribute("tag")->value();
+            vecDGI.tagValue = node->first_attribute("tagValue")->value();
+            m_vecFixedTagAdd.push_back(vecDGI);
+        }
+        else if (nodeName == "DeletedDGI") {
+            string deletedDgi = node->first_attribute("DGI")->value();
+            m_vecDGIDelete.push_back(deletedDgi);
+        }
+        else if (nodeName == "DeletedTag") {
+            DGIDeleteTag deleteTag;
+            deleteTag.srcDgi = node->first_attribute("DGI")->value();
+            deleteTag.tag = node->first_attribute("tag")->value();
+            m_vecTagDelete.push_back(deleteTag);
+        }
+    }
+  
+    return true;
 }
 
 void IRule::HandleRule(CPS_ITEM& cpsItem)
@@ -371,81 +376,75 @@ void IRule::HandleRule(CPS_ITEM& cpsItem)
     HandleDGIMap(cpsItem);
     HandleDGIExchange(cpsItem);
     HandleDGIDelete(cpsItem);
-    HandleDGIEncrypt(cpsItem);
+    HandleDGIDecrypt(cpsItem);
     HandleTagDelete(cpsItem);
 }
 
+/****************************************************************
+* 功能：更换DGI分组，例如将DGI8020映射为DGI9307
+*****************************************************************/
 void IRule::HandleDGIMap(CPS_ITEM& cpsItem)
 {
 	for (auto item : m_vecDGIMap)
 	{
 		for (auto& dgiItem : cpsItem.items)
 		{
-			if (item.first == dgiItem.dgi)
+			if (item.srcDgi == dgiItem.dgi)
 			{
-				dgiItem.dgi = item.second;
-                dgiItem.value.ReplaceKey(item.first, item.second);
+				dgiItem.dgi = item.dstDgi;
+                dgiItem.value.ReplaceKey(item.srcDgi, item.dstDgi);
 				break;
 			}
 		}
 	}
 }
+
+/**************************************************************
+* 功能：交换DGI分组的值
+***************************************************************/
 void IRule::HandleDGIExchange(CPS_ITEM& cpsItem)
 {
 	for (auto item : m_vecDGIExchange)
 	{
 		int firstIndex = 0;
 		int secondIndex = 0;
-		while (item.first != cpsItem.items[firstIndex].dgi)
+		while (item.srcDgi != cpsItem.items[firstIndex].dgi)
 			firstIndex++;
-		while (item.second != cpsItem.items[secondIndex].dgi)
+		while (item.exchangedDgi != cpsItem.items[secondIndex].dgi)
 			secondIndex++;
-        cpsItem.items[firstIndex].dgi = item.second;
-        cpsItem.items[firstIndex].value.ReplaceKey(item.first, item.second);
-        cpsItem.items[secondIndex].dgi = item.first;
-        cpsItem.items[secondIndex].value.ReplaceKey(item.second, item.first);
+        cpsItem.items[firstIndex].dgi = item.exchangedDgi;
+        cpsItem.items[firstIndex].value.ReplaceKey(item.srcDgi, item.exchangedDgi);
+        cpsItem.items[secondIndex].dgi = item.srcDgi;
+        cpsItem.items[secondIndex].value.ReplaceKey(item.exchangedDgi, item.srcDgi);
 	}
 }
 
 /***************************************************************
 * 解密DGI数据，注意该DGI只应只有一个tag=encryptData, 并且tag==DGI
 ****************************************************************/
-void IRule::HandleDGIEncrypt(CPS_ITEM& cpsItem)
-{
-   
+void IRule::HandleDGIDecrypt(CPS_ITEM& cpsItem)
+{  
     for (auto& item : cpsItem.items)
     {
-        string decryptedData;
-        if (ExistedInList(item.dgi, m_vecDGIEncrypt))
+        for(auto& encryptedItem : m_vecDGIEncrypt)
         {
-            string encryptData = item.value.GetItem(item.dgi);
-            if (ExistedInList(item.dgi,m_vecDGIpadding80))
-            {
-                if (encryptData.length() % 16 == 0)
-                {
-                    encryptData += "8000000000000000";
+            if (item.dgi == encryptedItem.dgi) {
+                string decryptedData;
+                if (encryptedItem.type == "SM") {
+                    decryptedData = SMDecryptDGI(encryptedItem.key, item.value.GetItem(item.dgi));
                 }
                 else {
-                    encryptData += "80";
-                    int remaindZero = encryptData.length() % 16;
-                    encryptData.append(remaindZero, '0');
+                    decryptedData = DesDecryptDGI(encryptedItem.key, item.value.GetItem(item.dgi));
                 }
-            }
-
-            int len = encryptData.length();
-            int unit = 16;
-            for (int i = 0; i < len; i += unit)
-            {
-                char* pOutput = new char[unit + 1];
-                memset(pOutput, 0, unit + 1);
-                _Des3(pOutput, (char*)m_tk.c_str(), (char*)encryptData.substr(i, unit).c_str());
-                decryptedData += string(pOutput);
-            }
-            item.value.ReplaceItem(item.dgi, decryptedData);
+                item.value.ReplaceItem(item.dgi, decryptedData);
+            }            
         }
     }
 }
 
+/*****************************************************************
+* 功能：删除DGI分组
+******************************************************************/
 void IRule::HandleDGIDelete(CPS_ITEM& cpsItem)
 {
 	for (auto item : m_vecDGIDelete)
@@ -461,19 +460,87 @@ void IRule::HandleDGIDelete(CPS_ITEM& cpsItem)
 	}
 }
 
+/***************************************************
+* 功能：删除某个DGI分组中的tag
+****************************************************/
 void IRule::HandleTagDelete(CPS_ITEM& cpsItem)
 {
 	for (auto item : m_vecTagDelete)
 	{
 		for (auto &dgiItem : cpsItem.items)
 		{
-			if (item.first == dgiItem.dgi)
+			if (item.srcDgi == dgiItem.dgi)
 			{
-                dgiItem.value.DeleteItem(item.second);
+                dgiItem.value.DeleteItem(item.tag);
                 break;
 			}
 		}
 	}
 }
+
+/********************************************************
+* 功能：给某个DGI分组添加固定的tag值
+*********************************************************/
+void IRule::HandleDGIAddFixedTag(CPS_ITEM& cpsItem)
+{
+    for (auto& dgiItem : cpsItem.items)
+    {
+        for (auto item : m_vecFixedTagAdd) {
+            if (dgiItem.dgi == item.srcDgi) {
+                dgiItem.value.InsertItem(item.tag, item.tagValue);
+            }
+        }        
+    }
+}
+
+/********************************************************
+* 功能： 将某个DGI分组的tag值添加到指定的DGI分组中
+*********************************************************/
+void IRule::HandleDGIAddTag(CPS_ITEM& cpsItem)
+{
+    for (auto &dgiItem : cpsItem.items) {
+        for (auto &item : m_vecAddTagFromDGI) {
+            if (dgiItem.dgi == item.srcDgi) {
+                string value = dgiItem.value.GetItem(item.dstTag);
+                dgiItem.value.InsertItem(item.dstTag, value);
+            }
+        }
+    }
+}
+
+
+string IRule::SMDecryptDGI(string tk, string encryptData)
+{
+    string result;
+    PDllSM4_CBC_DEC SM4_CBC_DEC = GetSMFunc<PDllSM4_CBC_DEC>("dllSM4_CBC_DEC");
+    int len = encryptData.length();
+    char* decryptedData = new char[len];
+    memset(decryptedData, 0, len);
+    if (SM4_CBC_DEC)
+    {
+        SM4_CBC_DEC((char*)tk.c_str(), (char*)encryptData.c_str(), decryptedData);
+        result = decryptedData;
+        delete[] decryptedData;
+    }
+    return result;
+}
+
+string IRule::DesDecryptDGI(string tk, string encryptData)
+{
+    string strResult;
+
+    int len = encryptData.length();
+    int unit = 16;
+    for (int i = 0; i < len; i += unit)
+    {
+        char* pOutput = new char[unit + 1];
+        memset(pOutput, 0, unit + 1);
+        _Des3(pOutput, (char*)tk.c_str(), (char*)encryptData.substr(i, unit).c_str());
+        strResult += string(pOutput);
+    }
+
+    return strResult;
+}
+
 
 
