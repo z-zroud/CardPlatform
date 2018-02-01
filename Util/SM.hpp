@@ -132,10 +132,9 @@ typedef int(*PDllPBOC_SM2_Verify)(char *pPublicKey, char *pMSG, char *pSignData)
 template <typename T>
 T GetSMFunc(const char* funcName)
 {
-    static bool isLoaded = false;
-    HINSTANCE hInst = NULL;
+    static HINSTANCE hInst = NULL;
     T ret = NULL;
-    if (!isLoaded)
+    if (!hInst)
     {
 		char appPath[256] = { 0 };
 		GetModuleFileName(NULL, appPath, 256);
@@ -146,10 +145,9 @@ T GetSMFunc(const char* funcName)
         if (hInst == NULL)
         {
             return ret;
-        }
-        isLoaded = true;       
+        }    
     }
-    if(isLoaded)
+    if(hInst)
         ret = (T)GetProcAddress(hInst, funcName);
     return ret;
 }

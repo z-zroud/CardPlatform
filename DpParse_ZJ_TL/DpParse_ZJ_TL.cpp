@@ -13,24 +13,86 @@ bool HandleDp(const char* szFileName, const char* ruleFile)
 	return parse.HandleDp(szFileName, ruleFile);
 }
 
+string ZJTLDpParse::GetDpMark(ifstream& dpFile)
+{
+    char mic[8] = { 0 };
+    GetBuffer(dpFile, mic, 7);
+    
+    return mic;
+}
+
+void ZJTLDpParse::ParsePSE(ifstream& dpFile, CPS_ITEM& cpsItem, string dgiName)
+{
+    if ("86" != GetDGIStartMark(dpFile)) {
+        return ;
+    }
+    int dgiLen;
+    GetLenTypeBuffer(dpFile, dgiLen, 1);
+    if (dgiLen == 0x81) {	//DGI数据为2字节
+        GetLenTypeBuffer(dpFile, dgiLen, 2);
+    }
+    DGI_ITEM dgiItem;
+    string value;
+    GetBCDBuffer(dpFile, value, dgiLen);
+    dgiItem.dgi = dgiName;
+    dgiItem.value.InsertItem(dgiItem.dgi, value);
+    cpsItem.items.push_back(dgiItem);
+}
+
+string ZJTLDpParse::GetDGIStartMark(ifstream& dpFile)
+{
+    string dgiStartMark;
+    GetBCDBuffer(dpFile, dgiStartMark, 1);
+    
+    return dgiStartMark;
+}
+
+int ZJTLDpParse::GetDGIDataLen(ifstream& dpFile)
+{
+    int dgiLen;
+    GetLenTypeBuffer(dpFile, dgiLen, 1); //获取整个DGI数据块的长度
+    if (dgiLen == 0x81)
+    {	//DGI数据为2字节
+        GetLenTypeBuffer(dpFile, dgiLen, 1);
+    }
+
+    string dgi;
+    GetBCDBuffer(dpFile, dgi, 2);
+    int dgiDataLen;
+    GetLenTypeBuffer(dpFile, dgiDataLen, 1); //DGI数据的长度
+    unsigned short sDgi = stoi(dgi, 0, 16);
+
+    if (sDgi < 0x0b01)		// 读取记录模板(该模板仅当DGI序号小于0x0B01时出现)
+    {
+        string templateTag;
+        GetBCDBuffer(dpFile, templateTag, 1);
+        if (templateTag != "70") {
+            return false;
+        }
+        GetLenTypeBuffer(dpFile, dgiDataLen, 1);
+        if (dgiDataLen == 0x81) {	//DGI数据为2字节
+            GetLenTypeBuffer(dpFile, dgiDataLen, 1);
+        }
+    }
+
+    return dgiDataLen;
+}
+
 bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile)
 {
 	ifstream dpFile;
 	if (!OpenDpFile(fileName, dpFile)) {
 		return false;
 	}
-	long dpFileSize = GetFileSize(dpFile);
-
-	char mic[8] = { 0 };
-	GetBuffer(dpFile, mic, 7);
-	int followedDataLen;
-	GetLenTypeBuffer(dpFile, followedDataLen, 8);
+    long dpFileSize = GetFileSize(dpFile);
+    if ("CITICDP" != GetDpMark(dpFile)){
+        return false;
+    }
+    int followedDataLen;
+    GetLenTypeBuffer(dpFile, followedDataLen, 8);
 
 	ReadDGIName(dpFile);		//读取DGI分组
 
-	
-
-	vector<CPS_ITEM> vecCpsItem;
 	while (dpFile.tellg() < dpFileSize)		//遍历后续数据，每一次遍历解析一个卡片数据
 	{
 		string cardSeqNo;
@@ -45,79 +107,38 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile)
 			dgiItem.dgi = m_vecDGI[i];
 			if (dgiItem.dgi.substr(0, 3) == "PSE")	//对于DGIF001和PSE/PPSE数据，需要特殊处理
 			{
-				string dgiTag;
-				GetBCDBuffer(dpFile, dgiTag, 1);
-				if ("86" != dgiTag) {
-					return 1;
-				}
-				int dgiLen;
-				GetLenTypeBuffer(dpFile, dgiLen, 1);
-				if (dgiLen == 0x81) {	//DGI数据为2字节
-					GetLenTypeBuffer(dpFile, dgiLen, 2);
-				}
-
-				char* buffer = new char[dgiLen];
-				memset(buffer, 0, dgiLen);
-				dpFile.read(buffer, dgiLen);
-				string value = StrToHex(buffer, dgiLen);	//直接保存，不用解析TLV结构
-				dgiItem.value.InsertItem(dgiItem.dgi, value);
-				cpsItem.items.push_back(dgiItem);
+                ParsePSE(dpFile, cpsItem, dgiItem.dgi);
 				continue;
 			}
-
-			string dgiTag;
-			GetBCDBuffer(dpFile, dgiTag, 1);
-			if ("86" != dgiTag) {
-				return 1;
-			}
-			int dgiLen;
-			int dgiDataLen;
-			GetLenTypeBuffer(dpFile, dgiDataLen, 1);
-			if (dgiDataLen == 0x81) {	//DGI数据为2字节
-				GetLenTypeBuffer(dpFile, dgiDataLen, 1);
-			}
-
-
-			string dgi;
-			//int dgiDataLen;
-			GetBCDBuffer(dpFile, dgi, 2);
-			GetLenTypeBuffer(dpFile, dgiLen, 1);
-			//if (dgiDataLen - 3 > 0x81) {	//DGI数据为2字节
-			//	GetLenTypeBuffer(dpFile, dgiLen, 1);
-			//}
-			unsigned short sDgi = stoi(dgi, 0, 16);
-
-			if (sDgi < 0x0b01)		// 读取记录模板(该模板仅当DGI序号小于0x0B01时出现)
-			{
-				string templateTag;
-				GetBCDBuffer(dpFile, templateTag, 1);
-				if (templateTag != "70") {
-					return false;
-				}
-				GetLenTypeBuffer(dpFile, dgiLen, 1);
-				if (dgiLen == 0x81) {	//DGI数据为2字节
-					GetLenTypeBuffer(dpFile, dgiLen, 1);
-				}
-			}
-
+            if (dgiItem.dgi.substr(0, 3) == "DGI") {
+                dgiItem.dgi = dgiItem.dgi.substr(3);
+            }
+            if (GetDGIStartMark(dpFile) != "86") {
+                return false;
+            }
+			
+            int dgiDataLen = GetDGIDataLen(dpFile);
             string buffer;
-            GetBCDBuffer(dpFile, buffer, dgiLen);
+            GetBCDBuffer(dpFile, buffer, dgiDataLen);
 			//判断是否仅包含数据内容，不是标准的TLV结构
-			if (IsTlvStruct((char*)buffer.c_str(), dgiLen * 2)) {
-				ParseTLV((char*)buffer.c_str(), dgiLen * 2, dgiItem.value);
+			if (IsTlvStruct((char*)buffer.c_str(), dgiDataLen * 2)) {
+				ParseTLV((char*)buffer.c_str(), dgiDataLen * 2, dgiItem.value);
 			}
-			else {
-				
+			else {	
+
 				dgiItem.value.InsertItem(dgiItem.dgi, buffer);
 			}
 			cpsItem.items.push_back(dgiItem);
 		}
 		int pos = string(fileName).find_last_of('\\');
 		string path = string(fileName).substr(0, pos + 1);
+        cpsItem.fileName = path +  GetAccount(cpsItem) + ".txt";
 
-        cpsItem.fileName = path + "conv\\" + GetAccount(cpsItem) + ".txt";
+        if (ruleFile) { //处理规则
+            HandleRule(ruleFile, cpsItem);
+        }
+
 		Save(cpsItem);
-		vecCpsItem.push_back(cpsItem);
 	}
 
 	return true;

@@ -18,6 +18,7 @@ public:
     void ReplaceItem(string key, string value);
     void ReplaceKey(string oldKey, string newKey);
     void DeleteItem(string key);
+    bool TagExisted(string tag);
 	vector<pair<string, string>> GetItems() { return m_vecItems; }
     string GetItem(string tag);
 private:
@@ -58,6 +59,15 @@ struct DGIEncrypt
     string dgi;     
     string type;
     string key;
+};
+
+struct TagEncrypt
+{
+    string tag;
+    string type;
+    string key;
+    int startPos;   //表示解密后截取数据的起始位置
+    int len;    //截取数据的长度
 };
 
 struct DGIMap
@@ -104,6 +114,7 @@ protected:
 	void HandleDGIMap(CPS_ITEM& cpsItem);           //处理DGI映射关系
 	void HandleDGIExchange(CPS_ITEM& cpsItem);      //处理DGI交换关系
 	void HandleDGIDecrypt(CPS_ITEM& cpsItem);       //处理DGI解密
+    void HandleTagDecrypt(CPS_ITEM& cpsItem);       //处理TAG解密
     void HandleDGIDelete(CPS_ITEM& cpsItem);        //处理删除DGI
     void HandleDGIAddTag(CPS_ITEM& cpsItem);        //处理DGI添加Tag
     void HandleDGIAddFixedTag(CPS_ITEM& cpsItem);   //处理DGI添加固定值的Tag
@@ -125,9 +136,11 @@ private:
 	vector<string>              m_vecDGIDelete;
 	vector<DGIExchange>         m_vecDGIExchange;
 	vector<DGIEncrypt>          m_vecDGIEncrypt;
+    vector<TagEncrypt>          m_vecTagEncrypt;
 	vector<AddTagFromDGI>       m_vecAddTagFromDGI;
 	vector<AddFixedTagValue>    m_vecFixedTagAdd;
     vector<DGIDeleteTag>        m_vecTagDelete;
+
 };
 
 /******************************************************************

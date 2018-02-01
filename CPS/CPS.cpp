@@ -7,17 +7,14 @@
 #include "Des0.h"
 #include "../ApduCmd/IApdu.h"
 #include "../Util/Tool.h"
+#include "../Util/rapidxml/rapidxml.hpp"
+#include "../Util/rapidxml/rapidxml_utils.hpp"
 
-/****************************************/
-string		g_kmc;
-string		g_isd;
-int			g_divMethod = 0;
-int			g_secureLevel = 0;
-IniConfig   g_cfgFile;
-/****************************************/
+using namespace rapidxml;
 
-struct InstallParam
+struct INSTALL_APP
 {
+    string appType;
 	string packageAid;
 	string appletAid;
 	string instanceAid;
@@ -26,41 +23,20 @@ struct InstallParam
 	string token;
 };
 
-/***********************************************************************
-* 从配置文件中获取安装参数
-************************************************************************/
-bool GetInstallParam(IniConfig cfg, string appType, InstallParam& param)
+struct EncryptDGI
 {
-	param.packageAid	= cfg.GetValue(appType, "PackageAid");
-	param.appletAid		= cfg.GetValue(appType, "AppletAid");
-	param.instanceAid	= cfg.GetValue(appType, "InstanceAid");
-	param.privilege		= cfg.GetValue(appType, "Privilege");
-	param.installParam	= cfg.GetValue(appType, "InstallParam");
-	param.token			= cfg.GetValue(appType, "Token");
+    string dgi;
+    bool isPadding80;
+};
 
-    if (param.token.empty()) {
-        param.token == "00";
-    }
-
-    return !param.packageAid.empty() &&
-        !param.appletAid.empty() &&
-        !param.instanceAid.empty() &&
-        !param.privilege.empty() &&
-        !param.installParam.empty();
-}
-
-/************************************************************
-* 安装应用，安装成功返回0x9000
-*************************************************************/
-int InstallApp(IniConfig cfg, string appType)
-{
-    InstallParam param;
-    if (!GetInstallParam(cfg, appType, param)) {
-        return 0x6982;
-    }
-
-	return InstallAppCmd(param.packageAid.c_str(), param.appletAid.c_str(), param.instanceAid.c_str(), param.privilege.c_str(), param.installParam.c_str(), param.token.c_str());
-}
+/****************************************/
+string		g_kmc;
+string		g_isd;
+int			g_divMethod = 0;
+int			g_secureLevel = 0;
+vector<INSTALL_APP> g_vecInstallApp;
+vector<EncryptDGI> g_vecEncryptDGI;
+/****************************************/
 
 /******************************************************
 * 生成统一CPS文件,便于个人化
@@ -105,41 +81,26 @@ bool ExistedInList(string value, vector<pair<string, string>> collection)
     return false;
 }
 
-string EncryptDGIData(string encSessionKey, string dgi, string data)
+string EncryptDGIData(string encSessionKey, string dgi, string data, bool isPadding80)
 {
     char decryptData[2048] = { 0 };
-    if (g_cfgFile.IsOpened())
+   
+    if (isPadding80) 
     {
-        vector<pair<string, string>> padding80DGIs;
-        g_cfgFile.GetValue("Padding80", padding80DGIs);
-        if (ExistedInList(dgi, padding80DGIs)) {
-            if (data.length() % 16 == 0)
-            {
-                data += "8000000000000000";
-            }
-            else {
-                data += "80";
-                int remaindZero = data.length() % 16;
-                data.append(remaindZero, '0');
-            }
-        }       
-        Des3_ECB(decryptData, (char*)encSessionKey.c_str(), (char*)data.c_str(), data.length());
-    }
+        if (data.length() % 16 == 0)
+        {
+            data += "8000000000000000";
+        }
+        else {
+            data += "80";
+            int remaindZero = data.length() % 16;
+            data.append(remaindZero, '0');
+        }
+    }       
+    Des3_ECB(decryptData, (char*)encSessionKey.c_str(), (char*)data.c_str(), data.length());
 	return decryptData;
 }
 
-bool IsNeedEncrypt(string dgi)
-{
-    if (g_cfgFile.IsOpened())
-    {
-        vector<pair<string, string>> encryptDGIs;
-        g_cfgFile.GetValue("EncryptDGI", encryptDGIs);
-        if (ExistedInList(dgi, encryptDGIs)) {
-            return true;
-        }
-    }
-	return false;
-}
 
 int DoPersonlizationWithOrderdDGI(const char* szCpsFile, const char* installCfgFile)
 {
@@ -189,6 +150,48 @@ bool PersonlizePSE(IniConfig cpsFile, string app)
     return true;
 }
 
+bool ParsePeronlizeConfiguration(const char* configFile)
+{
+    //使用rapidxml::file读取文件更方便  
+    rapidxml::file<char> fdoc(configFile);
+
+    rapidxml::xml_document<> doc;
+    doc.parse<0>(fdoc.data());
+
+    //在XML文档中寻找第一个节点  
+    const rapidxml::xml_node<> *root = doc.first_node("PersonlizeConfiguration");
+    if (NULL == root)
+    {
+        return false;
+    }
+    for (rapidxml::xml_node<> *node = root->first_node(); node != NULL; node = node->next_sibling())
+    {
+        string nodeName = node->name();
+        if (nodeName == "App") {
+            INSTALL_APP app;
+            app.packageAid = node->first_attribute("packageAid")->value();
+            app.appletAid = node->first_attribute("appletAid")->value();
+            app.instanceAid = node->first_attribute("instanceAid")->value();
+            app.installParam = node->first_attribute("installParam")->value();
+            app.token = node->first_attribute("token")->value();
+            if (app.token.empty())
+                app.token = "00";
+            g_vecInstallApp.push_back(app);
+        }
+        else if (nodeName == "Encrypt") {
+            EncryptDGI encryptDGI;
+            encryptDGI.dgi = node->first_attribute("DGI")->value();
+            string padding80 = node->first_attribute("padding80")->value();
+            if (padding80 == "false")encryptDGI.isPadding80 = false;
+            if (padding80 == "true")encryptDGI.isPadding80 = true;
+            g_vecEncryptDGI.push_back(encryptDGI);
+        }
+        
+    }
+
+    return true;
+}
+
 /********************************************************
 * 个人化PBOC，CPS中PSE及PPSE分组需放到CPS的最后分组中
 *********************************************************/
@@ -213,14 +216,21 @@ bool PersonlizePBOC(IniConfig cpsFile)
             for (auto item : cpsNodes[i].second.m_collection) {
                 data += item.second;    //拼接DGI分组下所有Tag的值
             }
-            if (IsNeedEncrypt(cpsNodes[i].first)) { //数据是否需要解密
-                char encSessionKey[33];
-                GetScureChannelSessionEncKey(encSessionKey);
-                data = EncryptDGIData(encSessionKey, cpsNodes[i].first, data);
-                dataType = STORE_DATA_ENCRYPT;
+            //Store Data数据是否需要加密
+            for (auto encryptItem : g_vecEncryptDGI)
+            {
+                if (cpsNodes[i].first == encryptItem.dgi)
+                {
+                    char encSessionKey[33];
+                    GetScureChannelSessionEncKey(encSessionKey);
+                    data = EncryptDGIData(encSessionKey, cpsNodes[i].first, data, encryptItem.isPadding80);
+                    dataType = STORE_DATA_ENCRYPT;
+                }
             }
+
+            //数据是否需要加70模板
             int sDgi = stoi(cpsNodes[i].first, 0, 16);
-            if (sDgi <= 0x0B01) {   //数据需要加70模板
+            if (sDgi <= 0x0B01) {   
                 char noTemplateDataLen[5] = { 0 };
                 Tool::GetBcdDataLen(data.c_str(), noTemplateDataLen, 5);
                 if (data.length() > 0xFF * 2) {
@@ -234,17 +244,18 @@ bool PersonlizePBOC(IniConfig cpsFile)
                 }
                
             }
-
-            if (i == 0) {   //第一条数据
+            //第一条数据 or 最后条数据
+            if (i == 0) {   
                 bReset = true;
             }
-            else if (i == pbocDGIs - 1) {   //最后条数据
+            else if (i == pbocDGIs - 1) {   
                 dataType = STORE_DATA_END;
             }
 
+            //数据过长，需分段store data处理
             char dataLen[5] = { 0 };
             Tool::GetBcdDataLen(data.c_str(), dataLen, 5);
-            if (data.length() > 0xFC * 2) { //数据过长，需分段处理              
+            if (data.length() > 0xFC * 2) {               
                 string firstDataBlock = data.substr(0, 0xFC * 2);
                 dataContainedDGI = cpsNodes[i].first + dataLen + firstDataBlock;    //DGI + dataLen + data
                 if (0x9000 != StoreDataCmd(dataContainedDGI.c_str(), dataType, bReset)) {
@@ -273,16 +284,15 @@ bool PersonlizePBOC(IniConfig cpsFile)
 /******************************************************
 * 通过CPS文件，完成卡片个人化
 *******************************************************/
-bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
+bool DoPersonlization(const char* szCpsFile, const char* szConfigFile)
 {
 	IniConfig cpsFile;
-    //IniConfig cfgFile;
 
 	//获取相关配置信息
 	if (!cpsFile.Read(szCpsFile)){
 		return false;
 	}
-	if (!g_cfgFile.Read(iniConfigFile)){
+	if (!ParsePeronlizeConfiguration(szConfigFile)){
 		return false;
 	}
 	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
@@ -297,26 +307,26 @@ bool DoPersonlization(const char* szCpsFile, const char* iniConfigFile)
             return false;
         }
     }
+
 	//安装应用
-    vector<pair<string, string>> InstallApps;
-    g_cfgFile.GetValue("InstallApp", InstallApps);
-    for (auto app : InstallApps) {
-        if (0x9000 != InstallApp(g_cfgFile, app.second)) {
+    for (auto app : g_vecInstallApp) 
+    {
+        int sw = InstallAppCmd(app.packageAid.c_str(), app.appletAid.c_str(), app.instanceAid.c_str(), app.privilege.c_str(), app.installParam.c_str(), app.token.c_str());
+        if (sw != 0x9000)
             return false;
-        }
     }
+
     //应用个人化
-    for (auto app : InstallApps) {
+    for (auto app : g_vecInstallApp) {
         char resp[RESP_LEN] = { 0 };
-        string aid = g_cfgFile.GetValue(app.second, "InstanceAid");
-        if (0x9000 != SelectAppCmd(aid.c_str(), resp)) {
+        if (0x9000 != SelectAppCmd(app.instanceAid.c_str(), resp)) {
             return false;
         }
         if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
             return false;
         }
-        if (app.second == "PSE" || app.second == "PPSE") {
-            if (!PersonlizePSE(cpsFile,app.second)) {
+        if (app.appType == "PSE" || app.appType == "PPSE") {
+            if (!PersonlizePSE(cpsFile,app.instanceAid)) {
                 return false;
             }
         }

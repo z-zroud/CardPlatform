@@ -32,13 +32,6 @@ private:
     string      m_Magstrip1;
     string      m_Magstrip2;
     string      m_magstrip3;
-
-    vector<string>              m_vecDGI;
-    string						m_currentAccount;
-    vector<string>              m_encryptTag;       //加密的tag
-    vector<unsigned short>      m_valueOnlyDGI;     //仅还有value的tag
-    map<string, string>         m_exchangeDGI;      //需要交换的tag
-    string                      m_key;              //解密密钥
 };
 
 

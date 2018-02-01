@@ -92,6 +92,16 @@ bool ExistedInList(string value, vector<string> collection)
     return false;
 }
 
+bool Dict::TagExisted(string tag)
+{
+    for (auto item : m_vecItems) {
+        if (item.first == tag) {
+            return true;
+        }
+    }
+    return false;
+}
+
 string Dict::GetItem(string tag)
 {
     for (auto item : m_vecItems) {
@@ -297,8 +307,8 @@ bool IDpParse::IsTlvStruct(char* buffer, unsigned int bufferLength, bool littleE
 void IDpParse::HandleRule(const char* szRuleConfig, CPS_ITEM& cpsItem)
 {
     IRule ruleObj;
-	ruleObj.SetRuleCfg(szRuleConfig);
-	ruleObj.HandleRule(cpsItem);
+	if(ruleObj.SetRuleCfg(szRuleConfig))
+	    ruleObj.HandleRule(cpsItem);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -328,6 +338,28 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             encryptDGI.type = node->first_attribute("type")->value();
             encryptDGI.key = node->first_attribute("key")->value();
             m_vecDGIEncrypt.push_back(encryptDGI);
+        }
+        else if (nodeName == "TagEncrypt") {
+            TagEncrypt encryptTag;
+            encryptTag.tag = node->first_attribute("tag")->value();
+            encryptTag.type = node->first_attribute("type")->value();
+            encryptTag.key = node->first_attribute("key")->value();
+            if (node->first_attribute("startPos") == NULL) {
+                encryptTag.startPos = 0;
+            }
+            else {
+                string startPos = node->first_attribute("startPos")->value();
+                encryptTag.startPos = stoi(startPos);
+            }
+
+            if (node->first_attribute("len") == NULL) {
+                encryptTag.len = 0;
+            }
+            else {
+                string tagLen = node->first_attribute("len")->value();
+                encryptTag.len = stoi(tagLen);
+            }           
+            m_vecTagEncrypt.push_back(encryptTag);
         }
         else if (nodeName == "Map") {
             DGIMap mappedDGI;
@@ -373,10 +405,13 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
 void IRule::HandleRule(CPS_ITEM& cpsItem)
 {
     //处理顺序：DGI映射-->DGI交换-->DGI删除-->DGI解密-->DGI删除tag
+    HandleDGIDecrypt(cpsItem);
+    HandleTagDecrypt(cpsItem);
     HandleDGIMap(cpsItem);
     HandleDGIExchange(cpsItem);
-    HandleDGIDelete(cpsItem);
-    HandleDGIDecrypt(cpsItem);
+    HandleDGIAddTag(cpsItem);
+    HandleDGIAddFixedTag(cpsItem);
+    HandleDGIDelete(cpsItem);    
     HandleTagDelete(cpsItem);
 }
 
@@ -419,14 +454,40 @@ void IRule::HandleDGIExchange(CPS_ITEM& cpsItem)
 	}
 }
 
+void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
+{
+    for (auto& encryptedItem : m_vecTagEncrypt)
+    {
+        for (auto& item : cpsItem.items) {
+            if (item.value.TagExisted(encryptedItem.tag)) {
+                string decryptedData;
+                string encryptData = item.value.GetItem(encryptedItem.tag).substr(encryptedItem.tag.length() + 2);
+                if (encryptedItem.type == "SM") {
+                    decryptedData = SMDecryptDGI(encryptedItem.key, encryptData);
+                }
+                else {
+                    decryptedData = DesDecryptDGI(encryptedItem.key, encryptData);
+                }
+                if (decryptedData.length() > encryptedItem.len && encryptedItem.len > 0) {
+                    decryptedData = decryptedData.substr(encryptedItem.startPos, encryptedItem.len);
+                }
+                char decryptedDataLen[3];
+                Tool::GetBcdDataLen(decryptedData.c_str(), decryptedDataLen, 3);
+                decryptedData = encryptedItem.tag + decryptedDataLen + decryptedData;
+                item.value.ReplaceItem(encryptedItem.tag, decryptedData);
+            }
+        }
+    }
+}
+
 /***************************************************************
 * 解密DGI数据，注意该DGI只应只有一个tag=encryptData, 并且tag==DGI
 ****************************************************************/
 void IRule::HandleDGIDecrypt(CPS_ITEM& cpsItem)
-{  
-    for (auto& item : cpsItem.items)
+{ 
+    for (auto& encryptedItem : m_vecDGIEncrypt)
     {
-        for(auto& encryptedItem : m_vecDGIEncrypt)
+        for(auto& item : cpsItem.items)
         {
             if (item.dgi == encryptedItem.dgi) {
                 string decryptedData;
@@ -487,7 +548,10 @@ void IRule::HandleDGIAddFixedTag(CPS_ITEM& cpsItem)
     {
         for (auto item : m_vecFixedTagAdd) {
             if (dgiItem.dgi == item.srcDgi) {
-                dgiItem.value.InsertItem(item.tag, item.tagValue);
+                char tagValueLen[3] = { 0 };
+                Tool::GetBcdDataLen(item.tagValue.c_str(), tagValueLen, 3);
+                string value = item.tag + tagValueLen + item.tagValue;
+                dgiItem.value.InsertItem(item.tag, value);
             }
         }        
     }
@@ -497,12 +561,19 @@ void IRule::HandleDGIAddFixedTag(CPS_ITEM& cpsItem)
 * 功能： 将某个DGI分组的tag值添加到指定的DGI分组中
 *********************************************************/
 void IRule::HandleDGIAddTag(CPS_ITEM& cpsItem)
-{
-    for (auto &dgiItem : cpsItem.items) {
-        for (auto &item : m_vecAddTagFromDGI) {
+{  
+    for (auto &item : m_vecAddTagFromDGI) {
+        string tagValue;
+        for (auto &dstItem : cpsItem.items) {
+            if (dstItem.dgi == item.dstDgi) {
+                tagValue = dstItem.value.GetItem(item.dstTag);
+                break;
+            }
+        }
+        for (auto &dgiItem : cpsItem.items) {
             if (dgiItem.dgi == item.srcDgi) {
-                string value = dgiItem.value.GetItem(item.dstTag);
-                dgiItem.value.InsertItem(item.dstTag, value);
+                dgiItem.value.InsertItem(item.dstTag, tagValue);
+                break;
             }
         }
     }
@@ -512,15 +583,14 @@ void IRule::HandleDGIAddTag(CPS_ITEM& cpsItem)
 string IRule::SMDecryptDGI(string tk, string encryptData)
 {
     string result;
-    PDllSM4_CBC_DEC SM4_CBC_DEC = GetSMFunc<PDllSM4_CBC_DEC>("dllSM4_CBC_DEC");
-    int len = encryptData.length();
-    char* decryptedData = new char[len];
-    memset(decryptedData, 0, len);
-    if (SM4_CBC_DEC)
+    PDllSM4_ECB_DEC SM4_ECB_DEC = GetSMFunc<PDllSM4_ECB_DEC>("dllSM4_ECB_DEC");
+    if (SM4_ECB_DEC)
     {
-        SM4_CBC_DEC((char*)tk.c_str(), (char*)encryptData.c_str(), decryptedData);
+        int len = encryptData.length();
+        char* decryptedData = new char[len];
+        memset(decryptedData, 0, len);
+        SM4_ECB_DEC((char*)tk.c_str(), (char*)encryptData.c_str(), decryptedData);
         result = decryptedData;
-        delete[] decryptedData;
     }
     return result;
 }
