@@ -143,6 +143,28 @@ void Dict::DeleteItem(string key)
     }
 }
 
+/*************************************************************
+* 功能：将DGI item添加到容器中，若item所在DGI存在，则合并。
+**************************************************************/
+void CPS_ITEM::AddDgiItem(DGI_ITEM item)
+{
+    bool hasDgiExisted = false;
+    for (auto &dgiItem : items) {
+        if (dgiItem.dgi == item.dgi) //说明有重复项，将该item下的所有tag合并到原DGI中
+        {
+            auto mergedItems = item.value.GetItems();
+            for (auto mergedItem : mergedItems)
+            {
+                dgiItem.value.InsertItem(mergedItem.first, mergedItem.second);
+            }
+            hasDgiExisted = true;
+            break;
+        }
+    }
+    if (!hasDgiExisted)
+        items.push_back(item);
+}
+
 /*****************************************************
 * 保存CPS数据
 ******************************************************/

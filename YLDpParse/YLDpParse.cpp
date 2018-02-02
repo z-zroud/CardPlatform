@@ -39,7 +39,11 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
         GetBCDBuffer(dpFile, value, nFollowedDataLen);
         if (dgiItem.dgi == "Store_PSE_1") {
             dgiItem.dgi = "PSE";
-            dgiItem.value.InsertItem("0101", value);
+            char dataLen[3] = { 0 };
+            Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
+            string tag = "0101";
+            value = tag + string(dataLen) + value;
+            dgiItem.value.InsertItem(tag, value);
         }
         else if (dgiItem.dgi == "Store_PSE_2") {
             dgiItem.dgi = "PSE";
@@ -47,7 +51,11 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
             char dataLen[3] = { 0 };
             Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
             value = "A5" + string(dataLen) + value;
-            dgiItem.value.InsertItem("9102", value);
+            memset(dataLen, 0, 3);
+            Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
+            string tag = "9102";
+            value = tag + dataLen + value;
+            dgiItem.value.InsertItem(tag, value);
         }
         else {
             dgiItem.dgi = "PPSE";
@@ -56,7 +64,11 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
             value = "BF0C" + string(dataLen) + value;
             Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
             value = "A5" + string(dataLen) + value;
-            dgiItem.value.InsertItem("9102", value);
+            memset(dataLen, 0, 3);
+            Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
+            string tag = "9102";
+            value = tag + dataLen + value;
+            dgiItem.value.InsertItem(tag, value);
         }
 	}
 
@@ -145,7 +157,7 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile)
         //±£´æÊý¾Ý
         int pos = string(fileName).find_last_of('\\');
         string path = string(fileName).substr(0, pos + 1);
-		cpsItem.fileName = path + "conv\\" + GetAccount(cpsItem) + ".txt";
+		cpsItem.fileName = path + GetAccount(cpsItem) + ".txt";
 		Save(cpsItem);
 		vecCpsItem.push_back(cpsItem);
 	}

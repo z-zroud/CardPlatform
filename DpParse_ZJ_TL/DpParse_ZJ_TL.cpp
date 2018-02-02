@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "DpParse_ZJ_TL.h"
+#include "../Util/Tool.h"
 
 #define DGI_NUMBER	4
 #define DGI_LEN		2
@@ -34,9 +35,23 @@ void ZJTLDpParse::ParsePSE(ifstream& dpFile, CPS_ITEM& cpsItem, string dgiName)
     DGI_ITEM dgiItem;
     string value;
     GetBCDBuffer(dpFile, value, dgiLen);
-    dgiItem.dgi = dgiName;
-    dgiItem.value.InsertItem(dgiItem.dgi, value);
-    cpsItem.items.push_back(dgiItem);
+    string tag;
+    if (dgiName.substr(0, 3) == "PSE")
+    {
+        dgiItem.dgi = "PSE";
+        tag = dgiName.substr(4);
+    }
+    else {
+        dgiItem.dgi = "PPSE";   //中信的数据都包含有6F模板，一般都固定值为42字节，去掉
+        tag = dgiName.substr(5);
+        char dataLen[3] = { 0 };
+        Tool::GetBcdDataLen(value.substr(42).c_str(), dataLen, 3);
+        value = "9102" + string(dataLen) + value.substr(42);
+    }
+    
+    dgiItem.value.InsertItem(tag, value);
+    //cpsItem.items.push_back(dgiItem);
+    cpsItem.AddDgiItem(dgiItem);
 }
 
 string ZJTLDpParse::GetDGIStartMark(ifstream& dpFile)
@@ -105,7 +120,8 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile)
 		{
 			DGI_ITEM dgiItem;
 			dgiItem.dgi = m_vecDGI[i];
-			if (dgiItem.dgi.substr(0, 3) == "PSE")	//对于DGIF001和PSE/PPSE数据，需要特殊处理
+			if (dgiItem.dgi.substr(0, 3) == "PSE" ||
+                dgiItem.dgi.substr(0,4) == "PPSE")	//对于DGIF001和PSE/PPSE数据，需要特殊处理
 			{
                 ParsePSE(dpFile, cpsItem, dgiItem.dgi);
 				continue;

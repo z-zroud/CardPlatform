@@ -42,6 +42,7 @@ struct CPS_ITEM
 {
 	string fileName;
 	vector<DGI_ITEM> items;
+    void AddDgiItem(DGI_ITEM item);
 };
 
 bool  CheckFolderExist(const string &strPath);

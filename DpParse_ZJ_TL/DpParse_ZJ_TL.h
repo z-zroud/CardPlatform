@@ -22,10 +22,6 @@ protected:
 private:
 	vector<string>              m_vecDGI;
 	string						m_currentAccount;
-	const int                   m_reserved = 8596;  //银联保留的文件头大小
-	vector<string>              m_encryptTag;       //加密的tag
-	vector<unsigned short>      m_valueOnlyDGI;     //仅还有value的tag
-	string                      m_key;              //解密密钥
 };
 
 extern "C" DPPARSE_ZJ_TL_API bool HandleDp(const char* szFileName, const char* ruleFile);
