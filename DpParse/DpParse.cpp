@@ -273,7 +273,7 @@ void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, boo
             Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
             strLen = "82" + string(dataLen);        
         }
-        else if (nLen > 0x79) {
+        else if (nLen > 0x80) {
             char dataLen[5] = { 0 };
             Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
             strLen = "81" + string(dataLen);

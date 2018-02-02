@@ -116,7 +116,7 @@ bool PersonlizePSE(IniConfig cpsFile, string app)
         if (personlizeDGIs.size() == 1) {   //如果DGI数量为1的情况
             char dataLen[5] = { 0 };
             Tool::GetBcdDataLen(personlizeDGIs[0].second.c_str(), dataLen, 5);
-            string data = personlizeDGIs[0].first + dataLen + personlizeDGIs[0].second;
+            string data = personlizeDGIs[0].second;
             if (0x9000 != StoreDataCmd(data.c_str(), STORE_DATA_END, true)) {
                 return false;
             }
@@ -127,7 +127,7 @@ bool PersonlizePSE(IniConfig cpsFile, string app)
             for (auto DGI : personlizeDGIs) {
                 char dataLen[5] = { 0 };
                 Tool::GetBcdDataLen(DGI.second.c_str(), dataLen, 5);
-                string data = DGI.first + dataLen + DGI.second;
+                string data = DGI.second;
                 if (*firstDGI == DGI) {
                     if (0x9000 != StoreDataCmd(data.c_str(), STORE_DATA_PLANT, true)) {
                         return false;
@@ -172,8 +172,10 @@ bool ParsePeronlizeConfiguration(const char* configFile)
             app.packageAid = node->first_attribute("packageAid")->value();
             app.appletAid = node->first_attribute("appletAid")->value();
             app.instanceAid = node->first_attribute("instanceAid")->value();
+            app.privilege = node->first_attribute("priviliage")->value();
             app.installParam = node->first_attribute("installParam")->value();
             app.token = node->first_attribute("token")->value();
+            app.appType = node->first_attribute("type")->value();
             if (app.token.empty())
                 app.token = "00";
             g_vecInstallApp.push_back(app);
@@ -236,7 +238,7 @@ bool PersonlizePBOC(IniConfig cpsFile)
                 if (data.length() > 0xFF * 2) {
                     data = "7082" + string(noTemplateDataLen) + data;
                 }
-                else if (data.length() > 0x79 * 2) {
+                else if (data.length() > 0x80 * 2) {
                     data = "7081" + string(noTemplateDataLen) + data;
                 }
                 else {
@@ -326,7 +328,7 @@ bool DoPersonlization(const char* szCpsFile, const char* szConfigFile)
             return false;
         }
         if (app.appType == "PSE" || app.appType == "PPSE") {
-            if (!PersonlizePSE(cpsFile,app.instanceAid)) {
+            if (!PersonlizePSE(cpsFile,app.appType)) {
                 return false;
             }
         }

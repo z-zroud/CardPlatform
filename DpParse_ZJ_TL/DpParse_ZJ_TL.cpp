@@ -110,7 +110,7 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile)
                 ParsePSE(dpFile, cpsItem, dgiItem.dgi);
 				continue;
 			}
-            if (dgiItem.dgi.substr(0, 3) == "DGI") {
+            if (dgiItem.dgi.substr(0, 3) == "DGI") {    //É¾³ýDGIÖÐµÄ"DGI"×Ö·û´®
                 dgiItem.dgi = dgiItem.dgi.substr(3);
             }
             if (GetDGIStartMark(dpFile) != "86") {
