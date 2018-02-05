@@ -128,6 +128,21 @@ def SaveTlv(tlvs, tags):
             tags.append(TV(tlv.tag,tlv.value))
             print("Tag: ", tlv.tag, "Value:",tlv.value)
 
+def GetTags(tlvs):
+    tags = []
+    for tlv in tlvs:
+        if tlv.isTemplate is False:
+            tags.append(TV(tlv.tag,tlv.value))
+    return tags
+
+
+def GetTagFromTlv(tag,tlvs):
+    ret = TLV()
+    for tlv in tlvs:
+        if tlv.tag == tag:
+            return tlv
+    return ret
+
 def GetTagValue(tag,tags):
     for item in tags:
         if tag == item.tag:

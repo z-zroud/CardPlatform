@@ -3,7 +3,6 @@
 from card_check.util import ApduCmd
 from card_check.util import DataParse
 from card_check.util import Authencation
-from card_check.pboc.cases import CaseSelectApp
 from card_check.util import CInterface
 
 tags = []   #store TV key-value pair

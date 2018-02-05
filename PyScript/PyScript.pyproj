@@ -34,7 +34,7 @@
     <Folder Include="card_check\util\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="card_check\pboc\cases\CaseSelectApp.py">
+    <Compile Include="card_check\pboc\cases\CaseGPO.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="card_check\pboc\cases\CaseSelectPse.py">
@@ -68,17 +68,18 @@
     <Compile Include="card_check\pboc\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="card_check\util\ReturnRet.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="card_check\util\SockClient.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PyScript.py" />
     <Compile Include="card_check\util\ApduCmd.py" />
-    <Compile Include="card_check\util\ApduOutput.py" />
     <Compile Include="card_check\util\Authencation.py" />
     <Compile Include="card_check\util\DataParse.py" />
     <Compile Include="card_check\util\Des.py" />
     <Compile Include="card_check\util\Kmc.py" />
-    <Compile Include="card_check\util\learn_test.py" />
     <Compile Include="card_check\util\MotCmd.py" />
     <Compile Include="card_check\util\PCSC.py" />
     <Compile Include="card_check\util\PCSCEnum.py" />

@@ -14,21 +14,16 @@ def OpenCardReader(readerName):
     if PCSC.OpenReader(readerName) is True:
         print(PCSC.GetATR())
 
-def DoPbocQPBOCTrans():
-    pbocPse.SelectPPSE()
-    qPboc.SelectApp(CInterface.GetAid())
-    qPboc.InitApp()
-    qPboc.ReadRecord()
-    qPboc.OfflineAuth()
-
-def DoPbocEC():
+def DoPbocContact():
     pbocPse.SelectPSE()
-    pbocEc.SelectApp(CInterface.GetAid())
-    pbocEc.InitApp()
-    pbocEc.ReadRecord()
-    pbocEc.OfflineAuth()
-    pbocEc.TerminalRiskManagement()
-    pbocEc.TerminalActionAnalyse()
+    pbocContactTrans.SelectApp(CInterface.GetAid())
+    pbocContactTrans.InitApp()
+    pbocContactTrans.ReadRecord()
+    pbocContactTrans.OfflineAuth()
+    pbocContactTrans.TerminalActionAnalyse()
+    pbocContactTrans.IssuerAuthencation()
+    pbocContactTrans.EndTransaction()
+    pbocContactTrans.HandleIssuerScript()
 
 def DoPbocContactless():
     pbocPse.SelectPPSE()
@@ -41,17 +36,21 @@ def DoPbocContactless():
     pbocContactTrans.EndTransaction()
     pbocContactTrans.HandleIssuerScript()
 
-
-def DoPbocContact():
+def DoPbocEC():
     pbocPse.SelectPSE()
-    pbocContactTrans.SelectApp(CInterface.GetAid())
-    pbocContactTrans.InitApp()
-    pbocContactTrans.ReadRecord()
-    pbocContactTrans.OfflineAuth()
-    pbocContactTrans.TerminalActionAnalyse()
-    pbocContactTrans.IssuerAuthencation()
-    pbocContactTrans.EndTransaction()
-    pbocContactTrans.HandleIssuerScript()
+    pbocEc.SelectApp(CInterface.GetAid())
+    pbocEc.InitApp()
+    pbocEc.ReadRecord()
+    pbocEc.OfflineAuth()
+    pbocEc.TerminalRiskManagement()
+    pbocEc.TerminalActionAnalyse()
+
+def DoPbocQPBOCTrans():
+    pbocPse.SelectPPSE()
+    qPboc.SelectApp(CInterface.GetAid())
+    qPboc.InitApp()
+    qPboc.ReadRecord()
+    qPboc.OfflineAuth()
 
 
 if __name__ == '__main__':
@@ -63,6 +62,7 @@ if __name__ == '__main__':
         print(reader)
     if PCSC.OpenReader(readers[0]) is True:
         print(PCSC.GetATR())
+        #DoPbocContact()
         DoPbocContactless()
         #DoPbocQPBOCTrans()
 

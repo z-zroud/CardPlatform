@@ -3,7 +3,7 @@
 from .PCSC import SendApdu
 from .Tool import SW
 from .Tool import GetBcdDataLen
-from .Tool import IntToStr
+from .Tool import IntToHexStr
 from .PCSCEnum import DIV_METHOD,SECURE_LEVEL
 from . import Kmc
 from . import Des
@@ -100,7 +100,7 @@ def ReadRecordCmd(sfi,recordNum):
 def ReadRecordCmd1(p1, sfi):
 	tmp = int(sfi,base=16)
 	p2 = (tmp << 3) + 4
-	p2Str = IntToStr(p2)
+	p2Str = IntToHexStr(p2)
 	cmd = "00B2" + p1 + p2Str
 	return SendApdu(cmd)
 
