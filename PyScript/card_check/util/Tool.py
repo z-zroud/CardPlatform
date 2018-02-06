@@ -1,5 +1,6 @@
 # This module define some hex int number to string type
 
+from card_check.util import DataParse
 # convert int value to hex string type
 def IntToHexStr(intValue):
     strNum = '{0:X}'.format(intValue)

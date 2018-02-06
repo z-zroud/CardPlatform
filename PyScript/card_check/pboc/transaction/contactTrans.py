@@ -2,11 +2,7 @@ from card_check.util import ApduCmd
 from card_check.util import DataParse
 from card_check.util import Authencation
 from card_check.util import CInterface
-
-tags = []   #store TV key-value pair
-sigStaticData = ""
-
-
+from card_check.util import TransInfo
 
 def SelectApp(aid):
     #aid = DataParse.GetTagValue("4F",tags)
@@ -31,9 +27,14 @@ def InitApp():
     if sw != 0x9000:
         return False
     tlvs = []
+    
     DataParse.ParseTLV(resp,tlvs)
-    DataParse.SaveTlv(tlvs,tags)
-    print(DataParse.FormatTlv(tlvs))
+    if len(tlvs) != 1:
+        return False
+    tags.append(DataParse.TV("82",tlvs[0].value[0:4]))
+    tags.append(DataParse.TV("94",tlvs[0].value[4:len(tlvs[0].value)]))
+    #DataParse.SaveTlv(tlvs,tags)
+    #print(DataParse.FormatTlv(tlvs))
     return True
 
 def ReadRecord():

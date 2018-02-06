@@ -74,3 +74,8 @@ extern "C" PCSC_API int SendApdu2(const char* cmd);
 *****************************************************/
 extern "C" PCSC_API char* GetApduError(int status);
 
+/*****************************************************
+* 功能：获取最近一次发送APDU指令的命令
+******************************************************/
+extern "C" PCSC_API void GetLastApduCmd(char* cmd, int cmdLen);
+

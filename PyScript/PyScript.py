@@ -60,9 +60,9 @@ if __name__ == '__main__':
     readers = PCSC.GetReaders()
     for reader in readers:
         print(reader)
-    if PCSC.OpenReader(readers[0]) is True:
+    if PCSC.OpenReader(readers[1]) is True:
         print(PCSC.GetATR())
-        #DoPbocContact()
-        DoPbocContactless()
+        DoPbocContact()
+        #DoPbocContactless()
         #DoPbocQPBOCTrans()
 

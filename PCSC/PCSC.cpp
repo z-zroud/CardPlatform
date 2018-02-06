@@ -15,6 +15,7 @@ SCARDHANDLE g_scardHandle = NULL;
 DWORD g_dwActiveProtocol = 0;
 
 char g_readerName[128] = { 0 };     //保存当前打开的读卡器
+char g_cmd[2048] = { 0 };   //保存最近一次Apdu指令
 
 //建立资源管理器上下文
 BOOL EstablishContext()
@@ -237,6 +238,7 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
     //删除字符串中的空格
     int cmdLen = strlen(cmd);
 	char noSpaceCmd[2048] = { 0 };
+    //memset(g_cmd, 0, sizeof(g_cmd));
     Tool::DeleteSpace(cmd, noSpaceCmd, sizeof(noSpaceCmd));
     cmdLen = strlen(noSpaceCmd);
 
@@ -294,7 +296,8 @@ int  SendApdu(const char* cmd, char* output, int len)
 
 	char response[2048] = {0};	//保存APDU返回值
     int responseLen = 2048;
-
+    memset(g_cmd, 0, sizeof(g_cmd));
+    Tool::DeleteSpace(cmd, g_cmd, sizeof(g_cmd));
     if (!SendApduCmd(cmd, response, responseLen))
     {
         return -1;
@@ -392,6 +395,11 @@ char* GetApduError(int status)
 	case 0x9406:	return "Requested TAC/MAC not available";						
 		}
 	return "Unkonw error";
+}
+
+void GetLastApduCmd(char* cmd, int cmdLen)
+{
+    strncpy_s(cmd, cmdLen, g_cmd, strlen(g_cmd));
 }
 
 

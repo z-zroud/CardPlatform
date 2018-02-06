@@ -1,5 +1,5 @@
-from card_check.util.DataParse import GetTagFromTlv
-from card_check.util.DataParse import GetTags
+from card_check.util.TransInfo import GetTagFromTlv
+from card_check.util.TransInfo import GetTags
 from card_check.util import ReturnRet
 from card_check.util import Tool
 
@@ -128,6 +128,69 @@ def PBOC_sPSE_CFX_001(tlvs):
     if tags.count("DF4D") > 1:
         return ReturnRet.S_ERROR
     return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_001(tlvs):
+    if tlvs[0].value != "70":
+        return ReturnRet.S_ERROR
+    return True
+
+def PBOC_sPSEDIR_SJHGX_002(tlvs):
+    pass
+
+def PBOC_sPSEDIR_SJHGX_003(tlvs):
+    template61 = GetTagFromTlv("61",tlvs)
+    if template61.level != 1:
+        return ReturnRet.S_ERROR
+    return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_004(tlvs):
+    pass
+
+def PBOC_sPSEDIR_SJHGX_005(tlvs):
+    tag4F = GetTagFromTlv("4F",tlvs)
+    if tag4F.level != 2 or len(tag4F.value) == 0:
+        return ReturnRet.S_ERROR
+    return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_006(tlvs):
+    tag4F = GetTagFromTlv("4F",tlvs)
+    if tag4F.length < 5 or tag4F.length > 16:
+        return ReturnRet.S_ERROR
+    return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_007(tlvs):
+    tag50 = GetTagFromTlv("50",tlvs)
+    if tag50.length < 1 or tag50.length > 16:
+        return ReturnRet.S_ERROR
+    return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_008(tlvs):
+    for tlv in tlvs:
+        if tlv.isTemplate is False:
+            if tlv.tag not in ("9F12","87","73"):
+                return ReturnRet.S_ERROR
+    return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_009(tlvs):
+    tag9F12 = GetTagFromTlv("9F12",tlvs)
+    if tag9F12.length < 1 or tag9F12.length > 16:
+        return ReturnRet.S_ERROR
+    return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_010(tlvs):
+    tag87 = GetTagFromTlv("87",tlvs)
+    if tag87.length != 1:
+        return ReturnRet.S_ERROR
+    return ReturnRet.S_OK
+
+def PBOC_sPSEDIR_SJHGX_011(tlvs):
+    pass
+
+def PBOC_sPSEDIR_SJHGX_012(tlvs):
+    pass
+
+def PBOC_sPSEDIR_SJHGX_013(tlvs):
+    pass
 
 
 

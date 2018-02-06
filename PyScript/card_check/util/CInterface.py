@@ -69,6 +69,31 @@ def GetTermTag(tag):
         pFunc = getattr(sys.modules[__name__],funcName)
         return pFunc()
 
+def SetTerminalParamsContactTransDes():
+    pass
+
+def SetTerminalParamsContactTransSM():
+    pass
+
+def SetTerminalParamsContactlessTransDes():
+    pass
+
+def SetTerminalParamsContactlessTransSM():
+    pass
+
+def SetTerminalParamsEcTransDes():
+    pass
+
+def SetTerminalParamsEcTransSM():
+    pass
+
+def SetTerminalParamsQPbocTransDes():
+    pass
+
+def SetTerminalParamsQPbocTransSM():
+    pass
+
+
 
 if __name__ == '__main__':
     print(GetTerm9A())

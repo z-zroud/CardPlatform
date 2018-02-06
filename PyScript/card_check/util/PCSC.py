@@ -70,6 +70,12 @@ def GetATR():
 	ReaderLib.GetATR(bytesATR,ATRLen)
 	return bytes.decode(bytesATR.value)
 
+def GetLastApduCmd():
+    cmdLen = c_int(2048)
+    bytesCmd = create_string_buffer(cmdLen.value)
+    ReaderLib.GetLastApduCmd(bytesCmd,cmdLen)
+    return bytes.decode(bytesCmd.value)
+
 # send apdu command, this function return a tuple eg. tuple(SW, data).
 # var cmd is string type, not bytes type.
 def SendApdu(cmd):

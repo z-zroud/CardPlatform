@@ -37,6 +37,12 @@
     <Compile Include="card_check\pboc\cases\CaseGPO.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="card_check\pboc\cases\CasePboc.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\pboc\cases\CaseSelectAid.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="card_check\pboc\cases\CaseSelectPse.py">
       <SubType>Code</SubType>
     </Compile>
@@ -72,6 +78,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="card_check\util\SockClient.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="card_check\util\TransInfo.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PyScript.py" />

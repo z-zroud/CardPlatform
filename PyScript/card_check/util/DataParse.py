@@ -111,43 +111,7 @@ def ParseTLV(buffer, tlvList):
         tlvList.append(_tlv)
     return ret
 
-def FormatTlv(tlvs):
-    formatStr = ""
-    for tlv in tlvs:
-        formatStr += '    ' * tlv.level
-        if tlv.isTemplate is True:
-            formatStr += "<" + tlv.tag + ">\n"
-        else:
-            formatStr += "[" + tlv.tag + "]=" + tlv.value + '\n'
-    return formatStr
 
-
-def SaveTlv(tlvs, tags):
-    for tlv in tlvs:
-        if tlv.isTemplate is False:
-            tags.append(TV(tlv.tag,tlv.value))
-            print("Tag: ", tlv.tag, "Value:",tlv.value)
-
-def GetTags(tlvs):
-    tags = []
-    for tlv in tlvs:
-        if tlv.isTemplate is False:
-            tags.append(TV(tlv.tag,tlv.value))
-    return tags
-
-
-def GetTagFromTlv(tag,tlvs):
-    ret = TLV()
-    for tlv in tlvs:
-        if tlv.tag == tag:
-            return tlv
-    return ret
-
-def GetTagValue(tag,tags):
-    for item in tags:
-        if tag == item.tag:
-            return item.value
-    return ''
 
 
 if __name__ == '__main__':
