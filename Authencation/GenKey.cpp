@@ -44,6 +44,32 @@ string EvenOddCheck(string input)
 	return result;
 }
 
+int GenDesKcv(const char* key, char* kcv, int kcvLen)
+{
+    char allKcv[32] = { 0 };
+    Des3_ECB(allKcv, (char*)key, "0000000000000000", 16);
+    if (strlen(allKcv) != 16)
+        return -1;
+    strncpy(kcv, allKcv, kcvLen);
+
+    return 0;
+}
+
+int GenSmKcv(const char* key, char* kcv, int kcvLen)
+{
+    char allKcv[33] = { 0 };
+    PDllSM4_ECB_ENC dllSM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
+    if (dllSM4_ECB_ENC)
+    {        
+        dllSM4_ECB_ENC((char*)key, "00000000000000000000000000000000", allKcv);
+    }
+    if (strlen(allKcv) != 32)
+        return -1;
+    strncpy(kcv, allKcv, kcvLen);
+
+    return 0;
+}
+
 void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey)
 {
 	string leftInput = "000000000000" + string(atc);

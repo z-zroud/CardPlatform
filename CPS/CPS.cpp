@@ -152,6 +152,8 @@ bool PersonlizePSE(IniConfig cpsFile, string app)
 
 bool ParsePeronlizeConfiguration(const char* configFile)
 {
+    g_vecInstallApp.clear();    //使用之前删除旧的，防止多次添加
+    g_vecEncryptDGI.clear();
     //使用rapidxml::file读取文件更方便  
     rapidxml::file<char> fdoc(configFile);
 
@@ -207,10 +209,14 @@ bool PersonlizePBOC(IniConfig cpsFile)
         if (cpsNodes.size() < 3) {
             return false;
         }
-        int pbocDGIs = cpsNodes.size() - 2;
+        int pbocDGIs = cpsNodes.size();
 
         for (int i = 0; i < pbocDGIs; i++)
         {
+            if (cpsNodes[i].first == "PSE" || cpsNodes[i].first == "PPSE")
+            {
+                continue;
+            }
             int dataType = STORE_DATA_PLANT;
             bool bReset = false;
             string data;
@@ -297,6 +303,11 @@ bool DoPersonlization(const char* szCpsFile, const char* szConfigFile)
 	if (!ParsePeronlizeConfiguration(szConfigFile)){
 		return false;
 	}
+    char resp[RESP_LEN] = { 0 };
+    if (0x9000 != SelectAppCmd(g_isd.c_str(), resp))
+    {
+        return false;
+    }
 	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
 		return false;
 	}
@@ -330,15 +341,23 @@ bool DoPersonlization(const char* szCpsFile, const char* szConfigFile)
         if (app.appType == "PSE" || app.appType == "PPSE") {
             if (!PersonlizePSE(cpsFile,app.appType)) {
                 return false;
+#if _DEBUG
+                printf("Personlize FAIL!\n");
+#endif
             }
         }
         else {
             if (!PersonlizePBOC(cpsFile)) {
                 return false;
+#if _DEBUG
+                printf("Personlize FAIL!\n");
+#endif
             }
         }
     }
-
+#if _DEBUG
+    printf("Personlize success!\n");
+#endif
     return true;
 }
 

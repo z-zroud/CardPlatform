@@ -208,17 +208,17 @@ enum TERM_TRANS_TYPE
 //	unsigned int subTLVnum;		//下一级的TLV数量，不包括下下级的TLV（记录subTLVEntity[]的大小）
 //}TLV, *PTLV;
 
-typedef struct BCD_TLVEntity
-{
-	unsigned char* Tag;			//标签
-	unsigned char* Length;		//长度
-	unsigned char* Value;		//数据
-	unsigned int TagSize;		//标签占用字节  一般两个字节
-	unsigned int LengthSize;	//数据占用的字节
-	bool isTemplate;		//是否为复合结构，也就是这个tag就是template
-	BCD_TLVEntity* subTLVEntity;	//嵌套的子TLV结构体,如果有的话，需要递归
-	unsigned int subTLVnum;		//下一级的TLV数量，不包括下下级的TLV（记录subTLVEntity[]的大小）
-}BCD_TLV, *PBCD_TLV;
+//typedef struct BCD_TLVEntity
+//{
+//	unsigned char* Tag;			//标签
+//	unsigned char* Length;		//长度
+//	unsigned char* Value;		//数据
+//	unsigned int TagSize;		//标签占用字节  一般两个字节
+//	unsigned int LengthSize;	//数据占用的字节
+//	bool isTemplate;		//是否为复合结构，也就是这个tag就是template
+//	BCD_TLVEntity* subTLVEntity;	//嵌套的子TLV结构体,如果有的话，需要递归
+//	unsigned int subTLVnum;		//下一级的TLV数量，不包括下下级的TLV（记录subTLVEntity[]的大小）
+//}BCD_TLV, *PBCD_TLV;
 
 typedef struct BCD_TLEntity
 {

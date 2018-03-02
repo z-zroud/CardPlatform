@@ -111,9 +111,6 @@ def ParseTLV(buffer, tlvList):
         tlvList.append(_tlv)
     return ret
 
-
-
-
 if __name__ == '__main__':
     afls = []
     print(ParseAFL("08010100100103011010100018010400",afls))

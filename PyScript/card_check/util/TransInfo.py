@@ -1,18 +1,8 @@
 from enum import Enum
-from card_check.util.DataParse import TL,TLV,AFL
+from card_check.util.DataParse import TL,TLV,AFL,ParseTLV
 
 sigStaticData = ""
-
-def FormatTlv(tlvs):
-    formatStr = ""
-    for tlv in tlvs:
-        formatStr += '    ' * tlv.level
-        if tlv.isTemplate is True:
-            formatStr += "<" + tlv.tag + ">\n"
-        else:
-            formatStr += "[" + tlv.tag + "]=" + tlv.value + '\n'
-    return formatStr
-
+transAid = "A000000333010101"   #交易时使用的应用AID，由界面传入
 
 def SaveTlv(tlvs, tags):
     for tlv in tlvs:
@@ -77,6 +67,41 @@ def SetTransTags(transStep,tlvs):
 
 def GetTransTags(transStep,tag):
     return TransTags[transStep][tag]
+
+def ParseAndSaveResp(resp,transStep):
+    tlvs = []
+    if ParseTLV(resp,tlvs) is False:
+        return False
+    SetTransTags(transStep,tlvs)
+    return True
+
+def ParseGPOAndSave(resp):
+    if len(resp) < 4:
+        return False
+    gpoTlvs = []
+    if ParseTLV(resp,gpoTlvs) is False:
+        return False
+    if len(gpoTlvs) != 1:
+        return False
+    tag80 = TLV()
+    tag80.isTemplate = True
+    tag80.level = 0
+    tag80.tag = "80"
+    tag82 = TLV()
+    tag82.isTemplate = False
+    tag82.length = 2
+    tag82.level = 1
+    tag82.tag = "82"
+    tag82.value = gpoTlvs[0].value[0:4]
+    tag94 = TLV()
+    tag94.isTemplate = False
+    tag94.level = 1
+    tag94.tag = "94"
+    tag94.value = gpoTlvs[0].value[4:len(gpoTlvs[0].value)]
+    tag94.length = len(tag94.value) // 2
+    tlvs = [tag80,tag82,tag94]
+    SetTransTags(TransStep.STEP_GPO,tlvs)
+    return True
 
 
 

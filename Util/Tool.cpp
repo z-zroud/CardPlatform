@@ -240,5 +240,21 @@ namespace  Tool
 
         return -1;
     }
+
+    void SplitStr(const string& str, string sep, vector<string>& subStrs)
+    {
+        int index = 0;
+        int maxIndex = str.length();
+        while (index < maxIndex)
+        {
+            int index2 = str.find_first_of(sep, index);
+            if (index2 != string::npos)
+            {
+                string subStr = str.substr(index, index2 - index);
+                subStrs.push_back(subStr);                
+            }
+            index = index2 + sep.length();
+        }       
+    }
 }
 

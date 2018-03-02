@@ -354,6 +354,10 @@ UINT StoreDataCmd(const char* data, int type, bool reset)
 	int sw = SendApdu2(cmd.c_str());
 	count++;
 	if (type == STORE_DATA_END) { count = 0; }	//ÖØÖÃ¼ÆÊıÆ÷
+
+#if _DEBUG
+    printf("%s\n sw=%4X\n", cmd.c_str(),sw);
+#endif
 	return sw;
 }
 

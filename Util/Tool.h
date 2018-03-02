@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 enum Hex_Len
 {
@@ -55,6 +56,11 @@ namespace Tool
     * 获取文件所在目录路径
     ************************************************************/
     string GetDirectory(const char* filePath);
+
+    /***********************************************************
+    * 功能：将字符串str按sep分割成子字符串，存储到subStrs容器中
+    ************************************************************/
+    void SplitStr(const string& str, string sep, vector<string>& subStrs);
 }
 
 //#ifdef __cplusplus

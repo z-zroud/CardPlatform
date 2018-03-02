@@ -2,6 +2,7 @@
 #include "IDpParse.h"
 #include "../Util/Des0.h"
 #include "../Util/SM.hpp"
+#include "../Authencation/IGenKey.h"
 #include <fstream>
 #include "../Util/IniConfig.h"
 #include "../Util/Tool.h"
@@ -79,6 +80,16 @@ string DeleteSpace(string s)
 		}
 	}
 	return strResult;
+}
+
+bool ExistedInDGIs(string dgi, CPS_ITEM& cpsItem)
+{
+    for (auto item : cpsItem.items)
+    {
+        if (item.dgi == dgi)
+            return true;
+    }
+    return false;
 }
 
 bool ExistedInList(string value, vector<string> collection)
@@ -208,6 +219,20 @@ long IDpParse::GetFileSize(ifstream& dpFile)
 }
 
 /******************************************************************
+******************************************************************/
+string IDpParse::GetLine(ifstream& dpFile)
+{
+    char* data = new char[100 * 1024];
+    memset(data, 0, 100 * 1024);
+    dpFile.getline(data, 100 * 1024);
+
+    string oneLineData(data);
+    delete data;
+
+    return oneLineData;
+}
+
+/******************************************************************
 * 打开文件
 *******************************************************************/
 bool IDpParse::OpenDpFile(const char* fileName, ifstream& dpFile)
@@ -306,6 +331,11 @@ void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, boo
     }
 }
 
+string IDpParse::GetAccount2(string magstripData)
+{
+    return "";
+}
+
 string IDpParse::GetAccount(CPS_ITEM& cpsItem)
 {
     for (auto item : cpsItem.items) {
@@ -361,6 +391,21 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             encryptDGI.key = node->first_attribute("key")->value();
             m_vecDGIEncrypt.push_back(encryptDGI);
         }
+        else if (nodeName == "AddTagToValue") {
+            string dgi = node->first_attribute("DGI")->value();
+            m_vecAddTagAndTemplate.push_back(dgi);
+        }
+        else if (nodeName == "SpliteEF02")
+        {
+            m_hasEF02 = true;
+        }
+        else if (nodeName == "AddKcv") {
+            AddKCV kcvItem;
+            kcvItem.srcDgi = node->first_attribute("srcDGI")->value();
+            kcvItem.dstDgi = node->first_attribute("dstDGI")->value();
+            kcvItem.keyType = node->first_attribute("keyType")->value();
+            m_vecAddKcv.push_back(kcvItem);
+        }
         else if (nodeName == "TagEncrypt") {
             TagEncrypt encryptTag;
             encryptTag.tag = node->first_attribute("tag")->value();
@@ -389,6 +434,15 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             mappedDGI.dstDgi = node->first_attribute("dstDGI")->value();
             m_vecDGIMap.push_back(mappedDGI);
         }
+        else if (nodeName == "MergeTag")
+        {
+            TagMerge mergeTag;
+            mergeTag.srcDgi = node->first_attribute("srcDGI")->value();
+            mergeTag.srcTag = node->first_attribute("srcTag")->value();
+            mergeTag.dstDgi = node->first_attribute("dstDGI")->value();
+            mergeTag.dstTag = node->first_attribute("dstTag")->value();
+            m_vecTagMerge.push_back(mergeTag);
+        }
         else if (nodeName == "Exchange") {
             DGIExchange exchangedDGI;
             exchangedDGI.srcDgi = node->first_attribute("srcDGI")->value();
@@ -398,6 +452,14 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
         else if (nodeName == "AddTagFromDGI") {
             AddTagFromDGI vecDGI;
             vecDGI.srcDgi = node->first_attribute("srcDGI")->value();
+            if (node->first_attribute("srcTag") != NULL)    //如果srcTag没配置，则默认和dstTag一致
+            {
+                vecDGI.srcTag = node->first_attribute("srcTag")->value();
+            }
+            else {
+                vecDGI.srcTag = node->first_attribute("dstTag")->value();
+            }
+            
             vecDGI.dstDgi = node->first_attribute("dstDGI")->value();
             vecDGI.dstTag = node->first_attribute("dstTag")->value();
             m_vecAddTagFromDGI.push_back(vecDGI);
@@ -426,15 +488,129 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
 
 void IRule::HandleRule(CPS_ITEM& cpsItem)
 {
+    //处理原则
+    //1. 调整DGI、tag
+    //2. 解密数据
+    //3. 增加kcv
+    //4. 添加tag到value
+    //5. 删除DGI、tag
     //处理顺序：DGI映射-->DGI交换-->DGI删除-->DGI解密-->DGI删除tag
+
+    HandleDGIMap(cpsItem);
+    HandleDGIExchange(cpsItem);   
+    HandleDGIAddTag(cpsItem);
+    HandleTagsMerge(cpsItem);
+    HandleDGIAddFixedTag(cpsItem);
+    SpliteEF02(cpsItem);
+
     HandleDGIDecrypt(cpsItem);
     HandleTagDecrypt(cpsItem);
-    HandleDGIMap(cpsItem);
-    HandleDGIExchange(cpsItem);
-    HandleDGIAddTag(cpsItem);
-    HandleDGIAddFixedTag(cpsItem);
-    HandleDGIDelete(cpsItem);    
+
+    AddKcv(cpsItem);
+    AddTagToValue(cpsItem);
+     
+    HandleDGIDelete(cpsItem);
     HandleTagDelete(cpsItem);
+}
+
+void IRule::AddTagToValue(CPS_ITEM& cpsItem)
+{
+    for (auto& dgi : m_vecAddTagAndTemplate)
+    {
+        for (auto& dgiItem : cpsItem.items)
+        {
+            if (dgi == dgiItem.dgi) {
+                vector<pair<string, string>> tls = dgiItem.value.GetItems();                
+                for (auto item : tls)
+                {
+                    char bcdLen[5] = { 0 };
+                    string newValue;
+                    Tool::GetBcdDataLen(item.second.c_str(), bcdLen, 4);
+                    if (item.second.length() > 0x80 * 2) {
+                        newValue = item.first + "81" + bcdLen + item.second;
+                    }
+                    else {
+                        newValue = item.first + bcdLen + item.second;
+                    }
+                    dgiItem.value.ReplaceItem(item.first, newValue);
+                }
+            }
+        }
+    }
+}
+
+void IRule::SpliteEF02(CPS_ITEM& cpsItem)
+{
+    if (m_hasEF02)
+    {
+        DGI_ITEM item8201, item8202, item8203, item8204, item8205;
+        item8201.dgi = "8201";
+        item8202.dgi = "8202";
+        item8203.dgi = "8203";
+        item8204.dgi = "8204";
+        item8205.dgi = "8205";
+        for (auto& dgiItem : cpsItem.items)
+        {
+            if (dgiItem.dgi == "01")
+            {
+                string EF02 = dgiItem.value.GetItem("EF02");
+                if (EF02.length() < 0)
+                    return;
+                const int len = 8;
+                EF02 = EF02.substr(len);
+                int index = 0;
+                for (int i = 0; i < 8; i++) //循环处理8201.8202...
+                {
+                    string bcdLen = EF02.substr(index, len);
+                    char ascStr[5] = { 0 };
+                    Tool::BcdToStr(bcdLen.c_str(), ascStr, 4);
+                    int iLen = 2 * stoi(ascStr, 0, 10);                  
+                    string value = EF02.substr(index + len, iLen);
+                    index += iLen + len;
+                    if (i == 3) { item8205.value.InsertItem(item8205.dgi, value); cpsItem.AddDgiItem(item8205); }
+                    if (i == 4) { item8204.value.InsertItem(item8204.dgi, value); cpsItem.AddDgiItem(item8204); }
+                    if (i == 5) { item8203.value.InsertItem(item8203.dgi, value); cpsItem.AddDgiItem(item8203); }
+                    if (i == 6) { item8202.value.InsertItem(item8202.dgi, value); cpsItem.AddDgiItem(item8202); }
+                    if (i == 7) { item8201.value.InsertItem(item8201.dgi, value); cpsItem.AddDgiItem(item8201); }
+                }
+                break;  //避免多余的循环
+            }
+        }
+    }
+}
+
+void IRule::AddKcv(CPS_ITEM& cpsItem)
+{
+    for (auto item : m_vecAddKcv)
+    {
+        string keys;
+        for (auto& dgiItem : cpsItem.items)
+        {
+            if (dgiItem.dgi == item.dstDgi) {
+                keys = dgiItem.value.GetItem(dgiItem.dgi);
+                break;
+            }
+        }
+        if (keys.length() % 32 != 0)
+            return;
+        string kcv;
+        for (int i = 0; i < keys.length(); i += 32)
+        {
+            string key = keys.substr(i, 32);
+            char singleKcv[7] = { 0 };
+            if (item.keyType == "DES") {
+                GenDesKcv(key.c_str(), singleKcv, 6);
+            }
+            else {
+                GenSmKcv(key.c_str(), singleKcv, 6);
+            }
+            kcv += singleKcv;
+        }
+        DGI_ITEM newDgiItem;
+        newDgiItem.dgi = item.srcDgi;
+        newDgiItem.value.InsertItem(item.srcDgi, kcv);
+        cpsItem.AddDgiItem(newDgiItem);
+    }
 }
 
 /****************************************************************
@@ -566,18 +742,59 @@ void IRule::HandleTagDelete(CPS_ITEM& cpsItem)
 *********************************************************/
 void IRule::HandleDGIAddFixedTag(CPS_ITEM& cpsItem)
 {
-    for (auto& dgiItem : cpsItem.items)
+    for (auto item : m_vecFixedTagAdd) 
     {
-        for (auto item : m_vecFixedTagAdd) {
+        bool hasExisted = false;
+        for (auto& dgiItem : cpsItem.items){
             if (dgiItem.dgi == item.srcDgi) {
+                hasExisted = true;
                 char tagValueLen[3] = { 0 };
                 Tool::GetBcdDataLen(item.tagValue.c_str(), tagValueLen, 3);
-                string value = item.tag + tagValueLen + item.tagValue;
+                //string value = item.tag + tagValueLen + item.tagValue;
+                string value = item.tagValue;
                 dgiItem.value.InsertItem(item.tag, value);
             }
-        }        
+        }
+        if (!hasExisted) {
+            DGI_ITEM newItem;
+            newItem.dgi = item.srcDgi;
+            newItem.value.InsertItem(item.tag, item.tagValue);
+            cpsItem.AddDgiItem(newItem);
+        }
     }
 }
+
+void IRule::HandleTagsMerge(CPS_ITEM& cpsItem)
+{
+    for (auto &item : m_vecTagMerge) {
+        string tagMergedValue;
+        for (auto &dstItem : cpsItem.items) {
+            if (dstItem.dgi == item.dstDgi) {
+                tagMergedValue = dstItem.value.GetItem(item.dstTag);
+                break;
+            }
+        }
+        if (!ExistedInDGIs(item.srcDgi, cpsItem))
+        {
+            DGI_ITEM newDgiItem;
+            newDgiItem.dgi = item.srcDgi;
+            cpsItem.AddDgiItem(newDgiItem);
+        }
+        for (auto &dgiItem : cpsItem.items) {
+            if (dgiItem.dgi == item.srcDgi) {
+                if (!dgiItem.value.TagExisted(item.srcTag))
+                {
+                    dgiItem.value.InsertItem(item.srcTag, "");  //如果tag不存在，添加一个空的tag
+                }
+                string oldValue = dgiItem.value.GetItem(item.srcTag);
+                string mergedValue = tagMergedValue + oldValue;
+                dgiItem.value.ReplaceItem(item.srcTag, mergedValue);
+                break;
+            }
+        }
+    }
+}
+
 
 /********************************************************
 * 功能： 将某个DGI分组的tag值添加到指定的DGI分组中
@@ -592,9 +809,15 @@ void IRule::HandleDGIAddTag(CPS_ITEM& cpsItem)
                 break;
             }
         }
+        if (!ExistedInDGIs(item.srcDgi, cpsItem))
+        {
+            DGI_ITEM newDgiItem;
+            newDgiItem.dgi = item.srcDgi;
+            cpsItem.AddDgiItem(newDgiItem);
+        }
         for (auto &dgiItem : cpsItem.items) {
             if (dgiItem.dgi == item.srcDgi) {
-                dgiItem.value.InsertItem(item.dstTag, tagValue);
+                dgiItem.value.InsertItem(item.srcTag, tagValue);
                 break;
             }
         }

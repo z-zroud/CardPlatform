@@ -6,6 +6,16 @@
 
 int main()
 {
+
+    //Test kcv
+    char* smKey = "EF157139EF975D3BB00DB8D27CA02090";
+    char* desKey = "9EE66BE0F25DA4D308978CDF643BD00D";
+
+    char kcv[7] = { 0 };
+    GenDesKcv(desKey, kcv, 6);
+
+    GenSmKcv(smKey, kcv, 6);
+
 	//Test GenCAPublicKey interface
 	char caPublicKey[2048] = { 0 };
 	GenCAPublicKey("0B","A000000333", caPublicKey);

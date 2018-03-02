@@ -71,6 +71,14 @@ struct TagEncrypt
     int len;    //截取数据的长度
 };
 
+struct TagMerge     //将old tag合并到 new tag中
+{
+    string srcDgi;
+    string srcTag;
+    string dstDgi;
+    string dstTag;
+};
+
 struct DGIMap
 {
     string srcDgi;
@@ -86,6 +94,7 @@ struct DGIExchange
 struct AddTagFromDGI
 {
     string srcDgi;
+    string srcTag;
     string dstDgi;
     string dstTag;
 };
@@ -103,7 +112,12 @@ struct DGIDeleteTag
     string tag;
 };
 
-
+struct AddKCV
+{
+    string srcDgi;
+    string dstDgi;
+    string keyType;
+};
 
 
 class IRule
@@ -117,9 +131,13 @@ protected:
 	void HandleDGIDecrypt(CPS_ITEM& cpsItem);       //处理DGI解密
     void HandleTagDecrypt(CPS_ITEM& cpsItem);       //处理TAG解密
     void HandleDGIDelete(CPS_ITEM& cpsItem);        //处理删除DGI
+    void HandleTagsMerge(CPS_ITEM& cpsItem);         //将多个tag合并
     void HandleDGIAddTag(CPS_ITEM& cpsItem);        //处理DGI添加Tag
     void HandleDGIAddFixedTag(CPS_ITEM& cpsItem);   //处理DGI添加固定值的Tag
 	void HandleTagDelete(CPS_ITEM& cpsItem);        //处理删除DGI某个tag
+    void AddKcv(CPS_ITEM& cpsItem);                 //增加KCV
+    void AddTagToValue(CPS_ITEM& cpsItem);      //将tag及template到数据部分
+    void SpliteEF02(CPS_ITEM& cpsItem);             //解析EFO2 神舟数码专用 存储8201,8202...IC卡私钥
 
     /***************************************************************
     * 对DP分组数据进行解密
@@ -141,7 +159,10 @@ private:
 	vector<AddTagFromDGI>       m_vecAddTagFromDGI;
 	vector<AddFixedTagValue>    m_vecFixedTagAdd;
     vector<DGIDeleteTag>        m_vecTagDelete;
-
+    vector<TagMerge>            m_vecTagMerge;
+    vector<AddKCV>              m_vecAddKcv;
+    vector<string>              m_vecAddTagAndTemplate;
+    bool                        m_hasEF02;
 };
 
 /******************************************************************
@@ -158,6 +179,8 @@ struct IDpParse
 	* 获取文件大小
 	***************************************************************/
 	virtual long GetFileSize(ifstream& dpFile);
+
+    virtual string GetLine(ifstream& dpFile);
 
 	/**************************************************************
 	* 打开文件
@@ -189,6 +212,7 @@ struct IDpParse
     * 从cpsItem中提取account作为文件名称
     ****************************************************************/
     virtual string GetAccount(CPS_ITEM& cpsItem);
+    virtual string GetAccount2(string magstripData);
 
 	/***************************************************************
 	* 保存CPS数据到本地文件，该文件默认为DP数据的下级目录文件

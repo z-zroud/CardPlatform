@@ -10,6 +10,10 @@ using namespace std;
 #define GENKEY_API __declspec(dllimport)
 #endif
 
+extern "C" GENKEY_API int GenDesKcv(const char* key, char* kcv, int kcvLen);
+
+extern "C" GENKEY_API int GenSmKcv(const char* key, char* kcv, int kcvLen);
+
 extern "C" GENKEY_API int GenCAPublicKey(const char* caIndex, const char* rid, char* caPublicKey);
 
 /********************************************************************************

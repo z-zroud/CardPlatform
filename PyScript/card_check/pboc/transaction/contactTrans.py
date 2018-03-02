@@ -3,21 +3,21 @@ from card_check.util import DataParse
 from card_check.util import Authencation
 from card_check.util import CInterface
 from card_check.util import TransInfo
+from card_check.util.TransInfo import TransStep,GetTransTags
+from card_check.pboc.cases.CasePboc import LogCheck
+from card_check.util.PCSC import GetLastApduCmd
 
-def SelectApp(aid):
-    #aid = DataParse.GetTagValue("4F",tags)
-    tags.append(DataParse.TV("4F",aid))
+def SelectApp(aid):    
     sw,resp = ApduCmd.SelectAppCmd(aid)
-    tlvs = []
-    print("resp=",resp)
-    if DataParse.ParseTLV(resp,tlvs) is False:
-        print("TLV format is not correct!")
+    if sw != 0x9000:
         return False
-    DataParse.SaveTlv(tlvs,tags)
-    print(DataParse.FormatTlv(tlvs))
+    cmd = GetLastApduCmd()
+    TransInfo.ParseAndSaveResp(resp,TransStep.STEP_SELECT_AID)
+    LogCheck("CaseSelectAid",cmd,sw,resp)
+    return True
 
 def InitApp():
-    tag9F38 = DataParse.GetTagValue("9F38",tags)
+    tag9F38 = TransInfo.GetTransTags(TransStep.STEP_SELECT_AID,"9F38")
     tls = []
     DataParse.ParseTL(tag9F38,tls)
     gpoData = ""
@@ -26,52 +26,42 @@ def InitApp():
     sw,resp = ApduCmd.GPOCmd(gpoData)
     if sw != 0x9000:
         return False
-    tlvs = []
-    
-    DataParse.ParseTLV(resp,tlvs)
-    if len(tlvs) != 1:
-        return False
-    tags.append(DataParse.TV("82",tlvs[0].value[0:4]))
-    tags.append(DataParse.TV("94",tlvs[0].value[4:len(tlvs[0].value)]))
-    #DataParse.SaveTlv(tlvs,tags)
-    #print(DataParse.FormatTlv(tlvs))
+    cmd = GetLastApduCmd()
+    TransInfo.ParseGPOAndSave(resp)
+    LogCheck("CaseGPO",cmd,sw,resp)
     return True
 
 def ReadRecord():
-    tag94 = DataParse.GetTagValue("94",tags)
+    tag94 = TransInfo.GetTransTags(TransStep.STEP_GPO,"94")
     afls = []
     DataParse.ParseAFL(tag94,afls)
-    global sigStaticData
     for afl in afls:
         sw,resp = ApduCmd.ReadRecordCmd(afl.sfi,afl.recordNumber)
-        tlvs = []
-        DataParse.ParseTLV(resp,tlvs)
-        DataParse.SaveTlv(tlvs,tags)
-        print(DataParse.FormatTlv(tlvs))
+        TransInfo.ParseAndSaveResp(resp,TransStep.STEP_READ_RECORD)
         if afl.bSigStaticData is True:
-            sigStaticData += resp[6:]
+            TransInfo.sigStaticData += resp[6:]
 
 def OfflineAuth():
-    caIndex = DataParse.GetTagValue("8F",tags)
+    caIndex = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"8F")
     caPublicKey = Authencation.GenCAPublicKey(caIndex,"A000000333")
     print("CA Public Key=",caPublicKey)
-    issuerPublicCert = DataParse.GetTagValue("90",tags)
-    ipkRemainder = DataParse.GetTagValue("92",tags)
-    issuerExponent = DataParse.GetTagValue("9F32",tags)
+    issuerPublicCert = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"90")
+    ipkRemainder = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"92")
+    issuerExponent = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F32")
     issuerPublicKey = Authencation.GenDesIssuerPublicKey(caPublicKey,issuerPublicCert,ipkRemainder,issuerExponent)
     print("issuer Public Key=",issuerPublicKey)
-    tag93 = DataParse.GetTagValue("93",tags)
-    tag82 = DataParse.GetTagValue("82",tags)
+    tag93 = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"93")
+    tag82 = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"82")
     print("tag93 = ",tag93)
     print("sig data = ",sigStaticData)
     ret = Authencation.DES_SDA(issuerPublicKey,issuerExponent,tag93,sigStaticData,tag82)
     if ret != 0:
         return False
-    iccPublicCert = DataParse.GetTagValue("9F46",tags)
-    iccRemainder = DataParse.GetTagValue("9F48",tags)
-    iccExponent = DataParse.GetTagValue("9F47",tags)
+    iccPublicCert = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F46")
+    iccRemainder = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F48")
+    iccExponent = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F47")
     iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey,iccPublicCert,iccRemainder,sigStaticData,iccExponent,tag82)
-    ddol = DataParse.GetTagValue("9F49",tags)
+    ddol = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F49")
     tls = []
     DataParse.ParseTL(ddol,tls)
     ddolData = ""
@@ -84,7 +74,7 @@ def OfflineAuth():
 
 
 def TerminalActionAnalyse():
-    cdol1 = DataParse.GetTagValue("8C",tags)
+    cdol1 = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"8C")
     tls = []
     DataParse.ParseTL(cdol1,tls)
     cdol1Data = ""
@@ -101,17 +91,17 @@ def TerminalActionAnalyse():
     tags.append(DataParse.TV("9F10",tag9F10))
 
 def IssuerAuthencation():
-    atc = DataParse.GetTagValue("9F36",tags)
+    atc = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F36")
     udkSessionKey = Authencation.GenUdkSessionKey(CInterface.GetUdkAuthKey(),atc)
     authCode = "3030"
-    ac = DataParse.GetTagValue("9F26",tags)
+    ac = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F26")
     arpc = Authencation.GenArpc(udkSessionKey,ac,authCode)
     sw,resp = ApduCmd.ExternalAuthencationCmd(arpc,authCode)
     if sw != 0x9000:
         return False
 
 def EndTransaction():
-    cdol2 = DataParse.GetTagValue("8D",tags)
+    cdol2 = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"8D")
     tls = []
     DataParse.ParseTL(cdol2,tls)
     cdol2Data = ""
@@ -126,8 +116,8 @@ def EndTransaction():
     tags.append(DataParse.TV("9F10",tag9F10))
 
 def HandleIssuerScript():
-    atc = DataParse.GetTagValue("9F36",tags)
-    ac = DataParse.GetTagValue("9F26",tags)
+    atc = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F36")
+    ac = TransInfo.GetTransTags(TransStep.STEP_READ_RECORD,"9F26")
     udkMacSessionKey = Authencation.GenUdkSessionKey(CInterface.GetUdkMacKey(),atc)
     scriptData = "04DA9F790A" + atc + ac + "000000050000"
     mac = Authencation.GenIssuerScriptMac(udkMacSessionKey,scriptData)

@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "..\Util\Tool.h"
 #include "..\Util\SockServer.h"
+#include <vector>
+using namespace std;
 
 int main()
 {
@@ -30,12 +32,10 @@ int main()
 	char dst[32] = { 0 };
 	Tool::SubStr(src, 7, 7, dst);
 
-    //Test socket server
-    //SockServer server;
-    //server.InitSock();
-    //server.CreateServer("127.0.0.1", 8888);
-    //server.Recive();
-    //server.ReleaseLibrary();
+    //Test SplitStr
+    string strSplit = "9F56|1|00|9F13|2|0000|9F4D|2|0B0A|";
+    vector<string> subStrs;
+    Tool::SplitStr(strSplit, "|", subStrs);
     return 0;
 }
 

@@ -13,12 +13,19 @@ def GetBcdDataLen(bcdData):
     bcdLen = int(len(bcdData) / 2)
     return IntToHexStr(bcdLen)
 
+def FormatTLV(tlvs):
+    formatStr = ""
+    for tlv in tlvs:
+        formatStr += '    ' * tlv.level
+        if tlv.isTemplate is True:
+            formatStr += "<" + tlv.tag + ">\n"
+        else:
+            formatStr += "[" + tlv.tag + "]=" + tlv.value + '\n'
+    return formatStr
 
 # convert int sw to string sw
 def SW(sw):
-	strNum = '{0:X}'.format(sw)
-	if len(strNum) % 2 != 0:
-		strNum = '0' + strNum
+	strNum = '0x{0:04X}'.format(sw)
 	return strNum
 
 def BcdToAsc(bcd):
