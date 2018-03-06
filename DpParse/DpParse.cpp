@@ -7,6 +7,7 @@
 #include "../Util/IniConfig.h"
 #include "../Util/Tool.h"
 #include "../Util/ParseTLV.h"
+#include "../DataParse/IDataParse.h"
 #include "../Util/rapidxml/rapidxml.hpp"
 #include "../Util/rapidxml/rapidxml_utils.hpp"
 
@@ -121,6 +122,15 @@ string Dict::GetItem(string tag)
         }
     }
     
+    return "";
+}
+
+string Dict::GetItem()
+{
+    for (auto item : m_vecItems) {
+        return item.second;
+    }
+
     return "";
 }
 
@@ -395,9 +405,11 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             string dgi = node->first_attribute("DGI")->value();
             m_vecAddTagAndTemplate.push_back(dgi);
         }
-        else if (nodeName == "SpliteEF02")
-        {
+        else if (nodeName == "SpliteEF02"){
             m_hasEF02 = true;
+        }
+        else if (nodeName == "AddPSEAndPPSE") {
+            m_addPse = true;
         }
         else if (nodeName == "AddKcv") {
             AddKCV kcvItem;
@@ -511,6 +523,43 @@ void IRule::HandleRule(CPS_ITEM& cpsItem)
      
     HandleDGIDelete(cpsItem);
     HandleTagDelete(cpsItem);
+}
+
+string Get9102TagItem(string tag, TLV* pTlvs, unsigned int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (pTlvs[i].tag == tag)
+            return pTlvs[i].value;
+    }
+    return "";
+}
+
+void IRule::AddPseAndPPSE(CPS_ITEM& cpsItem)
+{
+    string dgi9102;
+    for (auto item : cpsItem.items)
+    {
+        if (item.dgi == "9102") {
+            dgi9102 = item.value.GetItem();
+            break;
+        }
+    }
+    TLV pTlvs[32];
+    unsigned int tlvCount = 32;
+    ParseTLV((char*)dgi9102.c_str(), pTlvs, tlvCount);
+
+    string tag50, tag9F12, tag87, tag88, tag5F2D, tag9F11;
+    tag50 = Get9102TagItem("50", pTlvs, tlvCount);
+    tag9F12 = Get9102TagItem("9F12", pTlvs, tlvCount);
+    tag87 = Get9102TagItem("87", pTlvs, tlvCount);
+    tag88 = Get9102TagItem("88", pTlvs, tlvCount);
+    tag5F2D = Get9102TagItem("5F2D", pTlvs, tlvCount);
+    tag9F11 = Get9102TagItem("9F11", pTlvs, tlvCount);
+
+
+
+
 }
 
 void IRule::AddTagToValue(CPS_ITEM& cpsItem)
@@ -666,8 +715,17 @@ void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
                 else {
                     decryptedData = DesDecryptDGI(encryptedItem.key, encryptData);
                 }
-                if (decryptedData.length() > encryptedItem.len && encryptedItem.len > 0) {
-                    decryptedData = decryptedData.substr(encryptedItem.startPos, encryptedItem.len);
+                if (decryptedData.length() > encryptedItem.len && encryptedItem.len >= 0) {
+                    if (encryptedItem.len == 0 && encryptedItem.tag == "57") { //µ•∂¿¥¶¿Ì57
+                        int indexD = decryptedData.find_first_of('D');
+                        if (indexD == string::npos)
+                            return;
+                        int indexF = decryptedData.find_first_of('F', indexD);
+                        if (indexF == string::npos)
+                            return;
+                        decryptedData = decryptedData.substr(encryptedItem.startPos, indexF + 1);
+                    }else
+                        decryptedData = decryptedData.substr(encryptedItem.startPos, encryptedItem.len);
                 }
                 char decryptedDataLen[3];
                 Tool::GetBcdDataLen(decryptedData.c_str(), decryptedDataLen, 3);

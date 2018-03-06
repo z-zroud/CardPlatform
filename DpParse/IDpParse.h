@@ -21,6 +21,7 @@ public:
     bool TagExisted(string tag);
 	vector<pair<string, string>> GetItems() { return m_vecItems; }
     string GetItem(string tag);
+    string GetItem();   //返回DGI中唯一的一个tag的值，不需要考虑是那条tag
 private:
 	vector<pair<string, string>> m_vecItems;
 };
@@ -41,6 +42,7 @@ struct DGI_ITEM
 struct CPS_ITEM
 {
 	string fileName;
+    string aid;
 	vector<DGI_ITEM> items;
     void AddDgiItem(DGI_ITEM item);
 };
@@ -138,6 +140,7 @@ protected:
     void AddKcv(CPS_ITEM& cpsItem);                 //增加KCV
     void AddTagToValue(CPS_ITEM& cpsItem);      //将tag及template到数据部分
     void SpliteEF02(CPS_ITEM& cpsItem);             //解析EFO2 神舟数码专用 存储8201,8202...IC卡私钥
+    void AddPseAndPPSE(CPS_ITEM& cpsItem);      //增加PSE和PPSE DGI
 
     /***************************************************************
     * 对DP分组数据进行解密
@@ -163,6 +166,7 @@ private:
     vector<AddKCV>              m_vecAddKcv;
     vector<string>              m_vecAddTagAndTemplate;
     bool                        m_hasEF02;
+    bool                        m_addPse;
 };
 
 /******************************************************************

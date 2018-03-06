@@ -210,11 +210,12 @@ bool PersonlizePBOC(IniConfig cpsFile)
             return false;
         }
         int pbocDGIs = cpsNodes.size();
-
+        int passPseCount = 0;
         for (int i = 0; i < pbocDGIs; i++)
         {
             if (cpsNodes[i].first == "PSE" || cpsNodes[i].first == "PPSE")
             {
+                passPseCount++;
                 continue;
             }
             int dataType = STORE_DATA_PLANT;
@@ -256,7 +257,7 @@ bool PersonlizePBOC(IniConfig cpsFile)
             if (i == 0) {   
                 bReset = true;
             }
-            else if (i == pbocDGIs - 1) {   
+            else if (i == pbocDGIs + passPseCount - 3) {
                 dataType = STORE_DATA_END;
             }
 
