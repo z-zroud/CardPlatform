@@ -845,7 +845,8 @@ void IRule::HandleTagsMerge(CPS_ITEM& cpsItem)
                     dgiItem.value.InsertItem(item.srcTag, "");  //如果tag不存在，添加一个空的tag
                 }
                 string oldValue = dgiItem.value.GetItem(item.srcTag);
-                string mergedValue = tagMergedValue + oldValue;
+                string mergedValue =  oldValue + tagMergedValue;
+                //string mergedValue = tagMergedValue + oldValue;
                 dgiItem.value.ReplaceItem(item.srcTag, mergedValue);
                 break;
             }

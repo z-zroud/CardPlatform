@@ -21,6 +21,9 @@ using namespace rapidxml;
 
 int main()
 {
+    char reader[1024] = { 0 };
+    int size = 1024;
+    GetReadersEx(reader, size);
 	int count = 0;
 	char* readers[2] = { 0 };
 	GetReaders(readers, count);

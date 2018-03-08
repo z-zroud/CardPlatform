@@ -50,12 +50,15 @@ int main()
 	}
 
     //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\28_808021_20180109_20180109465_ic.txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
-    GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\华腾\\鞍山银行.dat", "F:\\CardPlatform\\bin\\Configuration\\Rule\\JR1792_鞍山银行_华腾_华大_G81140034.xml");
+    //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\26_808021_20180109_20180109421_ic.txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
+    //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\27_808021_20180109_20180109441_ic.txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
+    //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\23_808021_20180109_20180109363_ic (1).txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
+    //GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\华腾\\鞍山银行.dat", "F:\\CardPlatform\\bin\\Configuration\\Rule\\JR1792_鞍山银行_华腾_华大_G81140034.xml");
     //GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\华腾\\石阡村镇银行.dat", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HuaTengRule.xml");
     //GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\华腾\\HuaTeng.dp", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HuaTengRule.xml");
     //GenCpsFile("DpParse_DXT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\员工卡1500张_12_180131143629.dat", NULL);
     //GenCpsFile("DpParse_YL.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\石嘴山20180202.DP", NULL);
-    //GenCpsFile("DpParse_ZJ_TL.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\6214809938020000043.bin","F:\\CardPlatform\\bin\\Configuration\\Rule\\ZhongXingRule.xml");
+    GenCpsFile("DpParse_ZJ_TL.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\浙江泰隆\\6214809938020000043.bin","F:\\CardPlatform\\bin\\Configuration\\Rule\\JR17239_浙江泰隆银行_华大_G81140034.xml");
 
     SetPersonlizationConfig("A000000003000000", "404142434445464748494A4B4C4D4E4F", DIV_NONE, SECURE_NONE);
     string path = "F:\\Goldpac\\项目\\DP";
@@ -71,7 +74,8 @@ int main()
         {
             return 1;
         }
-        DoPersonlization(filePath.c_str(), "F:\\CardPlatform\\bin\\Configuration\\InstallParams\\JR1792_鞍山银行_华大_G81140034.xml");
+        //DoPersonlization(filePath.c_str(), "F:\\CardPlatform\\bin\\Configuration\\InstallParams\\JR1792_鞍山银行_华大_G81140034.xml");
+        DoPersonlization(filePath.c_str(), "F:\\CardPlatform\\bin\\Configuration\\InstallParams\\JR17239_浙江泰隆银行_华大_G81140034.xml");
     }
    	
     return 0;
