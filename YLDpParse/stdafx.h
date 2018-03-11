@@ -11,7 +11,14 @@
 // Windows Header Files:
 #include <windows.h>
 
-#pragma comment(lib,"../lib/Des0.lib")
-#pragma comment(lib,"../bin/DpParse.lib")
-#pragma comment(lib,"../bin/Util.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\DpParse.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Des0.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\DpParse.lib")
+#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#pragma comment(lib,"..\\lib\\Release\\Des0.lib")
+#endif
+
 // TODO: reference additional headers your program requires here

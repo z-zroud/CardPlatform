@@ -10,8 +10,14 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#pragma comment(lib,"..//bin//CPS.lib")
-#pragma comment(lib,"..//bin//PCSC.lib")
-#pragma comment(lib,"..//bin//DpParse.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..//lib//Debug//CPS.lib")
+#pragma comment(lib,"..//lib//Debug//PCSC.lib")
+#pragma comment(lib,"..//lib//Debug//DpParse.lib")
+#else
+#pragma comment(lib,"..//lib//Release//CPS.lib")
+#pragma comment(lib,"..//lib//Release//PCSC.lib")
+#pragma comment(lib,"..//lib//Release//DpParse.lib")
+#endif
 
 // TODO: reference additional headers your program requires here

@@ -10,8 +10,15 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 
 #include <Windows.h>
-#pragma comment(lib,"..\\lib\\Des0.lib")
-#pragma comment(lib,"..\\bin\\Util.lib")
-#pragma comment(lib,"..\\bin\\Authencation.lib")
-#pragma comment(lib,"..\\bin\\DataParse.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\Des0.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Authencation.lib")
+#pragma comment(lib,"..\\lib\\Debug\\DataParse.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\Des0.lib")
+#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#pragma comment(lib,"..\\lib\\Release\\Authencation.lib")
+#pragma comment(lib,"..\\lib\\Release\\DataParse.lib")
+#endif
 // TODO: reference additional headers your program requires here

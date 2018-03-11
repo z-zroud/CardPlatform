@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#pragma comment(lib,"..\\bin\\DataParse.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\DataParse.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\DataParse.lib")
+#endif
 
 // TODO: reference additional headers your program requires here

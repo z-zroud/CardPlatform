@@ -12,9 +12,16 @@
 #include <windows.h>
 
 
-#pragma comment(lib,"..\\bin\\ApduCmd.lib")
-#pragma comment(lib,"..\\bin\\Util.lib")
-#pragma comment(lib,"..\\lib\\Des0.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\ApduCmd.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Des0.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\ApduCmd.lib")
+#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#pragma comment(lib,"..\\lib\\Release\\Des0.lib")
+#endif
+
 
 
 // TODO: reference additional headers your program requires here

@@ -148,7 +148,7 @@ namespace ExcelLib
         {
             var workSheet = GetWorkSheet(sheetName);
             var sheetData = workSheet.Elements<SheetData>().First();
-            var cell = CreateTextCell(column, text);
+            var cell = CreateTextCell(column, row, text);
             var newRow = GetRow(sheetData, row);
             newRow.AppendChild(cell);
             workSheet.Save();
@@ -170,7 +170,7 @@ namespace ExcelLib
         {
             var workSheet = GetWorkSheet(sheetName);
             var sheetData = workSheet.Elements<SheetData>().First();
-            var cell = CreateTextCell(column, text);
+            var cell = CreateTextCell(column,row, text);
             var newRow = GetRow(sheetData, row);
             newRow.AppendChild(cell);
             workSheet.Save();
@@ -319,12 +319,12 @@ namespace ExcelLib
         /// <param name="column"></param>
         /// <param name="text"></param>
         /// <returns></returns>
-        private Cell CreateTextCell(int column, string text)
+        private Cell CreateTextCell(int column, int row, string text)
         {
             var cell = new Cell
             {
                 DataType = CellValues.InlineString,
-                CellReference = ColumnLetter(column) + column
+                CellReference = ColumnLetter(column) + row
             };
 
             var istring = new InlineString();

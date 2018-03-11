@@ -6,8 +6,7 @@
 #include "../CPS/ICPS.h"
 #include <Windows.h>
 
-#pragma comment(lib,"../bin/PCSC.lib")
-#pragma comment(lib,"../bin/CPS.lib")
+
 
 
 #include "rapidxml\rapidxml.hpp"
@@ -21,9 +20,6 @@ using namespace rapidxml;
 
 int main()
 {
-    char reader[1024] = { 0 };
-    int size = 1024;
-    GetReadersEx(reader, size);
 	int count = 0;
 	char* readers[2] = { 0 };
 	GetReaders(readers, count);

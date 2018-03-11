@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#pragma comment(lib,"..\\bin\\Util.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#endif
+
 
 // TODO: reference additional headers your program requires here

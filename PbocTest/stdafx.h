@@ -10,10 +10,19 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <Windows.h>
-#pragma comment(lib,"..\\bin\\PCSC.lib")
-#pragma comment(lib,"..\\bin\\ApduCmd.lib")
-#pragma comment(lib,"..\\bin\\DataParse.lib")
-#pragma comment(lib,"..\\bin\\Authencation.lib")
-#pragma comment(lib,"..\\bin\\Util.lib")
+
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\PCSC.lib")
+#pragma comment(lib,"..\\lib\\Debug\\ApduCmd.lib")
+#pragma comment(lib,"..\\lib\\Debug\\DataParse.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Authencation.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\PCSC.lib")
+#pragma comment(lib,"..\\lib\\Release\\ApduCmd.lib")
+#pragma comment(lib,"..\\lib\\Release\\DataParse.lib")
+#pragma comment(lib,"..\\lib\\Release\\Authencation.lib")
+#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#endif
 
 // TODO: reference additional headers your program requires here

@@ -10,7 +10,12 @@
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <windows.h>
-#pragma comment(lib,"..\\bin\\DpParse.lib")
-#pragma comment(lib,"..\\bin\\Util.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\DpParse.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\DpParse.lib")
+#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#endif
 
 // TODO: reference additional headers your program requires here

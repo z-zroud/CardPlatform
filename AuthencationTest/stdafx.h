@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#pragma comment(lib,"..\\bin\\Authencation.lib")
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\Authencation.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\Authencation.lib")
+#endif
 
 // TODO: reference additional headers your program requires here

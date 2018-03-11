@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CheckPicture"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="700" KeyDown="Window_KeyDown">
+        Title="MainWindow" Height="500" Width="700" KeyDown="Window_KeyDown" Loaded="Window_Loaded">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -16,7 +16,8 @@
         </Grid.RowDefinitions>
         <StackPanel  Orientation="Horizontal">
             <TextBlock Text="读 卡 器: " MinWidth="70" VerticalAlignment="Center"/>
-            <ComboBox Name="comboReader" MinWidth="500" ItemsSource="{Binding Readers}" SelectedItem="{Binding Red}"/>
+            <ComboBox Name="comboReader" MinWidth="500" ItemsSource="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Path=Readers, UpdateSourceTrigger=PropertyChanged}" 
+                      SelectedItem="{Binding Path=SelectedReader, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <TextBlock Text="序  号:" MinWidth="70" VerticalAlignment="Center"/>

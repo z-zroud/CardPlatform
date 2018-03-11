@@ -10,6 +10,12 @@
 #include <stdio.h>
 #include <tchar.h>
 
-
+#ifdef _DEBUG
+#pragma comment(lib,"..\\lib\\Debug\\PCSC.lib")
+#pragma comment(lib,"..\\lib\\Debug\\CPS.lib")
+#else
+#pragma comment(lib,"..\\lib\\Release\\PCSC.lib")
+#pragma comment(lib,"..\\lib\\Release\\CPS.lib")
+#endif
 
 // TODO: reference additional headers your program requires here
