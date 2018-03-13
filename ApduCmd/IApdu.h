@@ -122,10 +122,9 @@ APDUCMD_API UINT GACCmd(int terminalCryptogramType, const char* cdolData, char* 
 APDUCMD_API void GenDynamicData(const char* ddolData, char* resp);
 
 //获取打开安全通道之后的会话密钥，调用前，需调用OpenSecureChannel来打开安全通道
-APDUCMD_API	void GetScureChannelSessionAuthKey(char* scureChannelSessionAuthKey);
+APDUCMD_API	void GetScureChannelSessionDekKey(char* scureChannelSessionAuthKey);
 APDUCMD_API	void GetScureChannelSessionMacKey(char* scureChannelSessionMacKey);
 APDUCMD_API	void GetScureChannelSessionEncKey(char* scureChannelSessionEncKey);
-APDUCMD_API	void GetScureChannelSessionKekKey(char* scureChannelSessionKekKey);
 
 #ifdef __cplusplus
 }

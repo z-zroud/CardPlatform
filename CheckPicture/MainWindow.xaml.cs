@@ -5,38 +5,110 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using CplusplusDll;
 using ExcelLib;
 
 namespace CheckPicture
 {
+    
+
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window 
+    public partial class MainWindow : Window ,INotifyPropertyChanged
     {
+        [DllImport("user32.dll")]
+        public static extern UInt32 SendInput(UInt32 nInputs, ref INPUT pInputs, int cbSize);
+
+
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct INPUT
+        {
+            [FieldOffset(0)]
+            public Int32 type;
+            [FieldOffset(4)]
+            public KEYBDINPUT ki;
+            [FieldOffset(4)]
+            public MOUSEINPUT mi;
+            [FieldOffset(4)]
+            public HARDWAREINPUT hi;
+
+        }
+
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MOUSEINPUT
+        {
+            public Int32 dx;
+            public Int32 dy;
+            public Int32 mouseData;
+            public Int32 dwFlags;
+            public Int32 time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct KEYBDINPUT
+        {
+            public Int16 wVk;
+            public Int16 wScan;
+            public Int32 dwFlags;
+            public Int32 time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct HARDWAREINPUT
+        {
+            public Int32 uMsg;
+            public Int16 wParamL;
+            public Int16 wParamH;
+        }
+        public const int INPUT_KEYBOARD = 1;
+        public const int KEYEVENTF_KEYUP = 0x0002;
+
+
         public MainWindow()
         {
+            
             InitializeComponent();
             DataContext = this;
+            SeqNo = 1;
         }
         private ICDll _cdll;
         private IExcelOp _excelWrite;
         private DataTable _picInfos;
         public List<string> saveInfo = new List<string>();
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public List<string> Readers { get; set; }
-        public string SelectedReader { get; set; }
+        private string _selectedReader;
+        public string SelectedReader
+        {
+            get { return _selectedReader; }
+            set
+            {
+                _selectedReader = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedReader"));
+            }
+        }
+        private int _seqNo;
+        public int SeqNo
+        {
+            get { return _seqNo; }
+            set
+            {
+                _seqNo = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SeqNo"));
+            }
+        }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
@@ -46,8 +118,21 @@ namespace CheckPicture
                 if(comboReader.Items.Count == 0 && string.IsNullOrWhiteSpace(SelectedReader))    //如果读卡器没获取，则获取读卡器
                 {
                     _cdll = new SCReader();
-                    Readers = _cdll.GetReaders();
-                    SelectedReader = Readers[0];
+                    try
+                    {
+                        Readers = _cdll.GetReaders();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                    if(Readers.Count > 0)
+                    {
+                        SelectedReader = Readers[0];
+                        comboReader.ItemsSource = Readers;
+                    }
+
+                    //comboReader.SelectedValue = SelectedReader;
                 }
                 else if(string.IsNullOrWhiteSpace(tbCard.Text))   //获取了读卡器，没有输入序号，则表示显示卡号
                 {
@@ -63,54 +148,157 @@ namespace CheckPicture
                         }
                     }
                 }
-                else if(!string.IsNullOrWhiteSpace(tbSeq.Text) && !string.IsNullOrWhiteSpace(tbCard.Text) && familyPic.Tag == null)    //表示读取到了卡号，序号也存在，则读取照片信息
+                else if(!string.IsNullOrWhiteSpace(tbSeq.Text) && !string.IsNullOrWhiteSpace(tbCard.Text))    //表示读取到了卡号，序号也存在，则读取照片信息
                 {
                     string uriString = string.Empty;
+                    string text = tbSeq.Text.ToString().PadLeft(8, '0');
                     foreach (DataRow row in _picInfos.Rows)
                     {
-                        if(row[0].ToString() == tbSeq.Text)
+                        if(row[0].ToString() == text)
                         {
+                            saveInfo.Clear();
                             saveInfo.Add(row[0].ToString());
                             saveInfo.Add(tbCard.Text);
                             saveInfo.Add(row[1].ToString());
                             saveInfo.Add(row[2].ToString());
                             saveInfo.Add(row[3].ToString());
-                            uriString = Directory.GetCurrentDirectory() + "\\" + row[1].ToString() + "+" + row[2].ToString() + "+" + row[3].ToString() + ".jpg";
+                            saveInfo.Add("打印成功");
+
+                            string tmp = row[2].ToString();
+                            string fuck = tmp.Replace("行", "行+");
+                            uriString = Directory.GetCurrentDirectory() + "\\Picture\\"
+                                + row[0].ToString() + "+"
+                                + row[1].ToString() + "+" 
+                                + fuck + "+" 
+                                + row[3].ToString() + ".jpg";
                             break;
                         }
                     }
                     
                     Uri uri = new Uri(uriString, UriKind.RelativeOrAbsolute);
-                    familyPic.Source = new BitmapImage(uri);
-                    familyPic.Tag = "Image";
-                }
-                else if(familyPic.Tag != null && familyPic.Tag.ToString() == "Image")
-                {
-                    var result = MessageBox.Show("核对是否成功?","保存", MessageBoxButton.OKCancel, MessageBoxImage.Information);
-                    if(result == MessageBoxResult.OK)
+                    try
                     {
-                        _excelWrite.AppendRow("Sheet1", saveInfo);                       
+                        familyPic.Source = new BitmapImage(uri);
                     }
-                    tbCard.Text = string.Empty;
-                    saveInfo.Clear();
-                    familyPic.Tag = null;
-                    familyPic.Source = null;
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                    familyPic.Tag = "Image";
                 }
             }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            IExcelOp excelOp = new ExcelOp();
             string appDir = Directory.GetCurrentDirectory() + "\\";
-            if (excelOp.OpenExcel(appDir + "照片信息清单.xlsx", OpExcelType.Modify))
+            _excelWrite = new ExcelOp();
+            _excelWrite.OpenExcel(appDir + "全家福卡片信息清单.xlsx", OpExcelType.Modify);
+        }
+
+        private void btReader_Click(object sender, RoutedEventArgs e)
+        {
+            _cdll = new SCReader();
+            try
+            {
+                Readers = _cdll.GetReaders();
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
+            if(Readers.Count > 0)
+            {
+                SelectedReader = Readers[0];
+                comboReader.ItemsSource = Readers;
+                comboReader.SelectedValue = SelectedReader;
+            }
+
+        }
+
+        private void btReadCardNo_Click(object sender, RoutedEventArgs e)
+        {
+            if (_cdll.OpenReader(SelectedReader))
+            {
+                if (0x9000 == _cdll.SendApdu("00A40400 08 A000000333010101"))
+                {
+                    string result = string.Empty;
+                    if (0x9000 == _cdll.SendApdu("00B20114", ref result))
+                    {
+                        tbCard.Text = result.Substring(22, 19);
+                    }
+                }
+            }
+        }
+
+        private void btNext_Click(object sender, RoutedEventArgs e)
+        {
+            SeqNo++;
+            string uriString = string.Empty;
+            string text = SeqNo.ToString().PadLeft(8, '0');
+            foreach (DataRow row in _picInfos.Rows)
+            {
+                if (row[0].ToString() == text)
+                {
+                    saveInfo.Clear();
+                    saveInfo.Add(row[0].ToString());
+                    saveInfo.Add(tbCard.Text);
+                    saveInfo.Add(row[1].ToString());
+                    saveInfo.Add(row[2].ToString());
+                    saveInfo.Add(row[3].ToString());
+                    saveInfo.Add("打印成功");
+                    string tmp = row[2].ToString();
+                    string fuck = tmp.Replace("行", "行+");
+                    uriString = Directory.GetCurrentDirectory() + "\\Picture\\" +
+                        row[0].ToString() + "+" +
+                        row[1].ToString() + "+" +
+                        fuck + "+" +
+                        row[3].ToString() + ".jpg";
+                    break;
+                }
+            }
+
+            Uri uri = new Uri(uriString, UriKind.RelativeOrAbsolute);
+            try
+            {
+                familyPic.Source = new BitmapImage(uri);
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
+            familyPic.Tag = "Image";
+        }
+
+        private void btOK_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("核对是否成功?", "保存", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+            if (result == MessageBoxResult.OK)
+            {
+                _excelWrite.AppendRow("Sheet1", saveInfo);
+            }
+            tbCard.Text = string.Empty;
+            saveInfo.Clear();
+            familyPic.Tag = null;
+            familyPic.Source = null;
+        }
+
+        private void btScanFile_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "*|*.xlsx";
+            if (dialog.ShowDialog() == true)
+            {
+                tbFilePath.Text = dialog.FileName;
+            }
+
+            IExcelOp excelOp = new ExcelOp();
+            if (excelOp.OpenExcel(tbFilePath.Text))
             {
                 //string sheetName = "Sheet1";
                 var sheetName = excelOp.GetSheetNames().First();
                 _picInfos = excelOp.GetSheetData(sheetName);
             }
-            _excelWrite = new ExcelOp();
-            _excelWrite.OpenExcel(appDir + "全家福卡片信息清单.xlsx", OpExcelType.Modify);
         }
     }
 }

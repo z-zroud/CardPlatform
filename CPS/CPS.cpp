@@ -230,9 +230,9 @@ bool PersonlizePBOC(IniConfig cpsFile)
             {
                 if (cpsNodes[i].first == encryptItem.dgi)
                 {
-                    char encSessionKey[33];
-                    GetScureChannelSessionEncKey(encSessionKey);
-                    data = EncryptDGIData(encSessionKey, cpsNodes[i].first, data, encryptItem.isPadding80);
+                    char dekSessionKey[33];
+                    GetScureChannelSessionDekKey(dekSessionKey);
+                    data = EncryptDGIData(dekSessionKey, cpsNodes[i].first, data, encryptItem.isPadding80);
                     dataType = STORE_DATA_ENCRYPT;
                 }
             }

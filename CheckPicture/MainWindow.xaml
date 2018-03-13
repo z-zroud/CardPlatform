@@ -5,26 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CheckPicture"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="700" KeyDown="Window_KeyDown" Loaded="Window_Loaded">
+        Title="MainWindow" Height="600" Width="700" KeyDown="Window_KeyDown" Loaded="Window_Loaded">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="10"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="10"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="10"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
         <StackPanel  Orientation="Horizontal">
             <TextBlock Text="读 卡 器: " MinWidth="70" VerticalAlignment="Center"/>
-            <ComboBox Name="comboReader" MinWidth="500" ItemsSource="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:MainWindow}}, Path=Readers, UpdateSourceTrigger=PropertyChanged}" 
-                      SelectedItem="{Binding Path=SelectedReader, UpdateSourceTrigger=PropertyChanged}"/>
+            <ComboBox Name="comboReader" MinWidth="500" VerticalContentAlignment="Center" SelectedValue="{Binding Path=SelectedReader}"/>
         </StackPanel>
         <StackPanel Grid.Row="2" Orientation="Horizontal">
             <TextBlock Text="序  号:" MinWidth="70" VerticalAlignment="Center"/>
-            <TextBox Name="tbSeq" MinWidth="100" Margin="0,0,50,0" VerticalContentAlignment="Center"/>
+            <TextBox Name="tbSeq" MinWidth="100" Margin="0,0,50,0" VerticalContentAlignment="Center" Text="{Binding Path=SeqNo}"/>
             <TextBlock Text="卡 号:" MinWidth="70" VerticalAlignment="Center"/>
             <TextBox Name="tbCard" MinWidth="280" VerticalContentAlignment="Center" IsEnabled="False"/>
         </StackPanel>
-        <Image Grid.Row="4" Name="familyPic"/>
+        <StackPanel Grid.Row="4" Orientation="Horizontal">
+            <TextBox Name="tbFilePath" MinWidth="520" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
+            <Button Name="btScanFile" MinWidth="60" Content="浏览.." Click="btScanFile_Click"/>
+        </StackPanel>
+        <Image Grid.Row="6" Name="familyPic"/>
+        <StackPanel Grid.Row="8"  Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Name="btReader" Width="60" Content="读卡器" Margin="0,0,10,0" Click="btReader_Click"/>
+            <Button Name="btReadCardNo" Width="60" Content="读卡号"  Margin="0,0,10,0" Click="btReadCardNo_Click"/>
+            <Button Name="btNext" Width="60" Content="下一张"  Margin="0,0,10,0" Click="btNext_Click"/>
+            <Button Name="btOK" Width="60" Content="保存" Click="btOK_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

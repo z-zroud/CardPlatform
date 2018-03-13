@@ -4,14 +4,14 @@
 #include "../Util/Tool.h"
 #include "Des0.h"
 
-char g_secureChannelSessionAuthKey[KEY_LEN] = { 0 };
+char g_secureChannelSessionDekKey[KEY_LEN] = { 0 };
 char g_secureChannelSessionMacKey[KEY_LEN] = { 0 };
 char g_secureChannelSessionEncKey[KEY_LEN] = { 0 };
-char g_secureChannelSessionKekKey[KEY_LEN] = { 0 };
+//char g_secureChannelSessionKekKey[KEY_LEN] = { 0 };
 
-void GetScureChannelSessionAuthKey(char* secureChannelSessionAuthKey)
+void GetScureChannelSessionDekKey(char* secureChannelSessionAuthKey)
 {
-	strcpy_s(secureChannelSessionAuthKey, KEY_LEN, g_secureChannelSessionAuthKey);
+	strcpy_s(secureChannelSessionAuthKey, KEY_LEN, g_secureChannelSessionDekKey);
 }
 void GetScureChannelSessionMacKey(char* secureChannelSessionMacKey)
 {
@@ -21,10 +21,10 @@ void GetScureChannelSessionEncKey(char* secureChannelSessionEncKey)
 {
 	strcpy_s(secureChannelSessionEncKey, KEY_LEN, g_secureChannelSessionEncKey);
 }
-void GetScureChannelSessionKekKey(char* secureChannelSessionKekKey)
-{
-	strcpy_s(secureChannelSessionKekKey, KEY_LEN, g_secureChannelSessionKekKey);
-}
+//void GetScureChannelSessionKekKey(char* secureChannelSessionKekKey)
+//{
+//	strcpy_s(secureChannelSessionKekKey, KEY_LEN, g_secureChannelSessionKekKey);
+//}
 
 string _GenSecureChannelSessionKey(const string leftDivFactor, const string rightDivFactor, string key)
 {
@@ -38,8 +38,8 @@ string _GenSecureChannelSessionKey(const string leftDivFactor, const string righ
 	return string(leftDivKey) + string(rightDivKey);
 }
 
-//获取 会话密钥 Auth Key
-string _GenSecureChannelSessionAuthKey(string seqNo, string strAuthKey)
+//获取 会话密钥 Enc Key
+string _GenSecureChannelSessionEncKey(string seqNo, string strAuthKey)
 {
 	string leftDivFactor = "0182" + seqNo + "00000000";
 	string rightDivFactor = "0000000000000000";
@@ -56,8 +56,8 @@ string _GenSecureChannelSessionMacKey(string seqNo, string strMacKey)
 
 	return _GenSecureChannelSessionKey(leftDivFactor, rightDivFactor, strMacKey);
 }
-//获取 会话密钥 Enc Key
-string _GenSecureChannelSessionEncKey(string seqNo, string strEnKey)
+//获取 会话密钥 Dek Key
+string _GenSecureChannelSessionDekKey(string seqNo, string strEnKey)
 {
 	string leftDivFactor = "0181" + seqNo + "00000000";
 	string rightDivFactor = "0000000000000000";
@@ -78,7 +78,7 @@ string _GenKmcSubKey(const string kmc, string leftDivFactor, string rightDivFact
 }
 
 
-string _GenKmcAuthKey(const string kmc, string partLeftDivFactor, string partRightDivFactor)
+string _GenKmcEncKey(const string kmc, string partLeftDivFactor, string partRightDivFactor)
 {
 	string leftDivFactor = partLeftDivFactor + string("F001");
 	string rightDivFactor = partRightDivFactor + string("0F01");
@@ -94,7 +94,7 @@ string _GenKmcMacKey(const string kmc, string partLeftDivFactor, string partRigh
 	return _GenKmcSubKey(kmc, leftDivFactor, rightDivFactor);
 }
 
-string _GenKmcEncKey(const string kmc, string partLeftDivFactor, string partRightDivFactor)
+string _GenKmcDekKey(const string kmc, string partLeftDivFactor, string partRightDivFactor)
 {
 	string leftDivFactor = partLeftDivFactor + string("F003");
 	string rightDivFactor = partRightDivFactor + string("0F03");
@@ -104,7 +104,7 @@ string _GenKmcEncKey(const string kmc, string partLeftDivFactor, string partRigh
 
 
 
-void GenKmcSubKey(string kmc, int divMethod, string divData, string &kmcAuthKey, string &kmcMacKey, string &kmcEncKey)
+void GenKmcSubKey(string kmc, int divMethod, string divData, string &kmcEncKey, string &kmcMacKey, string &kmcDekKey)
 {
 	string 	leftDivData;
 	string	rightDivData;
@@ -119,14 +119,14 @@ void GenKmcSubKey(string kmc, int divMethod, string divData, string &kmcAuthKey,
 		rightDivData = leftDivData;
 	}
 	else {
-		kmcAuthKey = kmc;
+        kmcDekKey = kmc;
 		kmcMacKey = kmc;
 		kmcEncKey = kmc;
 
 		return;
 	}
 
-	kmcAuthKey = _GenKmcAuthKey(kmc, leftDivData, rightDivData);
+    kmcDekKey = _GenKmcDekKey(kmc, leftDivData, rightDivData);
 	kmcMacKey = _GenKmcMacKey(kmc, leftDivData, rightDivData);
 	kmcEncKey = _GenKmcEncKey(kmc, leftDivData, rightDivData);
 }
@@ -138,10 +138,9 @@ void GenSecureChannelSessionKey(string kmc,
 	int divMethod,
 	string termialRandom,
 	string initializeUpdateResp,
-	string& sessionAuthKey,
+	string& sessionDekKey,
 	string& sessionMacKey,
-	string& sessionEncKey,
-	string& kekKey)
+	string& sessionEncKey)
 {
 	string leftDivData, rightDivData;
 	string divData = initializeUpdateResp.substr(0, 20);
@@ -150,11 +149,11 @@ void GenSecureChannelSessionKey(string kmc,
 	string cardChallenge = initializeUpdateResp.substr(24, 16);
 	string cardCryptogram = initializeUpdateResp.substr(40, 16);
 
-	string kmcAuthKey, kmcMacKey, kmcEncKey;
-	GenKmcSubKey(kmc, divMethod, divData, kmcAuthKey, kmcMacKey, kmcEncKey);
+	string kmcDekKey, kmcMacKey, kmcEncKey;
+	GenKmcSubKey(kmc, divMethod, divData, kmcEncKey, kmcMacKey, kmcDekKey); //生成KMC子密钥
 
-	if (scp == 1) {
-		char szSessionAuthKey[33] = { 0 };
+	if (scp == 1) {     //显示安全通道生成会话密钥
+		char szSessionDekKey[33] = { 0 };
 		char szSessionMacKey[33] = { 0 };
 		char szSessionEncKey[33] = { 0 };
 
@@ -162,26 +161,24 @@ void GenSecureChannelSessionKey(string kmc,
 		rightDivData = cardChallenge.substr(0, 8) + termialRandom.substr(8, 8);
 		divData = leftDivData + rightDivData;
 
-		Des3_ECB(szSessionAuthKey, (char*)kmcAuthKey.c_str(), (char*)divData.c_str(), 16);
+		Des3_ECB(szSessionDekKey, (char*)kmcDekKey.c_str(), (char*)divData.c_str(), 16);
 		Des3_ECB(szSessionMacKey, (char*)kmcMacKey.c_str(), (char*)divData.c_str(), 16);
 		Des3_ECB(szSessionEncKey, (char*)kmcEncKey.c_str(), (char*)divData.c_str(), 16);
 
-		sessionAuthKey = szSessionAuthKey;
+		sessionDekKey = szSessionDekKey;
 		sessionMacKey = szSessionMacKey;
 		sessionEncKey = szSessionEncKey;
-		kekKey = kmcEncKey;
 	}
-	else {
+	else {  //隐式安全通道生成会话密钥
 		string seqNo = cardChallenge.substr(0, 4);
-		sessionAuthKey = _GenSecureChannelSessionAuthKey(seqNo, kmcAuthKey);
+		sessionDekKey = _GenSecureChannelSessionDekKey(seqNo, kmcDekKey);
 		sessionMacKey = _GenSecureChannelSessionMacKey(seqNo, kmcMacKey);
 		sessionEncKey = _GenSecureChannelSessionEncKey(seqNo, kmcEncKey);
-		kekKey = sessionEncKey;
 	}
 }
 
 
-UINT ExternalAuthencationCmd2(const string& kmc, int divMethod, string terminalRandom, int secureLevel, string initializeUpdateResp)
+UINT ExternalAuthencationCmd2(const string& kmc, int divMethod, string hostChanllenge, int secureLevel, string initializeUpdateResp)
 {
 	string cmd;
 	string hostCryptogramAndMacLen = "10";
@@ -196,42 +193,44 @@ UINT ExternalAuthencationCmd2(const string& kmc, int divMethod, string terminalR
 	string cardChanllenge = initializeUpdateResp.substr(24, 16);
 	string cardCryptogram = initializeUpdateResp.substr(40, 56);
 
-	memset(g_secureChannelSessionAuthKey, 0, KEY_LEN);
+	memset(g_secureChannelSessionDekKey, 0, KEY_LEN);
 	memset(g_secureChannelSessionMacKey, 0, KEY_LEN);
 	memset(g_secureChannelSessionEncKey, 0, KEY_LEN);
-	memset(g_secureChannelSessionKekKey, 0, KEY_LEN);
 
-	string sessionAuthKey, sessionMacKey, sessionEncKey, kekKey;
-	GenSecureChannelSessionKey(kmc, divMethod, terminalRandom, initializeUpdateResp, sessionAuthKey, sessionMacKey, sessionEncKey, kekKey);
-	string validateMacInput = terminalRandom + cardChanllenge;
-	char validateMac[17] = { 0 };
-	Full_3DES_CBC_MAC((char*)validateMacInput.c_str(), (char*)sessionAuthKey.c_str(), "0000000000000000", validateMac);
 
-	memcpy(g_secureChannelSessionAuthKey, sessionAuthKey.c_str(), KEY_LEN - 1);
-	memcpy(g_secureChannelSessionMacKey, sessionMacKey.c_str(), KEY_LEN - 1);
-	memcpy(g_secureChannelSessionEncKey, sessionEncKey.c_str(), KEY_LEN - 1);
-	memcpy(g_secureChannelSessionKekKey, kekKey.c_str(), KEY_LEN - 1);
+	string sessionDekKey, sessionMacKey, sessionEncKey;
+	GenSecureChannelSessionKey(kmc, divMethod, hostChanllenge, initializeUpdateResp, sessionDekKey, sessionMacKey, sessionEncKey);
+    memcpy(g_secureChannelSessionDekKey, sessionDekKey.c_str(), KEY_LEN - 1);
+    memcpy(g_secureChannelSessionMacKey, sessionMacKey.c_str(), KEY_LEN - 1);
+    memcpy(g_secureChannelSessionEncKey, sessionEncKey.c_str(), KEY_LEN - 1);
 
-	if (cardCryptogram != validateMac)
+    //检查card cryptogram 是否正确，若正确则校验成功
+	string checkCardCryptogramInput = hostChanllenge + cardChanllenge;
+	char genCardCryptogram[17] = { 0 };
+	Full_3DES_CBC_MAC((char*)checkCardCryptogramInput.c_str(), (char*)sessionEncKey.c_str(), "0000000000000000", genCardCryptogram);
+
+	if (cardCryptogram != genCardCryptogram)
 	{
 		return 0x6300;
 	}
-	char szMac[17] = { 0 };
 
-	string hostChallengeInput = cardChanllenge + terminalRandom;
-	Full_3DES_CBC_MAC((char*)hostChallengeInput.c_str(), (char*)sessionAuthKey.c_str(), "0000000000000000", szMac);
+    //生成host cryptogram
+	char hostCryptogram[17] = { 0 };
+	string hostChallengeInput = cardChanllenge + hostChanllenge;
+	Full_3DES_CBC_MAC((char*)hostChallengeInput.c_str(), (char*)sessionEncKey.c_str(), "0000000000000000", hostCryptogram);
+	cmd += string("10") + hostCryptogram;   //10代表8字节的hostCryptogram + 8 字节的这个APDU的mac
 
-	cmd += string("10") + szMac;
-	memset(szMac, 0, sizeof(szMac));
+    //生成mac校验值
+    char mac[17] = { 0 };
 	if (scp == "01")
 	{
-		Full_3DES_CBC_MAC((char*)cmd.c_str(), (char*)sessionAuthKey.c_str(), "0000000000000000", szMac);
+		Full_3DES_CBC_MAC((char*)cmd.c_str(), (char*)sessionMacKey.c_str(), "0000000000000000", mac);
 	}
 	else {
-		Common_MAC((char*)cmd.c_str(), (char*)sessionMacKey.c_str(), "0000000000000000", szMac);
+		Common_MAC((char*)cmd.c_str(), (char*)sessionMacKey.c_str(), "0000000000000000", mac);
 	}
 
-	cmd += szMac;
+	cmd += mac;
 
 	return SendApdu2(cmd.c_str());
 }
