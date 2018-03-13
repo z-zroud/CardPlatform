@@ -136,7 +136,7 @@ void GenKmcSubKey(string kmc, int divMethod, string divData, string &kmcEncKey, 
 
 void GenSecureChannelSessionKey(string kmc,
 	int divMethod,
-	string termialRandom,
+	string hostChallenge,
 	string initializeUpdateResp,
 	string& sessionDekKey,
 	string& sessionMacKey,
@@ -157,8 +157,8 @@ void GenSecureChannelSessionKey(string kmc,
 		char szSessionMacKey[33] = { 0 };
 		char szSessionEncKey[33] = { 0 };
 
-		leftDivData = cardChallenge.substr(8, 8) + termialRandom.substr(0, 8);
-		rightDivData = cardChallenge.substr(0, 8) + termialRandom.substr(8, 8);
+		leftDivData = cardChallenge.substr(8, 8) + hostChallenge.substr(0, 8);
+		rightDivData = cardChallenge.substr(0, 8) + hostChallenge.substr(8, 8);
 		divData = leftDivData + rightDivData;
 
 		Des3_ECB(szSessionDekKey, (char*)kmcDekKey.c_str(), (char*)divData.c_str(), 16);

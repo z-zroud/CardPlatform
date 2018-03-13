@@ -104,6 +104,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonInterface", "PythonIn
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PythonInterfaceTest", "PythonInterfaceTest\PythonInterfaceTest.vcxproj", "{99F11B21-8101-4A24-A116-E504EB6C21D7}"
 	ProjectSection(ProjectDependencies) = postProject
+		{0C9661B0-0F06-4F3C-AD36-F5650F60812F} = {0C9661B0-0F06-4F3C-AD36-F5650F60812F}
 		{439981DD-FA57-41F8-8839-DA90DB2A8320} = {439981DD-FA57-41F8-8839-DA90DB2A8320}
 	EndProjectSection
 EndProject
