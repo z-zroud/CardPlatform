@@ -157,7 +157,7 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile)
         //±£´æÊý¾Ý
         int pos = string(fileName).find_last_of('\\');
         string path = string(fileName).substr(0, pos + 1);
-		cpsItem.fileName = path + GetAccount(cpsItem) + ".txt";
+		cpsItem.fileName = path + "conv\\" + GetAccount(cpsItem) + ".txt";
 		Save(cpsItem);
 		vecCpsItem.push_back(cpsItem);
 	}

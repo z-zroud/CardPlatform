@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Window>
-      <Default name="Menu" value="bordersize=&quot;1&quot; bordercolor=&quot;#FFB5B5B5&quot; inset=&quot;3,4,3,4&quot; itemtextpadding=&quot;25,0,0,0&quot; bkcolor=&quot;#FFDEDFDE&quot; itemselectedbkcolor=&quot;#FFB5B5B5&quot;"/>
-      <Menu name="TerminalMenu">
-            <MenuElement name="terminalSetting" text="终端设置"/>
-      </Menu>
-</Window>

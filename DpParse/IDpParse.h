@@ -167,6 +167,7 @@ private:
     vector<string>              m_vecAddTagAndTemplate;
     bool                        m_hasEF02;
     bool                        m_addPse;
+    string                      m_aid;
 };
 
 /******************************************************************

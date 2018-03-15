@@ -22,13 +22,13 @@
             <TextBlock Text="读 卡 器: " MinWidth="70" VerticalAlignment="Center"/>
             <ComboBox Name="comboReader" MinWidth="500" VerticalContentAlignment="Center" SelectedValue="{Binding Path=SelectedReader}"/>
         </StackPanel>
-        <StackPanel Grid.Row="2" Orientation="Horizontal">
+        <StackPanel Grid.Row="4" Orientation="Horizontal">
             <TextBlock Text="序  号:" MinWidth="70" VerticalAlignment="Center"/>
             <TextBox Name="tbSeq" MinWidth="100" Margin="0,0,50,0" VerticalContentAlignment="Center" Text="{Binding Path=SeqNo}"/>
             <TextBlock Text="卡 号:" MinWidth="70" VerticalAlignment="Center"/>
             <TextBox Name="tbCard" MinWidth="280" VerticalContentAlignment="Center" IsEnabled="False"/>
         </StackPanel>
-        <StackPanel Grid.Row="4" Orientation="Horizontal">
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
             <TextBox Name="tbFilePath" MinWidth="520" VerticalContentAlignment="Center" Margin="0,0,10,0"/>
             <Button Name="btScanFile" MinWidth="60" Content="浏览.." Click="btScanFile_Click"/>
         </StackPanel>

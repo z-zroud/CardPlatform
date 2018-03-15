@@ -197,6 +197,14 @@ namespace  Tool
         }		
 	}
 
+    string GetBcdStrLen(string data)
+    {
+        char len[5] = { 0 };
+        GetBcdDataLen(data.c_str(), len, 4);
+
+        return string(len);
+    }
+
 	void IntToStr(int value, char* hexStr, Hex_Len hexLen)
 	{
 		if (hexLen == Two_byte) {

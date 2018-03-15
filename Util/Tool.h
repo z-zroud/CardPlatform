@@ -30,6 +30,8 @@ namespace Tool
 	void GetBcdDataLen(const char* bcdLen, char* output, int len);
 	void IncreaseStep(const char* strLen, int step, char* output, int len);
 
+    string GetBcdStrLen(string data);
+
 	/***********************************************************
 	* 功能： 截取子字符串
 	* 参数： src 源字符串

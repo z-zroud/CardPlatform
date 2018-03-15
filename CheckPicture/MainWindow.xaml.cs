@@ -225,7 +225,7 @@ namespace CheckPicture
                     string result = string.Empty;
                     if (0x9000 == _cdll.SendApdu("00B20114", ref result))
                     {
-                        tbCard.Text = result.Substring(22, 19);
+                        tbCard.Text = result.Substring(34, 16);
                     }
                 }
             }

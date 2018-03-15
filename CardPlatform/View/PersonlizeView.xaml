@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="CardPlatform.View.PersonlizeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:local="clr-namespace:CardPlatform.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1200">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Name="personlizeTitle" Background="#FFF0F0F0" Grid.ColumnSpan="2">
+            <Label Content="数据解析与个人化选项" DockPanel.Dock="Left" FontSize="30"/>
+            <Label Content="SHIT" DockPanel.Dock="Right" HorizontalAlignment="Right"/>
+        </DockPanel>
+        <StackPanel Grid.Row="1" Margin="60,20,20,20">
+            <DockPanel Background="#FF104E8B">
+                <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">数据解析</Label>
+                <Button Name="btnDataParseHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+            </DockPanel>
+            <StackPanel Margin="10,10,10,10">
+                <TextBlock Text="选择DP文件"/>
+            </StackPanel>
+            <StackPanel Margin="10,10,10,10">
+                <TextBlock Text="数据类型"/>
+                <ComboBox Width="200"
+                          Margin="0, 10, 0, 0"
+                          Style="{DynamicResource VirtualisedMetroComboBox}"
+                          DisplayMemberPath="Title"
+                          IsEditable="True"
+                          ItemsSource="{Binding Albums}"
+                          MaxDropDownHeight="125"
+                          Text="{Binding Path=Title}" />
+            </StackPanel>
+            <StackPanel Margin="10,10,10,10">
+                <TextBlock Text="参数配置路径"/>
+                
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,20,60,20">
+            <DockPanel Background="#FF104E8B">
+                <Label Name="lblLayout" DockPanel.Dock="Left" FontSize="25" Foreground="White">个人化</Label>
+                <Button Name="btnPersonlizeHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+            </DockPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

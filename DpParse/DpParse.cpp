@@ -409,6 +409,7 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             m_hasEF02 = true;
         }
         else if (nodeName == "AddPSEAndPPSE") {
+            m_aid = node->first_attribute("aid")->value();
             m_addPse = true;
         }
         else if (nodeName == "AddKcv") {
@@ -535,31 +536,70 @@ string Get9102TagItem(string tag, TLV* pTlvs, unsigned int count)
     return "";
 }
 
+string GetTLVData(string tag, string value)
+{
+    if (value.empty())
+        return "";
+    string len = Tool::GetBcdStrLen(value);
+
+    return tag + len + value;
+}
+
 void IRule::AddPseAndPPSE(CPS_ITEM& cpsItem)
 {
-    string dgi9102;
-    for (auto item : cpsItem.items)
+    if (m_addPse)
     {
-        if (item.dgi == "9102") {
-            dgi9102 = item.value.GetItem();
-            break;
+        string dgi9102;
+        for (auto item : cpsItem.items)
+        {
+            if (item.dgi == "9102") {
+                dgi9102 = item.value.GetItem();
+                break;
+            }
         }
-    }
-    TLV pTlvs[32];
-    unsigned int tlvCount = 32;
-    ParseTLV((char*)dgi9102.c_str(), pTlvs, tlvCount);
+        TLV pTlvs[32];
+        unsigned int tlvCount = 32;
+        ParseTLV((char*)dgi9102.c_str(), pTlvs, tlvCount);
 
-    string tag50, tag9F12, tag87, tag88, tag5F2D, tag9F11;
-    tag50 = Get9102TagItem("50", pTlvs, tlvCount);
-    tag9F12 = Get9102TagItem("9F12", pTlvs, tlvCount);
-    tag87 = Get9102TagItem("87", pTlvs, tlvCount);
-    tag88 = Get9102TagItem("88", pTlvs, tlvCount);
-    tag5F2D = Get9102TagItem("5F2D", pTlvs, tlvCount);
-    tag9F11 = Get9102TagItem("9F11", pTlvs, tlvCount);
+        string tag50, tag9F12, tag87, tag88, tag5F2D, tag9F11;
+        tag50 = Get9102TagItem("50", pTlvs, tlvCount);
+        tag9F12 = Get9102TagItem("9F12", pTlvs, tlvCount);
+        tag87 = Get9102TagItem("87", pTlvs, tlvCount);
+        tag88 = Get9102TagItem("88", pTlvs, tlvCount);
+        tag5F2D = Get9102TagItem("5F2D", pTlvs, tlvCount);
+        tag9F11 = Get9102TagItem("9F11", pTlvs, tlvCount);
+
+        string pseA5 = GetTLVData("88", tag88) +
+            GetTLVData("5F2D", tag5F2D) +
+            GetTLVData("9F11", tag9F11);
+        string pse9102 = GetTLVData("A5", pseA5);
+
+        string template61Data = GetTLVData("4F", m_aid) +
+            GetTLVData("50", tag50) +
+            GetTLVData("9F12", tag9F12) +
+            GetTLVData("87", tag87);
+        string dgi0101 = GetTLVData("61", template61Data);
+
+        string ppse61Template = GetTLVData("4F", m_aid) +
+            GetTLVData("50", tag50) +
+            GetTLVData("87", tag87);
+        string ppseBF0CTemplate = GetTLVData("61", ppse61Template);
+        string ppseA5 = GetTLVData("BF0C", ppseBF0CTemplate);
+        string ppse9102 = GetTLVData("A5", ppseA5);
+
+        DGI_ITEM dgiPSE;
+        dgiPSE.dgi = "PSE";
+        dgiPSE.value.InsertItem("0101", dgi0101);
+        dgiPSE.value.InsertItem("9102", dgi9102);
+
+        DGI_ITEM dgiPPSE;
+        dgiPPSE.dgi = "PPSE";
+        dgiPPSE.value.InsertItem("9102", ppse9102);
 
 
-
-
+        cpsItem.AddDgiItem(dgiPSE);
+        cpsItem.AddDgiItem(dgiPPSE);
+    }   
 }
 
 void IRule::AddTagToValue(CPS_ITEM& cpsItem)
@@ -715,6 +755,9 @@ void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
                 else {
                     decryptedData = DesDecryptDGI(encryptedItem.key, encryptData);
                 }
+
+                item.value.ReplaceItem(encryptedItem.tag, decryptedData); //将数据替换为临时解密数据
+
                 if (decryptedData.length() > encryptedItem.len && encryptedItem.len >= 0) {
                     if (encryptedItem.len == 0 && encryptedItem.tag == "57") { //单独处理57
                         int indexD = decryptedData.find_first_of('D');
