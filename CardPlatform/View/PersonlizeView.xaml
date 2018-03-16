@@ -16,21 +16,55 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <DockPanel Name="personlizeTitle" Background="#FFF0F0F0" Grid.ColumnSpan="2">
-            <Label Content="数据解析与个人化选项" DockPanel.Dock="Left" FontSize="30"/>
-            <Label Content="SHIT" DockPanel.Dock="Right" HorizontalAlignment="Right"/>
-        </DockPanel>
-        <StackPanel Grid.Row="1" Margin="60,20,20,20">
-            <DockPanel Background="#FF104E8B">
-                <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">数据解析</Label>
-                <Button Name="btnDataParseHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
-            </DockPanel>
-            <StackPanel Margin="10,10,10,10">
-                <TextBlock Text="选择DP文件"/>
+        <DockPanel Name="personlizeTitle" HorizontalAlignment="Stretch" Background="#FFF0F0F0" Grid.ColumnSpan="2">
+            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                <Image Source="/Images/PersonlizeTitle.png" Width="50" Height="Auto"/>
+                <Label Content="数据解析与个人化选项" VerticalContentAlignment="Center" FontSize="30"/>
             </StackPanel>
-            <StackPanel Margin="10,10,10,10">
-                <TextBlock Text="数据类型"/>
-                <ComboBox Width="200"
+            <Grid DockPanel.Dock="Right">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+                <Menu Grid.Column="1">
+                    <MenuItem Margin="-5,0,0,0" Background="{Binding ElementName=personlizeTitle, Path=Background}" 
+                        Height="100">
+                        <MenuItem.Header>
+                            <StackPanel Width="100" Height="100">
+                                <Image Source="/Images/setting.png" Margin="0,10,0,10" Width="30"/>
+                                <TextBlock Text="预置" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </MenuItem.Header>
+                        <MenuItem Name="menuLoadPreSetting" Header="加载预置" MinWidth="180"/>
+                        <MenuItem Name="menuSave" Header="保存预置..." MinWidth="180"/>
+                        <MenuItem Name="menuManage" Header="管理预置" MinWidth="180"/>
+                    </MenuItem>
+                </Menu>
+            </Grid>
+        </DockPanel>
+        <!--数据解析面板-->
+        <StackPanel Grid.Row="1" Margin="60,0,20,0" Background="AliceBlue" MinWidth="350">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                <DockPanel Background="#FF104E8B">
+                    <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">数据解析</Label>
+                    <Button Name="btnDataParseHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+                </DockPanel>
+                <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
+                    <StackPanel Margin="5" Width="280">
+                        <TextBlock Text="选择DP文件"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <TextBox Width="220" Height="30"/>
+                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="5" Width="280">
+                        <TextBlock Text="数据类型"/>
+                        <ComboBox 
                           Margin="0, 10, 0, 0"
                           Style="{DynamicResource VirtualisedMetroComboBox}"
                           DisplayMemberPath="Title"
@@ -38,17 +72,92 @@
                           ItemsSource="{Binding Albums}"
                           MaxDropDownHeight="125"
                           Text="{Binding Path=Title}" />
-            </StackPanel>
-            <StackPanel Margin="10,10,10,10">
-                <TextBlock Text="参数配置路径"/>
+                    </StackPanel>
+                    <StackPanel Margin="5" Width="280">
+                        <TextBlock Text="参数配置路径"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBox Width="220" Height="30"/>
+                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Margin="5,5,5,0" Height="180">
+                        <TextBlock Text="结果"/>
+                        <ListBox Height="150" BorderThickness="1"
+                         Margin="0,5,0,0"
+                         SelectedIndex="0" />
+                    </StackPanel>
+                </WrapPanel>
                 
-            </StackPanel>
+                <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
+                    <Button Width="80" Height="30" Content="解析" Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                </StackPanel>
+            </Grid>
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,20,60,20">
-            <DockPanel Background="#FF104E8B">
-                <Label Name="lblLayout" DockPanel.Dock="Left" FontSize="25" Foreground="White">个人化</Label>
-                <Button Name="btnPersonlizeHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
-            </DockPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,0,60,0" Background="AliceBlue">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="40"/>
+                </Grid.RowDefinitions>
+                <DockPanel Background="#FF104E8B">
+                    <Label Name="lblLayout" DockPanel.Dock="Left" FontSize="25" Foreground="White">个人化</Label>
+                    <Button Name="btnPersonlizeHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+                </DockPanel>
+                <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
+                    <StackPanel Margin="10,10,10,10" Width="280">
+                        <TextBlock Text="CMD AID"/>
+                        <ComboBox 
+                          Margin="0, 10, 0, 0"
+                          Style="{DynamicResource VirtualisedMetroComboBox}"
+                          DisplayMemberPath="Title"
+                          IsEditable="True"
+                          ItemsSource="{Binding Albums}"
+                          MaxDropDownHeight="125"
+                          Text="{Binding Path=Title}" />
+                    </StackPanel>
+                    <StackPanel Margin="10,10,10,10" Width="280">
+                        <TextBlock Text="KMC"/>
+                        <ComboBox 
+                          Margin="0, 10, 0, 0"
+                          Style="{DynamicResource VirtualisedMetroComboBox}"
+                          DisplayMemberPath="Title"
+                          IsEditable="True"
+                          ItemsSource="{Binding Albums}"
+                          MaxDropDownHeight="125"
+                          Text="{Binding Path=Title}" />
+                    </StackPanel>
+                    <StackPanel Width="280" Margin="10">
+                        <TextBlock Margin="0,0,0,10">分散方式</TextBlock>
+                        <RadioButton Name="rbNoDiv" GroupName="divTypeGroup" Margin="10,0,0,5" IsChecked="True">不分散</RadioButton>
+                        <RadioButton Name="rbDiv202" GroupName="divTypeGroup" Margin="10,0,0,5">CPG 202</RadioButton>
+                        <RadioButton Name="rbDiv212" GroupName="divTypeGroup" Margin="10,0,0,5">CPG 212</RadioButton>
+                    </StackPanel>
+                    <StackPanel Width="280" Margin="10">
+                        <TextBlock Margin="0,0,0,10">安全等级</TextBlock>
+                        <RadioButton Name="rbNoSecure" GroupName="secureGroup" Margin="10,0,0,5" IsChecked="True">No Secure</RadioButton>
+                        <RadioButton Name="rbMacSecure" GroupName="secureGroup" Margin="10,0,0,5">Mac Secure</RadioButton>
+                    </StackPanel>
+                    <StackPanel Margin="10,10,10,10" Width="280">
+                        <TextBlock Text="安装参数配置路径"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <TextBox Width="220" Height="30"/>
+                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Width="280" Margin="10">
+                        <TextBlock Margin="0,0,0,10">删除实例</TextBlock>
+                        <RadioButton Name="rbDelAllInst" GroupName="delInstGroup" Margin="10,0,0,5" IsChecked="True">删除所有实例</RadioButton>
+                        <RadioButton Name="rbDeToBeInstallInst" GroupName="delInstGroup" Margin="10,0,0,5">删除待安装的实例</RadioButton>
+                    </StackPanel>
+                </WrapPanel>
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,40,0">
+                    <Button Width="80" Height="30" Margin="0,0,20,0"  Content="个人化所有" Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                    <Button Width="80" Height="30" Content="个人化" Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                </StackPanel>
+            </Grid>
+            
         </StackPanel>
     </Grid>
 </UserControl>

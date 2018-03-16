@@ -246,7 +246,7 @@ namespace CheckPicture
                     saveInfo.Add(row[1].ToString());
                     saveInfo.Add(row[2].ToString());
                     saveInfo.Add(row[3].ToString());
-                    saveInfo.Add("打印成功");
+                    saveInfo.Add("打印失败");
                     string tmp = row[2].ToString();
                     string fuck = tmp.Replace("行", "行+");
                     uriString = Directory.GetCurrentDirectory() + "\\Picture\\" +

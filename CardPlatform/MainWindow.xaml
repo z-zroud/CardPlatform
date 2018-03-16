@@ -7,7 +7,7 @@
         xmlns:Views="clr-namespace:CardPlatform.View"
         xmlns:local="clr-namespace:CardPlatform"
         mc:Ignorable="d"
-        Title="制卡检卡平台" FontWeight="Heavy" Height="700" Width="1200" Loaded="MetroWindow_Loaded">
+        Title="制卡检卡平台" Height="700" Width="1200" Loaded="MetroWindow_Loaded">
     <Controls:MetroContentControl>
         <Grid>
             <Grid.RowDefinitions>
@@ -16,24 +16,23 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Controls:MetroAnimatedSingleRowTabControl Grid.Row="1" x:Name="MainTabControl">
-                <TabItem Header="制 卡" BorderThickness="0,0,1,0" Background="AliceBlue">
+                <TabItem Header="制 卡">
                     <Views:PersonlizeView DataContext="{Binding}" />
                 </TabItem>
-                <TabItem Header="卡片检测" BorderThickness="1" Background="AliceBlue">
+                <TabItem Header="卡片检测">
                     <!--exampleViews:ButtonsExample DataContext="{Binding}" /-->
                 </TabItem>
-                <TabItem Header="算法工具" BorderThickness="1" Background="AliceBlue">
+                <TabItem Header="算法工具">
                     <!--exampleViews:ButtonsExample DataContext="{Binding}" /-->
                 </TabItem>
             </Controls:MetroAnimatedSingleRowTabControl>
 
             <StatusBar Grid.Row="2">
-                <StatusBarItem>MahApps.Metro DEMO Application</StatusBarItem>
+                <StatusBarItem>制卡检卡平台</StatusBarItem>
                 <Separator Style="{StaticResource MetroStatusBarSeparator}" />
-                <StatusBarItem>Selected Tab:</StatusBarItem>
+                <StatusBarItem>选择应用:</StatusBarItem>
                 <StatusBarItem Content="{Binding ElementName=MainTabControl, Path=SelectedItem.Header, Mode=OneWay}" />
             </StatusBar>
-
         </Grid>
     </Controls:MetroContentControl>
 </Controls:MetroWindow>
