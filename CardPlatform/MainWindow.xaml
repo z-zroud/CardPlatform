@@ -7,7 +7,18 @@
         xmlns:Views="clr-namespace:CardPlatform.View"
         xmlns:local="clr-namespace:CardPlatform"
         mc:Ignorable="d"
-        Title="制卡检卡平台" WindowStartupLocation="CenterScreen" Height="700" Width="1200" Loaded="MetroWindow_Loaded">
+        Title="制卡检卡平台" 
+        WindowStartupLocation="CenterScreen" 
+        ShowTitleBar="True"
+        Height="700" 
+        Width="1200" 
+        Loaded="MetroWindow_Loaded">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands ShowLastSeparator="False">
+            <ComboBox Width="400" Background="LightSkyBlue"/>
+            <Button Content="刷新"/>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
     <Controls:MetroContentControl>
         <Grid>
             <Grid.RowDefinitions>
