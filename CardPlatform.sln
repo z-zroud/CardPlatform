@@ -126,7 +126,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CallCplusDll", "CallCplusDl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CplusplusDll", "CplusplusDll\CplusplusDll.csproj", "{59EF0D64-111C-4931-AEF1-CF8984324ABA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelLib", "ExcelLib\ExcelLib.csproj", "{C05BF27E-4CB1-4E0E-9323-9017B914AFE4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilLib", "ExcelLib\UtilLib.csproj", "{C05BF27E-4CB1-4E0E-9323-9017B914AFE4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckPicture", "CheckPicture\CheckPicture.csproj", "{B5212F83-9B08-4391-B8F6-A6FF84FDD28E}"
 EndProject

@@ -44,6 +44,7 @@ namespace CardPlatform.ViewModel
             ////}
 
             SimpleIoc.Default.Register<MainViewModel>();
+            SimpleIoc.Default.Register<PersonlizeViewModel>();
         }
 
         public MainViewModel Main
@@ -51,6 +52,14 @@ namespace CardPlatform.ViewModel
             get
             {
                 return ServiceLocator.Current.GetInstance<MainViewModel>();
+            }
+        }
+
+        public PersonlizeViewModel Personlize
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<PersonlizeViewModel>();
             }
         }
         

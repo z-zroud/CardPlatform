@@ -8,7 +8,8 @@ using System.Runtime.InteropServices;
 namespace CplusplusDll
 {
     public class CDll
-    {       
+    {
+        #region import PCSC.dll
         [DllImport(@"PCSC.dll", EntryPoint = "GetReaders", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static int GetReaders(IntPtr[] readers, ref int count);
 
@@ -38,5 +39,17 @@ namespace CplusplusDll
 
         [DllImport(@"PCSC.dll", EntryPoint = "SendApdu2", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static int SendApdu2(string cmd);
+        #endregion
+
+        #region import CPS.dll
+        [DllImport(@"CPS.dll", EntryPoint = "GenCpsFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool GenCpsFile(string dllName, string funcName, string dpFile, string ruleFile);
+
+        [DllImport(@"CPS.dll", EntryPoint = "SetPersonlizationConfig", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void SetPersonlizationConfig(string isd, string kmc, int divMethod, int secureLevel);
+
+        [DllImport(@"CPS.dll", EntryPoint = "DoPersonlization", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool DoPersonlization(string cpsFile, string iniConfigFile);
+        #endregion
     }
 }

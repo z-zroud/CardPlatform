@@ -50,9 +50,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ExcelLib\ExcelLib.csproj">
+    <ProjectReference Include="..\ExcelLib\UtilLib.csproj">
       <Project>{c05bf27e-4cb1-4e0e-9323-9017b914afe4}</Project>
-      <Name>ExcelLib</Name>
+      <Name>UtilLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

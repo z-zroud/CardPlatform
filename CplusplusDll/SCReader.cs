@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CplusplusDll
 {
-    public class SCReader : ICDll
+    public class SCReader : ISCReader
     {
         public void CloseReader()
         {

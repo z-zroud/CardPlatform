@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CplusplusDll
 {
-    public interface ICDll
+    public interface ISCReader
     {
         List<string> GetReaders();
         bool OpenReader(string reader);

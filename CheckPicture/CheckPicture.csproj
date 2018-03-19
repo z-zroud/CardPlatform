@@ -118,9 +118,9 @@
       <Project>{59ef0d64-111c-4931-aef1-cf8984324aba}</Project>
       <Name>CplusplusDll</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExcelLib\ExcelLib.csproj">
+    <ProjectReference Include="..\ExcelLib\UtilLib.csproj">
       <Project>{c05bf27e-4cb1-4e0e-9323-9017b914afe4}</Project>
-      <Name>ExcelLib</Name>
+      <Name>UtilLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
