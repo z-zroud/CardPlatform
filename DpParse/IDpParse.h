@@ -178,7 +178,7 @@ struct IDpParse
 	/**************************************************************
 	* 每一个继承IDpParse的类都需要实现如何解析DP文件接口
 	***************************************************************/
-	virtual bool HandleDp(const char* szFileName, const char* ruleFile) = 0;
+	virtual bool HandleDp(const char* szFileName, const char* ruleFile, char** cpsFile, int& count) = 0;
 	
 	/**************************************************************
 	* 获取文件大小

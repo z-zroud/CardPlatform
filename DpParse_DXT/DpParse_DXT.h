@@ -11,7 +11,7 @@
 class DXTDpParse : public IDpParse
 {
 public:
-	virtual bool HandleDp(const char* szFileName, const char* szRuleFile);
+	virtual bool HandleDp(const char* szFileName, const char* szRuleFile, char** cpsFile, int& count);
 };
 
-extern "C" DPPARSE_DXT_API bool HandleDp(const char* szFileName, const char* szRuleFile);
+extern "C" DPPARSE_DXT_API bool HandleDp(const char* szFileName, const char* szRuleFile, char** cpsFile, int& count);

@@ -1,4 +1,8 @@
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using System.Collections.Generic;
+using System.Windows.Input;
+using CplusplusDll;
 
 namespace CardPlatform.ViewModel
 {
@@ -29,6 +33,45 @@ namespace CardPlatform.ViewModel
             ////{
             ////    // Code runs "for real"
             ////}
+        }
+
+        private List<string> _readers;
+        public List<string> Readers
+        {
+            get { return _readers; }
+            set
+            {
+                Set(ref _readers, value);
+            }
+        }
+
+        private string _selectedReader;
+        public string SelectedReader
+        {
+            get { return _selectedReader; }
+            set
+            {
+                Set(ref _selectedReader, value);
+            }
+        }
+
+        private ICommand _refreshCmd;
+        public ICommand RefreshCmd
+        {
+            get
+            {
+                if (_refreshCmd == null)
+                    _refreshCmd = new RelayCommand(DoRefresh);
+                return _refreshCmd;
+            }
+        }
+
+        private void DoRefresh()
+        {
+            ISCReader reader = new SCReader();
+            Readers = reader.GetReaders();
+            if (Readers.Count > 0)
+                SelectedReader = Readers[0];
         }
     }
 }

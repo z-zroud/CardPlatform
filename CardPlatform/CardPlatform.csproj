@@ -15,7 +15,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -81,6 +81,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\DpParsedProgram.cs" />
+    <Compile Include="Settings\PersonlizeSetting.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\PersonlizeViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
@@ -163,6 +165,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CplusplusDll\CplusplusDll.csproj">
+      <Project>{59ef0d64-111c-4931-aef1-cf8984324aba}</Project>
+      <Name>CplusplusDll</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ExcelLib\UtilLib.csproj">
+      <Project>{c05bf27e-4cb1-4e0e-9323-9017b914afe4}</Project>
+      <Name>UtilLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

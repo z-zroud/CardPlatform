@@ -78,7 +78,7 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 /********************************************************************
 * 解析银联DP数据
 ********************************************************************/
-bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile)
+bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile, char** cpsFile, int& count)
 {
 	ifstream dpFile;
 	if (!OpenDpFile(fileName, dpFile)) {

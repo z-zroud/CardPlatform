@@ -11,7 +11,7 @@
 class ZJTLDpParse : public IDpParse
 {
 public:
-	virtual bool HandleDp(const char* szFileName, const char* ruleFile);
+	virtual bool HandleDp(const char* szFileName, const char* ruleFile, char** cpsFile, int& count);
 
 protected:
 	void ReadDGIName(ifstream &dpFile);
@@ -24,4 +24,4 @@ private:
 	string						m_currentAccount;
 };
 
-extern "C" DPPARSE_ZJ_TL_API bool HandleDp(const char* szFileName, const char* ruleFile);
+extern "C" DPPARSE_ZJ_TL_API bool HandleDp(const char* szFileName, const char* ruleFile, char** cpsFile, int& count);

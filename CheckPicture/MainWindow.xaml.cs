@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using CplusplusDll;
-using ExcelLib;
+using UtilLib;
 
 namespace CheckPicture
 {
@@ -81,7 +81,7 @@ namespace CheckPicture
             DataContext = this;
             SeqNo = 1;
         }
-        private ICDll _cdll;
+        private ISCReader _cdll;
         private IExcelOp _excelWrite;
         private DataTable _picInfos;
         public List<string> saveInfo = new List<string>();

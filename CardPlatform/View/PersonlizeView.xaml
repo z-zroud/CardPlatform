@@ -60,37 +60,48 @@
                         <TextBlock Text="选择DP文件"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                             <TextBox Width="220" Height="30" Text="{Binding DpPath}"/>
-                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenDpFileCmd}"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Margin="5" Width="280">
                         <TextBlock Text="数据类型"/>
                         <ComboBox 
-                          Margin="0, 10, 0, 0"
-                          Style="{DynamicResource VirtualisedMetroComboBox}"
-                          DisplayMemberPath="Title"
-                          IsEditable="True"
-                          ItemsSource="{Binding Albums}"
-                          MaxDropDownHeight="125"
-                          Text="{Binding Path=Title}" />
+                            Margin="0, 10, 0, 0"
+                            Style="{DynamicResource VirtualisedMetroComboBox}"
+                            ItemsSource="{Binding DpType}"
+                            DisplayMemberPath="Name"
+                            SelectedItem="{Binding SelectedDpType}"
+                            MaxDropDownHeight="125" />
                     </StackPanel>
                     <StackPanel Margin="5" Width="280">
                         <TextBlock Text="参数配置路径"/>
                         <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <TextBox Width="220" Height="30"/>
-                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                            <TextBox Width="220" Height="30" Text="{Binding RulePath}"/>
+                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenDpRuleFileCmd}"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Margin="5,5,5,0" Height="180">
-                        <TextBlock Text="结果"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="结果: "/>
+                            <TextBlock Text="{Binding Status.Info}" Foreground="Black" Width="100"/>
+                        </StackPanel>
                         <ListBox Height="150" BorderThickness="1"
                          Margin="0,5,0,0"
-                         SelectedIndex="0" />
+                         ItemsSource="{Binding FileStatus}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox IsChecked="{Binding IsSelected}"/>
+                                        <TextBlock Text="{Binding DpFileName}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </StackPanel>
                 </WrapPanel>
 
                 <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Content="解析" Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                    <Button Width="80" Height="30" Content="解析" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding ParseDpCmd}"/>
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -110,24 +121,22 @@
                     <StackPanel Margin="10,10,10,10" Width="280">
                         <TextBlock Text="CMD AID"/>
                         <ComboBox 
-                          Margin="0, 10, 0, 0"
-                          Style="{DynamicResource VirtualisedMetroComboBox}"
-                          DisplayMemberPath="Title"
-                          IsEditable="True"
-                          ItemsSource="{Binding Albums}"
-                          MaxDropDownHeight="125"
-                          Text="{Binding Path=Title}" />
+                            Margin="0, 10, 0, 0"
+                            Style="{DynamicResource VirtualisedMetroComboBox}"
+                            IsEditable="True"
+                            ItemsSource="{Binding ISDs}"
+                            SelectedItem="{Binding SelectedISD}"
+                            MaxDropDownHeight="125"/>
                     </StackPanel>
                     <StackPanel Margin="10,10,10,10" Width="280">
                         <TextBlock Text="KMC"/>
                         <ComboBox 
-                          Margin="0, 10, 0, 0"
-                          Style="{DynamicResource VirtualisedMetroComboBox}"
-                          DisplayMemberPath="Title"
-                          IsEditable="True"
-                          ItemsSource="{Binding Albums}"
-                          MaxDropDownHeight="125"
-                          Text="{Binding Path=Title}" />
+                            Margin="0, 10, 0, 0"
+                            Style="{DynamicResource VirtualisedMetroComboBox}"
+                            IsEditable="True"
+                            ItemsSource="{Binding KMCs}"
+                            SelectedItem="{Binding SelectedKMC}"
+                            MaxDropDownHeight="125"/>
                     </StackPanel>
                     <StackPanel Width="280" Margin="10">
                         <TextBlock Margin="0,0,0,10">分散方式</TextBlock>
@@ -143,8 +152,8 @@
                     <StackPanel Margin="10,10,10,10" Width="280">
                         <TextBlock Text="安装参数配置路径"/>
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <TextBox Width="220" Height="30"/>
-                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                            <TextBox Width="220" Height="30" Text="{Binding InstallParamPath}"/>
+                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenInstallParamFileCmd}"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Width="280" Margin="10">
@@ -154,7 +163,6 @@
                     </StackPanel>
                 </WrapPanel>
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Margin="0,0,20,0"  Content="个人化所有" Style="{DynamicResource AccentedSquareButtonStyle}"/>
                     <Button Width="80" Height="30" Content="个人化" Style="{DynamicResource AccentedSquareButtonStyle}"/>
                 </StackPanel>
             </Grid>

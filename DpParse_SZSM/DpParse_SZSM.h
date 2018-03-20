@@ -12,12 +12,12 @@ using namespace std;
 #endif
 
 
-extern "C" DPPARSESZSM_API bool HandleDp(const char* szFileName, const char* ruleFile);
+extern "C" DPPARSESZSM_API bool HandleDp(const char* szFileName, const char* ruleFile, char** cpsFile, int& count);
 
 class SZSMDpParser : public IDpParse
 {
 public:
-    bool HandleDp(const char* szFileName, const char* szRuleFile);
+    bool HandleDp(const char* szFileName, const char* szRuleFile, char** cpsFile, int& count);
 
     string GetAccount2(string magstripData);
 protected:

@@ -12,11 +12,12 @@
         ShowTitleBar="True"
         Height="700" 
         Width="1200" 
-        Loaded="MetroWindow_Loaded">
+        Loaded="MetroWindow_Loaded"
+        DataContext="{Binding Source={StaticResource Locator}, Path=Main}">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands ShowLastSeparator="False">
-            <ComboBox Width="400" Background="LightSkyBlue"/>
-            <Button Content="刷新"/>
+            <ComboBox Width="400" Background="LightSkyBlue" ItemsSource="{Binding Readers}" SelectedItem="{Binding SelectedReader}"/>
+            <Button Content="刷新" Command="{Binding RefreshCmd}"/>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
     <Controls:MetroContentControl>
@@ -28,7 +29,7 @@
             </Grid.RowDefinitions>
             <Controls:MetroAnimatedSingleRowTabControl Grid.Row="1" x:Name="MainTabControl">
                 <TabItem Header="制 卡">
-                    <Views:PersonlizeView DataContext="{Binding}" />
+                    <Views:PersonlizeView DataContext="{Binding Source={StaticResource Locator}, Path=Personlize}" />
                 </TabItem>
                 <TabItem Header="卡片检测">
                     <!--exampleViews:ButtonsExample DataContext="{Binding}" /-->

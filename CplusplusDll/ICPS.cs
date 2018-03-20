@@ -5,9 +5,9 @@ using System.Text;
 
 namespace CplusplusDll
 {
-    interface ICPS
+    public interface ICPS
     {
-        bool GenCpsFile(string dllName, string funcName, string dpFile, string ruleFile);
+        List<string> GenCpsFile(string dllName, string funcName, string dpFile, string ruleFile);
         void SetPersonlizationConfig(string isd, string kmc, int divMethod, int secureLevel);
         bool DoPersonlization(string cpsFile, string iniConfigFile);
     }

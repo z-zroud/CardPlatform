@@ -12,13 +12,13 @@ using namespace std;
 #endif
 
 
-extern "C" YLDPPARSE_API bool HandleDp(const char* szFileName,const char* ruleFile);
+extern "C" YLDPPARSE_API bool HandleDp(const char* szFileName,const char* ruleFile, char** cpsFile, int& count);
 
 class YLDpParser : public IDpParse
 {
 public:
 	YLDpParser();
-	bool HandleDp(const char* szFileName,const char* szRuleFile);
+	bool HandleDp(const char* szFileName,const char* szRuleFile, char** cpsFile, int& count);
 
 private:
 	void			ReadDGIName(ifstream &dpFile);                          //¶ÁÈ¡DGIÃû³Æ

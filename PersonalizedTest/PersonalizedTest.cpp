@@ -51,9 +51,12 @@ int main()
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
     string dpFormat = "神舟数码";
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\28_808021_20180109_20180109465_ic.txt";
+    string dpPath = dpDir + dpFormat + "\\33_496121_20201018_20201018803_ic.txt";
     rulePath += "HeDongRule.xml";
     GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    char* cpsFile[30] = { 0 };
+    int cpsCount = 0;
+    GetCpsFiles(cpsFile, cpsCount);
     //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\26_808021_20180109_20180109421_ic.txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
     //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\27_808021_20180109_20180109441_ic.txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
     //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\23_808021_20180109_20180109363_ic (1).txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
@@ -71,10 +74,10 @@ int main()
     vector<string> files;
     getFiles(path, files);
     string installParamDir = "F:\\CardPlatform\\bin\\Debug\\Configuration\\InstallParams\\";
-    string installParamPath = installParamDir + "JR1838_神池河东村镇银行_华大_G81140042.xml";
+    string installParamPath = installParamDir + "JR1838_河东村镇银行_华大_G81140042.xml";
 
 
-    bool isSongJan = true;
+    bool isSongJan = false;
     if (isSongJan)
     {
         while(true)

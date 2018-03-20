@@ -8,10 +8,10 @@
 #define DGI_NUMBER	4
 #define DGI_LEN		2
 
-bool HandleDp(const char* szFileName, const char* ruleFile)
+bool HandleDp(const char* szFileName, const char* ruleFile, char** cpsFile, int& count)
 {
 	ZJTLDpParse parse;
-	return parse.HandleDp(szFileName, ruleFile);
+    return parse.HandleDp(szFileName, ruleFile, cpsFile, count);
 }
 
 string ZJTLDpParse::GetDpMark(ifstream& dpFile)
@@ -93,7 +93,7 @@ int ZJTLDpParse::GetDGIDataLen(ifstream& dpFile)
     return dgiDataLen;
 }
 
-bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile)
+bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile, char** cpsFile, int& count)
 {
 	ifstream dpFile;
 	if (!OpenDpFile(fileName, dpFile)) {

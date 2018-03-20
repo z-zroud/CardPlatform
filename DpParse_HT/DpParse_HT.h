@@ -12,12 +12,12 @@ using namespace std;
 #endif
 
 
-extern "C" HTDPPARSE_API bool HandleDp(const char* szFileName, const char* ruleFile);
+extern "C" HTDPPARSE_API bool HandleDp(const char* szFileName, const char* ruleFile, char** cpsFile, int& count);
 
 class HTDpParser : public IDpParse
 {
 public:
-    bool HandleDp(const char* szFileName, const char* szRuleFile);
+    bool HandleDp(const char* szFileName, const char* szRuleFile, char** cpsFile, int& count);
 
 protected:
     int     GetCardSequence();

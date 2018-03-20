@@ -36,6 +36,8 @@ int			g_divMethod = 0;
 int			g_secureLevel = 0;
 vector<INSTALL_APP> g_vecInstallApp;
 vector<EncryptDGI> g_vecEncryptDGI;
+int         g_cpsCount = 1024;
+char*       g_cpsFile[1024] = { 0 };
 /****************************************/
 
 /******************************************************
@@ -58,9 +60,19 @@ bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szDpF
 	{
 		return false;
 	}
-	return pHandleDpFunc(szDpFile, szRuleFile);
+	return pHandleDpFunc(szDpFile, szRuleFile, g_cpsFile, g_cpsCount);
 }
 
+void GetCpsFiles(char** cpsFiles, int& count)
+{
+    count = g_cpsCount;
+    for (int i = 0; i < g_cpsCount; i++)
+    {
+        cpsFiles[i] = new char[1024];
+        memset(cpsFiles[i], 0, 1024);
+        strncpy_s(cpsFiles[i], 1024, g_cpsFile[i], strlen(g_cpsFile[i]));
+    }
+}
 
 void SetPersonlizationConfig(const char* isd,const char* kmc, int divMethod, int secureLevel)
 {

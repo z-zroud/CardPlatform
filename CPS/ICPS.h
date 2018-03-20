@@ -4,7 +4,7 @@
 * 外界dll需实现的接口，统一的接口名称为：
 * bool HandleDp(const char* fileName);
 ********************************************************/
-typedef bool(*PHandleDpCallback)(const char* dpFile,const char* ruleFile);
+typedef bool(*PHandleDpCallback)(const char* dpFile,const char* ruleFile, char** cpsFile, int& count);
 
 /**********************************************************
 * 定义该dll对外接口
@@ -24,6 +24,7 @@ typedef bool(*PHandleDpCallback)(const char* dpFile,const char* ruleFile);
 ***********************************************************/
 extern "C" CPS_API bool GenCpsFile(const char* szDllName, const char* szFuncName, const char* szDpFile, const char* szRuleFile);
 
+extern "C" CPS_API void GetCpsFiles(char** cpsFiles, int& count);
 
 /**********************************************************
 * 设置个人化时的KMC信息

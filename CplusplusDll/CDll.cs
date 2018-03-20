@@ -45,6 +45,9 @@ namespace CplusplusDll
         [DllImport(@"CPS.dll", EntryPoint = "GenCpsFile", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static bool GenCpsFile(string dllName, string funcName, string dpFile, string ruleFile);
 
+        [DllImport(@"CPS.dll", EntryPoint = "GetCpsFiles", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool GetCpsFiles(IntPtr[] readers, ref int count);
+
         [DllImport(@"CPS.dll", EntryPoint = "SetPersonlizationConfig", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void SetPersonlizationConfig(string isd, string kmc, int divMethod, int secureLevel);
 

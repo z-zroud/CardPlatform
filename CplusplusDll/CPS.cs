@@ -14,9 +14,25 @@ namespace CplusplusDll
             return CDll.DoPersonlization(cpsFile, iniConfigFile);
         }
 
-        public bool GenCpsFile(string dllName, string funcName, string dpFile, string ruleFile)
+        public List<string> GenCpsFile(string dllName, string funcName, string dpFile, string ruleFile)
         {
-            return CDll.GenCpsFile(dllName, funcName, dpFile, ruleFile);
+            var cpsFiles = new List<string>();
+            if (CDll.GenCpsFile(dllName, funcName, dpFile, ruleFile))
+            {                
+                int count = 128;
+                IntPtr[] intPtrs = new IntPtr[count];
+                for (int i = 0; i < count; i++)
+                {
+                    intPtrs[i] = new IntPtr();
+                }
+                CDll.GetCpsFiles(intPtrs, ref count);
+                for (int j = 0; j < count; j++)
+                {
+                    string cpsFile = Marshal.PtrToStringAnsi(intPtrs[j]);
+                    cpsFiles.Add(cpsFile);
+                }
+            }
+            return cpsFiles;
         }
 
         public void SetPersonlizationConfig(string isd, string kmc, int divMethod, int secureLevel)
