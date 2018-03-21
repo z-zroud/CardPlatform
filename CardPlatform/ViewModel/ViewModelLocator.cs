@@ -45,6 +45,7 @@ namespace CardPlatform.ViewModel
 
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<PersonlizeViewModel>();
+            SimpleIoc.Default.Register<AlgorithomViewModel>();
         }
 
         public MainViewModel Main
@@ -62,7 +63,15 @@ namespace CardPlatform.ViewModel
                 return ServiceLocator.Current.GetInstance<PersonlizeViewModel>();
             }
         }
-        
+
+        public AlgorithomViewModel Algorithm
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<AlgorithomViewModel>();
+            }
+        }
+
         public static void Cleanup()
         {
             // TODO Clear the ViewModels

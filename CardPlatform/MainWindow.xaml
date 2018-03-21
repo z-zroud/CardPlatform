@@ -35,7 +35,7 @@
                     <!--exampleViews:ButtonsExample DataContext="{Binding}" /-->
                 </TabItem>
                 <TabItem Header="算法工具">
-                    <!--exampleViews:ButtonsExample DataContext="{Binding}" /-->
+                    <Views:AlgorithmView DataContext="{Binding Source={StaticResource Locator}, Path=Algorithm}" />
                 </TabItem>
             </Controls:MetroAnimatedSingleRowTabControl>
 

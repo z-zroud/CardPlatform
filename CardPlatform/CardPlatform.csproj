@@ -83,6 +83,8 @@
     </ApplicationDefinition>
     <Compile Include="Models\DpParsedProgram.cs" />
     <Compile Include="Settings\PersonlizeSetting.cs" />
+    <Compile Include="ViewModel\AlgorithomViewModel.cs" />
+    <Compile Include="ViewModel\CardCheckViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\PersonlizeViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
