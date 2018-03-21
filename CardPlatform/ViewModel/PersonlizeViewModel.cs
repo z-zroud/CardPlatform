@@ -23,11 +23,17 @@ namespace CardPlatform.ViewModel
             KMCs = new List<string>();
             Status = new DpParseStatus();
             FileStatus = new ObservableCollection<DpFileStatus>();
-
+            DivType = new List<string>();
+            Secure = new List<string>();
+            DelInst = new List<string>();
+            
             Load();
         }
 
         #region data binding
+        /// <summary>
+        /// DP文件路径属性
+        /// </summary>
         private string _dpPath;
         public string DpPath
         {
@@ -38,6 +44,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// DP文件 数据类型属性
+        /// </summary>
         private List<DpParsedProgram> _dpType;
         public List<DpParsedProgram> DpType
         {
@@ -48,6 +57,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// 被选中的DP数据类型
+        /// </summary>
         private DpParsedProgram _SelectedDpType;
         public DpParsedProgram SelectedDpType
         {
@@ -58,6 +70,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// DP解析规则 配置文件路径
+        /// </summary>
         private string _rulePath;
         public string RulePath
         {
@@ -68,6 +83,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// DP解析是否成功，状态属性
+        /// </summary>
         private DpParseStatus _status;
         public DpParseStatus Status
         {
@@ -78,6 +96,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// DP解析之后的文件属性
+        /// </summary>
         private ObservableCollection<DpFileStatus> _fileStatus;
         public ObservableCollection<DpFileStatus> FileStatus
         {
@@ -88,6 +109,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// ISD 主安全域ID
+        /// </summary>
         private List<string> _isds;
         public List<string> ISDs
         {
@@ -98,6 +122,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// 选中的主安全域
+        /// </summary>
         private string _selectedISD;
         public string SelectedISD
         {
@@ -108,6 +135,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// KMC列表
+        /// </summary>
         private List<string> _kmcs;
         public List<string> KMCs
         {
@@ -118,6 +148,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// 选中的KMC
+        /// </summary>
         private string _selectedKMC;
         public string SelectedKMC
         {
@@ -128,6 +161,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// 个人化安装参数路径
+        /// </summary>
         private string _installParamPath;
         public string InstallParamPath
         {
@@ -137,6 +173,84 @@ namespace CardPlatform.ViewModel
                 Set(ref _installParamPath, value);
             }
         }
+
+        /// <summary>
+        /// KMC分散方式列表
+        /// </summary>
+        private List<string> _divType;
+        public List<string> DivType
+        {
+            get { return _divType; }
+            set
+            {
+                Set(ref _divType, value);
+            }
+        }
+
+        /// <summary>
+        /// 被选中的分散方式
+        /// </summary>
+        private int _divTypeIndex;
+        public int DivTypeIndex
+        {
+            get { return _divTypeIndex; }
+            set
+            {
+                Set(ref _divTypeIndex, value);
+            }
+        }
+
+        /// <summary>
+        /// 打开安全通道的安全等级
+        /// </summary>
+        private List<string> _secure;
+        public List<string> Secure
+        {
+            get { return _secure; }
+            set
+            {
+                Set(ref _secure, value);
+            }
+        }
+
+        /// <summary>
+        /// 被选中的安全等级
+        /// </summary>
+        private int _secureIndex;
+        public int SecureIndex
+        {
+            get { return _secureIndex; }
+            set
+            {
+                Set(ref _secureIndex, value);
+            }
+        }
+
+        /// <summary>
+        /// 删除实例方式
+        /// </summary>
+        private List<string> _delInst;
+        public List<string> DelInst
+        {
+            get { return _delInst; }
+            set
+            {
+                Set(ref _delInst, value);
+            }
+        }
+        /// <summary>
+        /// 选中的删除实例的方式
+        /// </summary>
+        private int _delInstIndex;
+        public int DelInstIndex
+        {
+            get { return _delInstIndex; }
+            set
+            {
+                Set(ref _delInstIndex, value);
+            }
+        }
+
         #endregion
 
         #region command binding
@@ -215,12 +329,12 @@ namespace CardPlatform.ViewModel
         {
             ViewModelLocator locator = new ViewModelLocator();
             ISCReader reader = new SCReader();
+            if (string.IsNullOrWhiteSpace(locator.Main.SelectedReader))
+                return;
             if(reader.OpenReader(locator.Main.SelectedReader))
             {
                 ICPS cps = new CPS();
-                int divType = 0;
-                int secureLevel = 0;
-                cps.SetPersonlizationConfig(SelectedISD, SelectedKMC, divType, secureLevel);
+                cps.SetPersonlizationConfig(SelectedISD, SelectedKMC, DivTypeIndex, SecureIndex);
                 foreach(var cpsFile in FileStatus)
                 {
                     if(cpsFile.IsSelected)
@@ -284,6 +398,15 @@ namespace CardPlatform.ViewModel
             KMCs = personlizeCfg.KMCs;
             if (KMCs.Count > 0)
                 SelectedKMC = KMCs.First();
+            DivType = personlizeCfg.DivType;
+            if (DivType.Count > 0)
+                DivTypeIndex = 0;
+            Secure = personlizeCfg.Secure;
+            if (Secure.Count > 0)
+                SecureIndex = 0;
+            DelInst = personlizeCfg.DelInst;
+            if (DelInst.Count > 0)
+                DelInstIndex = 0;
         }
     }
 }

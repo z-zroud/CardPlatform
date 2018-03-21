@@ -11,11 +11,18 @@
                             Value="48" />
         <Setter Property="ArrowVisibility"
                             Value="Collapsed" />
-        <!--Setter Property="ButtonStyle"
-                            Value="{DynamicResource MetroCircleButtonStyle}" /-->
         <Setter Property="BorderThickness"
                             Value="0" />
-        <!--Setter Property="FocusVisualStyle"
-                            Value="{DynamicResource MetroCircleButtonFocusVisual}" /-->
+    </Style>
+
+    <!-- radio button group style -->
+    <Style x:Key="RadioButtonGroupStyle" TargetType="ListBoxItem">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <RadioButton Margin="0,5,0,0" Content="{TemplateBinding Content}" IsChecked="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=IsSelected}"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>

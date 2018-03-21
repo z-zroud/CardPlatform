@@ -44,7 +44,7 @@
             </Grid>
         </DockPanel>
         <!--数据解析面板-->
-        <StackPanel Grid.Row="1" Margin="60,0,20,0" Background="AliceBlue" MinWidth="350">
+        <StackPanel Name="PeronlizeContentPanel" Grid.Row="1" Margin="60,0,20,0" Background="AliceBlue" MinWidth="350">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="40"/>
@@ -140,14 +140,11 @@
                     </StackPanel>
                     <StackPanel Width="280" Margin="10">
                         <TextBlock Margin="0,0,0,10">分散方式</TextBlock>
-                        <RadioButton Name="rbNoDiv" GroupName="divTypeGroup" Margin="10,0,0,5" IsChecked="True">不分散</RadioButton>
-                        <RadioButton Name="rbDiv202" GroupName="divTypeGroup" Margin="10,0,0,5">CPG 202</RadioButton>
-                        <RadioButton Name="rbDiv212" GroupName="divTypeGroup" Margin="10,0,0,5">CPG 212</RadioButton>
+                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DivType}" SelectedIndex="{Binding DivTypeIndex}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
                     </StackPanel>
                     <StackPanel Width="280" Margin="10">
                         <TextBlock Margin="0,0,0,10">安全等级</TextBlock>
-                        <RadioButton Name="rbNoSecure" GroupName="secureGroup" Margin="10,0,0,5" IsChecked="True">No Secure</RadioButton>
-                        <RadioButton Name="rbMacSecure" GroupName="secureGroup" Margin="10,0,0,5">Mac Secure</RadioButton>
+                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding Secure}" SelectedIndex="{Binding SecureIndex}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
                     </StackPanel>
                     <StackPanel Margin="10,10,10,10" Width="280">
                         <TextBlock Text="安装参数配置路径"/>
@@ -158,12 +155,11 @@
                     </StackPanel>
                     <StackPanel Width="280" Margin="10">
                         <TextBlock Margin="0,0,0,10">删除实例</TextBlock>
-                        <RadioButton Name="rbDelAllInst" GroupName="delInstGroup" Margin="10,0,0,5" IsChecked="True">删除所有实例</RadioButton>
-                        <RadioButton Name="rbDeToBeInstallInst" GroupName="delInstGroup" Margin="10,0,0,5">删除待安装的实例</RadioButton>
+                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DelInst}" SelectedIndex="{Binding DelInstIndex}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
                     </StackPanel>
                 </WrapPanel>
                 <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Content="个人化" Style="{DynamicResource AccentedSquareButtonStyle}"/>
+                    <Button Width="80" Height="30" Content="个人化" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding PersonlizeCmd}"/>
                 </StackPanel>
             </Grid>
 
