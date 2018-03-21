@@ -11,13 +11,18 @@ using UtilLib;
 using CardPlatform.Models;
 using CplusplusDll;
 using System.Collections.ObjectModel;
+using MahApps.Metro.Controls;
+using System.Windows;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace CardPlatform.ViewModel
 {
     public class PersonlizeViewModel : ViewModelBase
     {
+        private MetroWindow _dialog;
         public PersonlizeViewModel()
         {
+            //_dialogCoordinator = dialogCoordinator;
             DpType = new List<DpParsedProgram>();
             ISDs = new List<string>();
             KMCs = new List<string>();
@@ -26,8 +31,9 @@ namespace CardPlatform.ViewModel
             DivType = new List<string>();
             Secure = new List<string>();
             DelInst = new List<string>();
-            
+            _dialog = (MetroWindow)Application.Current.MainWindow;
             Load();
+            
         }
 
         #region data binding
@@ -325,12 +331,18 @@ namespace CardPlatform.ViewModel
             return string.Empty;
         }
 
-        private void DoPersonlize()
+        private async void DoPersonlize()
         {
+            MetroDialogSettings settings = new MetroDialogSettings();
+
             ViewModelLocator locator = new ViewModelLocator();
             ISCReader reader = new SCReader();
             if (string.IsNullOrWhiteSpace(locator.Main.SelectedReader))
+            {
+                await _dialog.ShowMessageAsync("Warning", "You need select a smart card reader!");
                 return;
+            }
+
             if(reader.OpenReader(locator.Main.SelectedReader))
             {
                 ICPS cps = new CPS();
@@ -339,16 +351,49 @@ namespace CardPlatform.ViewModel
                 {
                     if(cpsFile.IsSelected)
                     {
-                        cps.DoPersonlization(cpsFile.DpFilePath, InstallParamPath);
+
+                        MessageDialogResult result = await _dialog.ShowMessageAsync("Message", string.Format("Please Input card : {0}", cpsFile.DpFileName.Substring(0, cpsFile.DpFileName.Length - 4)),MessageDialogStyle.AffirmativeAndNegative);
+                        if(result == MessageDialogResult.Affirmative)
+                        {
+                            bool sucess = cps.DoPersonlization(cpsFile.DpFilePath, InstallParamPath);
+                            if (!sucess)
+                            {
+                                await _dialog.ShowMessageAsync("Failed", string.Format("Personlize card: {0} failed.", cpsFile.DpFileName.Substring(0, cpsFile.DpFileName.Length - 4)));
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+
                     }
                 }
             }
+            else
+            {
+                await _dialog.ShowMessageAsync("Error", "Can not open the smart card reader!");
+            }
         }
 
-        private void DoParseDp()
+        private void GenCpsFile()
+        {
+        }
+
+        private async void DoParseDp()
         {
             ICPS cps = new CPS();
-            var cpsFiles = cps.GenCpsFile(SelectedDpType.ProgramName, SelectedDpType.FuncName, DpPath, RulePath);
+            var task = new Task<List<string>>(() => cps.GenCpsFile(SelectedDpType.ProgramName, SelectedDpType.FuncName, DpPath, RulePath));
+            //var cpsFiles = cps.GenCpsFile(SelectedDpType.ProgramName, SelectedDpType.FuncName, DpPath, RulePath);
+            var controller = await _dialog.ShowProgressAsync("Progress Dp File", "Progressing all the things, wait for seconds");
+            task.Start();
+            
+            controller.SetIndeterminate();
+            task.Wait();
+   
+            await controller.CloseAsync();
+            var cpsFiles = task.Result;
+            
             foreach(var cpsFile in cpsFiles)
             {
                 DpFileStatus fileStatus = new DpFileStatus();
