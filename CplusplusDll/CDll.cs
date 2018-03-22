@@ -54,5 +54,31 @@ namespace CplusplusDll
         [DllImport(@"CPS.dll", EntryPoint = "DoPersonlization", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static bool DoPersonlization(string cpsFile, string iniConfigFile);
         #endregion
+
+        #region import Des0.dll
+        [DllImport(@"Des0.dll", EntryPoint = "Des3", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool Des3Encrypt(StringBuilder output, string key, string input);
+
+        [DllImport(@"Des0.dll", EntryPoint = "_Des3", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool Des3Decrypt(StringBuilder output, string key, string input);
+
+        [DllImport(@"Des0.dll", EntryPoint = "Des3_CBC", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool Des3CBCEncrypt(StringBuilder output, string key, string input, int inputLen);
+
+        [DllImport(@"Des0.dll", EntryPoint = "Des3_ECB", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool Des3ECBEncrypt(StringBuilder output, string key, string input, int inputLen);
+
+        [DllImport(@"Des0.dll", EntryPoint = "DES_3DES_CBC_MAC", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool Des3Mac(string input, string key, string initVector, StringBuilder output);
+
+        [DllImport(@"Des0.dll", EntryPoint = "Full_3DES_CBC_MAC", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool Des3FullMac(string input, string key, string initVector, StringBuilder output);
+
+        [DllImport(@"Des0.dll", EntryPoint = "AscToBcd", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool BcdToAsc(string bcd, StringBuilder asc, int ascLen);
+
+        [DllImport(@"Des0.dll", EntryPoint = "BcdToAsc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static bool AscToBcd(string asc, StringBuilder bcd, int bcdLen);
+        #endregion
     }
 }

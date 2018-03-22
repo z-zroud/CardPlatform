@@ -93,6 +93,9 @@ namespace CardPlatform.Models
             DpType = new List<DpParsedProgram>();
             ISDs = new List<string>();
             KMCs = new List<string>();
+            Secure = new List<string>();
+            DivType = new List<string>();
+            DelInst = new List<string>();
         }
         public List<DpParsedProgram> DpType { get; set; }
 

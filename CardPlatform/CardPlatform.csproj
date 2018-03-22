@@ -81,6 +81,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\AlgorithmConfig.cs" />
     <Compile Include="Models\DpParsedProgram.cs" />
     <Compile Include="Settings\PersonlizeSetting.cs" />
     <Compile Include="ViewModel\AlgorithomViewModel.cs" />
