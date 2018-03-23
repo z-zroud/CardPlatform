@@ -305,7 +305,12 @@ namespace CardPlatform.ViewModel
 
         private void OpenEncryptFile()
         {
-
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "*|*";
+            if (dialog.ShowDialog() == true)
+            {
+                EncryptFilePath = dialog.FileName;
+            }
         }
 
         private void DoKmcDiv()

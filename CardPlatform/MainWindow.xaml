@@ -32,7 +32,7 @@
                     <Views:PersonlizeView DataContext="{Binding Source={StaticResource Locator}, Path=Personlize}" />
                 </TabItem>
                 <TabItem Header="卡片检测">
-                    <!--exampleViews:ButtonsExample DataContext="{Binding}" /-->
+                    <Views:CardCheckView DataContext="{Binding Source={StaticResource Locator}, Path=CardCheck}" />
                 </TabItem>
                 <TabItem Header="算法工具">
                     <Views:AlgorithmView DataContext="{Binding Source={StaticResource Locator}, Path=Algorithm}" />

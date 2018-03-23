@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace CardPlatform.ViewModel
 {
-    public class CardCheckViewModel : ViewModelBase
+    public class TransactionViewModel : ViewModelBase
     {
+
     }
 }

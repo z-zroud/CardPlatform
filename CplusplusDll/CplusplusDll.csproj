@@ -48,7 +48,7 @@
   <ItemGroup>
     <Compile Include="CDll.cs" />
     <Compile Include="CPS.cs" />
-    <Compile Include="IAlgorithm.cs" />
+    <Compile Include="Algorithm.cs" />
     <Compile Include="ISCReader.cs" />
     <Compile Include="ICPS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
