@@ -29,13 +29,13 @@
             </Grid.RowDefinitions>
             <Controls:MetroAnimatedSingleRowTabControl Grid.Row="1" x:Name="MainTabControl">
                 <TabItem Header="制 卡">
-                    <Views:PersonlizeView DataContext="{Binding Source={StaticResource Locator}, Path=Personlize}" />
+                    <Views:PersonlizeView />
                 </TabItem>
                 <TabItem Header="卡片检测">
-                    <Views:CardCheckView DataContext="{Binding Source={StaticResource Locator}, Path=CardCheck}" />
+                    <Views:CardCheckView />
                 </TabItem>
                 <TabItem Header="算法工具">
-                    <Views:AlgorithmView DataContext="{Binding Source={StaticResource Locator}, Path=Algorithm}" />
+                    <Views:AlgorithmView/>
                 </TabItem>
             </Controls:MetroAnimatedSingleRowTabControl>
 

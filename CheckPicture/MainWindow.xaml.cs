@@ -162,7 +162,7 @@ namespace CheckPicture
                             saveInfo.Add(row[1].ToString());
                             saveInfo.Add(row[2].ToString());
                             saveInfo.Add(row[3].ToString());
-                            saveInfo.Add("打印成功");
+                            //saveInfo.Add("打印成功");
 
                             string tmp = row[2].ToString();
                             string fuck = tmp.Replace("行", "行+");
@@ -246,7 +246,7 @@ namespace CheckPicture
                     saveInfo.Add(row[1].ToString());
                     saveInfo.Add(row[2].ToString());
                     saveInfo.Add(row[3].ToString());
-                    saveInfo.Add("打印失败");
+                    //saveInfo.Add("打印失败");
                     string tmp = row[2].ToString();
                     string fuck = tmp.Replace("行", "行+");
                     uriString = Directory.GetCurrentDirectory() + "\\Picture\\" +
@@ -272,9 +272,14 @@ namespace CheckPicture
 
         private void btOK_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("核对是否成功?", "保存", MessageBoxButton.OKCancel, MessageBoxImage.Information);
-            if (result == MessageBoxResult.OK)
+            var result = MessageBox.Show("核对是否成功?", "保存", MessageBoxButton.YesNoCancel, MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
             {
+                saveInfo.Add("打印成功");
+                _excelWrite.AppendRow("Sheet1", saveInfo);
+            }else if(result == MessageBoxResult.No)
+            {
+                saveInfo.Add("打印作废");
                 _excelWrite.AppendRow("Sheet1", saveInfo);
             }
             tbCard.Text = string.Empty;

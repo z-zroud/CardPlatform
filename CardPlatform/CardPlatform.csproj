@@ -93,6 +93,9 @@
     <Compile Include="View\AlgorithmView.xaml.cs">
       <DependentUpon>AlgorithmView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\CappView.xaml.cs">
+      <DependentUpon>CappView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\CardCheckView.xaml.cs">
       <DependentUpon>CardCheckView.xaml</DependentUpon>
     </Compile>
@@ -115,6 +118,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="View\AlgorithmView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\CappView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

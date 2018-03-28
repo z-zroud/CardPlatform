@@ -7,19 +7,19 @@ using System.Threading.Tasks;
 
 namespace CplusplusDll
 {
-    public class SCReader : ISCReader
+    public static class SCReader
     {
-        public void CloseReader()
+        public static void CloseReader()
         {
             CDll.CloseReader();
         }
 
-        public bool ColdReset()
+        public static bool ColdReset()
         {
             return CDll.ColdReset();
         }
 
-        public string GetATR()
+        public static string GetATR()
         {
             int len = 128;
             StringBuilder atr = new StringBuilder(len);
@@ -27,12 +27,12 @@ namespace CplusplusDll
             return atr.ToString();
         }
 
-        public int GetCardStatus()
+        public static int GetCardStatus()
         {
             return CDll.GetCardStatus();
         }
 
-        public List<string> GetReaders()
+        public static List<string> GetReaders()
         {
             var readers = new List<string>();
             int count = 12;
@@ -50,17 +50,17 @@ namespace CplusplusDll
             return readers;
         }
 
-        public int GetTransProtocol()
+        public static int GetTransProtocol()
         {
             return CDll.GetTransProtocol();
         }
 
-        public bool OpenReader(string reader)
+        public static bool OpenReader(string reader)
         {
             return CDll.OpenReader(reader);
         }
 
-        public int SendApdu(string cmd, ref string result)
+        public static int SendApdu(string cmd, ref string result)
         {
             int resultLen = 2048;
             StringBuilder apduRet = new StringBuilder(resultLen);
@@ -70,12 +70,12 @@ namespace CplusplusDll
             return sw;
         }
 
-        public int SendApdu(string cmd)
+        public static int SendApdu(string cmd)
         {
             return CDll.SendApdu2(cmd);
         }
 
-        public bool WarmReset()
+        public static bool WarmReset()
         {
             return CDll.WarmReset();
         }

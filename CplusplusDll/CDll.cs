@@ -80,5 +80,53 @@ namespace CplusplusDll
         [DllImport(@"Des0.dll", EntryPoint = "BcdToAsc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static bool AscToBcd(string asc, StringBuilder bcd, int bcdLen);
         #endregion
+
+        #region import Authencation.dll
+        [DllImport(@"Authencation.dll", EntryPoint = "GenDesKcv", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GenDesKcv(string key, StringBuilder kcv, int kcvLen);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenSmKcv", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GenSmKcv(string key, StringBuilder kcv, int kcvLen);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenCAPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GenCAPublicKey(string caIndex, string rid, StringBuilder caPublicKey);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenDesIssuerPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GenDesIssuerPublicKey( string caPublicKey,string issuerPublicCert,string ipkRemainder,string issuerExponent,StringBuilder issuerPublicKey);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenDesICCPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GenDesICCPublicKey(string issuerPublicKey,string iccPublicCert,string iccRemainder,string sigStaticData,string iccExponent,string tag82,StringBuilder iccPublicKey);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenSMIssuerPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GenSMIssuerPublicKey(  string caPublicKey,string issuerPublicCert,StringBuilder issuerPublicKeyn);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenSMICCPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GenSMICCPublicKey( string issuerPublicKey,string iccPublicCert,string needAuthStaticData,StringBuilder iccPublicKey);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "DES_SDA", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int DES_SDA(string issuerPublicKey,string ipkExponent,string tag93,string sigStaticData,string tag82);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "SM_SDA", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int SM_SDA(string issuerPublicKey, string ipkExponent, string sigStaticData, string tag93, string tag82);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "DES_DDA", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int DES_DDA(string iccPublicKey,string iccExponent,string tag9F4B,string dynamicData);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "SM_DDA", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int SM_DDA(string iccPublicKey, string dynamicData);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenUdkSessionKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void GenUdkSessionKey(string udkSubKey, string atc, StringBuilder udkSessionKey);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenUdk", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void GenUdk(string mdk, string cardNo, string cardSequence,StringBuilder udk);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenArpc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void GenArpc(string udkAuthSessionKey, string ac, string authCode, StringBuilder arpc);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "GenIssuerScriptMac", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void GenIssuerScriptMac(string udkMacSessionKey, string data, StringBuilder mac);
+
+        #endregion
     }
 }

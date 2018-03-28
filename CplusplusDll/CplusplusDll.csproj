@@ -46,13 +46,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="APDU.cs" />
+    <Compile Include="Authencation.cs" />
     <Compile Include="CDll.cs" />
+    <Compile Include="Constant.cs" />
     <Compile Include="CPS.cs" />
     <Compile Include="Algorithm.cs" />
-    <Compile Include="ISCReader.cs" />
     <Compile Include="ICPS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SCReader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ExcelLib\UtilLib.csproj">
+      <Project>{c05bf27e-4cb1-4e0e-9323-9017b914afe4}</Project>
+      <Name>UtilLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

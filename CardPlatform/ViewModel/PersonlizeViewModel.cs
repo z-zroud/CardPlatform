@@ -336,14 +336,13 @@ namespace CardPlatform.ViewModel
             MetroDialogSettings settings = new MetroDialogSettings();
 
             ViewModelLocator locator = new ViewModelLocator();
-            ISCReader reader = new SCReader();
             if (string.IsNullOrWhiteSpace(locator.Main.SelectedReader))
             {
                 await _dialog.ShowMessageAsync("Warning", "You need select a smart card reader!");
                 return;
             }
 
-            if(reader.OpenReader(locator.Main.SelectedReader))
+            if(SCReader.OpenReader(locator.Main.SelectedReader))
             {
                 ICPS cps = new CPS();
                 cps.SetPersonlizationConfig(SelectedISD, SelectedKMC, DivTypeIndex, SecureIndex);

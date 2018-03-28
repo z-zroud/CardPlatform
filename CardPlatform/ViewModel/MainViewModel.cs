@@ -68,8 +68,7 @@ namespace CardPlatform.ViewModel
 
         private void DoRefresh()
         {
-            ISCReader reader = new SCReader();
-            Readers = reader.GetReaders();
+            Readers = SCReader.GetReaders();
             if (Readers.Count > 0)
                 SelectedReader = Readers[0];
         }

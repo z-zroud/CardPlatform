@@ -92,6 +92,7 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile, char** cpsF
 	ReadDGIName(dpFile);		//第一步： 读取DGI分组
 
 	vector<CPS_ITEM> vecCpsItem;
+    int cpsCount = 0;
 	while (dpFile.tellg() < dpFileSize)		//遍历后续数据，每一次遍历解析一个卡片数据
 	{
 		string cardSeq;
@@ -139,7 +140,12 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile, char** cpsF
             GetBCDBuffer(dpFile, buffer, nFollowedDataLen);
 
 			//判断是否仅包含数据内容，不是标准的TLV结构
-			if (IsTlvStruct((char*)buffer.c_str(),nFollowedDataLen * 2)){
+			if (IsTlvStruct((char*)buffer.c_str(),nFollowedDataLen * 2) 
+                && sDgi != 0x8201
+                && sDgi != 0x8202
+                && sDgi != 0x8203
+                && sDgi != 0x8204
+                && sDgi != 0x8205){
                 ParseTLV((char*)buffer.c_str(), nFollowedDataLen * 2, dgiItem.value);
 			}else{  
 				char szTag[5] = { 0 };
@@ -160,6 +166,12 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile, char** cpsF
 		cpsItem.fileName = path + "conv\\" + GetAccount(cpsItem) + ".txt";
 		Save(cpsItem);
 		vecCpsItem.push_back(cpsItem);
+
+        cpsFile[cpsCount] = new char[1024];
+        memset(cpsFile[cpsCount], 0, 1024);
+        strncpy_s(cpsFile[cpsCount], 1024, cpsItem.fileName.c_str(), cpsItem.fileName.length());
+        cpsCount++;
+        count = cpsCount;
 	}
 
 	return true;
@@ -185,11 +197,11 @@ int YLDpParser::GetFollowedDataLen(ifstream &dpFile)
 {
 	int dataLen = 0;
 
-    GetLenTypeBufferLittleEnd(dpFile, dataLen, 1);
+    GetLenTypeBuffer(dpFile, dataLen, 1);
 	if (dataLen == 0x81)
-        GetLenTypeBufferLittleEnd(dpFile, dataLen, 1);
-    else if (dataLen == 0x82) {
-        GetLenTypeBufferLittleEnd(dpFile, dataLen, 2);
+        GetLenTypeBuffer(dpFile, dataLen, 1);
+    else if (dataLen == 0x82 || dataLen == 0xFF) {
+        GetLenTypeBuffer(dpFile, dataLen, 2);
     }
 
 	return dataLen;

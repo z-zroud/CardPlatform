@@ -471,7 +471,12 @@ UINT InstallAppCmd(const char* package,
 
 	string cmd = string("80E60C00") + dataLen + data;
 
-	return SendApdu2(cmd.c_str());
+    int sw = SendApdu2(cmd.c_str());
+#if _DEBUG
+    printf("%s\n sw=%4X\n", cmd.c_str(), sw);
+#endif
+
+    return sw;
 }
 
 //******************************************************

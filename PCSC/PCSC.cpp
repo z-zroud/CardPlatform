@@ -297,6 +297,7 @@ int  SendApdu(const char* cmd, char* output, int len)
 	char response[2048] = {0};	//±£¥ÊAPDU∑µªÿ÷µ
     int responseLen = 2048;
     memset(g_cmd, 0, sizeof(g_cmd));
+    memset(output, 0, len);
     Tool::DeleteSpace(cmd, g_cmd, sizeof(g_cmd));
     if (!SendApduCmd(cmd, response, responseLen))
     {
