@@ -81,7 +81,6 @@ namespace CheckPicture
             DataContext = this;
             SeqNo = 1;
         }
-        private ISCReader _cdll;
         private IExcelOp _excelWrite;
         private DataTable _picInfos;
         public List<string> saveInfo = new List<string>();
@@ -117,10 +116,9 @@ namespace CheckPicture
             {
                 if(comboReader.Items.Count == 0 && string.IsNullOrWhiteSpace(SelectedReader))    //如果读卡器没获取，则获取读卡器
                 {
-                    _cdll = new SCReader();
                     try
                     {
-                        Readers = _cdll.GetReaders();
+                        Readers = SCReader.GetReaders();
                     }
                     catch (Exception ex)
                     {
@@ -136,12 +134,12 @@ namespace CheckPicture
                 }
                 else if(string.IsNullOrWhiteSpace(tbCard.Text))   //获取了读卡器，没有输入序号，则表示显示卡号
                 {
-                    if(_cdll.OpenReader(SelectedReader))
+                    if(SCReader.OpenReader(SelectedReader))
                     {
-                        if(0x9000 == _cdll.SendApdu("00A40400 08 A000000333010101"))
+                        if(0x9000 == SCReader.SendApdu("00A40400 08 A000000333010101"))
                         {
                             string result = string.Empty;
-                            if(0x9000 == _cdll.SendApdu("00B20114", ref result))
+                            if(0x9000 == SCReader.SendApdu("00B20114", ref result))
                             {
                                 tbCard.Text = result.Substring(22, 19);
                             }
@@ -165,8 +163,9 @@ namespace CheckPicture
                             //saveInfo.Add("打印成功");
 
                             string tmp = row[2].ToString();
-                            string fuck = tmp.Replace("行", "行+");
-                            uriString = Directory.GetCurrentDirectory() + "\\Picture\\"
+                            string fuck = tmp.Replace("支行", "支行+");
+                            string path = Path.GetDirectoryName(tbFilePath.Text);
+                            uriString = path + "\\Picture\\"
                                 + row[0].ToString() + "+"
                                 + row[1].ToString() + "+" 
                                 + fuck + "+" 
@@ -198,10 +197,9 @@ namespace CheckPicture
 
         private void btReader_Click(object sender, RoutedEventArgs e)
         {
-            _cdll = new SCReader();
             try
             {
-                Readers = _cdll.GetReaders();
+                Readers = SCReader.GetReaders();
             }catch(Exception ex)
             {
                 MessageBox.Show(ex.Message);
@@ -218,12 +216,12 @@ namespace CheckPicture
 
         private void btReadCardNo_Click(object sender, RoutedEventArgs e)
         {
-            if (_cdll.OpenReader(SelectedReader))
+            if (SCReader.OpenReader(SelectedReader))
             {
-                if (0x9000 == _cdll.SendApdu("00A40400 08 A000000333010101"))
+                if (0x9000 == SCReader.SendApdu("00A40400 08 A000000333010101"))
                 {
                     string result = string.Empty;
-                    if (0x9000 == _cdll.SendApdu("00B20114", ref result))
+                    if (0x9000 == SCReader.SendApdu("00B20114", ref result))
                     {
                         tbCard.Text = result.Substring(34, 16);
                     }
@@ -248,8 +246,9 @@ namespace CheckPicture
                     saveInfo.Add(row[3].ToString());
                     //saveInfo.Add("打印失败");
                     string tmp = row[2].ToString();
-                    string fuck = tmp.Replace("行", "行+");
-                    uriString = Directory.GetCurrentDirectory() + "\\Picture\\" +
+                    string fuck = tmp.Replace("支行", "支行+");
+                    string path = Path.GetDirectoryName(tbFilePath.Text);
+                    uriString = path + "\\Picture\\" +
                         row[0].ToString() + "+" +
                         row[1].ToString() + "+" +
                         fuck + "+" +
@@ -291,10 +290,11 @@ namespace CheckPicture
         private void btScanFile_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.Filter = "*|*.xlsx";
+            dialog.Filter = "*|*.*";
             if (dialog.ShowDialog() == true)
             {
                 tbFilePath.Text = dialog.FileName;
+                
             }
 
             IExcelOp excelOp = new ExcelOp();

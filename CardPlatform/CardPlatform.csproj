@@ -82,7 +82,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\AlgorithmConfig.cs" />
+    <Compile Include="Models\AlgorithmModel.cs" />
     <Compile Include="Models\DpParsedProgram.cs" />
+    <Compile Include="Models\TransConfig.cs" />
+    <Compile Include="Models\TransKeyModel.cs" />
+    <Compile Include="Models\TransTypeModel.cs" />
     <Compile Include="Settings\PersonlizeSetting.cs" />
     <Compile Include="ViewModel\AlgorithomViewModel.cs" />
     <Compile Include="ViewModel\CardCheckViewModel.cs" />

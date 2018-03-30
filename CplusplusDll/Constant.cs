@@ -12,4 +12,10 @@ namespace CplusplusDll
         public static readonly string DebitAid = "A000000333010101";
         public static readonly string CreditAid = "A000000333010102";
     }
+
+    public enum TransCategory
+    {
+        Contact = 0,
+        Contactless = 1
+    }
 }

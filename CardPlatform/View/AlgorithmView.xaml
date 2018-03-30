@@ -5,149 +5,155 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CardPlatform.View"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1200">
+             DataContext="{Binding Source={StaticResource Locator}, Path=Algorithm}"
+             d:DesignHeight="700" d:DesignWidth="1200">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
         <DockPanel Name="AlgorithmTitle" HorizontalAlignment="Stretch" Background="#FFF0F0F0" Grid.ColumnSpan="3">
             <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                 <Image Source="/Images/PersonlizeTitle.png" Width="50" Height="Auto"/>
                 <Label Content="算法工具" VerticalContentAlignment="Center" FontSize="30"/>
             </StackPanel>
         </DockPanel>
-        <!--对称加解密面板-->
-        <StackPanel Name="AlgorithmContentPanel" Grid.Row="1" Margin="60,0,20,0" Background="AliceBlue" MinWidth="350">
+        <ScrollViewer Grid.Row="1" Background="White" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="40"/>
-                </Grid.RowDefinitions>
-                <DockPanel Background="#FF104E8B">
-                    <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">对称加密算法</Label>
-                    <Button Name="btnDataParseHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
-                </DockPanel>
-                <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="输入"/>
-                        <TextBox TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" MinHeight="100" Text="{Binding InputData}"/>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="输出"/>
-                        <TextBox TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" MinHeight="100" Text="{Binding OutputData}"/>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="加解密方式"/>
-                        <ComboBox 
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="350" Width="auto"/>
+                    <ColumnDefinition MinWidth="350" Width="auto"/>
+                    <ColumnDefinition MinWidth="350" Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <!--对称加解密面板-->
+                <StackPanel Name="AlgorithmContentPanel" Margin="60,0,20,0" Background="AliceBlue" MinWidth="350">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Background="#FF104E8B">
+                            <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">对称加密算法</Label>
+                            <Button Name="btnDataParseHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+                        </DockPanel>
+                        <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="输入"/>
+                                <TextBox TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" MinHeight="100" Text="{Binding InputData}"/>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="输出"/>
+                                <TextBox TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" MinHeight="100" Text="{Binding OutputData}"/>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="加解密方式"/>
+                                <ComboBox 
                             Margin="0, 10, 0, 0"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding EncryptType}"
                             SelectedIndex="{Binding SelectedEncryptType}"
                             MaxDropDownHeight="125"/>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="密钥"/>
-                        <TextBox />
-                    </StackPanel>
-                </WrapPanel>
-                <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Content="确认" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding AlgorithmComfirmCmd}"/>
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-        
-        <!--文件解密面板-->
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,0,20,0" Background="AliceBlue">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="40"/>
-                </Grid.RowDefinitions>
-                <DockPanel Background="#FF104E8B">
-                    <Label Name="lblLayout" DockPanel.Dock="Left" FontSize="25" Foreground="White">文件解密</Label>
-                    <Button Name="btnPersonlizeHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
-                </DockPanel>
-                <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="加密的文件路径"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <TextBox Width="220" Height="30" Text="{Binding EncryptFilePath}"/>
-                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenEncryptFilePath}"/>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="密钥"/>
+                                <TextBox />
+                            </StackPanel>
+                        </WrapPanel>
+                        <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
+                            <Button Width="80" Height="30" Content="确认" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding AlgorithmComfirmCmd}"/>
                         </StackPanel>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="解密方式"/>
-                        <ComboBox 
+                    </Grid>
+                </StackPanel>
+
+                <!--文件解密面板-->
+                <StackPanel Grid.Column="1" Margin="20,0,20,0" Background="AliceBlue">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Background="#FF104E8B">
+                            <Label Name="lblLayout" DockPanel.Dock="Left" FontSize="25" Foreground="White">文件解密</Label>
+                            <Button Name="btnPersonlizeHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+                        </DockPanel>
+                        <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="加密的文件路径"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBox Width="220" Height="30" Text="{Binding EncryptFilePath}"/>
+                                    <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenEncryptFilePath}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="解密方式"/>
+                                <ComboBox 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding DecryptType}"
                             SelectedIndex="{Binding SelectedDecryptType}"
                             MaxDropDownHeight="125"/>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="密钥"/>
-                        <TextBox/>
-                    </StackPanel>
-                </WrapPanel>
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Content="确认" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding DecryptFileComfirmCmd}"/>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="密钥"/>
+                                <TextBox/>
+                            </StackPanel>
+                        </WrapPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,40,0">
+                            <Button Width="80" Height="30" Content="确认" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding DecryptFileComfirmCmd}"/>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
-            </Grid>
-        </StackPanel>
-        
-        <!--KMC分散面板-->
-        <StackPanel Name="KmcDivPanel" Grid.Row="1" Grid.Column="2" Margin="20,0,20,0" Background="AliceBlue" MinWidth="350">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="40"/>
-                </Grid.RowDefinitions>
-                <DockPanel Background="#FF104E8B">
-                    <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">KMC分散</Label>
-                    <Button Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
-                </DockPanel>
-                <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="KMC"/>
-                        <ComboBox 
+                <!--KMC分散面板-->
+                <StackPanel Grid.Column="2" Name="KmcDivPanel" Margin="20,0,20,0" Background="AliceBlue" MinWidth="350">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Background="#FF104E8B">
+                            <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">KMC分散</Label>
+                            <Button Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+                        </DockPanel>
+                        <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="KMC"/>
+                                <ComboBox 
                             Margin="0, 10, 0, 0"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             IsEditable="True"
                             ItemsSource="{Binding KMCs}"
                             SelectedItem="{Binding SelectedKMC}"
                             MaxDropDownHeight="125"/>
-                    </StackPanel>
-                    <StackPanel Width="280" Margin="10">
-                        <TextBlock Margin="0,0,0,10">分散方式</TextBlock>
-                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DivType}" SelectedIndex="{Binding DivTypeIndex}" Background="{Binding ElementName=KmcDivPanel, Path=Background}"/>
-                    </StackPanel>
-                    <StackPanel Width="280" Margin="10">
-                        <TextBlock Margin="0,0,0,10">安全等级</TextBlock>
-                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding Secure}" SelectedIndex="{Binding SecureIndex}" Background="{Binding ElementName=KmcDivPanel, Path=Background}"/>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="分散数据"/>
-                        <TextBox TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Text="{Binding DivData}"/>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="随机数"/>
-                        <TextBox Text="{Binding Random}"/>
-                    </StackPanel>
-                    
-                </WrapPanel>
-                <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Content="确认" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding KmcDivComfirmCmd}"/>
+                            </StackPanel>
+                            <StackPanel Width="280" Margin="10">
+                                <TextBlock Margin="0,0,0,10">分散方式</TextBlock>
+                                <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DivType}" SelectedIndex="{Binding DivTypeIndex}" Background="{Binding ElementName=KmcDivPanel, Path=Background}"/>
+                            </StackPanel>
+                            <StackPanel Width="280" Margin="10">
+                                <TextBlock Margin="0,0,0,10">安全等级</TextBlock>
+                                <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding Secure}" SelectedIndex="{Binding SecureIndex}" Background="{Binding ElementName=KmcDivPanel, Path=Background}"/>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="分散数据"/>
+                                <TextBox TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Text="{Binding DivData}"/>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="随机数"/>
+                                <TextBox Text="{Binding Random}"/>
+                            </StackPanel>
+
+                        </WrapPanel>
+                        <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
+                            <Button Width="80" Height="30" Content="确认" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding KmcDivComfirmCmd}"/>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </Grid>
-        </StackPanel>
+            
+        </ScrollViewer>
+        
 
     </Grid>
 </UserControl>
