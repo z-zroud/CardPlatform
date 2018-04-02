@@ -38,7 +38,7 @@ namespace CallCplusDll
             var readers = SCReader.GetReaders();
             if(APDU.RegisterReader(readers[0]))
             {
-                APDU.SelectCmd(Constant.CreditAid);
+                //APDU.SelectCmd(Constant.CreditAid);
             }
         }
     }

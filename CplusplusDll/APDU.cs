@@ -9,12 +9,12 @@ namespace CplusplusDll
     public class ApduResponse
     {
         public int SW { get; set; }
+        public string Request { get; set; }
         public string Response { get; set; }
     }
 
     public static class APDU
     {
-     
         public static bool RegisterReader(string readerName)
         {
             return SCReader.OpenReader(readerName); 
@@ -26,6 +26,7 @@ namespace CplusplusDll
             string response = string.Empty;
             apduResponse.SW = SCReader.SendApdu(cmd, ref response);
             apduResponse.Response = response;
+            apduResponse.Request = cmd;
             return apduResponse;
         }
         /// <summary>

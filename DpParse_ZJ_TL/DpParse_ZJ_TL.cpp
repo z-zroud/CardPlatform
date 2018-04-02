@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "DpParse_ZJ_TL.h"
 #include "../Util/Tool.h"
-
+#include "../Util/Des0.h"
 #define DGI_NUMBER	4
 #define DGI_LEN		2
 
@@ -95,6 +95,32 @@ int ZJTLDpParse::GetDGIDataLen(ifstream& dpFile)
 
 bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile, char** cpsFile, int& count)
 {
+    //Test magistrap
+    //ifstream dpFile1;
+    //if (!OpenDpFile(fileName, dpFile1)) {
+    //    return false;
+    //}
+    //long dpFileSize1 = GetFileSize(dpFile1);
+    //ofstream outputFile("D:\\tet.txt");
+    //while (dpFile1.tellg() < dpFileSize1)
+    //{
+    //    string magistrpBuff;
+    //    GetBCDBuffer(dpFile1, magistrpBuff, 176);
+    //    int unit = 16;
+    //    string strResult;
+    //    string tk = "3D370479B77FFCCCC6B89CC6FFDD570E";
+    //    for (int i = 0; i < 352; i += unit)
+    //    {
+    //        char* pOutput = new char[unit + 1];
+    //        memset(pOutput, 0, unit + 1);
+    //        _Des3(pOutput, (char*)tk.c_str(), (char*)magistrpBuff.substr(i, unit).c_str());
+    //        strResult += string(pOutput);
+    //    }
+    //    outputFile << strResult << endl;
+    //    GetBCDBuffer(dpFile1, magistrpBuff, 1);
+    //}
+    //outputFile.close();
+    //end Test
 	ifstream dpFile;
 	if (!OpenDpFile(fileName, dpFile)) {
 		return false;

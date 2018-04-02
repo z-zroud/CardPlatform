@@ -49,11 +49,11 @@ int main()
 		printf("%s\n", readers[i]);
 	}
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
-    string dpFormat = "银联";
+    string dpFormat = "中信";
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\测试-3.0-4808-MCLIST-004379-20161019.dat.DP";
+    string dpPath = dpDir + dpFormat + "\\ZX.bin";
     rulePath += "合肥通项目.xml";
-    //GenCpsFile("DpParse_YL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    GenCpsFile("DpParse_ZJ_TL.dll", "HandleDp", dpPath.c_str(), NULL);
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);

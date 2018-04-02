@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace CplusplusDll
+namespace CardPlatform.Business
 {
     public class Constant
     {
@@ -17,5 +18,15 @@ namespace CplusplusDll
     {
         Contact = 0,
         Contactless = 1
+    }
+
+    public enum CardRespDataType
+    {
+        SelectPSE = 0,
+        SelectPPSE = 1,
+        ReadPSERecord = 2,
+        SelectAid = 4,
+        GPO = 5,
+        ReadRecord = 6
     }
 }

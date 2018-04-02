@@ -132,7 +132,7 @@ namespace CplusplusDll
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public struct TLVStruct
         {
-            public bool IsTemplate;     //是否是模板
+            public byte IsTemplate;     //是否是模板
             public int Level;          //层级
             public IntPtr Tag;
             public int Length;         //长度

@@ -10,6 +10,7 @@ using System.Windows.Input;
 using CplusplusDll;
 using UtilLib;
 using CardPlatform.Models;
+using CardPlatform.Business;
 
 namespace CardPlatform.ViewModel
 {
@@ -32,6 +33,10 @@ namespace CardPlatform.ViewModel
             HasSelectedSMKey = false;
             HasSelectedDESKey = true;
 
+            Aids = new ObservableCollection<string>();
+            TransCategorys = new List<string>();
+            KeyTypeList = new List<string>();
+            TransKeyList = new TransKeyModel();
             Load();
         }
 
@@ -173,13 +178,29 @@ namespace CardPlatform.ViewModel
 
         private void LoadApp()
         {
-            switch((TransCategory)SelectedCategory)
+            ApduResponse response = new ApduResponse();
+            List<string> aids = new List<string>();
+            ViewModelLocator locator = new ViewModelLocator();
+            if(!APDU.RegisterReader(locator.Main.SelectedReader))
             {
-                case TransCategory.Contact:
+                return;
+            }
+            switch ((TransCategory)SelectedCategory)
+            {
+                case TransCategory.Contact:                    
+                    BusinessPSE businessPSE = new BusinessPSE();
+                    aids = businessPSE.SelectPSE();
                     break;
                 case TransCategory.Contactless:
+                    BusinessPPSE businessPPSE = new BusinessPPSE();
+                    aids = businessPPSE.SelectPPSE();
                     break;
             }
+            foreach(var aid in aids)
+            {               
+                Aids.Add(aid);
+            }
+            SelectedAid = Aids.First();
         }
 
         private void SelectSMKey()

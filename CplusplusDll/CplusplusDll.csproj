@@ -49,7 +49,6 @@
     <Compile Include="APDU.cs" />
     <Compile Include="Authencation.cs" />
     <Compile Include="CDll.cs" />
-    <Compile Include="Constant.cs" />
     <Compile Include="CPS.cs" />
     <Compile Include="Algorithm.cs" />
     <Compile Include="DataParse.cs" />

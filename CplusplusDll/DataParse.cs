@@ -46,7 +46,7 @@ namespace CplusplusDll
                 arrTLV[i] = (CDll.TLVStruct)Marshal.PtrToStructure(ptr, typeof(CDll.TLVStruct));
 
                 TLV tlv = new TLV();
-                tlv.IsTemplate = arrTLV[i].IsTemplate;
+                tlv.IsTemplate = arrTLV[i].IsTemplate == 0 ? false : true;
                 tlv.Len = arrTLV[i].Length;
                 tlv.Level = arrTLV[i].Level;
                 tlv.Tag = Marshal.PtrToStringAnsi(arrTLV[i].Tag);
