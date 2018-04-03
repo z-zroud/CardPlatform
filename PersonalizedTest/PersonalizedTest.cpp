@@ -51,9 +51,9 @@ int main()
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
     string dpFormat = "中信";
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\ZX.bin";
-    rulePath += "合肥通项目.xml";
-    GenCpsFile("DpParse_ZJ_TL.dll", "HandleDp", dpPath.c_str(), NULL);
+    string dpPath = dpDir + dpFormat + "\\湖南农信社借记.bin";
+    rulePath += "湖南农信社_英飞凌_05006063.xml";
+    GenCpsFile("DpParse_ZJ_TL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
@@ -74,7 +74,7 @@ int main()
     vector<string> files;
     getFiles(path, files);
     string installParamDir = "F:\\CardPlatform\\bin\\Debug\\Configuration\\InstallParams\\";
-    string installParamPath = installParamDir + "合肥通_同方_G8C140031.xml";
+    string installParamPath = installParamDir + "湖南农信社借记_英飞凌_0500605.xml";
 
 
     bool isSongJan = false;

@@ -241,10 +241,16 @@ bool OpenSecureChannel(const char* kmc, int divMethod, int secureLevel)
 {
 	char random[] = "1122334455667788";
 	char initializeUpdateResp[256] = { 0 };
-	if (APDU_OK != InitializeUpdateCmd(random, initializeUpdateResp))
+
+    if (kmc == NULL || strlen(kmc) != 32)
+    {
+        return false;
+    }
+	if (APDU_OK != InitializeUpdateCmd(random, initializeUpdateResp,256))
 	{
 		return false;
 	}
+    
 	if (APDU_OK != ExternalAuthencationCmd2(kmc, divMethod, random, secureLevel, initializeUpdateResp))
 	{
 		return false;
@@ -264,10 +270,10 @@ bool SetKmc(const char* kmc, int divMethod)
 /***********************************************************
 * 用于打开安全通道更新初始化，
 ************************************************************/
-UINT InitializeUpdateCmd(const char* random, char* resp)
+UINT InitializeUpdateCmd(const char* random, char* resp, int respLen)
 {
 	string cmd = "80500000 08" + string(random);
-	int sw = SendApdu(cmd.c_str(), resp, RESP_LEN);
+	int sw = SendApdu(cmd.c_str(), resp, respLen);
 	return sw;
 }
 /**************************************************

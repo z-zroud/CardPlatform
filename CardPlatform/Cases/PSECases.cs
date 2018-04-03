@@ -21,7 +21,7 @@ namespace CardPlatform.Cases
 
         public void ExcuteCase(Object srcData, CardRespDataType type)
         {
-            ApduResponse response = (ApduResponse)srcData;
+            response = (ApduResponse)srcData;
             arrTLV = DataParse.ParseTLV(response.Response);
 
             switch(type)

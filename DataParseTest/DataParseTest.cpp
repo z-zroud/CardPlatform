@@ -26,7 +26,7 @@ int main()
 
 	//Test Parse AFL
 	AFL pAfls[12] = { 0 };
-	char* aflBuffer = "08010100100103011010100018010400";
+	char* aflBuffer = "1801020018040701200505003001020040010100";
 	unsigned int aflCount = 12;
 	ParseAFL(aflBuffer, pAfls, aflCount);
 

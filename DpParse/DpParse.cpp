@@ -399,6 +399,12 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             encryptDGI.dgi = node->first_attribute("DGI")->value();
             encryptDGI.type = node->first_attribute("type")->value();
             encryptDGI.key = node->first_attribute("key")->value();
+            if (node->first_attribute("delete80") == NULL) {
+                encryptDGI.isDelete80 = false;
+            }
+            else {
+                encryptDGI.isDelete80 = true;
+            }
             m_vecDGIEncrypt.push_back(encryptDGI);
         }
         else if (nodeName == "AddTagToValue") {
@@ -494,6 +500,15 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             deleteTag.tag = node->first_attribute("tag")->value();
             m_vecTagDelete.push_back(deleteTag);
         }
+        else if (nodeName == "InsertValue") {
+            TagInsert insertedTag;
+            insertedTag.insertedValue = node->first_attribute("value")->value();
+            insertedTag.dgi = node->first_attribute("DGI")->value();
+            insertedTag.tag = node->first_attribute("tag")->value();
+            string strPos = node->first_attribute("pos")->value();
+            insertedTag.pos = stoi(strPos);
+            m_vecTagInsert.push_back(insertedTag);
+        }
     }
   
     return true;
@@ -518,7 +533,7 @@ void IRule::HandleRule(CPS_ITEM& cpsItem)
 
     HandleDGIDecrypt(cpsItem);
     HandleTagDecrypt(cpsItem);
-
+    HandleTagInsertValue(cpsItem);
     AddKcv(cpsItem);
     AddTagToValue(cpsItem);
      
@@ -796,6 +811,12 @@ void IRule::HandleDGIDecrypt(CPS_ITEM& cpsItem)
                 else {
                     decryptedData = DesDecryptDGI(encryptedItem.key, item.value.GetItem(item.dgi));
                 }
+                if (encryptedItem.isDelete80) {
+                    int found = decryptedData.length();
+                    found = decryptedData.rfind("80");
+                    if(found != string::npos)
+                        decryptedData = decryptedData.substr(0, found);
+                }
                 item.value.ReplaceItem(item.dgi, decryptedData);
             }            
         }
@@ -836,6 +857,26 @@ void IRule::HandleTagDelete(CPS_ITEM& cpsItem)
 			}
 		}
 	}
+}
+
+void IRule::HandleTagInsertValue(CPS_ITEM& cpsItem)
+{
+    for (auto item : m_vecTagInsert)
+    {
+        for (auto &dgiItem : cpsItem.items)
+        {
+            if (item.dgi == dgiItem.dgi && dgiItem.value.TagExisted(item.tag))
+            {
+                string oldTagValue = dgiItem.value.GetItem(item.tag).substr(item.tag.length() + 2); //默认tag值长度不超过7F,且更改后的新值也捕超过7F
+                string newTagValue = oldTagValue.substr(0, item.pos) + item.insertedValue + oldTagValue.substr(item.pos);
+                string strLen = Tool::GetBcdStrLen(newTagValue);
+                newTagValue = item.tag + strLen + newTagValue;
+                dgiItem.value.ReplaceItem(item.tag, newTagValue);
+                
+                break;
+            }
+        }
+    }
 }
 
 /********************************************************

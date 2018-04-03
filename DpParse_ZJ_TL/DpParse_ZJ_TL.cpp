@@ -62,7 +62,7 @@ string ZJTLDpParse::GetDGIStartMark(ifstream& dpFile)
     return dgiStartMark;
 }
 
-int ZJTLDpParse::GetDGIDataLen(ifstream& dpFile)
+int ZJTLDpParse::GetDGIDataLen(ifstream& dpFile,string &dgiName)
 {
     int dgiLen;
     GetLenTypeBuffer(dpFile, dgiLen, 1); //获取整个DGI数据块的长度
@@ -70,9 +70,16 @@ int ZJTLDpParse::GetDGIDataLen(ifstream& dpFile)
     {	//DGI数据为2字节
         GetLenTypeBuffer(dpFile, dgiLen, 1);
     }
+    else if (dgiLen == 0x82) {
+        GetLenTypeBuffer(dpFile, dgiLen, 2);
+    }
 
     string dgi;
     GetBCDBuffer(dpFile, dgi, 2);
+    if (dgi != dgiName)
+    {
+        dgiName = dgi;  //这里要打印警告日志，列表和实际DGI顺序不一致
+    }
     int dgiDataLen;
     GetLenTypeBuffer(dpFile, dgiDataLen, 1); //DGI数据的长度
     unsigned short sDgi = stoi(dgi, 0, 16);
@@ -87,6 +94,9 @@ int ZJTLDpParse::GetDGIDataLen(ifstream& dpFile)
         GetLenTypeBuffer(dpFile, dgiDataLen, 1);
         if (dgiDataLen == 0x81) {	//DGI数据为2字节
             GetLenTypeBuffer(dpFile, dgiDataLen, 1);
+        }
+        else if (dgiDataLen == 0x82) {
+            GetLenTypeBuffer(dpFile, dgiDataLen, 2);
         }
     }
 
@@ -159,7 +169,7 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile, char** cp
                 return false;
             }
 			
-            int dgiDataLen = GetDGIDataLen(dpFile);
+            int dgiDataLen = GetDGIDataLen(dpFile, dgiItem.dgi);
             string buffer;
             GetBCDBuffer(dpFile, buffer, dgiDataLen);
 			//判断是否仅包含数据内容，不是标准的TLV结构
@@ -172,9 +182,9 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile, char** cp
 			}
 			cpsItem.items.push_back(dgiItem);
 		}
-		int pos = string(fileName).find_last_of('\\');
-		string path = string(fileName).substr(0, pos + 1);
-        cpsItem.fileName = path +  GetAccount(cpsItem) + ".txt";
+		//int pos = string(fileName).find_last_of('\\');
+		//string path = string(fileName).substr(0, pos + 1);
+        cpsItem.fileName = Tool::GetDirectory(fileName) + "conv\\" +  GetAccount(cpsItem) + ".txt";
 
         if (ruleFile) { //处理规则
             HandleRule(ruleFile, cpsItem);

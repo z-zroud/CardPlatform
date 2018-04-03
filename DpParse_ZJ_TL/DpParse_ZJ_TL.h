@@ -17,7 +17,7 @@ protected:
 	void ReadDGIName(ifstream &dpFile);
     string GetDpMark(ifstream& dpFile);
     string GetDGIStartMark(ifstream& dpFile);
-    int GetDGIDataLen(ifstream& dpFile);
+    int GetDGIDataLen(ifstream& dpFile, string &dgiName);
     void ParsePSE(ifstream& dpFile, CPS_ITEM& cpsItem, string dgiName);
 private:
 	vector<string>              m_vecDGI;

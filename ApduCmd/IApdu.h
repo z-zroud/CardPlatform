@@ -95,7 +95,7 @@ APDUCMD_API	UINT InstallAppCmd(const char* package,
 	const char* token);
 
 APDUCMD_API	UINT StoreDataCmd(const char* data, int type, bool reset = false);
-APDUCMD_API	UINT InitializeUpdateCmd(const char* random, char* resp);
+APDUCMD_API	UINT InitializeUpdateCmd(const char* random, char* resp, int respLen);
 
 /*************************************************************************
 * 内部认证命令，终端发送该命令用来验证卡片的合法性

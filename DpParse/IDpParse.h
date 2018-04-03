@@ -62,6 +62,7 @@ struct DGIEncrypt
     string dgi;     
     string type;
     string key;
+    bool isDelete80;
 };
 
 struct TagEncrypt
@@ -114,6 +115,14 @@ struct DGIDeleteTag
     string tag;
 };
 
+struct TagInsert
+{
+    string dgi;
+    string tag;
+    string insertedValue;
+    int pos;
+};
+
 struct AddKCV
 {
     string srcDgi;
@@ -137,6 +146,7 @@ protected:
     void HandleDGIAddTag(CPS_ITEM& cpsItem);        //处理DGI添加Tag
     void HandleDGIAddFixedTag(CPS_ITEM& cpsItem);   //处理DGI添加固定值的Tag
 	void HandleTagDelete(CPS_ITEM& cpsItem);        //处理删除DGI某个tag
+    void HandleTagInsertValue(CPS_ITEM& cpsItem);   //处理Tag添加值的问题
     void AddKcv(CPS_ITEM& cpsItem);                 //增加KCV
     void AddTagToValue(CPS_ITEM& cpsItem);      //将tag及template到数据部分
     void SpliteEF02(CPS_ITEM& cpsItem);             //解析EFO2 神舟数码专用 存储8201,8202...IC卡私钥
@@ -163,6 +173,7 @@ private:
 	vector<AddFixedTagValue>    m_vecFixedTagAdd;
     vector<DGIDeleteTag>        m_vecTagDelete;
     vector<TagMerge>            m_vecTagMerge;
+    vector<TagInsert>           m_vecTagInsert;
     vector<AddKCV>              m_vecAddKcv;
     vector<string>              m_vecAddTagAndTemplate;
     bool                        m_hasEF02;
