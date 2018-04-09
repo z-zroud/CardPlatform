@@ -34,6 +34,7 @@ namespace CardPlatform.ViewModel
             HasSelectedDESKey = true;
 
             Aids = new ObservableCollection<string>();
+            CaseInfos = new ObservableCollection<TransInfoModel>();
             TransCategorys = new List<string>();
             KeyTypeList = new List<string>();
             TransKeyList = new TransKeyModel();
@@ -145,6 +146,16 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        private ObservableCollection<TransInfoModel> _caseInfos;
+        public ObservableCollection<TransInfoModel> CaseInfos
+        {
+            get { return _caseInfos; }
+            set
+            {
+                Set(ref _caseInfos, value);
+            }
+        }
+
         /// <summary>
         /// 应用密钥信息
         /// </summary>
@@ -200,7 +211,8 @@ namespace CardPlatform.ViewModel
             {               
                 Aids.Add(aid);
             }
-            SelectedAid = Aids.First();
+            if(Aids.Count > 0)
+                SelectedAid = Aids.First();
         }
 
         private void SelectSMKey()

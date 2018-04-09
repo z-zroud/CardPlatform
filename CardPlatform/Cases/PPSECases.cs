@@ -8,9 +8,9 @@ using CardPlatform.Business;
 
 namespace CardPlatform.Cases
 {
-    public class PPSECases : IExcuteCase
+    public class PPSECases : CaseBase
     {
-        public void ExcuteCase(Object srcData, CardRespDataType type)
+        public override void ExcuteCase(Object srcData, CardRespDataType type)
         {
             throw new NotImplementedException();
         }

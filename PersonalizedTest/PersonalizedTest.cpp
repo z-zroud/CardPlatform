@@ -49,11 +49,12 @@ int main()
 		printf("%s\n", readers[i]);
 	}
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
-    string dpFormat = "中信";
+    string dpFormat = "神舟数码";
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\湖南农信社借记.bin";
-    rulePath += "湖南农信社_英飞凌_05006063.xml";
-    GenCpsFile("DpParse_ZJ_TL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string dpPath = dpDir + dpFormat + "\\23_808021_20180109_20180109363_ic (1).txt";
+    rulePath += "河东村镇银行_神码_华大_G81140042.xml";
+    string installParamCfg = "湖南农信社贷记_英飞凌_非扩展_0500605.xml";
+    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
@@ -74,7 +75,7 @@ int main()
     vector<string> files;
     getFiles(path, files);
     string installParamDir = "F:\\CardPlatform\\bin\\Debug\\Configuration\\InstallParams\\";
-    string installParamPath = installParamDir + "湖南农信社借记_英飞凌_0500605.xml";
+    string installParamPath = installParamDir + installParamCfg;
 
 
     bool isSongJan = false;

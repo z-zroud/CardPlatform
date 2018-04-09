@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 using CardPlatform.Business;
 
 namespace CardPlatform.Cases
 {
-    public class PSECases : IExcuteCase
+    public class PSECases : CaseBase
     {
         private List<TLV> arrTLV;
         private ApduResponse response;
@@ -19,7 +20,7 @@ namespace CardPlatform.Cases
             arrTLV = new List<TLV>();
         }
 
-        public void ExcuteCase(Object srcData, CardRespDataType type)
+        public override void ExcuteCase(Object srcData, CardRespDataType type)
         {
             response = (ApduResponse)srcData;
             arrTLV = DataParse.ParseTLV(response.Response);
@@ -36,13 +37,15 @@ namespace CardPlatform.Cases
 
         protected void PBOC_sPSE_SJHGX_001_01()
         {
-            if(response.Response.Length < 2 || response.Response.Substring(0,2) != "6F")
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseDesc = GetDescription(caseNo);
+            if (response.Response.Length < 2 || response.Response.Substring(0,2) != "6F")
             {
-                //send event Failed.
+                ShowInfo(caseNo, caseDesc, CaseLevel.CaseFailed);
             }
             else
             {
-                //send event OK
+                ShowInfo(caseNo, caseDesc, CaseLevel.CaseSucess);
             }
         }
     }

@@ -110,7 +110,31 @@
         <StackPanel Grid.ColumnSpan="4" Grid.Row="1" Height="300">
             <TabControl Controls:TabControlHelper.IsUnderlined="True" Background="AliceBlue">
                 <TabItem Header="输出" Controls:ControlsHelper.HeaderFontSize="15">
-                    <ListBox/>
+                    <DataGrid  RenderOptions.ClearTypeHint="Enabled"
+                                TextOptions.TextFormattingMode="Display"
+                                Margin="5"
+                                ItemsSource="{Binding Path=CaseInfos}"
+                                Style="{DynamicResource AzureDataGrid}"
+                                AutoGenerateColumns="False">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="HorizontalContentAlignment" Value="Center">
+                                </Setter>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn IsReadOnly="True" Header="编号"  Width="200" Binding="{Binding CaseNo}"/>
+                            <DataGridTextColumn IsReadOnly="True" Header="描述" Width="760" Binding="{Binding CaseInfo}"/>
+                            <DataGridTemplateColumn Header="等级">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                        <TextBlock Text="{Binding CaseLevel}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Foreground="{Binding ColorMark}"/>
+                                    </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </TabItem>
                 <TabItem Header="错误" Controls:ControlsHelper.HeaderFontSize="15">
                     <ListBox/>
