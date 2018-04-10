@@ -151,7 +151,7 @@ namespace CplusplusDll
         {
             public int sfi;                //短文件标识符
             public int recordNumber;       //记录号
-            public bool bSigStaticData;		//是否为签名的数据(表明哪些数据需要参与到签名中)
+            public byte bSigStaticData;		//是否为签名的数据(表明哪些数据需要参与到签名中)
         }
 
         [DllImport(@"DataParse.dll", EntryPoint = "ParseTL", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]

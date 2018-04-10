@@ -63,10 +63,10 @@ namespace CardPlatform.Business
             return APDU.SelectCmd(aid);
         }
 
-        protected virtual ApduResponse GPO(string pdol, List<AFL> AFLs)
+        protected virtual ApduResponse GPO(string pdol)
         {
             var response = APDU.GPOCmd(pdol);
-            AFLs = DataParse.ParseAFL(response.Response);
+            //AFLs = DataParse.ParseAFL(response.Response);
 
             return response;
         }

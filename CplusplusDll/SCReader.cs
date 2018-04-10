@@ -57,6 +57,8 @@ namespace CplusplusDll
 
         public static bool OpenReader(string reader)
         {
+            if (string.IsNullOrWhiteSpace(reader))
+                return false;
             return CDll.OpenReader(reader);
         }
 

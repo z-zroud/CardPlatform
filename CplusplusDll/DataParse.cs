@@ -90,7 +90,7 @@ namespace CplusplusDll
                 AFL afl = new AFL();
                 afl.SFI = aflStruct.sfi;
                 afl.RecordNo = aflStruct.recordNumber;
-                afl.IsSignedRecordNo = aflStruct.bSigStaticData;
+                afl.IsSignedRecordNo = aflStruct.bSigStaticData == 0 ? false : true;
                 tls.Add(afl);
             }
             return tls;

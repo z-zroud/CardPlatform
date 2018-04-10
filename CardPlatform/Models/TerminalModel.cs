@@ -20,6 +20,13 @@ namespace CardPlatform.Models
             Tag9F66 = "26000080";
             Tag9F4E = "476F6C647061635F54435F4465706172746D656E74";
         }
+
+        public string GetTag(string tag)
+        {
+            string propertyName = "Tag" + tag;
+            return (string)GetType().GetProperty(propertyName).GetValue(this);
+        }
+
         private string _tag9F02;
         public string Tag9F02
         {

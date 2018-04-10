@@ -246,7 +246,7 @@ namespace CardPlatform.ViewModel
         private void DoTrans()
         {
             BusinessBase trans;
-            ViewModelLocator locator = new ViewModelLocator();
+            
             if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
             {
                 trans = new BusinessUICS();
