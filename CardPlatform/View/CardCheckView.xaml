@@ -20,7 +20,10 @@
         </DockPanel>
         <Grid Grid.Row="1" Background="#FFF0F0F0">
             <TabControl Grid.ColumnSpan="2" TabStripPlacement="Left" Margin="5,15,5,5"  >
-                <TabItem Header="交易流程" Background="#FFF0F0F0">
+                <TabItem Header="终端设置" Background="#FFF0F0F0">
+                    <Views:TerminalView/>
+                </TabItem>
+                <TabItem Header="交易流程" Background="#FFF0F0F0" IsSelected="True">
                     <Views:TransactionView />
                 </TabItem>
                 <TabItem Header="执行脚本" Background="#FFF0F0F0"></TabItem>

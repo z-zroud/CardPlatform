@@ -14,10 +14,15 @@ namespace CardPlatform.Cases
     public abstract class CaseBase : IExcuteCase
     {
         private static readonly Dictionary<string, string> CaseDict = new Dictionary<string, string>();
+        private static bool isLoaded = false;
 
         public CaseBase()
         {
-            Load();
+            if(!isLoaded)
+            {
+                Load();
+                isLoaded = true;
+            }          
         }
 
         public abstract void ExcuteCase(object srcData, CardRespDataType type);

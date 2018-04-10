@@ -51,9 +51,9 @@ int main()
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
     string dpFormat = "神舟数码";
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\23_808021_20180109_20180109363_ic (1).txt";
+    string dpPath = dpDir + dpFormat + "\\33_496121_20201018_20201018803_ic.txt";
     rulePath += "河东村镇银行_神码_华大_G81140042.xml";
-    string installParamCfg = "湖南农信社贷记_英飞凌_非扩展_0500605.xml";
+    string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
     GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
@@ -78,7 +78,7 @@ int main()
     string installParamPath = installParamDir + installParamCfg;
 
 
-    bool isSongJan = false;
+    bool isSongJan = true;
     if (isSongJan)
     {
         while(true)

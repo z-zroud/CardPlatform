@@ -185,6 +185,17 @@ namespace CardPlatform.ViewModel
                 return _selectSMCmd;
             }
         }
+
+        private ICommand _doTransCmd;
+        public ICommand DoTransCmd
+        {
+            get
+            {
+                if (_doTransCmd == null)
+                    _doTransCmd = new RelayCommand(DoTrans);
+                return _doTransCmd;
+            }
+        }
         #endregion
 
         private void LoadApp()
@@ -230,6 +241,27 @@ namespace CardPlatform.ViewModel
             KeyTypeList = transactionCfg.KeyTypeList;
             if (KeyTypeList.Count > 0)
                 SelectedKeyType = 0;
+        }
+
+        private void DoTrans()
+        {
+            BusinessBase trans;
+            ViewModelLocator locator = new ViewModelLocator();
+            if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
+            {
+                trans = new BusinessUICS();
+                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            }
+            //if(TransType.IsCheckECC)
+            //{
+            //    trans = new BusinessECC();
+            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //}
+            //if(TransType.IsCheckQPBOC)
+            //{
+            //    trans = new BusinessQPBOC();
+            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //}
         }
     }
 }

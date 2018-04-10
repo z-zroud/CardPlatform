@@ -1,16 +1,49 @@
 ﻿using CplusplusDll;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UtilLib;
 
 namespace CardPlatform.Business
 {
     public class BusinessBase
     {
-        public List<TLV> ParseAndSave(string response)
+        public BusinessBase()
+        {
+            KeyType = TransKeyType.MDK;
+            //AFLs = new List<AFL>();
+        }
+
+        public TransKeyType KeyType { get; set; }
+        public string TransDesACKey { get; set; }
+        public string TransDesMACKey { get; set; }
+        public string TransDesENCKey { get; set; }
+        public string TransSMACKey { get; set; }
+        public string TransSMMACKey { get; set; }
+        public string TransSMENCKey { get; set; }
+
+        protected bool doDesTrans = false;
+        protected bool doSMTrans = false;
+
+        //protected List<AFL> AFLs;
+
+        public void SetTransDESKeys(string acKey,string macKey,string encKey)
+        {
+            TransDesACKey = acKey;
+            TransDesMACKey = macKey;
+            TransDesENCKey = encKey;
+        }
+
+        public void SetTransSMKeys(string acKey,string macKey,string encKey)
+        {
+            TransSMACKey = acKey;
+            TransSMMACKey = macKey;
+            TransSMENCKey = encKey;
+        }
+
+        public virtual void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
+        {
+
+        }
+
+        protected List<TLV> ParseAndSave(string response)
         {
             List<TLV> arrTLV = DataParse.ParseTLV(response);
             TagDict tagDict = TagDict.GetInstance();
@@ -19,17 +52,26 @@ namespace CardPlatform.Business
             return arrTLV;
         }
 
-        public ApduResponse SelectAid(string aid)
+        //protected List<AFL> ParseAFL(string response)
+        //{
+        //    AFLs = DataParse.ParseAFL(response);
+        //    return AFLs;
+        //}
+
+        protected virtual ApduResponse SelectAid(string aid)
         {
             return APDU.SelectCmd(aid);
         }
 
-        public ApduResponse GPO(string pdol)
+        protected virtual ApduResponse GPO(string pdol, List<AFL> AFLs)
         {
-            return APDU.GPOCmd(pdol);
+            var response = APDU.GPOCmd(pdol);
+            AFLs = DataParse.ParseAFL(response.Response);
+
+            return response;
         }
 
-        public List<ApduResponse> ReadRecords(List<AFL> afls)
+        protected virtual List<ApduResponse> ReadRecords(List<AFL> afls)
         {
             var responses = new List<ApduResponse>();
             foreach(var afl in afls)

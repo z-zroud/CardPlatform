@@ -48,6 +48,7 @@ namespace CardPlatform.ViewModel
             SimpleIoc.Default.Register<AlgorithomViewModel>();
             SimpleIoc.Default.Register<CardCheckViewModel>();
             SimpleIoc.Default.Register<TransactionViewModel>();
+            SimpleIoc.Default.Register<TerminalViewModel>();
         }
 
         public MainViewModel Main
@@ -55,6 +56,14 @@ namespace CardPlatform.ViewModel
             get
             {
                 return ServiceLocator.Current.GetInstance<MainViewModel>();
+            }
+        }
+
+        public TerminalViewModel Terminal
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<TerminalViewModel>();
             }
         }
 

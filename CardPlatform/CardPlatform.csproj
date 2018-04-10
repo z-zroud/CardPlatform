@@ -91,13 +91,17 @@
     <Compile Include="Business\Log.cs" />
     <Compile Include="Business\TagDict.cs" />
     <Compile Include="Cases\CaseBase.cs" />
+    <Compile Include="Cases\GPOCase.cs" />
     <Compile Include="Cases\IExcuteCase.cs" />
     <Compile Include="Cases\PPSECases.cs" />
     <Compile Include="Cases\PSECases.cs" />
+    <Compile Include="Cases\ReadRecordCase.cs" />
+    <Compile Include="Cases\SelectAidCase.cs" />
     <Compile Include="Models\AlgorithmConfig.cs" />
     <Compile Include="Models\AlgorithmModel.cs" />
     <Compile Include="Models\CaseConfig.cs" />
     <Compile Include="Models\DpParsedProgram.cs" />
+    <Compile Include="Models\TerminalModel.cs" />
     <Compile Include="Models\TransConfig.cs" />
     <Compile Include="Models\TransInfoModel.cs" />
     <Compile Include="Models\TransKeyModel.cs" />
@@ -107,6 +111,7 @@
     <Compile Include="ViewModel\CardCheckViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\PersonlizeViewModel.cs" />
+    <Compile Include="ViewModel\TerminalViewModel.cs" />
     <Compile Include="ViewModel\TransactionViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Compile Include="View\AlgorithmView.xaml.cs">
@@ -120,6 +125,9 @@
     </Compile>
     <Compile Include="View\PersonlizeView.xaml.cs">
       <DependentUpon>PersonlizeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\TerminalView.xaml.cs">
+      <DependentUpon>TerminalView.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\TransactionView.xaml.cs">
       <DependentUpon>TransactionView.xaml</DependentUpon>
@@ -153,6 +161,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\PersonlizeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\TerminalView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

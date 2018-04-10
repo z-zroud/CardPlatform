@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CardPlatform.Business
 {
-    class BusinessQPBOC
+    public class BusinessQPBOC : BusinessBase
     {
     }
 }

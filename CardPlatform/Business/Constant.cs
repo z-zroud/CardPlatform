@@ -20,6 +20,26 @@ namespace CardPlatform.Business
         Contactless = 1
     }
 
+    public enum TransType
+    {
+        PBOC,
+        UICS,
+        ECC,
+        QPBOC
+    }
+
+    public enum AlgorithmCategory
+    {
+        DES,
+        SM
+    }
+
+    public enum TransKeyType
+    {
+        MDK,
+        UDK
+    }
+
     public enum CardRespDataType
     {
         SelectPSE = 0,
