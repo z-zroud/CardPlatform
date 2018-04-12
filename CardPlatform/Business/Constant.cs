@@ -12,6 +12,12 @@ namespace CardPlatform.Business
         public static readonly string PPSE = "325041592E5359532E4444463031";
         public static readonly string DebitAid = "A000000333010101";
         public static readonly string CreditAid = "A000000333010102";
+
+        public static readonly int ARQC = 0x80;
+        public static readonly int TC = 0x40;
+        public static readonly int AAC = 0x00;
+        public static readonly int CDA = 0x10;
+
     }
 
     public enum TransCategory

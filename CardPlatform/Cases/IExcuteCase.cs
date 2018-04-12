@@ -18,6 +18,6 @@ namespace CardPlatform.Cases
     public interface IExcuteCase
     {
         void ExcuteCase(Object srcData, CardRespDataType type);
-
+        void ShowInfo(string caseNo, string description, CaseLevel level);
     }
 }

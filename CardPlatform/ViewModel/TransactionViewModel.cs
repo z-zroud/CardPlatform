@@ -250,6 +250,9 @@ namespace CardPlatform.ViewModel
             if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
             {
                 trans = new BusinessUICS();
+                trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
+                trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
                 trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
             }
             //if(TransType.IsCheckECC)

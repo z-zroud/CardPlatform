@@ -14,6 +14,12 @@ namespace CallCplusDll
     {
         static void Main(string[] args)
         {
+            
+            string ret;
+            ret = Convert.ToString(0x80, 16);
+            ret = Authencation.GenDesKcv("12345678900987765434123456789761");
+            ret = Authencation.GenSmKcv("12345678900987765434123456789761");
+            ret = Authencation.GenCAPublicKey("03", "A000000333");
             string data;
             data = Algorithm.Des3Encrypt("12345678900987765434123456789761", "00000000000000000000000000000000");
             data = Algorithm.Des3Decrypt("12345678900987765434123456789761", "4EAE6AB88A307FA94EAE6AB88A307FA9");
@@ -22,7 +28,7 @@ namespace CallCplusDll
 
             data = Algorithm.AscToBcd("4858694034593451230948586940345934512309485869403459345123094858694034593451230948586940345934512309485869403459345123094858694034593451230948586940345934512309485869403459345123094858694034593451230948586940345934512309485869403459345");
             //data = Algorithm.BcdToAsc(data);
-            string ret = Utils.IntToString(1, 2);
+            ret = Utils.IntToString(1, 2);
             ret = Utils.IntToString(15, 2);
             ret = Utils.IntToString(20, 2);
 

@@ -16,9 +16,10 @@ namespace CardPlatform.Models
             Tag9F04 = "000000000000";
             Tag9F1A = "0156";
             Tag5F2A = "0156";
-            Tag95 = "0000000000";
+            Tag95 = "0000046000"; //0000046000
             Tag9F66 = "26000080";
-            Tag9F4E = "476F6C647061635F54435F4465706172746D656E74";
+            Tag9F4E = "476F6C647061635F54435F4465706172746D656E";
+            Tag9F37 = "11223344";
         }
 
         public string GetTag(string tag)
@@ -107,10 +108,33 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 交易日期
+        /// </summary>
+        public string Tag9A
+        {
+            get
+            {
+                 return DateTime.Now.ToString("yyMMdd");
+            }
+        }
+
+        /// <summary>
+        /// 交易时间
+        /// </summary>
+        public string Tag9F21
+        {
+            get
+            {
+                return DateTime.Now.ToString("hhmmss");
+            }
+        }
+
         public string Tag9F7A { get; set; }
         public string TagDF69 { get; set; }
         public string Tag8A { get; set; }
         public string TagDF60 { get; set; }
         public string Tag9C { get; set; }
+        public string Tag9F37 { get; set; }
     }
 }

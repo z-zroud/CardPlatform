@@ -29,6 +29,7 @@ namespace CplusplusDll
             apduResponse.Request = cmd;
             return apduResponse;
         }
+
         /// <summary>
         /// 选择应用
         /// </summary>
@@ -88,6 +89,79 @@ namespace CplusplusDll
             string data = "83" + PDOLDataLen + PDOLData;
             string dataLen = Utils.GetBcdLen(data);
             string cmd = "80A80000" + dataLen + data;
+
+            return SendApdu(cmd);
+        }
+
+        /// <summary>
+        /// 生成动态应用数据，也就是9F4B
+        /// </summary>
+        /// <param name="DDOLData"></param>
+        /// <returns></returns>
+        public static string GenDynamicDataCmd(string DDOLData)
+        {
+            string DDOLDataLen = Utils.GetBcdLen(DDOLData);
+            string cmd = "00880000" + DDOLDataLen + DDOLData;
+
+            var resp = SendApdu(cmd);
+            if(resp.SW == 0x9000)
+            {
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                if(tlvs.Count == 1)
+                {
+                    return tlvs[0].Value;   //Tag9F4B
+                }
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 生成应用密文
+        /// </summary>
+        /// <param name="acType">密文类型</param>
+        /// <param name="cdol">由终端组成的CDOL 数据</param>
+        /// <returns></returns>
+        public static ApduResponse GACCmd(int acType, string cdol)
+        {
+            string type = Convert.ToString(acType, 16);
+            string dataLen = Utils.GetBcdLen(cdol);
+            string cmd = "80AE" + type + "00" + dataLen + cdol;
+
+            return SendApdu(cmd);
+        }
+
+        /// <summary>
+        /// 外部认证
+        /// </summary>
+        /// <param name="ARPC"></param>
+        /// <param name="authCode"></param>
+        /// <returns></returns>
+        public static ApduResponse ExtAuthCmd(string ARPC, string authCode)
+        {
+            string extAuthData = ARPC + authCode;
+            string dataLen = Utils.GetBcdLen(extAuthData);
+
+            string cmd = "00820000" + dataLen + extAuthData;
+
+            return SendApdu(cmd);
+        }
+
+        /// <summary>
+        /// 向卡片设置tag值
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static ApduResponse PutDataCmd(string tag, string data, string mac)
+        {
+            if(tag.Length == 2)
+            {
+                tag = "00" + tag;
+            }
+            string cmdData = data + mac;
+            string cmdDataLen = Utils.GetBcdLen(cmdData);
+
+            string cmd = "04DA" + tag + cmdDataLen + cmdData;
 
             return SendApdu(cmd);
         }
