@@ -23,7 +23,7 @@ namespace CardPlatform.Business
 
         protected bool doDesTrans = false;
         protected bool doSMTrans = false;
-        protected string joinSignedData;
+        protected string toBeSignAppData;
 
         //protected List<AFL> AFLs;
 
@@ -81,7 +81,7 @@ namespace CardPlatform.Business
                     {
                         if(tlv.IsTemplate && tlv.Tag == "70") //用于脱机数据认证中的签名数据
                         {
-                            joinSignedData += tlv.Value;
+                            toBeSignAppData += tlv.Value;
                             break;
                         }
                     }

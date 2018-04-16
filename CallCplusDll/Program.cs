@@ -14,9 +14,6 @@ namespace CallCplusDll
     {
         static void Main(string[] args)
         {
-            XmlParse parse = new XmlParse();
-            parse.Load("ProjectTemplate.xml");
-            parse.Parse();
             string ret;
             ret = Convert.ToString(0x80, 16);
             ret = Authencation.GenDesKcv("12345678900987765434123456789761");

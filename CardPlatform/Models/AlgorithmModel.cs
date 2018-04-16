@@ -22,7 +22,7 @@ namespace CardPlatform.Models
         private bool _isCheckSM;
         public bool IsCheckSM
         {
-            get { return _isCheckDES; }
+            get { return _isCheckSM; }
             set
             {
                 Set(ref _isCheckSM, value);

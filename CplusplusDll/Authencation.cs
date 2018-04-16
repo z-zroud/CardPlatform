@@ -47,18 +47,18 @@ namespace CplusplusDll
             return iccPublicKey.ToString();
         }
 
-        public static string GenSMIssuerPublicKey(string caPublicKey, string issuerPublicCert)
+        public static string GenSMIssuerPublicKey(string caPublicKey, string issuerPublicCert, string PAN)
         {
             StringBuilder issuerPublicKey = new StringBuilder(1024 * 4);
-            CDll.GenSMIssuerPublicKey(caPublicKey, issuerPublicCert, issuerPublicKey);
+            CDll.GenSMIssuerPublicKey(caPublicKey, issuerPublicCert, PAN, issuerPublicKey);
 
             return issuerPublicKey.ToString();
         }
 
-        public static string GenSMICCPublicKey(string issuerPublicKey, string iccPublicCert, string needAuthStaticData)
+        public static string GenSMICCPublicKey(string issuerPublicKey, string iccPublicCert, string needAuthStaticData, string PAN)
         {
-            StringBuilder iccPublicKey = new StringBuilder(1024 * 4);
-            CDll.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needAuthStaticData, iccPublicKey);
+            StringBuilder iccPublicKey = new StringBuilder(1024 * 2);
+            CDll.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needAuthStaticData, PAN, iccPublicKey);
 
             return iccPublicKey.ToString();
         }
@@ -68,9 +68,9 @@ namespace CplusplusDll
             return CDll.DES_SDA(issuerPublicKey, ipkExponent, tag93, sigStaticData, tag82);
         }
 
-        public static int SM_SDA(string issuerPublicKey, string ipkExponent, string sigStaticData, string tag93, string tag82)
+        public static int SM_SDA(string issuerPublicKey, string sigStaticData, string tag93, string tag82)
         {
-            return CDll.SM_SDA(issuerPublicKey, ipkExponent, sigStaticData, tag93, tag82);
+            return CDll.SM_SDA(issuerPublicKey, sigStaticData, tag93, tag82);
         }
 
         public static int DES_DDA(string iccPublicKey, string iccExponent, string tag9F4B, string dynamicData)
@@ -78,39 +78,39 @@ namespace CplusplusDll
             return CDll.DES_DDA(iccPublicKey, iccExponent, tag9F4B, dynamicData);
         }
 
-        public static int SM_DDA(string iccPublicKey, string dynamicData)
+        public static int SM_DDA(string iccPublicKey, string tag9F4B, string dynamicData)
         {
-            return CDll.SM_DDA(iccPublicKey, dynamicData);
+            return CDll.SM_DDA(iccPublicKey, tag9F4B, dynamicData);
         }
 
-        public static string GenUdkSessionKey(string udkSubKey, string atc)
+        public static string GenUdkSessionKey(string udkSubKey, string atc, int keyType = 0)
         {
             StringBuilder udkSessionKey = new StringBuilder(33);
-            CDll.GenUdkSessionKey(udkSubKey, atc, udkSessionKey);
+            CDll.GenUdkSessionKey(udkSubKey, atc, udkSessionKey, keyType);
 
             return udkSessionKey.ToString();
         }
 
-        public static string GenUdk(string mdk, string cardNo, string cardSequence)
+        public static string GenUdk(string mdk, string cardNo, string cardSequence, int keyType = 0)
         {
             StringBuilder udk = new StringBuilder(33);
-            CDll.GenUdk(mdk, cardNo, cardSequence, udk);
+            CDll.GenUdk(mdk, cardNo, cardSequence, udk, keyType);
 
             return udk.ToString();
         }
 
-        public static string GenArpc(string udkAuthSessionKey, string ac, string authCode)
+        public static string GenArpc(string udkAuthSessionKey, string ac, string authCode, int keyType = 0)
         {
             StringBuilder arpc = new StringBuilder(17);
-            CDll.GenArpc(udkAuthSessionKey, ac, authCode, arpc);
+            CDll.GenArpc(udkAuthSessionKey, ac, authCode, arpc, keyType);
 
             return arpc.ToString().Substring(0, 16);
         }
 
-        public static string GenIssuerScriptMac(string udkMacSessionKey, string data)
+        public static string GenIssuerScriptMac(string udkMacSessionKey, string data, int keyType = 0)
         {
             StringBuilder mac = new StringBuilder(17);
-            CDll.GenIssuerScriptMac(udkMacSessionKey, data, mac);
+            CDll.GenIssuerScriptMac(udkMacSessionKey, data, mac,keyType);
 
             return mac.ToString().Substring(0, 16);
         }

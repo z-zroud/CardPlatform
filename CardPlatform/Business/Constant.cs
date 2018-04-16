@@ -20,6 +20,8 @@ namespace CardPlatform.Business
 
         public static readonly string DataComparedConfigFile = "ProjectTemplate.xml";
 
+        public static readonly string TransactionCase = "Transcation case";
+
     }
 
     public enum TransCategory

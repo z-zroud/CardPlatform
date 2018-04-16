@@ -70,7 +70,7 @@ int GenSmKcv(const char* key, char* kcv, int kcvLen)
     return 0;
 }
 
-void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey)
+void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey, int keyType)
 {
 	string leftInput = "000000000000" + string(atc);
 
@@ -81,17 +81,35 @@ void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKe
 
 	char leftKey[32] = { 0 };
 	char rightKey[32] = { 0 };
-	Des3(leftKey, (char*)udkSubKey, (char*)leftInput.c_str());
-	Des3(rightKey, (char*)udkSubKey, (char*)rightInput.c_str());
+    if (keyType == DES_KEY)
+    {
+        Des3(leftKey, (char*)udkSubKey, (char*)leftInput.c_str());
+        Des3(rightKey, (char*)udkSubKey, (char*)rightInput.c_str());
+    }
+    else {
+        PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
+        if (Dll_SM4_ECB_ENC)
+        {
+            Dll_SM4_ECB_ENC((char*)udkSubKey, (char*)leftInput.c_str(), leftKey);
+            Dll_SM4_ECB_ENC((char*)udkSubKey, (char*)leftInput.c_str(), rightKey);
+        }
+    }
+
 
 	string key = string(leftKey) + string(rightKey);
 	string sessionKey = EvenOddCheck(key);
 	strcpy(udkSessionKey, sessionKey.c_str());
 }
 
-void GenUdk(const char* mdk, const char* cardNo, const char* cardSequence, char* udk)
+void GenUdk(const char* mdk, const char* cardNo, const char* cardSequence, char* udk, int keyType)
 {
-	string leftInput = string(cardNo) + string(cardSequence);
+    //去掉F
+    string cardNoDelF = string(cardNo);
+    if (cardNoDelF[cardNoDelF.length() - 1] == 'F')
+    {
+        cardNoDelF = cardNoDelF.substr(0, cardNoDelF.length() - 1);
+    }
+	string leftInput = cardNoDelF + string(cardSequence);
 	if (leftInput.length() > 16)
 	{
 		leftInput = leftInput.substr(leftInput.length() - 16, 16);
@@ -102,24 +120,46 @@ void GenUdk(const char* mdk, const char* cardNo, const char* cardSequence, char*
 
 	char leftKey[32] = { 0 };
 	char rightKey[32] = { 0 };
-	Des3(leftKey, (char*)mdk, (char*)leftInput.c_str());
-	Des3(rightKey, (char*)mdk, rightInput);
+
+    if (keyType == DES_KEY)
+    {
+        Des3(leftKey, (char*)mdk, (char*)leftInput.c_str());
+        Des3(rightKey, (char*)mdk, rightInput);
+    }
+    else {
+        PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
+        if (Dll_SM4_ECB_ENC)
+        {
+            Dll_SM4_ECB_ENC((char*)mdk, (char*)leftInput.c_str(), leftKey);
+            Dll_SM4_ECB_ENC((char*)mdk, (char*)leftInput.c_str(), rightKey);
+        }
+    }
+
 
 	string key = string(leftKey) + string(rightKey);
 	string result = EvenOddCheck(key);
 	strcpy(udk, result.c_str());
 }
 
-void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc)
+void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc, int keyType)
 {
 	char temp[17] = { 0 };
 	sprintf(temp, "%s000000000000", authCode);
 	str_xor(ac, temp, 16);
-
-	Des3(arpc, (char*)udkAuthSessionKey, ac);
+    if (keyType == DES_KEY)
+    {
+        Des3(arpc, (char*)udkAuthSessionKey, ac);
+    }
+    else {
+        PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
+        if (Dll_SM4_ECB_ENC)
+        {
+            Dll_SM4_ECB_ENC((char*)udkAuthSessionKey, ac, arpc);
+        }
+    }	
 }
 
-void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* mac)
+void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* mac, int keyType)
 {
 	string sessionMacKey = udkMacSessionKey;
 	string leftSessionMacKey = sessionMacKey.substr(0, 16);
@@ -141,15 +181,23 @@ void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* ma
 	char szOutput[17] = { 0 };
 
 	string blockData = calcData.substr(0, 16);
-	for (int i = 1; i < blocks; i++)
-	{
-		Des(szOutput, (char*)leftSessionMacKey.c_str(), (char*)blockData.c_str());
-		str_xor(szOutput, (char*)calcData.substr(i * 16, 16).c_str(), 16);
-		blockData = szOutput;
-	}
-	Des(szOutput, (char*)leftSessionMacKey.c_str(), szOutput);
-	_Des(szOutput, (char*)rightSessionMacKey.c_str(), szOutput);
-	Des(szOutput, (char*)leftSessionMacKey.c_str(), szOutput);
+    if (keyType == DES_KEY)
+    {
+        for (int i = 1; i < blocks; i++)
+        {
+            Des(szOutput, (char*)leftSessionMacKey.c_str(), (char*)blockData.c_str());
+            str_xor(szOutput, (char*)calcData.substr(i * 16, 16).c_str(), 16);
+            blockData = szOutput;
+        }
+        Des(szOutput, (char*)leftSessionMacKey.c_str(), szOutput);
+        _Des(szOutput, (char*)rightSessionMacKey.c_str(), szOutput);
+        Des(szOutput, (char*)leftSessionMacKey.c_str(), szOutput);
+    }
+    else {
+        //PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
+        //PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
+    }
+
 
 	string result = string(szOutput).substr(0, 8);
 
@@ -287,73 +335,115 @@ int GenDesICCPublicKey(
 int GenSMIssuerPublicKey(
 	const char* caPublicKey,
 	const char* issuerPublicCert,
+    const char* PAN,
 	char* issuerPublicKey)
 {
+    if (strlen(issuerPublicCert) < 28 || (issuerPublicCert[0] != '1' || issuerPublicCert[1] != '2'))
+    {
+        return 1;   //format error
+    }
+    string issuerFlag = string(issuerPublicCert).substr(2, 8);
+    int index = issuerFlag.find('F');
+    if (index == string::npos)
+    {
+        index = 8;
+    }
+    string leftPAN = issuerFlag.substr(0, index);
+    if (string(PAN).substr(0, index) != leftPAN)
+    {
+        return 2;   //issuer mark error
+    }
+    string issuerPublicKeySignAlogrithmFlag = string(issuerPublicCert).substr(20, 2);
+    if (issuerPublicKeySignAlogrithmFlag != "04")
+    {
+        return 3;   //issuer public key signed alogrithm falg error
+    }
 	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
 	if (DllPBOC_SM2_Verify)
 	{
-		int signedResultLen = strlen(caPublicKey);
-		int signDataLen = strlen(issuerPublicCert) - signedResultLen;
-		//string signData = issuerPublicCert.substr(0, signDataLen);
-		char signData[1024] = { 0 };
-		Tool::SubStr(issuerPublicCert, 0, signDataLen, signData);
+		int signedResultLen = strlen(caPublicKey);  //数字签名的长度
+		int toBeSignDataLen = strlen(issuerPublicCert) - signedResultLen; //需签名的数据的长度
+
+		char toBeSignData[1024] = { 0 };
+		Tool::SubStr(issuerPublicCert, 0, toBeSignDataLen, toBeSignData);   //需签名的数据
+
 		char signedResult[1024] = { 0 };
-		//string signedResult = issuerPublicCert.substr(signDataLen);
-		Tool::SubStr(issuerPublicCert, signDataLen, strlen(issuerPublicCert) - signDataLen, signedResult);
-		int ret = DllPBOC_SM2_Verify((char*)caPublicKey, signData, signedResult);
+		Tool::SubStr(issuerPublicCert, toBeSignDataLen, strlen(issuerPublicCert) - toBeSignDataLen, signedResult); //已签名的结果
+
+		int ret = DllPBOC_SM2_Verify((char*)caPublicKey, toBeSignData, signedResult);
 		if (ret == SM_OK)
 		{
 			char issuerPublicCertLen[3] = { 0 };
 			Tool::SubStr(issuerPublicCert, 26, 2, issuerPublicCertLen);
 			int ipkLen = stoi(issuerPublicCertLen, 0, 16) * 2;
-			int ipkLen2 = signDataLen - 28;
-			if (ipkLen != ipkLen2)
+			int ipkLen2 = toBeSignDataLen - 28;
+			if (ipkLen != ipkLen2) //再次校验发卡行公钥长度是否一致
 			{
-				return 2;
+				return 4;
 			}
 			Tool::SubStr(issuerPublicCert, 28, ipkLen, issuerPublicKey);
-			//return issuerPublicCert.substr(28, ipkLen);
+            return 0;
 		}
 	}
 
-	return 0;
+	return 5;
 }
 
 int GenSMICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
-	const char* needAuthStaticData,
+	const char* signStaticAppData,
+    const char* PAN,
 	char* iccPublicKey)
 {
-	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
+    if (strlen(iccPublicCert) < 40)
+    {
+        return 1;   //length error
+    }
+
+    if (iccPublicCert[0] != '1' || iccPublicCert[1] != '4')
+    {
+        return 2;   //format error
+    }
+
+    string iccPAN = string(iccPublicCert).substr(2, 20);
+    if (iccPAN.substr(0, strlen(PAN)) != string(PAN))
+    {
+        return 3;   //pan invalid
+    }
+
+    PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
 	if (DllPBOC_SM2_Verify)
 	{
 		int signedResultLen = strlen(issuerPublicKey);
-		int signDataLen = strlen(iccPublicCert) - signedResultLen;
-		//string signData = iccPublicCert.substr(0, signDataLen) + needAuthStaticData;
-		char signData[2048] = { 0 };
-		Tool::SubStr(iccPublicCert, 0, signDataLen, signData);
-		strcat_s(signData, 2048, needAuthStaticData);
-		//string signedResult = iccPublicCert.substr(signDataLen);
+		int toBeSignDataLen = strlen(iccPublicCert) - signedResultLen;
+
+        //需要签名的数据
+		char toBeSignData[2048] = { 0 };
+		Tool::SubStr(iccPublicCert, 0, toBeSignDataLen, toBeSignData);
+		strcat_s(toBeSignData, 2048, signStaticAppData);
+
+        //已签名的结果
 		char signedResult[1024] = { 0 };
-		Tool::SubStr(iccPublicCert, signDataLen, strlen(iccPublicCert) - signDataLen, signedResult);
-		int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey, signData, signedResult);
+		Tool::SubStr(iccPublicCert, toBeSignDataLen, strlen(iccPublicCert) - toBeSignDataLen, signedResult);
+
+		int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey, toBeSignData, signedResult);
 		if (ret == SM_OK)
 		{
 			char icPublicCertLen[3] = { 0 };
 			Tool::SubStr(iccPublicCert, 38, 2, icPublicCertLen);
 			int iccLen = stoi(icPublicCertLen, 0, 16) * 2;
-			int iccLen2 = signDataLen - 40;
-			if (iccLen != iccLen2)
+			int iccLen2 = toBeSignDataLen - 40;
+			if (iccLen != iccLen2) //再次核实长度的正确性
 			{
-				return 2;
+				return 4;
 			}
 			Tool::SubStr(iccPublicCert, 40, iccLen, iccPublicKey);
-			//return iccPublicCert.substr(40, iccLen);
+            return 0;
 		}
 	}
 
-	return 0;
+	return 5;
 }
 
 int DES_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* tag93, const char* sigStaticData, const char* tag82)
@@ -383,24 +473,29 @@ int DES_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* tag
 	return 5;
 }
 
-int SM_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* sigStaticData, const char* tag93, const char* tag82)
+int SM_SDA(const char* issuerPublicKey, const char* toBeSignedStaticAppData, const char* tag93, const char* tag82)
 {
+    if (tag93[0] != '1' || tag93[1] != '3')
+    {
+        return 1;   //format error
+    }
+
 	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
 	if (DllPBOC_SM2_Verify)
 	{
 		char signedData[1024] = { 0 };
-		Tool::SubStr(sigStaticData, 6, strlen(tag93) - 6, signedData);
+		Tool::SubStr(tag93, 6, strlen(tag93) - 6, signedData);
 		char sigHeader[32] = { 0 };
-		Tool::SubStr(sigStaticData, 0, 6, sigHeader);
-		string needValidateData = string(sigHeader) + tag93 + tag82;
-		int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey, (char*)needValidateData.c_str(), (char*)signedData);
+		Tool::SubStr(tag93, 0, 6, sigHeader);
+		string toBeSignData = string(sigHeader) + toBeSignedStaticAppData + tag82;
+		int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey, (char*)toBeSignData.c_str(), (char*)signedData);
 		if (ret == SM_OK)
 		{
 			return 0;
 		}
 	}
 
-	return 1;
+	return 2;   //校验不成功
 }
 
 int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4B, const char* dynamicData)
@@ -426,26 +521,36 @@ int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4
 	return 2;
 }
 
-int SM_DDA(const char* iccPublicKey, const char* dynamicData)
+int SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicData)
 {
+    if (tag9F4B[0] != '1' || tag9F4B[1] != '5')
+    {
+        return 1;
+    }
 	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
 	if (DllPBOC_SM2_Verify)
 	{
-		//if (signedData.substr(0, 2) != "15")
-		//{
-		//	return false;
-		//}
-		//int iccDynamicDataLen = stoi(signedData.substr(2, 2), 0, 16) * 2;
-		//string iccDynamicData = signedData.substr(4, iccDynamicDataLen);
-		//string signedResult = signedData.substr(4 + iccDynamicDataLen);
-		//string needValidateData = signedData.substr(0, 4 + iccDynamicDataLen) + terminalData;
-		//int ret = DllPBOC_SM2_Verify((char*)iccPublicKey (char*)needValidateData.c_str(), (char*)signedResult.c_str());
-		//if (ret == SM_OK)
-		//{
-		//	return true;
-		//}
+        string daynamicAppData = tag9F4B;
+		int iccDynamicAppDataLen = stoi(daynamicAppData.substr(2, 2), 0, 16) * 2;
+        if (daynamicAppData.length() < 4 + iccDynamicAppDataLen)
+        {
+            return 3;   //数据长度有误
+        }
+
+        //需签名的数据
+		string iccDynamicAppData = daynamicAppData.substr(4, iccDynamicAppDataLen);
+		string toBeSignedData = daynamicAppData.substr(0, 4 + iccDynamicAppDataLen) + dynamicData;
+
+        //已签名的结果
+        string signedResult = daynamicAppData.substr(4 + iccDynamicAppDataLen);
+
+		int ret = DllPBOC_SM2_Verify((char*)iccPublicKey,(char*)toBeSignedData.c_str(), (char*)signedResult.c_str());
+		if (ret == SM_OK)
+		{
+			return 0;
+		}
 	}
-	return 1;
+	return 2;
 }
 
 /***************************************************************************/

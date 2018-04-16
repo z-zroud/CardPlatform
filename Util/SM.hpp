@@ -134,7 +134,7 @@ T GetSMFunc(const char* funcName)
 {
     static HINSTANCE hInst = NULL;
     T ret = NULL;
-    if (!hInst)
+    //if (!hInst)
     {
 		char appPath[256] = { 0 };
 		GetModuleFileName(NULL, appPath, 256);

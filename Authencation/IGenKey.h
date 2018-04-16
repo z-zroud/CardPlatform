@@ -10,6 +10,9 @@ using namespace std;
 #define GENKEY_API __declspec(dllimport)
 #endif
 
+const int DES_KEY = 0;
+const int SM_KEY = 1;
+
 extern "C" GENKEY_API int GenDesKcv(const char* key, char* kcv, int kcvLen);
 
 extern "C" GENKEY_API int GenSmKcv(const char* key, char* kcv, int kcvLen);
@@ -51,11 +54,13 @@ extern "C" GENKEY_API  int GenDesICCPublicKey(
 * 功能： 获取发卡行公钥
 * 参数： issuerPulicCert 发卡行公钥证书
 *		ipkRemainder 发卡行公钥余项
+*       PAN 账号
 * 返回：	发卡行公钥
 *********************************************************************************/
 extern "C" GENKEY_API  int GenSMIssuerPublicKey(
 	const char* caPublicKey, 
 	const char* issuerPublicCert,
+    const char* PAN,
 	char* issuerPublicKey);
 
 /********************************************************************************
@@ -68,6 +73,7 @@ extern "C" GENKEY_API  int GenSMICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
 	const char* needAuthStaticData,
+    const char* PAN,
 	char* iccPublicKey);
 
 /***************************************************************************************************
@@ -82,20 +88,20 @@ extern "C" GENKEY_API int DES_SDA(const char* issuerPublicKey,
 	const char* tag93, 
 	const char* sigStaticData,
 	const char* tag82);
-extern "C" GENKEY_API int SM_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* sigStaticData, const char* tag93, const char* tag82);
+extern "C" GENKEY_API int SM_SDA(const char* issuerPublicKey, const char* toBeSignedStaticAppData, const char* tag93, const char* tag82);
 
 extern "C" GENKEY_API int DES_DDA(const char* iccPublicKey, 
 	const char*iccExponent,
 	const char* tag9F4B,
 	const char* dynamicData);
-extern "C" GENKEY_API int SM_DDA(const char* iccPublicKey, const char* dynamicData);
+extern "C" GENKEY_API int SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicData);
 
 /********************************************************************************************************
 * 通过UDK_AC  UDK_MAC  UDK_ENC 生成对应的会话密钥
 * 参数udkSubKey 可以传入UDK_AC/UDK_MAC/UDK_ENC 生成对应的sessionKey
 * 参数atc 应用交易计数器
 *********************************************************************************************************/
-extern "C" GENKEY_API void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey);
+extern "C" GENKEY_API void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey, int keyType=0);
 
 /*******************************************************************************************************
 * 通过对应的MDK_AC MDK_MAC MDK_ENC 生成对应的UDK_AC UDK_MAC  UDK_ENC
@@ -103,17 +109,17 @@ extern "C" GENKEY_API void GenUdkSessionKey(const char* udkSubKey, const char* a
 * 参数 cardNo 卡号
 * 参数cardSequence 卡片序列号
 ********************************************************************************************************/
-extern "C" GENKEY_API void GenUdk(const char* mdk,const char* cardNo,const char* cardSequence,char* udk);
+extern "C" GENKEY_API void GenUdk(const char* mdk,const char* cardNo,const char* cardSequence,char* udk, int keyType = 0);
 
 /************************************************************************************************
 * 生成ARPC
 * 参数： udkAcSessionKey 为UDK_AC生成的会话密钥
 * 参数：ac 应用密文
 *************************************************************************************************/
-extern "C" GENKEY_API void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc);
+extern "C" GENKEY_API void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc, int keyType = 0);
 
 /*******************************************************************************************************
 * 生成发卡行脚本MAC
 ********************************************************************************************************/
-extern "C" GENKEY_API void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* mac);
+extern "C" GENKEY_API void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* mac, int keyType = 0);
 

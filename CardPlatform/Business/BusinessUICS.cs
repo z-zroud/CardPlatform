@@ -49,6 +49,22 @@ namespace CardPlatform.Business
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
                 SelectAid(aid);
+                string tag9F38 = tagDict.GetTag("9F38");
+                var tls = DataParse.ParseTL(tag9F38);
+                string pdol = string.Empty;
+                foreach (var tl in tls)
+                {
+                    pdol += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                }
+                var AFLs = GPOEx(pdol);
+                ReadRecords(AFLs);
+                OfflineAuthcation();
+                HandleLimitation();
+                CardHolderVerify();
+                TerminalRiskManagement();
+                TerminalActionAnalyze();
+                IssuerAuthencation();
+                TransactionEnd();
             }
 
         }
@@ -120,33 +136,101 @@ namespace CardPlatform.Business
         protected int OfflineAuthcation()
         {
             int result;
+            IExcuteCase excuteCase = new CaseBase();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
             if (aid.Length < 10)
+            {
+                excuteCase.ShowInfo(caseNo, "应用AID长度太短", CaseLevel.CaseFailed);
                 return -1;
+            }
             string rid = aid.Substring(0, 10);
             string CAIndex = tagDict.GetTag("8F");
             if (CAIndex.Length != 2)
+            {
+                excuteCase.ShowInfo(caseNo, "无法获取CA 索引,请检查8F是否存在", CaseLevel.CaseFailed);
                 return -2;
+            }
             string CAPublicKey = Authencation.GenCAPublicKey(CAIndex, rid);
-            string issuerPublicCert = tagDict.GetTag("90");
-            string issuerPublicKeyRemainder = tagDict.GetTag("92");
-            string issuerExp = tagDict.GetTag("9F32");
-            string issuerPublicKey = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp);
-            string signedStaticAppData = tagDict.GetTag("93");
-            string AIP = tagDict.GetTag("82");
-            result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, joinSignedData, AIP);
+            if(string.IsNullOrWhiteSpace(CAPublicKey))
+            {
+                excuteCase.ShowInfo(caseNo, "无法获取CA公钥，请检查RID及索引是否正确", CaseLevel.CaseFailed);
+                return -3;
+            }
 
+            string issuerPublicKey;
+            string issuerPublicCert = tagDict.GetTag("90");
+            string PAN = tagDict.GetTag("5A");
+            string signedStaticAppData = tagDict.GetTag("93");
             string iccPublicCert = tagDict.GetTag("9F46");
-            string iccPublicKeyRemainder = tagDict.GetTag("9F48");
-            string iccPublicKeyExp = tagDict.GetTag("9F47");
-            string iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, joinSignedData, iccPublicKeyExp, AIP);
+            string AIP = tagDict.GetTag("82");
 
             string ddol = tagDict.GetTag("9F49");
             string terminalRandom = "12345678";
 
-            var Tag9F4B = APDU.GenDynamicDataCmd(terminalRandom);
+            var tag9F4B = APDU.GenDynamicDataCmd(terminalRandom);
+            if (string.IsNullOrWhiteSpace(tag9F4B))
+            {
+                excuteCase.ShowInfo(caseNo, "Tag9F4B不存在", CaseLevel.CaseFailed);
+                return -7;
+            }
+
+            if (doDesTrans) //DES算法
+            {
+                string issuerPublicKeyRemainder = tagDict.GetTag("92");
+                string issuerExp = tagDict.GetTag("9F32");
+                issuerPublicKey = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp);
+                if (string.IsNullOrWhiteSpace(issuerPublicKey))
+                {
+                    excuteCase.ShowInfo(caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在", CaseLevel.CaseFailed);
+                    return -4;
+                }
+
+                result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
+                if (result != 0)
+                {
+                    excuteCase.ShowInfo(caseNo, "静态数据认证失败!", CaseLevel.CaseFailed);
+                    return -5;
+                }
+
+                string iccPublicKeyRemainder = tagDict.GetTag("9F48");
+                string iccPublicKeyExp = tagDict.GetTag("9F47");
+                string iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
+                if (string.IsNullOrWhiteSpace(iccPublicKey))
+                {
+                    excuteCase.ShowInfo(caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在", CaseLevel.CaseFailed);
+                    return -6;
+                }
+
+                result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, terminalRandom);
+                if (result != 0)
+                {
+                    excuteCase.ShowInfo(caseNo, "动态数据认证失败!", CaseLevel.CaseFailed);
+                    return -8;
+                }
+            }
+            else //SM算法
+            {
+                issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
+                if (string.IsNullOrWhiteSpace(issuerPublicKey))
+                {
+                    excuteCase.ShowInfo(caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在", CaseLevel.CaseFailed);
+                    return -4;
+                }
 
 
-            result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, Tag9F4B, terminalRandom);
+                result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
+                if(result != 0)
+                {
+                    excuteCase.ShowInfo(caseNo, "SM算法 静态数据认证失败!", CaseLevel.CaseFailed);
+                    return -9;
+                }
+
+                string iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, PAN);
+                result = Authencation.SM_DDA(iccPublicKey, tag9F4B, terminalRandom);
+
+            }
+           
+            
 
             return 0;
         }
@@ -181,18 +265,19 @@ namespace CardPlatform.Business
                 caseBase.ShowInfo(caseNo, "应用失效日期大于生效日期，应用不合法", CaseLevel.CaseFailed);
             }
 
-            string appVersion = tagDict.GetTag("9F08"); //需要判断版本号
-            DataCompareConfig dataCompareConfig = DataCompareConfig.GetInstance();
-            if (!dataCompareConfig.HasLoaded)
-                dataCompareConfig.Load(Constant.DataComparedConfigFile);
-            var templateAppVersion = dataCompareConfig.GetComparedTag("9F08").Value;
-            if(appVersion != templateAppVersion)
-            {
-                caseBase.ShowInfo(caseNo, "应用版本不一致", CaseLevel.CaseFailed);
-            }
-            string AUC = tagDict.GetTag("9F07");
+            //模板值对比判断放到程序交易结束之后
+            //string appVersion = tagDict.GetTag("9F08"); //需要判断版本号
+            ////DataCompareConfig dataCompareConfig = DataCompareConfig.GetInstance();
+            ////if (!dataCompareConfig.HasLoaded)
+            ////    dataCompareConfig.Load(Constant.DataComparedConfigFile);
+            ////var templateAppVersion = dataCompareConfig.GetComparedTag("9F08").Value;
+            ////if(appVersion != templateAppVersion)
+            ////{
+            ////    caseBase.ShowInfo(caseNo, "应用版本不一致", CaseLevel.CaseFailed);
+            ////}
+            //string AUC = tagDict.GetTag("9F07");
 
-            string cardIssuerCountryCode = tagDict.GetTag("5F28");
+            //string cardIssuerCountryCode = tagDict.GetTag("5F28");
 
             return 0;
         }
