@@ -19,5 +19,6 @@ namespace CardPlatform.Cases
     {
         void ExcuteCase(Object srcData, CardRespDataType type);
         void ShowInfo(string caseNo, string description, CaseLevel level);
+        void ShowComparedResult(string tag);
     }
 }

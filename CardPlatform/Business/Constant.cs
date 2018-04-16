@@ -18,6 +18,8 @@ namespace CardPlatform.Business
         public static readonly int AAC = 0x00;
         public static readonly int CDA = 0x10;
 
+        public static readonly string DataComparedConfigFile = "ProjectTemplate.xml";
+
     }
 
     public enum TransCategory

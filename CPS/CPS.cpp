@@ -218,9 +218,9 @@ bool PersonlizePBOC(IniConfig cpsFile)
         vector<pair<string, string>> personlizeDGIs;
         auto cpsNodes = cpsFile.GetAllNodes();
 
-        if (cpsNodes.size() < 3) {
-            return false;
-        }
+        //if (cpsNodes.size() < 3) {
+        //    return false;
+        //}
         int pbocDGIs = cpsNodes.size();
         int passPseCount = 0;
         for (int i = 0; i < pbocDGIs; i++)

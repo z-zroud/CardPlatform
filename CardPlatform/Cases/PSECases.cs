@@ -48,5 +48,12 @@ namespace CardPlatform.Cases
                 ShowInfo(caseNo, caseDesc, CaseLevel.CaseSucess);
             }
         }
+
+        protected void PBOC_sPSE_SJHGX_003_01()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseDesc = GetDescription(caseNo);
+            
+        }
     }
 }

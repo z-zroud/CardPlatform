@@ -360,9 +360,9 @@ UINT StoreDataCmd(const char* data, int type, bool reset)
 	count++;
 	if (type == STORE_DATA_END) { count = 0; }	//ÖØÖÃ¼ÆÊýÆ÷
 
-#if _DEBUG
-    printf("%s\n sw=%4X\n", cmd.c_str(),sw);
-#endif
+//#if _DEBUG
+//    printf("%s\n sw=%4X\n", cmd.c_str(),sw);
+//#endif
 	return sw;
 }
 
@@ -478,9 +478,9 @@ UINT InstallAppCmd(const char* package,
 	string cmd = string("80E60C00") + dataLen + data;
 
     int sw = SendApdu2(cmd.c_str());
-#if _DEBUG
-    printf("%s\n sw=%4X\n", cmd.c_str(), sw);
-#endif
+//#if _DEBUG
+//    printf("%s\n sw=%4X\n", cmd.c_str(), sw);
+//#endif
 
     return sw;
 }

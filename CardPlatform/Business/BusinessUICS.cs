@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using CplusplusDll;
 using CardPlatform.Cases;
 using CardPlatform.ViewModel;
+using System.Reflection;
+using CardPlatform.Config;
 
 namespace CardPlatform.Business
 {
@@ -51,6 +53,11 @@ namespace CardPlatform.Business
 
         }
 
+        /// <summary>
+        /// 选择应用
+        /// </summary>
+        /// <param name="aid"></param>
+        /// <returns></returns>
         protected override ApduResponse SelectAid(string aid)
         {
             ApduResponse response = base.SelectAid(aid);
@@ -61,6 +68,11 @@ namespace CardPlatform.Business
             return response;
         }
 
+        /// <summary>
+        /// 应用初始化
+        /// </summary>
+        /// <param name="pdol"></param>
+        /// <returns></returns>
         protected List<AFL> GPOEx(string pdol)
         {
             ApduResponse response = base.GPO(pdol);
@@ -81,6 +93,11 @@ namespace CardPlatform.Business
             return AFLs;
         }
 
+        /// <summary>
+        /// 读记录
+        /// </summary>
+        /// <param name="afls"></param>
+        /// <returns></returns>
         protected override List<ApduResponse> ReadRecords(List<AFL> afls)
         {
             var resps = base.ReadRecords(afls);
@@ -96,6 +113,10 @@ namespace CardPlatform.Business
             return resps;
         }
 
+        /// <summary>
+        /// 脱机数据认证
+        /// </summary>
+        /// <returns></returns>
         protected int OfflineAuthcation()
         {
             int result;
@@ -130,6 +151,10 @@ namespace CardPlatform.Business
             return 0;
         }
 
+        /// <summary>
+        /// 处理限制
+        /// </summary>
+        /// <returns></returns>
         protected int HandleLimitation()
         {
             int expiryDate;
@@ -139,23 +164,32 @@ namespace CardPlatform.Business
             int.TryParse(tagDict.GetTag("5F25"), out effectiveDate);
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
 
+            var caseBase = new CaseBase();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
             if (expiryDate < currentDate)    //应用已失效
             {
-
+                caseBase.ShowInfo(caseNo, "应用失效日期大于当前日期，应用已失效", CaseLevel.CaseWarn);
             }
 
             if (effectiveDate < currentDate) // 应用未生效
             {
-
+                caseBase.ShowInfo(caseNo, "应用生效日期大于当前日期，应用未生效", CaseLevel.CaseWarn);
             }
 
             if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
             {
-
+                caseBase.ShowInfo(caseNo, "应用失效日期大于生效日期，应用不合法", CaseLevel.CaseFailed);
             }
 
             string appVersion = tagDict.GetTag("9F08"); //需要判断版本号
-
+            DataCompareConfig dataCompareConfig = DataCompareConfig.GetInstance();
+            if (!dataCompareConfig.HasLoaded)
+                dataCompareConfig.Load(Constant.DataComparedConfigFile);
+            var templateAppVersion = dataCompareConfig.GetComparedTag("9F08").Value;
+            if(appVersion != templateAppVersion)
+            {
+                caseBase.ShowInfo(caseNo, "应用版本不一致", CaseLevel.CaseFailed);
+            }
             string AUC = tagDict.GetTag("9F07");
 
             string cardIssuerCountryCode = tagDict.GetTag("5F28");

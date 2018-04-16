@@ -91,12 +91,14 @@
     <Compile Include="Business\Log.cs" />
     <Compile Include="Business\TagDict.cs" />
     <Compile Include="Cases\CaseBase.cs" />
+    <Compile Include="Cases\DataComparedCase.cs" />
     <Compile Include="Cases\GPOCase.cs" />
     <Compile Include="Cases\IExcuteCase.cs" />
     <Compile Include="Cases\PPSECases.cs" />
     <Compile Include="Cases\PSECases.cs" />
     <Compile Include="Cases\ReadRecordCase.cs" />
     <Compile Include="Cases\SelectAidCase.cs" />
+    <Compile Include="Config\DataCompareConfig.cs" />
     <Compile Include="Models\AlgorithmConfig.cs" />
     <Compile Include="Models\AlgorithmModel.cs" />
     <Compile Include="Models\CaseConfig.cs" />

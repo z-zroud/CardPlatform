@@ -247,7 +247,14 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
     strncpy_s(cmdHeader, 10, noSpaceCmd, 8);
     strncpy_s(szCmdLen, 3, noSpaceCmd + 8, 2);
     //Log->Debug("APDU: %s %s %s", cmdHeader, szCmdLen, noSpaceCmd + 10);
-    //printf("APDU: %s %s %s", cmdHeader, szCmdLen, noSpaceCmd + 10);
+#ifdef _DEBUG
+    if (cmdLen > 8)
+        printf("APDU: %s %s %s\n", cmdHeader, szCmdLen, noSpaceCmd + 10);
+    else
+        printf("APDU: %s\n", noSpaceCmd);
+#endif // DEBUG
+
+
     if (cmdLen < 8 || cmdLen % 2 != 0)	//bcd码命令必须包含命令头8字节，必须是偶数字节
     {
         return false;
@@ -272,7 +279,19 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
     {
         return false;
     }
+    char tmp[2048] = { 0 };
+    Tool::AscToBcd(tmp, output, len * 2);
 
+    if (strlen(tmp) < 4)
+    {
+        return false;
+    }
+    //memcpy(output, tmp, strlen(tmp) - 4);
+    int result = strtol(tmp + strlen(tmp) - 4, NULL, 16);
+
+    #if _DEBUG
+        printf("SW = %4X\n", result);
+    #endif
     return true;
 }
 

@@ -53,8 +53,8 @@ int main()
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
     string dpPath = dpDir + dpFormat + "\\23_808021_20180109_20180109363_ic (1).txt";
     rulePath += "河东村镇银行_神码_华大_G81140042.xml";
-    string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
-    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string installParamCfg = "test2.xml";
+    //GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);

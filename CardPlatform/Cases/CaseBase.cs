@@ -11,21 +11,29 @@ using System.Windows.Media;
 
 namespace CardPlatform.Cases
 {
-    public abstract class CaseBase : IExcuteCase
+    public class CaseBase : IExcuteCase
     {
         private static readonly Dictionary<string, string> CaseDict = new Dictionary<string, string>();
         private static bool isLoaded = false;
 
         public CaseBase()
         {
-            if(!isLoaded)
+            if (!isLoaded)
             {
                 Load();
                 isLoaded = true;
-            }          
+            }
         }
 
-        public abstract void ExcuteCase(object srcData, CardRespDataType type);
+        public virtual void ExcuteCase(object srcData, CardRespDataType type)
+        {
+
+        }
+
+        public virtual void ShowComparedResult(string tag)
+        {
+
+        }
 
         public void ShowInfo(string caseNo,string description, CaseLevel level)
         {
@@ -34,9 +42,8 @@ namespace CardPlatform.Cases
 
             if (level == CaseLevel.CaseSucess) { caseInfo.ColorMark = new SolidColorBrush(Colors.Black); caseLevel = "成功"; }
             else if (level == CaseLevel.CaseWarn) { caseInfo.ColorMark = new SolidColorBrush(Colors.Yellow); caseLevel = "警告"; }
-            else if (level == CaseLevel.CaseFailed) { caseInfo.ColorMark = new SolidColorBrush(Colors.Red); caseLevel = "失败"; } 
-            //            ShowCaseInfo?.Invoke(caseNo, description, caseLevel);
-            
+            else if (level == CaseLevel.CaseFailed) { caseInfo.ColorMark = new SolidColorBrush(Colors.Red); caseLevel = "失败"; }
+
             caseInfo.CaseNo = caseNo;
             caseInfo.CaseInfo = description;
             caseInfo.CaseLevel = caseLevel;

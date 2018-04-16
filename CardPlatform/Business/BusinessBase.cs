@@ -55,11 +55,6 @@ namespace CardPlatform.Business
             return arrTLV;
         }
 
-        //protected List<AFL> ParseAFL(string response)
-        //{
-        //    AFLs = DataParse.ParseAFL(response);
-        //    return AFLs;
-        //}
 
         protected virtual ApduResponse SelectAid(string aid)
         {
@@ -69,8 +64,6 @@ namespace CardPlatform.Business
         protected virtual ApduResponse GPO(string pdol)
         {
             var response = APDU.GPOCmd(pdol);
-            //AFLs = DataParse.ParseAFL(response.Response);
-
             return response;
         }
 
