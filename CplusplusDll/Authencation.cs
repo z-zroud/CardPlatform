@@ -50,15 +50,15 @@ namespace CplusplusDll
         public static string GenSMIssuerPublicKey(string caPublicKey, string issuerPublicCert, string PAN)
         {
             StringBuilder issuerPublicKey = new StringBuilder(1024 * 4);
-            CDll.GenSMIssuerPublicKey(caPublicKey, issuerPublicCert, PAN, issuerPublicKey);
+            CDll.GenSMIssuerPublicKey(caPublicKey, issuerPublicCert,  PAN, issuerPublicKey);
 
             return issuerPublicKey.ToString();
         }
 
-        public static string GenSMICCPublicKey(string issuerPublicKey, string iccPublicCert, string needAuthStaticData, string PAN)
+        public static string GenSMICCPublicKey(string issuerPublicKey, string iccPublicCert, string needAuthStaticData, string tag82, string PAN)
         {
             StringBuilder iccPublicKey = new StringBuilder(1024 * 2);
-            CDll.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needAuthStaticData, PAN, iccPublicKey);
+            var result = CDll.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needAuthStaticData, tag82, PAN, iccPublicKey);
 
             return iccPublicKey.ToString();
         }

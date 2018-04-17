@@ -217,7 +217,6 @@ namespace CardPlatform.Business
                     return -4;
                 }
 
-
                 result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
                 if(result != 0)
                 {
@@ -225,13 +224,19 @@ namespace CardPlatform.Business
                     return -9;
                 }
 
-                string iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, PAN);
+                string iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData,AIP, PAN);
+                if (string.IsNullOrWhiteSpace(iccPublicKey))
+                {
+                    excuteCase.ShowInfo(caseNo, "无法获取IC卡公钥", CaseLevel.CaseFailed);
+                    return -4;
+                }
                 result = Authencation.SM_DDA(iccPublicKey, tag9F4B, terminalRandom);
-
-            }
-           
-            
-
+                if (result != 0)
+                {
+                    excuteCase.ShowInfo(caseNo, "SM算法 动态数据认证失败!", CaseLevel.CaseFailed);
+                    return -10;
+                }
+            }         
             return 0;
         }
 
@@ -326,15 +331,31 @@ namespace CardPlatform.Business
             {
                 string cardAcct = tagDict.GetTag("5A");
                 string cardSeq = tagDict.GetTag("5F34");
-                string UDKACKey = Authencation.GenUdk(TransDesACKey, cardAcct, cardSeq);
-                acSessionKey = Authencation.GenUdkSessionKey(UDKACKey, ATC);
+                if(doDesTrans)
+                {
+                    string UDKACKey = Authencation.GenUdk(TransDesACKey, cardAcct, cardSeq, (int)AlgorithmCategory.DES);
+                    acSessionKey = Authencation.GenUdkSessionKey(UDKACKey, ATC, (int)AlgorithmCategory.DES);
+                }
+                else
+                {
+                    string UDKACKey = Authencation.GenUdk(TransSMACKey, cardAcct, cardSeq, (int)AlgorithmCategory.SM);
+                    acSessionKey = Authencation.GenUdkSessionKey(UDKACKey, ATC, (int)AlgorithmCategory.SM);
+                }            
             }
             else
             {
-                acSessionKey = Authencation.GenUdkSessionKey(TransDesACKey, ATC);
+                if(doDesTrans)
+                    acSessionKey = Authencation.GenUdkSessionKey(TransDesACKey, ATC,(int)AlgorithmCategory.DES);
+                else
+                    acSessionKey = Authencation.GenUdkSessionKey(TransSMACKey, ATC,(int)AlgorithmCategory.SM);
             }
             string AC = tagDict.GetTag("9F26");
-            string ARPC = Authencation.GenArpc(acSessionKey, AC, "3030");
+            string ARPC;
+            if(doDesTrans)
+                ARPC = Authencation.GenArpc(acSessionKey, AC, "3030", (int)AlgorithmCategory.DES);
+            else
+                ARPC = Authencation.GenArpc(acSessionKey, AC, "3030", (int)AlgorithmCategory.SM);
+
             var resp = APDU.ExtAuthCmd(ARPC, "3030");
             if (resp.SW == 0x9000)
             {

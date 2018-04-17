@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "GenKey.h"
+#include "IGenKey.h"
 #include "..\Util\Tool.h"
 #include "SqliteDB.h"
 #include "..\Util\Des0.h"
@@ -393,9 +393,11 @@ int GenSMICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
 	const char* signStaticAppData,
+    const char* tag82,
     const char* PAN,
 	char* iccPublicKey)
 {
+
     if (strlen(iccPublicCert) < 40)
     {
         return 1;   //length error
@@ -411,9 +413,8 @@ int GenSMICCPublicKey(
     {
         return 3;   //pan invalid
     }
-
-    PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
-	if (DllPBOC_SM2_Verify)
+    PDllPBOC_SM2_Verify SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
+	if (SM2_Verify)
 	{
 		int signedResultLen = strlen(issuerPublicKey);
 		int toBeSignDataLen = strlen(iccPublicCert) - signedResultLen;
@@ -422,12 +423,12 @@ int GenSMICCPublicKey(
 		char toBeSignData[2048] = { 0 };
 		Tool::SubStr(iccPublicCert, 0, toBeSignDataLen, toBeSignData);
 		strcat_s(toBeSignData, 2048, signStaticAppData);
-
+        strcat_s(toBeSignData, 2048, tag82);
         //已签名的结果
 		char signedResult[1024] = { 0 };
 		Tool::SubStr(iccPublicCert, toBeSignDataLen, strlen(iccPublicCert) - toBeSignDataLen, signedResult);
 
-		int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey, toBeSignData, signedResult);
+		int ret = SM2_Verify((char*)issuerPublicKey, toBeSignData, signedResult);
 		if (ret == SM_OK)
 		{
 			char icPublicCertLen[3] = { 0 };
@@ -440,7 +441,10 @@ int GenSMICCPublicKey(
 			}
 			Tool::SubStr(iccPublicCert, 40, iccLen, iccPublicKey);
             return 0;
-		}
+        }
+        else {
+            return 6;
+        }
 	}
 
 	return 5;

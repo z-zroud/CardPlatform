@@ -40,8 +40,8 @@ namespace CardPlatform.Business
 
     public enum AlgorithmCategory
     {
-        DES,
-        SM
+        DES = 0,
+        SM = 1
     }
 
     public enum TransKeyType

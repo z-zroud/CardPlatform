@@ -101,7 +101,7 @@ namespace CplusplusDll
         public extern static int GenSMIssuerPublicKey(  string caPublicKey,string issuerPublicCert,string PAN, StringBuilder issuerPublicKey);
 
         [DllImport(@"Authencation.dll", EntryPoint = "GenSMICCPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int GenSMICCPublicKey( string issuerPublicKey,string iccPublicCert,string needAuthStaticData, string PAN, StringBuilder iccPublicKey);
+        public extern static int GenSMICCPublicKey( string issuerPublicKey,string iccPublicCert,string needAuthStaticData, string tag82, string PAN, StringBuilder iccPublicKey);
 
         [DllImport(@"Authencation.dll", EntryPoint = "DES_SDA", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static int DES_SDA(string issuerPublicKey,string ipkExponent,string tag93,string sigStaticData,string tag82);

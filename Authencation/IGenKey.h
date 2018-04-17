@@ -73,6 +73,7 @@ extern "C" GENKEY_API  int GenSMICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
 	const char* needAuthStaticData,
+    const char* tag82,
     const char* PAN,
 	char* iccPublicKey);
 
