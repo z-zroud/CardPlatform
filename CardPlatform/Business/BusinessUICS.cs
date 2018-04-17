@@ -327,6 +327,8 @@ namespace CardPlatform.Business
         {
             string acSessionKey;
             string ATC = tagDict.GetTag("9F36");
+            var caseBase = new CaseBase();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
             if (KeyType == TransKeyType.MDK)
             {
                 string cardAcct = tagDict.GetTag("5A");
@@ -338,6 +340,11 @@ namespace CardPlatform.Business
                 }
                 else
                 {
+                    if(string.IsNullOrWhiteSpace(TransSMACKey))
+                    {
+                        caseBase.ShowInfo(caseNo, "SM AC密钥不存在", CaseLevel.CaseFailed);
+                        return -1;
+                    }
                     string UDKACKey = Authencation.GenUdk(TransSMACKey, cardAcct, cardSeq, (int)AlgorithmCategory.SM);
                     acSessionKey = Authencation.GenUdkSessionKey(UDKACKey, ATC, (int)AlgorithmCategory.SM);
                 }            

@@ -12,7 +12,7 @@ namespace CardPlatform.Cases
     {
         public override void ExcuteCase(Object srcData, CardRespDataType type)
         {
-            throw new NotImplementedException();
+            return;
         }
     }
 }

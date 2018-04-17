@@ -79,8 +79,8 @@ void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKe
 	str_xor(tmp, "FFFF", 4);
 	string rightInput = "000000000000" + string(tmp);
 
-	char leftKey[32] = { 0 };
-	char rightKey[32] = { 0 };
+	char leftKey[33] = { 0 };
+	char rightKey[33] = { 0 };
     if (keyType == DES_KEY)
     {
         Des3(leftKey, (char*)udkSubKey, (char*)leftInput.c_str());
@@ -90,14 +90,13 @@ void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKe
         PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
         if (Dll_SM4_ECB_ENC)
         {
-            Dll_SM4_ECB_ENC((char*)udkSubKey, (char*)leftInput.c_str(), leftKey);
-            Dll_SM4_ECB_ENC((char*)udkSubKey, (char*)leftInput.c_str(), rightKey);
+            string input = leftInput + rightInput;
+            Dll_SM4_ECB_ENC((char*)udkSubKey, (char*)input.c_str(), leftKey);
         }
     }
 
-
 	string key = string(leftKey) + string(rightKey);
-	string sessionKey = EvenOddCheck(key);
+	string sessionKey = keyType == DES_KEY ? EvenOddCheck(key) : key;
 	strcpy(udkSessionKey, sessionKey.c_str());
 }
 
@@ -118,8 +117,8 @@ void GenUdk(const char* mdk, const char* cardNo, const char* cardSequence, char*
 	memcpy(rightInput, leftInput.c_str(), leftInput.length());
 	str_xor(rightInput, "FFFFFFFFFFFFFFFF", 16);
 
-	char leftKey[32] = { 0 };
-	char rightKey[32] = { 0 };
+	char leftKey[33] = { 0 };
+	char rightKey[33] = { 0 };
 
     if (keyType == DES_KEY)
     {
@@ -130,14 +129,14 @@ void GenUdk(const char* mdk, const char* cardNo, const char* cardSequence, char*
         PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
         if (Dll_SM4_ECB_ENC)
         {
-            Dll_SM4_ECB_ENC((char*)mdk, (char*)leftInput.c_str(), leftKey);
-            Dll_SM4_ECB_ENC((char*)mdk, (char*)leftInput.c_str(), rightKey);
+            string input = leftInput + rightInput;
+            Dll_SM4_ECB_ENC((char*)mdk, (char*)input.c_str(), leftKey);
         }
     }
 
 
 	string key = string(leftKey) + string(rightKey);
-	string result = EvenOddCheck(key);
+	string result = keyType == DES_KEY ? EvenOddCheck(key) : key;
 	strcpy(udk, result.c_str());
 }
 
@@ -154,7 +153,10 @@ void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc
         PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
         if (Dll_SM4_ECB_ENC)
         {
-            Dll_SM4_ECB_ENC((char*)udkAuthSessionKey, ac, arpc);
+            string input = string(ac) + "0000000000000000";
+            char result[33] = { 0 };
+            Dll_SM4_ECB_ENC((char*)udkAuthSessionKey, (char*)input.c_str(), result);
+            strncpy_s(arpc, 17, result, 16);
         }
     }	
 }

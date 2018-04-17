@@ -19,14 +19,20 @@ namespace CardPlatform.Business
                 return new List<string>();
             }
             List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
-            TagDict tagDict = TagDict.GetInstance();
-            tagDict.SetTags(arrTLV);
+            //TagDict tagDict = TagDict.GetInstance();
+            //tagDict.SetTags(arrTLV);
 
             IExcuteCase cases = new PPSECases();
             cases.ExcuteCase(arrTLV, CardRespDataType.SelectPPSE);
 
             List<string> Aids = new List<string>();
-
+            foreach(var tlv in arrTLV)
+            {
+                if(tlv.Tag == "4F")
+                {
+                    Aids.Add(tlv.Value);
+                }
+            }
             return Aids;
         }
     }
