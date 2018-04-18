@@ -17,6 +17,10 @@ namespace CardPlatform.Business
             aidTags = new Dictionary<string, List<TLV>>();
         }
 
+        /// <summary>
+        /// 选择PSE
+        /// </summary>
+        /// <returns></returns>
         public List<string> SelectPSE()
         {
             ApduResponse response = new ApduResponse();
@@ -25,10 +29,12 @@ namespace CardPlatform.Business
             {
                 return new List<string>();
             }
-            List<TLV> arrTLV = ParseAndSave(response.Response);
-            IExcuteCase cases = new PSECases();
-            cases.ExcuteCase(response, CardRespDataType.SelectPSE);
+            ParseAndSave(response.Response);
 
+            IExcuteCase cases = new PSECases();
+            cases.ExcuteCase(response);
+
+            //获取AID列表
             List<string> Aids = new List<string>();
             int SFI;
             if(int.TryParse(TagDict.GetInstance().GetTag("88"),out SFI))
@@ -50,6 +56,12 @@ namespace CardPlatform.Business
             return Aids;
         }
 
+        /// <summary>
+        /// 读取PSE DIR
+        /// </summary>
+        /// <param name="SFI"></param>
+        /// <param name="recordNo"></param>
+        /// <returns></returns>
         protected string ReadPSERecord(int SFI, int recordNo)
         {
             ApduResponse response = new ApduResponse();

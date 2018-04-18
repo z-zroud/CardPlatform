@@ -6,54 +6,42 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using CardPlatform.Business;
+using CardPlatform.Config;
 
 namespace CardPlatform.Cases
 {
     public class PSECases : CaseBase
     {
-        private List<TLV> arrTLV;
-        private ApduResponse response;
-
         public PSECases()
         {
-            response = new ApduResponse();
-            arrTLV = new List<TLV>();
         }
 
-        public override void ExcuteCase(Object srcData, CardRespDataType type)
+        protected override void Load()
         {
-            response = (ApduResponse)srcData;
-            arrTLV = DataParse.ParseTLV(response.Response);
-
-            switch(type)
-            {
-                case CardRespDataType.SelectPSE:
-                    PBOC_sPSE_SJHGX_001_01();
-                    break;
-                case CardRespDataType.ReadPSERecord:
-                    break;
-            }
+            Step = "SelectPSE";
+            base.Load();           
         }
 
-        protected void PBOC_sPSE_SJHGX_001_01()
+        public void PBOC_sPSE_SJHGX_001_01()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseDesc = GetDescription(caseNo);
+            var caseItem = GetCaseItem(caseNo);
+
             if (response.Response.Length < 2 || response.Response.Substring(0,2) != "6F")
             {
-                ShowInfo(caseNo, caseDesc, CaseLevel.CaseFailed);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
             else
             {
-                ShowInfo(caseNo, caseDesc, CaseLevel.CaseSucess);
+                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
-        protected void PBOC_sPSE_SJHGX_003_01()
+        public void PBOC_sPSE_SJHGX_003_01()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseDesc = GetDescription(caseNo);
-            
+            var caseItem = GetCaseItem(caseNo);
+
         }
     }
 }

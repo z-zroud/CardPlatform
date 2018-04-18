@@ -1,24 +1,12 @@
-﻿using CplusplusDll;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CardPlatform.Business;
+﻿using System;
+using CardPlatform.Config;
+
 namespace CardPlatform.Cases
 {
-
-    public enum CaseLevel
-    {
-        CaseSucess = 0,
-        CaseWarn = 1,
-        CaseFailed = 2
-    }
-
     public interface IExcuteCase
     {
-        void ExcuteCase(Object srcData, CardRespDataType type);
-        void ShowInfo(string caseNo, string description, CaseLevel level);
+        void ExcuteCase(Object srcData);
+        void TraceInfo(CaseLevel level, string caseNo, string format, params object[] args);
         void ShowComparedResult(string tag);
     }
 }

@@ -15,8 +15,15 @@ namespace CardPlatform.Business
     {
         private TagDict tagDict = TagDict.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
+        private IExcuteCase baseCase = new CaseBase();
         private string aid;
 
+        /// <summary>
+        /// 开始交易流程
+        /// </summary>
+        /// <param name="aid"></param>
+        /// <param name="doDesTrans"></param>
+        /// <param name="doSMTrans"></param>
         public override void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
         {
             this.aid = aid;
@@ -24,10 +31,17 @@ namespace CardPlatform.Business
             locator.Terminal.TermianlSettings.Tag9F7A = "00";
             locator.Terminal.TermianlSettings.Tag9C = "00";
 
-            if (doDesTrans)  // do des uics transaction
+            // do des uics transaction
+            if (doDesTrans)  
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "00";
-                SelectAid(aid);
+                var caseNo = MethodBase.GetCurrentMethod().Name;
+
+                var resp = SelectAid(aid);
+                if(resp.SW != 0x9000)
+                {
+                    //baseCase.ShowInfo(caseNo,string.Format()
+                }
                 string tag9F38 = tagDict.GetTag("9F38");
                 var tls = DataParse.ParseTL(tag9F38);
                 string pdol = string.Empty;
@@ -79,7 +93,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             ParseAndSave(response.Response);
             IExcuteCase excuteCase = new SelectAidCase();
-            excuteCase.ExcuteCase(response, CardRespDataType.SelectAid);
+            excuteCase.ExcuteCase(response);
 
             return response;
         }
@@ -104,7 +118,7 @@ namespace CardPlatform.Business
             var AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
 
             IExcuteCase excuteCase = new GPOCase();
-            excuteCase.ExcuteCase(response, CardRespDataType.GPO);
+            excuteCase.ExcuteCase(response);
 
             return AFLs;
         }
@@ -124,7 +138,7 @@ namespace CardPlatform.Business
             }
 
             IExcuteCase excuteCase = new ReadRecordCase();
-            excuteCase.ExcuteCase(resps, CardRespDataType.ReadPSERecord);
+            excuteCase.ExcuteCase(resps);
 
             return resps;
         }
@@ -140,20 +154,20 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (aid.Length < 10)
             {
-                excuteCase.ShowInfo(caseNo, "应用AID长度太短", CaseLevel.CaseFailed);
+                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "应用AID长度太短");
                 return -1;
             }
             string rid = aid.Substring(0, 10);
             string CAIndex = tagDict.GetTag("8F");
             if (CAIndex.Length != 2)
             {
-                excuteCase.ShowInfo(caseNo, "无法获取CA 索引,请检查8F是否存在", CaseLevel.CaseFailed);
+                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA 索引,请检查8F是否存在");
                 return -2;
             }
             string CAPublicKey = Authencation.GenCAPublicKey(CAIndex, rid);
             if(string.IsNullOrWhiteSpace(CAPublicKey))
             {
-                excuteCase.ShowInfo(caseNo, "无法获取CA公钥，请检查RID及索引是否正确", CaseLevel.CaseFailed);
+                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA公钥，请检查RID及索引是否正确");
                 return -3;
             }
 
@@ -170,7 +184,7 @@ namespace CardPlatform.Business
             var tag9F4B = APDU.GenDynamicDataCmd(terminalRandom);
             if (string.IsNullOrWhiteSpace(tag9F4B))
             {
-                excuteCase.ShowInfo(caseNo, "Tag9F4B不存在", CaseLevel.CaseFailed);
+                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
                 return -7;
             }
 
@@ -181,14 +195,14 @@ namespace CardPlatform.Business
                 issuerPublicKey = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp);
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
-                    excuteCase.ShowInfo(caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在" );
                     return -4;
                 }
 
                 result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
                 if (result != 0)
                 {
-                    excuteCase.ShowInfo(caseNo, "静态数据认证失败!", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "静态数据认证失败!");
                     return -5;
                 }
 
@@ -197,14 +211,14 @@ namespace CardPlatform.Business
                 string iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
-                    excuteCase.ShowInfo(caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
                     return -6;
                 }
 
                 result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, terminalRandom);
                 if (result != 0)
                 {
-                    excuteCase.ShowInfo(caseNo, "动态数据认证失败!", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "动态数据认证失败!");
                     return -8;
                 }
             }
@@ -213,27 +227,27 @@ namespace CardPlatform.Business
                 issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
-                    excuteCase.ShowInfo(caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
                     return -4;
                 }
 
                 result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
                 if(result != 0)
                 {
-                    excuteCase.ShowInfo(caseNo, "SM算法 静态数据认证失败!", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 静态数据认证失败!");
                     return -9;
                 }
 
                 string iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData,AIP, PAN);
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
-                    excuteCase.ShowInfo(caseNo, "无法获取IC卡公钥", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥");
                     return -4;
                 }
                 result = Authencation.SM_DDA(iccPublicKey, tag9F4B, terminalRandom);
                 if (result != 0)
                 {
-                    excuteCase.ShowInfo(caseNo, "SM算法 动态数据认证失败!", CaseLevel.CaseFailed);
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 动态数据认证失败!");
                     return -10;
                 }
             }         
@@ -257,17 +271,17 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (expiryDate < currentDate)    //应用已失效
             {
-                caseBase.ShowInfo(caseNo, "应用失效日期大于当前日期，应用已失效", CaseLevel.CaseWarn);
+                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用失效日期大于当前日期，应用已失效");
             }
 
             if (effectiveDate < currentDate) // 应用未生效
             {
-                caseBase.ShowInfo(caseNo, "应用生效日期大于当前日期，应用未生效", CaseLevel.CaseWarn);
+                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用生效日期大于当前日期，应用未生效");
             }
 
             if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
             {
-                caseBase.ShowInfo(caseNo, "应用失效日期大于生效日期，应用不合法", CaseLevel.CaseFailed);
+                caseBase.TraceInfo(CaseLevel.Failed, caseNo, "应用失效日期大于生效日期，应用不合法");
             }
 
             //模板值对比判断放到程序交易结束之后
@@ -342,7 +356,7 @@ namespace CardPlatform.Business
                 {
                     if(string.IsNullOrWhiteSpace(TransSMACKey))
                     {
-                        caseBase.ShowInfo(caseNo, "SM AC密钥不存在", CaseLevel.CaseFailed);
+                        caseBase.TraceInfo(CaseLevel.Failed, caseNo, "SM AC密钥不存在");
                         return -1;
                     }
                     string UDKACKey = Authencation.GenUdk(TransSMACKey, cardAcct, cardSeq, (int)AlgorithmCategory.SM);

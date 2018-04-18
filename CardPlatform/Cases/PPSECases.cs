@@ -10,7 +10,7 @@ namespace CardPlatform.Cases
 {
     public class PPSECases : CaseBase
     {
-        public override void ExcuteCase(Object srcData, CardRespDataType type)
+        public override void ExcuteCase(Object srcData)
         {
             return;
         }

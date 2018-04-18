@@ -23,7 +23,7 @@ namespace CardPlatform.Business
             //tagDict.SetTags(arrTLV);
 
             IExcuteCase cases = new PPSECases();
-            cases.ExcuteCase(arrTLV, CardRespDataType.SelectPPSE);
+            cases.ExcuteCase(arrTLV);
 
             List<string> Aids = new List<string>();
             foreach(var tlv in arrTLV)
