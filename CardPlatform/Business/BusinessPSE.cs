@@ -66,10 +66,15 @@ namespace CardPlatform.Business
         {
             ApduResponse response = new ApduResponse();
             response = APDU.ReadRecordCmd(SFI, recordNo);
-            if(response.SW != 0x9000)
+
+            IExcuteCase cases = new PSEDirCase();
+            if (response.SW != 0x9000 || response.SW != 0x6700)
             {
+                cases.TraceInfo(Config.CaseLevel.Failed, "ReadPSERecord", "读到最后一条记录后再读下一条应返回6700");
                 return string.Empty;
-            }
+            }           
+            cases.ExcuteCase(response);
+
             List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
             var aid = from tlv in arrTLV where tlv.Tag == "4F" select tlv.Value;
             aidTags.Add(aid.First(), arrTLV);

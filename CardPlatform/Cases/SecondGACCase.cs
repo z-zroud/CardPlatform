@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CardPlatform.Business;
-using CplusplusDll;
 
 namespace CardPlatform.Cases
 {
-    public class ReadRecordCase : CaseBase
+    public class SecondGACCase : CaseBase
     {
         protected override void Load()
         {
-            Step = "ReadRecord";
+            Step = "SecondGAC";
             base.Load();
         }
     }

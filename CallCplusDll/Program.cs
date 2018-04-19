@@ -14,7 +14,11 @@ namespace CallCplusDll
     {
         static void Main(string[] args)
         {
+
+
             string ret;
+            ret = Utils.StrToBcd("cn");
+            ret = Utils.BcdToStr(ret);
             ret = Convert.ToString(0x80, 16);
             ret = Authencation.GenDesKcv("12345678900987765434123456789761");
             ret = Authencation.GenSmKcv("12345678900987765434123456789761");

@@ -27,8 +27,7 @@ namespace CardPlatform.Cases
             response = new ApduResponse();
             arrTLV = new List<TLV>();
             Step = "CaseBase";
-            Load();
-            
+            Load();           
         }
 
         /// <summary>

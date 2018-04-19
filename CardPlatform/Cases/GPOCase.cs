@@ -12,13 +12,13 @@ namespace CardPlatform.Cases
     public class GPOCase : CaseBase
     {
 
-        public GPOCase()
+        protected override void Load()
         {
+            Step = "GPO";
+            base.Load();
         }
 
-
-
-        protected void PBOC_GPO_SJHGX_001()
+        public void PBOC_GPO_SJHGX_001()
         {
             //var caseNo = MethodBase.GetCurrentMethod().Name;
             //var caseDesc = GetDescription(caseNo);

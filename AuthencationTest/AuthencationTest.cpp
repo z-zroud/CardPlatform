@@ -6,6 +6,10 @@
 
 int main()
 {
+    string testStr = "49ABC12346493534uDEF3943ABCDEFw93";
+    int startIndex = testStr.find("ABC");
+    int endIndex = testStr.find("DEF");
+    auto test = testStr.find("49", startIndex);
 
     string issuerFlag = string("1234567890").substr(2, 8);
     int index = issuerFlag.find('F');

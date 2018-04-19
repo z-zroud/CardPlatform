@@ -49,12 +49,12 @@ int main()
 		printf("%s\n", readers[i]);
 	}
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
-    string dpFormat = "神舟数码";
+    string dpFormat = "银联";
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\26_808021_20180109_20180109421_ic.txt";
-    rulePath += "河东村镇银行_神码_华大_G81140042.xml";
-    string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
-    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string dpPath = dpDir + dpFormat + "\\澳门立桥银行.DP";
+    rulePath += "澳门立桥借记_银联_英飞凌.xml";
+    string installParamCfg = "澳门立桥借记_英飞凌_非扩展.xml";
+    //GenCpsFile("DpParse_YL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
@@ -86,7 +86,7 @@ int main()
             cout << files[0] << endl;
             char c;
             cin >> c;
-            if (!OpenReader(readers[0]))
+            if (!OpenReader(readers[1]))
             {
                 return 1;
             }
