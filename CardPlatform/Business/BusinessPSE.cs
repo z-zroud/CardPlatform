@@ -68,7 +68,7 @@ namespace CardPlatform.Business
             response = APDU.ReadRecordCmd(SFI, recordNo);
 
             IExcuteCase cases = new PSEDirCase();
-            if (response.SW != 0x9000 || response.SW != 0x6700)
+            if (response.SW != 0x9000 && response.SW != 0x6700)
             {
                 cases.TraceInfo(Config.CaseLevel.Failed, "ReadPSERecord", "读到最后一条记录后再读下一条应返回6700");
                 return string.Empty;

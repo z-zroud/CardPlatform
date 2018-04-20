@@ -24,6 +24,7 @@ namespace CardPlatform.Business
         protected bool doDesTrans = false;
         protected bool doSMTrans = false;
         protected string toBeSignAppData;
+        protected string aid;
 
         //protected List<AFL> AFLs;
 
@@ -43,7 +44,9 @@ namespace CardPlatform.Business
 
         public virtual void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
         {
-
+            this.doDesTrans = doDesTrans;
+            this.doSMTrans = doSMTrans;
+            this.aid = aid;
         }
 
         protected List<TLV> ParseAndSave(string response)

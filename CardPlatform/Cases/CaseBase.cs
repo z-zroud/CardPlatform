@@ -39,10 +39,14 @@ namespace CardPlatform.Cases
             response = (ApduResponse)srcData;
             arrTLV = DataParse.ParseTLV(response.Response);
 
-            foreach (var item in CaseInfos.Keys)
+            if(CaseInfos != null)
             {
-                var methods = GetType().GetMethods();
-                GetType().GetMethod(item).Invoke(this, null);
+                foreach (var item in CaseInfos.Keys)
+                {
+                    //var methods = GetType().GetMethods();
+                    if (!string.IsNullOrEmpty(item))
+                        GetType().GetMethod(item).Invoke(this, null);
+                }
             }
         }
 

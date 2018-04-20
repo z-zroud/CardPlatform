@@ -16,7 +16,7 @@ namespace CardPlatform.Business
         private TagDict tagDict = TagDict.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
-        private string aid;
+
 
         /// <summary>
         /// 开始交易流程
@@ -26,8 +26,8 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public override void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
         {
-            this.aid = aid;
-            
+            base.DoTrans(aid, doDesTrans, doSMTrans);
+
             locator.Terminal.TermianlSettings.Tag9F7A = "00";
             locator.Terminal.TermianlSettings.Tag9C = "00";
 

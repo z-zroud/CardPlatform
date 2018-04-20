@@ -130,11 +130,34 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 电子现金终端支持指示器
+        /// </summary>
         public string Tag9F7A { get; set; }
+
+        /// <summary>
+        /// SM算法支持指示器
+        /// </summary>
         public string TagDF69 { get; set; }
+
+        /// <summary>
+        /// 来自发卡行或终端的授权响应码
+        /// </summary>
         public string Tag8A { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string TagDF60 { get; set; }
+
+        /// <summary>
+        /// 交易类型
+        /// </summary>
         public string Tag9C { get; set; }
+
+        /// <summary>
+        /// 终端随机数
+        /// </summary>
         public string Tag9F37 { get; set; }
     }
 }
