@@ -7,17 +7,18 @@
 #include "Des0.h"
 #include "../ApduCmd/IApdu.h"
 #include "../Util/Tool.h"
+#include "../Util/Log.h"
 #include "../Util/rapidxml/rapidxml.hpp"
 #include "../Util/rapidxml/rapidxml_utils.hpp"
 
 using namespace rapidxml;
 
-struct INSTALL_APP
+struct AppParams
 {
-    string appType;
-	string packageAid;
-	string appletAid;
-	string instanceAid;
+    string appType;         //应用类型 PSE,PPSE,UICS,PBOC...
+	string packageAid;      //包id
+	string appletAid;       //applet id
+	string instanceAid;     //instance id
 	string privilege;
 	string installParam;
 	string token;
@@ -34,7 +35,7 @@ string		g_kmc;
 string		g_isd;
 int			g_divMethod = 0;
 int			g_secureLevel = 0;
-vector<INSTALL_APP> g_vecInstallApp;
+vector<AppParams> g_vecAppParams;
 vector<EncryptDGI> g_vecEncryptDGI;
 int         g_cpsCount = 1024;
 char*       g_cpsFile[1024] = { 0 };
@@ -162,9 +163,9 @@ bool PersonlizePSE(IniConfig cpsFile, string app)
     return true;
 }
 
-bool ParsePeronlizeConfiguration(const char* configFile)
+bool ParsePersoConfigFile(const char* configFile)
 {
-    g_vecInstallApp.clear();    //使用之前删除旧的，防止多次添加
+    g_vecAppParams.clear();    //使用之前删除旧的，防止多次添加
     g_vecEncryptDGI.clear();
     //使用rapidxml::file读取文件更方便  
     rapidxml::file<char> fdoc(configFile);
@@ -181,8 +182,9 @@ bool ParsePeronlizeConfiguration(const char* configFile)
     for (rapidxml::xml_node<> *node = root->first_node(); node != NULL; node = node->next_sibling())
     {
         string nodeName = node->name();
-        if (nodeName == "App") {
-            INSTALL_APP app;
+        if (nodeName == "App") 
+        {
+            AppParams app;
             app.packageAid = node->first_attribute("packageAid")->value();
             app.appletAid = node->first_attribute("appletAid")->value();
             app.instanceAid = node->first_attribute("instanceAid")->value();
@@ -192,9 +194,10 @@ bool ParsePeronlizeConfiguration(const char* configFile)
             app.appType = node->first_attribute("type")->value();
             if (app.token.empty())
                 app.token = "00";
-            g_vecInstallApp.push_back(app);
+            g_vecAppParams.push_back(app);
         }
-        else if (nodeName == "Encrypt") {
+        else if (nodeName == "Encrypt") 
+        {
             EncryptDGI encryptDGI;
             encryptDGI.dgi = node->first_attribute("DGI")->value();
             string padding80 = node->first_attribute("padding80")->value();
@@ -308,69 +311,92 @@ bool PersonlizePBOC(IniConfig cpsFile)
 bool DoPersonlization(const char* szCpsFile, const char* szConfigFile)
 {
 	IniConfig cpsFile;
-
+    Log->Info("==================== Begin personlization ===================");
 	//获取相关配置信息
 	if (!cpsFile.Read(szCpsFile)){
+        Log->Error("Open cps file [%s] failed.", szCpsFile);
 		return false;
 	}
-	if (!ParsePeronlizeConfiguration(szConfigFile)){
+	if (!ParsePersoConfigFile(szConfigFile)){
+        Log->Error("Parse install param configuration file [%s] failed.", szConfigFile);
 		return false;
 	}
     char resp[RESP_LEN] = { 0 };
-    if (0x9000 != SelectAppCmd(g_isd.c_str(), resp))
+    int sw = SelectAppCmd(g_isd.c_str(), resp);
+    if (0x9000 != sw)
     {
+        Log->Error("Select aid [%s] failed. sw = %d", g_isd.c_str(), sw);
         return false;
     }
-	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
+	if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) 
+    {
+        Log->Error("Open secure channel failed, kmc[%s],div method[%d],secure level[%d]", g_kmc.c_str(), g_divMethod, g_secureLevel);
 		return false;
 	}
+
     //删除实例(全部删除)
+    
     AppInfo apps[12] = { 0 };
     int appCount = 12;
     GetAppStatusCmd(apps, appCount);
-    for (int i = 0; i < appCount; i++) {
-        if (0x9000 != DeleteAppCmd(apps[i].aid)) {
+    for (int i = 0; i < appCount; i++) 
+    {
+        Log->Info("Delete instance %s", apps[i].aid);
+        sw = DeleteAppCmd(apps[i].aid);
+        if (0x9000 != sw) 
+        {
+            Log->Error("Delete instance [%s] failed. sw = %d", apps[i].aid, sw);
             return false;
         }
     }
 
 	//安装应用
-    for (auto app : g_vecInstallApp) 
+    for (auto app : g_vecAppParams)
     {
-        int sw = InstallAppCmd(app.packageAid.c_str(), app.appletAid.c_str(), app.instanceAid.c_str(), app.privilege.c_str(), app.installParam.c_str(), app.token.c_str());
+        Log->Info("Install instance %s", app.instanceAid.c_str());
+        sw = InstallAppCmd(app.packageAid.c_str(), app.appletAid.c_str(), app.instanceAid.c_str(), app.privilege.c_str(), app.installParam.c_str(), app.token.c_str());
         if (sw != 0x9000)
+        {
+            Log->Error("Install application failed. sw = [%d]", sw);
             return false;
+        }           
     }
 
     //应用个人化
-    for (auto app : g_vecInstallApp) {
+    for (auto app : g_vecAppParams)
+    {
+        Log->Info("Starting personlize instance [%s] ...", app.instanceAid.c_str());
         char resp[RESP_LEN] = { 0 };
-        if (0x9000 != SelectAppCmd(app.instanceAid.c_str(), resp)) {
+        if (0x9000 != SelectAppCmd(app.instanceAid.c_str(), resp)) 
+        {
+            Log->Error("Select instance [%s] failed.", app.instanceAid.c_str());
             return false;
         }
-        if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) {
+        if (!OpenSecureChannel(g_kmc.c_str(), g_divMethod, g_secureLevel)) 
+        {
+            Log->Error("Open secure channel failed, kmc[%s],div method[%d],secure level[%d]", g_kmc.c_str(), g_divMethod, g_secureLevel);
             return false;
         }
-        if (app.appType == "PSE" || app.appType == "PPSE") {
-            if (!PersonlizePSE(cpsFile,app.appType)) {
+        if (app.appType == "PSE" || app.appType == "PPSE") 
+        {
+            if (!PersonlizePSE(cpsFile,app.appType)) 
+            {
+                Log->Error("Personlize instance [%s] failed.", app.instanceAid.c_str());
                 return false;
-#if _DEBUG
-                printf("Personlize FAIL!\n");
-#endif
             }
         }
-        else {
-            if (!PersonlizePBOC(cpsFile)) {
+        else 
+        {
+            if (!PersonlizePBOC(cpsFile)) 
+            {
+                Log->Error("Personlize instance [%s] failed.", app.instanceAid.c_str());
                 return false;
-#if _DEBUG
-                printf("Personlize FAIL!\n");
-#endif
             }
         }
+        Log->Info("Personlize instance [%s] end.", app.instanceAid.c_str());
     }
-#if _DEBUG
-    printf("Personlize success!\n");
-#endif
+    Log->Info("Personlize cps sucess.");
+
     return true;
 }
 

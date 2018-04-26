@@ -8,39 +8,26 @@ using System.Xml.Serialization;
 
 namespace CardPlatform.Models
 {
-    public enum DivType
-    {
-        NoDiv = 0,
-        CPG202 = 1,
-        CPG212 = 2
-    }
 
-    public enum SecureLevel
-    {
-        NoSecure = 0,
-        MacSecure = 1
-    }
 
-    public enum DelInstance
-    {
-        DelToBeInstall = 0,
-        DelAll = 1
-    }
-
-    public class DpParsedProgram
+    public class DpDll
     {
         [XmlAttribute]
         public string Name { get; set; }
 
         [XmlAttribute]
-        public string ProgramName { get; set; }
+        public string DllName { get; set; }
 
         [XmlAttribute]
         public string FuncName { get; set; }
     }
 
-    public class DpParseStatus : ViewModelBase
+    
+    public class DpParseResultModel : ObservableObject
     {
+        /// <summary>
+        /// 返回是否成功字符串信息
+        /// </summary>
         private string _info;
         public string Info
         {
@@ -50,21 +37,31 @@ namespace CardPlatform.Models
                 Set(ref _info, value);
             }
         }
+
+        /// <summary>
+        /// 状态颜色
+        /// </summary>
         public string StatusColor { get; set; }
     }
 
-    public class DpFileStatus : ViewModelBase
+    public class DpGenCpsModel : ObservableObject
     {
-        private string _dpFileName;
-        public string DpFileName
+        /// <summary>
+        /// 解析之后的CPS文件
+        /// </summary>
+        private string _cpsFilePath;
+        public string CpsFilePath
         {
-            get { return _dpFileName; }
+            get { return _cpsFilePath; }
             set
             {
-                Set(ref _dpFileName, value);
+                Set(ref _cpsFilePath, value);
             }
         }
 
+        /// <summary>
+        /// 是否需要进行个人化
+        /// </summary>
         private bool _isSelected;
         public bool IsSelected
         {
@@ -74,7 +71,18 @@ namespace CardPlatform.Models
                 Set(ref _isSelected, value);
             }
         }
+    }
 
+    public class DpParseModel : ObservableObject
+    {
+        public DpParseModel()
+        {
+            DpTypeCollection = new List<DpDll>();
+        }
+
+        /// <summary>
+        /// DP文件路径
+        /// </summary>
         private string _dpFilePath;
         public string DpFilePath
         {
@@ -84,20 +92,46 @@ namespace CardPlatform.Models
                 Set(ref _dpFilePath, value);
             }
         }
+
+        /// <summary>
+        /// DP数据类型
+        /// </summary>
+        private List<DpDll> _dpTypeCollection;
+        public List<DpDll> DpTypeCollection
+        {
+            get { return _dpTypeCollection; }
+            set
+            {
+                Set(ref _dpTypeCollection, value);
+            }
+        }
+
+        /// <summary>
+        /// 规则配置路径
+        /// </summary>
+        private string _ruleFilePath;
+        public string RuleFilePath
+        {
+            get { return _ruleFilePath; }
+            set
+            {
+                Set(ref _ruleFilePath, value);
+            }
+        }
     }
 
     public class PersonlizeConfiguartion
     {
         public PersonlizeConfiguartion()
         {
-            DpType = new List<DpParsedProgram>();
+            DpType = new List<DpDll>();
             ISDs = new List<string>();
             KMCs = new List<string>();
             Secure = new List<string>();
             DivType = new List<string>();
             DelInst = new List<string>();
         }
-        public List<DpParsedProgram> DpType { get; set; }
+        public List<DpDll> DpType { get; set; }
 
         [XmlArray(ElementName ="AIDs")]
         [XmlArrayItem(ElementName ="AID")]

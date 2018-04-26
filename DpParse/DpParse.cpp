@@ -4,6 +4,7 @@
 #include "../Util/SM.hpp"
 #include "../Authencation/IGenKey.h"
 #include <fstream>
+#include <algorithm>
 #include "../Util/IniConfig.h"
 #include "../Util/Tool.h"
 #include "../Util/ParseTLV.h"
@@ -95,13 +96,13 @@ bool ExistedInDGIs(string dgi, CPS_ITEM& cpsItem)
 
 bool ExistedInList(string value, vector<string> collection)
 {
-    for (auto item : collection)
-    {
-        if (item == value) {
-            return true;
-        }
+for (auto item : collection)
+{
+    if (item == value) {
+        return true;
     }
-    return false;
+}
+return false;
 }
 
 bool Dict::TagExisted(string tag)
@@ -121,7 +122,7 @@ string Dict::GetItem(string tag)
             return item.second;
         }
     }
-    
+
     return "";
 }
 
@@ -186,6 +187,42 @@ void CPS_ITEM::AddDgiItem(DGI_ITEM item)
         items.push_back(item);
 }
 
+
+bool GreaterSort(DGI_ITEM item1, DGI_ITEM item2) 
+{
+    string compare1 = item1.dgi;
+    string compare2 = item2.dgi;
+    if (compare1.substr(0, 3) == "PSE")
+    {
+        compare1 = "EEEE";
+    }
+    else if (compare1.substr(0, 4) == "PPSE") {
+        compare1 = "FFFF";
+    }
+    else if (compare1 == "A001") {
+        compare1 = "8019";   //确保A001在8020之前个人化
+    }
+
+    if (compare2.substr(0, 3) == "PSE")
+    {
+        compare2 = "EEEE";
+    }
+    else if (compare2.substr(0, 4) == "PPSE") {
+        compare2 = "FFFF";
+    }
+    else if (compare2 == "A001") {
+        compare2 = "8019";
+    }
+
+    int nItem1 = stoi(compare1, 0, 16);
+    int nItem2 = stoi(compare2, 0, 16);
+
+    return nItem1 < nItem2;
+
+    return false;
+}
+
+
 /*****************************************************
 * 保存CPS数据
 ******************************************************/
@@ -201,6 +238,8 @@ void IDpParse::Save(CPS_ITEM cpsItem)
 	if (!outputFile)
 		return;
     string privousDGI = "";
+
+    sort(cpsItem.items.begin(), cpsItem.items.end(), GreaterSort);
 	for (auto iter : cpsItem.items)
 	{
         if (iter.dgi != privousDGI) {
@@ -211,9 +250,11 @@ void IDpParse::Save(CPS_ITEM cpsItem)
 			outputFile << tlvData.first << "=" << tlvData.second << endl;
 		}
         privousDGI = iter.dgi;
+        outputFile << endl;
 	}
-	outputFile.close();
+	
 	outputFile.clear();
+    outputFile.close();
 }
 
 /******************************************************************

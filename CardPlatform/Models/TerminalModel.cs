@@ -16,8 +16,7 @@ namespace CardPlatform.Models
             Tag9F04 = "000000000000";
             Tag9F1A = "0156";
             Tag5F2A = "0156";
-            Tag95 = "0000046000"; //0000046000
-            Tag9F66 = "26000080";
+            Tag95 = "0000000000"; //0000046000
             Tag9F4E = "476F6C647061635F54435F4465706172746D656E";
             Tag9F37 = "11223344";
         }
@@ -78,6 +77,9 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 终端验证结果
+        /// </summary>
         private string _tag95;
         public string Tag95
         {
@@ -85,16 +87,6 @@ namespace CardPlatform.Models
             set
             {
                 Set(ref _tag95, value);
-            }
-        }
-
-        private string _tag9F66;
-        public string Tag9F66
-        {
-            get { return _tag9F66; }
-            set
-            {
-                Set(ref _tag9F66, value);
             }
         }
 
@@ -146,7 +138,7 @@ namespace CardPlatform.Models
         public string Tag8A { get; set; }
 
         /// <summary>
-        /// 
+        /// CAPP交易指示位
         /// </summary>
         public string TagDF60 { get; set; }
 
@@ -159,5 +151,10 @@ namespace CardPlatform.Models
         /// 终端随机数
         /// </summary>
         public string Tag9F37 { get; set; }
+
+        /// <summary>
+        /// 终端交易属性
+        /// </summary>
+        public string Tag9F66 { get; set; }
     }
 }

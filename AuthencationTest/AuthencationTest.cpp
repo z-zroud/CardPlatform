@@ -6,6 +6,13 @@
 
 int main()
 {
+    string dgi0201 = "EHFIWHEF5F340101shdifewh";
+    int pos = dgi0201.find("5F34");
+    int len = stoi(dgi0201.substr(pos + 4, 2), 0, 16);
+
+    string value = dgi0201.substr(pos, len * 2 + 4);
+
+
     string testStr = "49ABC12346493534uDEF3943ABCDEFw93";
     int startIndex = testStr.find("ABC");
     int endIndex = testStr.find("DEF");

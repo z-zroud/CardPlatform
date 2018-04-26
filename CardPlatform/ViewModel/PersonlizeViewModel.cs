@@ -14,6 +14,9 @@ using System.Collections.ObjectModel;
 using MahApps.Metro.Controls;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
+using System.Xml;
+using System.Xml.Linq;
+using CardPlatform.Config;
 
 namespace CardPlatform.ViewModel
 {
@@ -22,238 +25,82 @@ namespace CardPlatform.ViewModel
         private MetroWindow _dialog;
         public PersonlizeViewModel()
         {
-            //_dialogCoordinator = dialogCoordinator;
-            DpType = new List<DpParsedProgram>();
-            ISDs = new List<string>();
-            KMCs = new List<string>();
-            Status = new DpParseStatus();
-            FileStatus = new ObservableCollection<DpFileStatus>();
-            DivType = new List<string>();
-            Secure = new List<string>();
-            DelInst = new List<string>();
+            DpParseParams = new DpParseModel();
+            DpParseResult = new DpParseResultModel();
+            DpGenCpsResults = new ObservableCollection<DpGenCpsModel>();
+            SecureChannelParams = new SecureChannelModel();
+            DivMethodCollection = new List<string>();
+            DelInstCollection = new List<string>();
+            SecureLevelCollection = new List<string>();
+            Config = new PersonlizeConfig();
+
             _dialog = (MetroWindow)Application.Current.MainWindow;
-            Load();
-            
+            Load();            
         }
 
         #region data binding
+
         /// <summary>
-        /// DP文件路径属性
+        /// DP解析参数
         /// </summary>
-        private string _dpPath;
-        public string DpPath
+        public DpParseModel DpParseParams { get; set; }
+
+        /// <summary>
+        /// DP解析结果
+        /// </summary>
+        public DpParseResultModel DpParseResult { get; set; }
+
+        /// <summary>
+        /// DP生成CPS文件结果列表
+        /// </summary>
+        public ObservableCollection<DpGenCpsModel> DpGenCpsResults { get; set; }
+
+        /// <summary>
+        /// 打开安全通道参数
+        /// </summary>
+        public SecureChannelModel SecureChannelParams { get; set; }
+
+        /// <summary>
+        /// 界面配置参数由该属性绑定
+        /// </summary>
+        public PersonlizeConfig Config { get; set; }
+
+        /// <summary>
+        /// 分散方式
+        /// </summary>
+        private List<string> _divMethodCollection;
+        public List<string> DivMethodCollection
         {
-            get { return _dpPath; }
+            get { return _divMethodCollection; }
             set
             {
-                Set(ref _dpPath, value);
+                Set(ref _divMethodCollection, value);
             }
         }
 
         /// <summary>
-        /// DP文件 数据类型属性
+        /// 安全等级
         /// </summary>
-        private List<DpParsedProgram> _dpType;
-        public List<DpParsedProgram> DpType
+        private List<string> _secureLevelCollection;
+        public List<string> SecureLevelCollection
         {
-            get { return _dpType; }
+            get { return _secureLevelCollection; }
             set
             {
-                Set(ref _dpType, value);
-            }
-        }
-
-        /// <summary>
-        /// 被选中的DP数据类型
-        /// </summary>
-        private DpParsedProgram _SelectedDpType;
-        public DpParsedProgram SelectedDpType
-        {
-            get { return _SelectedDpType; }
-            set
-            {
-                Set(ref _SelectedDpType, value);
-            }
-        }
-
-        /// <summary>
-        /// DP解析规则 配置文件路径
-        /// </summary>
-        private string _rulePath;
-        public string RulePath
-        {
-            get { return _rulePath; }
-            set
-            {
-                Set(ref _rulePath, value);
-            }
-        }
-
-        /// <summary>
-        /// DP解析是否成功，状态属性
-        /// </summary>
-        private DpParseStatus _status;
-        public DpParseStatus Status
-        {
-            get { return _status; }
-            set
-            {
-                Set(ref _status, value);
-            }
-        }
-
-        /// <summary>
-        /// DP解析之后的文件属性
-        /// </summary>
-        private ObservableCollection<DpFileStatus> _fileStatus;
-        public ObservableCollection<DpFileStatus> FileStatus
-        {
-            get { return _fileStatus; }
-            set
-            {
-                Set(ref _fileStatus, value);
-            }
-        }
-
-        /// <summary>
-        /// ISD 主安全域ID
-        /// </summary>
-        private List<string> _isds;
-        public List<string> ISDs
-        {
-            get { return _isds; }
-            set
-            {
-                Set(ref _isds, value);
-            }
-        }
-
-        /// <summary>
-        /// 选中的主安全域
-        /// </summary>
-        private string _selectedISD;
-        public string SelectedISD
-        {
-            get { return _selectedISD; }
-            set
-            {
-                Set(ref _selectedISD, value);
-            }
-        }
-
-        /// <summary>
-        /// KMC列表
-        /// </summary>
-        private List<string> _kmcs;
-        public List<string> KMCs
-        {
-            get { return _kmcs; }
-            set
-            {
-                Set(ref _kmcs, value);
-            }
-        }
-
-        /// <summary>
-        /// 选中的KMC
-        /// </summary>
-        private string _selectedKMC;
-        public string SelectedKMC
-        {
-            get { return _selectedKMC; }
-            set
-            {
-                Set(ref _selectedKMC, value);
-            }
-        }
-
-        /// <summary>
-        /// 个人化安装参数路径
-        /// </summary>
-        private string _installParamPath;
-        public string InstallParamPath
-        {
-            get { return _installParamPath; }
-            set
-            {
-                Set(ref _installParamPath, value);
-            }
-        }
-
-        /// <summary>
-        /// KMC分散方式列表
-        /// </summary>
-        private List<string> _divType;
-        public List<string> DivType
-        {
-            get { return _divType; }
-            set
-            {
-                Set(ref _divType, value);
-            }
-        }
-
-        /// <summary>
-        /// 被选中的分散方式
-        /// </summary>
-        private int _divTypeIndex;
-        public int DivTypeIndex
-        {
-            get { return _divTypeIndex; }
-            set
-            {
-                Set(ref _divTypeIndex, value);
-            }
-        }
-
-        /// <summary>
-        /// 打开安全通道的安全等级
-        /// </summary>
-        private List<string> _secure;
-        public List<string> Secure
-        {
-            get { return _secure; }
-            set
-            {
-                Set(ref _secure, value);
-            }
-        }
-
-        /// <summary>
-        /// 被选中的安全等级
-        /// </summary>
-        private int _secureIndex;
-        public int SecureIndex
-        {
-            get { return _secureIndex; }
-            set
-            {
-                Set(ref _secureIndex, value);
+                Set(ref _secureLevelCollection, value);
             }
         }
 
         /// <summary>
         /// 删除实例方式
         /// </summary>
-        private List<string> _delInst;
-        public List<string> DelInst
+        private List<string> _delInstCollection;
+        public List<string> DelInstCollection
         {
-            get { return _delInst; }
+            get { return _delInstCollection; }
             set
             {
-                Set(ref _delInst, value);
-            }
-        }
-        /// <summary>
-        /// 选中的删除实例的方式
-        /// </summary>
-        private int _delInstIndex;
-        public int DelInstIndex
-        {
-            get { return _delInstIndex; }
-            set
-            {
-                Set(ref _delInstIndex, value);
+                Set(ref _delInstCollection, value);
             }
         }
 
@@ -271,35 +118,44 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// 打开选择DP文件对话框
+        /// </summary>
         private ICommand _openDpFileCmd;
         public ICommand OpenDpFileCmd
         {
             get
             {
                 if (_openDpFileCmd == null)
-                    _openDpFileCmd = new RelayCommand(OpenDpFile);
+                    _openDpFileCmd = new RelayCommand(()=> { Config.DpFilePath = OpenFileDialog(); });
                 return _openDpFileCmd;
             }
         }
 
+        /// <summary>
+        /// 打开选择DP解析规则文件对话框
+        /// </summary>
         private ICommand _openDpRuleFileCmd;
         public ICommand OpenDpRuleFileCmd
         {
             get
             {
                 if (_openDpRuleFileCmd == null)
-                    _openDpRuleFileCmd = new RelayCommand(OpenDpRuleFile);
+                    _openDpRuleFileCmd = new RelayCommand(()=> { Config.DpRulePath = OpenFileDialog(); });
                 return _openDpRuleFileCmd;
             }
         }
 
+        /// <summary>
+        /// 打开安装参数文件对话框
+        /// </summary>
         private ICommand _openInstallParamFileCmd;
         public ICommand OpenInstallParamFileCmd
         {
             get
             {
                 if (_openInstallParamFileCmd == null)
-                    _openInstallParamFileCmd = new RelayCommand(OpenInstallParamFile);
+                    _openInstallParamFileCmd = new RelayCommand(()=> { Config.InstallParamsFilePath = OpenFileDialog(); });
                 return _openInstallParamFileCmd;
             }
         }
@@ -342,22 +198,22 @@ namespace CardPlatform.ViewModel
                 return;
             }
 
-            if(SCReader.OpenReader(locator.Main.SelectedReader))
+            if (SCReader.OpenReader(locator.Main.SelectedReader))
             {
                 ICPS cps = new CPS();
-                cps.SetPersonlizationConfig(SelectedISD, SelectedKMC, DivTypeIndex, SecureIndex);
-                foreach(var cpsFile in FileStatus)
+                cps.SetPersonlizationConfig(Config.ISD, Config.KMC, Config.DivMethod, Config.SecureLevel);
+                foreach (var cpsFile in DpGenCpsResults)
                 {
-                    if(cpsFile.IsSelected)
+                    if (cpsFile.IsSelected)
                     {
-
-                        MessageDialogResult result = await _dialog.ShowMessageAsync("Message", string.Format("Please Input card : {0}", cpsFile.DpFileName.Substring(0, cpsFile.DpFileName.Length - 4)),MessageDialogStyle.AffirmativeAndNegative);
-                        if(result == MessageDialogResult.Affirmative)
+                        string fileName = Path.GetFileNameWithoutExtension(cpsFile.CpsFilePath);
+                        MessageDialogResult result = await _dialog.ShowMessageAsync("Message", string.Format("Please Input card : {0}", fileName), MessageDialogStyle.AffirmativeAndNegative);
+                        if (result == MessageDialogResult.Affirmative)
                         {
-                            bool sucess = cps.DoPersonlization(cpsFile.DpFilePath, InstallParamPath);
+                            bool sucess = cps.DoPersonlization(cpsFile.CpsFilePath, Config.InstallParamsFilePath);
                             if (!sucess)
-                            {
-                                await _dialog.ShowMessageAsync("Failed", string.Format("Personlize card: {0} failed.", cpsFile.DpFileName.Substring(0, cpsFile.DpFileName.Length - 4)));
+                            {                               
+                                await _dialog.ShowMessageAsync("Failed", string.Format("Personlize card: {0} failed.", fileName));
                                 return;
                             }
                         }
@@ -375,82 +231,95 @@ namespace CardPlatform.ViewModel
             }
         }
 
-        private void GenCpsFile()
-        {
-        }
 
         private async void DoParseDp()
         {
             ICPS cps = new CPS();
-            var task = new Task<List<string>>(() => cps.GenCpsFile(SelectedDpType.ProgramName, SelectedDpType.FuncName, DpPath, RulePath));
-            //var cpsFiles = cps.GenCpsFile(SelectedDpType.ProgramName, SelectedDpType.FuncName, DpPath, RulePath);
+            var task = new Task<List<string>>(() => cps.GenCpsFile(Config.DpType.DllName, Config.DpType.FuncName, Config.DpFilePath, Config.DpRulePath));
             var controller = await _dialog.ShowProgressAsync("Progress Dp File", "Progressing all the things, wait for seconds");
             task.Start();
-            
+
             controller.SetIndeterminate();
             task.Wait();
-   
+
             await controller.CloseAsync();
             var cpsFiles = task.Result;
-            
-            foreach(var cpsFile in cpsFiles)
+
+            foreach (var cpsFile in cpsFiles)
             {
-                DpFileStatus fileStatus = new DpFileStatus();
-                fileStatus.DpFilePath = cpsFile;
-                fileStatus.DpFileName = Path.GetFileName(cpsFile);
-                fileStatus.IsSelected = true;
-                FileStatus.Add(fileStatus);
+                DpGenCpsModel cpsInfo = new DpGenCpsModel();
+                cpsInfo.CpsFilePath = cpsFile;
+                cpsInfo.IsSelected = true;
+                DpGenCpsResults.Add(cpsInfo);
             }
-            if(FileStatus.Count > 0)
+            if (DpGenCpsResults.Count > 0)
             {
-                Status.Info = "成功";
+                DpParseResult.Info = "成功";
             }
             else
             {
-                Status.Info = "失败";
-            }            
+                DpParseResult.Info = "失败";
+            }
         }
 
-        private void OpenDpFile()
-        {
-            DpPath = OpenFileDialog();
-        }
 
-        private void OpenDpRuleFile()
-        {
-            RulePath = OpenFileDialog();
-        }
-
-        private void OpenInstallParamFile()
-        {
-            InstallParamPath = OpenFileDialog();
-        }
 
         /// <summary>
         /// 加载初始化数据
         /// </summary>
         private void Load()
         {
-            ISerialize serialize = new XmlSerialize();
-            var personlizeCfg = (PersonlizeConfiguartion)serialize.DeserizlizeFromFile("PersonlizeConfiguration.xml", typeof(PersonlizeConfiguartion));
-            DpType = personlizeCfg.DpType;
-            if (DpType.Count > 0)
-                SelectedDpType = DpType.First();
-            ISDs = personlizeCfg.ISDs;
-            if (ISDs.Count > 0)
-                SelectedISD = ISDs.First();
-            KMCs = personlizeCfg.KMCs;
-            if (KMCs.Count > 0)
-                SelectedKMC = KMCs.First();
-            DivType = personlizeCfg.DivType;
-            if (DivType.Count > 0)
-                DivTypeIndex = 0;
-            Secure = personlizeCfg.Secure;
-            if (Secure.Count > 0)
-                SecureIndex = 0;
-            DelInst = personlizeCfg.DelInst;
-            if (DelInst.Count > 0)
-                DelInstIndex = 0;
+            XDocument doc = XDocument.Load("PersonlizeConfiguration.xml");
+            if(doc != null)
+            {
+                var root = doc.Root;
+                var dpTypeElements = root.Element("DpType").Elements("Type");
+                foreach(var item in dpTypeElements)
+                {
+                    var dpDll = new DpDll();
+                    dpDll.Name = item.Attribute("name").Value;
+                    dpDll.DllName = item.Attribute("dllName").Value;
+                    dpDll.FuncName = item.Attribute("funcName").Value;
+                    DpParseParams.DpTypeCollection.Add(dpDll);
+                }
+                
+                var KMCElements = root.Element("KMCs").Elements("KMC");
+                foreach(var item in KMCElements)
+                {
+                    SecureChannelParams.KMCCollection.Add(item.Value);
+                }
+                var aidElements = root.Element("AIDs").Elements("AID");
+                foreach(var item in aidElements)
+                {
+                    SecureChannelParams.ISDCollection.Add(item.Value);
+                }
+                var divMethodElements = root.Element("DivType").Elements("Type");
+                foreach(var item in divMethodElements)
+                {
+                    DivMethodCollection.Add(item.Value);
+                }
+                var secureLevelElements = root.Element("Secure").Elements("SecureLevel");
+                foreach(var item in secureLevelElements)
+                {
+                    SecureLevelCollection.Add(item.Value);
+                }
+                var delInstElements = root.Element("DelInst").Elements("Type");
+                foreach(var item in delInstElements)
+                {
+                    DelInstCollection.Add(item.Value);
+                }
+
+                Config.DpType = DpParseParams.DpTypeCollection[0];
+                Config.KMC = SecureChannelParams.KMCCollection[0];
+                Config.ISD = SecureChannelParams.ISDCollection[0];
+                Config.DivMethod = 0;
+                Config.DelInst = 0;
+                Config.SecureLevel = 0;
+            }
         }
     }
 }
+
+
+
+  
