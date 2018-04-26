@@ -55,14 +55,26 @@ namespace CardPlatform.ViewModel
         }
 
         //用来接收关闭按钮的Command
-        private ICommand _closeCmd;
-        public ICommand CloseCmd
+        private ICommand _loadCmd;
+        public ICommand LoadCmd
         {
             get
             {
-                if (_closeCmd == null)
-                    _closeCmd = new RelayCommand(Close);
-                return _closeCmd;
+                if (_loadCmd == null)
+                    _loadCmd = new RelayCommand(()=> 
+                    {
+                        ViewModelLocator locator = new ViewModelLocator();
+                        foreach(var item in locator.Personlize.ConfigCollection)
+                        {
+                            if(item.ConfigName == SelectedConfig)
+                            {
+                                locator.Personlize.Config = item;          
+                                break;
+                            }
+                        }
+                        Close();
+                    });
+                return _loadCmd;
             }
         }
 

@@ -64,7 +64,15 @@ namespace CardPlatform.ViewModel
         /// <summary>
         /// 界面配置参数由该属性绑定
         /// </summary>
-        public PersonlizeConfig Config { get; set; }
+        private PersonlizeConfig _config;
+        public PersonlizeConfig Config
+        {
+            get { return _config; }
+            set
+            {
+                Set(ref _config, value);
+            }
+        }
 
         /// <summary>
         /// 加载配置信息

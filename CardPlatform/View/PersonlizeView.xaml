@@ -36,7 +36,6 @@
                                 <TextBlock Text="预置" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </MenuItem.Header>
-                        <MenuItem Name="menuLoadPreSetting" Header="加载预置" MinWidth="180"/>
                         <MenuItem Name="menuSave" Header="保存预置..." MinWidth="180" Command="{Binding LoadConfigCmd}"/>
                         <MenuItem Name="menuManage" Header="管理预置" MinWidth="180" Command="{Binding SaveConfigCmd}"/>
                     </MenuItem>
