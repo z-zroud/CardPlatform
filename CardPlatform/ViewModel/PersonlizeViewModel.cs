@@ -17,6 +17,7 @@ using MahApps.Metro.Controls.Dialogs;
 using System.Xml;
 using System.Xml.Linq;
 using CardPlatform.Config;
+using CardPlatform.View;
 
 namespace CardPlatform.ViewModel
 {
@@ -33,7 +34,7 @@ namespace CardPlatform.ViewModel
             DelInstCollection = new List<string>();
             SecureLevelCollection = new List<string>();
             Config = new PersonlizeConfig();
-
+            ConfigCollection = new List<PersonlizeConfig>();
             _dialog = (MetroWindow)Application.Current.MainWindow;
             Load();            
         }
@@ -64,6 +65,11 @@ namespace CardPlatform.ViewModel
         /// 界面配置参数由该属性绑定
         /// </summary>
         public PersonlizeConfig Config { get; set; }
+
+        /// <summary>
+        /// 加载配置信息
+        /// </summary>
+        public List<PersonlizeConfig> ConfigCollection { get; set; }
 
         /// <summary>
         /// 分散方式
@@ -107,6 +113,9 @@ namespace CardPlatform.ViewModel
         #endregion
 
         #region command binding
+        /// <summary>
+        /// 解析DP文件
+        /// </summary>
         private ICommand _parseDpCmd;
         public ICommand ParseDpCmd
         {
@@ -160,6 +169,9 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        /// <summary>
+        /// 个人化CPS
+        /// </summary>
         private ICommand _personlizeCmd;
         public ICommand PersonlizeCmd
         {
@@ -168,6 +180,39 @@ namespace CardPlatform.ViewModel
                 if (_personlizeCmd == null)
                     _personlizeCmd = new RelayCommand(DoPersonlize);
                 return _personlizeCmd;
+            }
+        }
+
+        /// <summary>
+        /// 加载配置
+        /// </summary>
+        private ICommand _loadConfigCmd;
+        public ICommand LoadConfigCmd
+        {
+            get
+            {
+                if (_loadConfigCmd == null)
+                    _loadConfigCmd = new RelayCommand(()=> 
+                    {
+                        SaveSettingDialog dialog = new SaveSettingDialog();
+                        dialog.ShowDialog();
+                    });
+                return _loadConfigCmd;
+            }
+        }
+
+        private ICommand _saveConfigCmd;
+        public ICommand SaveConfigCmd
+        {
+            get
+            {
+                if (_saveConfigCmd == null)
+                    _saveConfigCmd = new RelayCommand(()=>
+                    {
+                        SettingDialog dialog = new SettingDialog();
+                        dialog.ShowDialog();
+                    });
+                return _saveConfigCmd;
             }
         }
         #endregion
@@ -197,7 +242,6 @@ namespace CardPlatform.ViewModel
                 await _dialog.ShowMessageAsync("Warning", "You need select a smart card reader!");
                 return;
             }
-
             if (SCReader.OpenReader(locator.Main.SelectedReader))
             {
                 ICPS cps = new CPS();
@@ -316,6 +360,9 @@ namespace CardPlatform.ViewModel
                 Config.DelInst = 0;
                 Config.SecureLevel = 0;
             }
+
+            ISerialize serialize = new XmlSerialize();
+            ConfigCollection = (List< PersonlizeConfig>)serialize.DeserizlizeFromFile("PersonlizeSettings.xml", typeof(List<PersonlizeConfig>));
         }
     }
 }

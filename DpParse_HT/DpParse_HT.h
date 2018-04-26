@@ -26,7 +26,7 @@ protected:
     int     GetCardDataLen();
     int     ParseEmbossData();
     int     ParseMagstripData(const char* szFileName);
-    int     ParseCardData(const char* szFileName, const char* szRuleFile);
+    int     ParseCardData(const char* szFileName, const char* szRuleFile, vector<string>& vecCps);
 private:
     ifstream    m_DpFile;
     string      m_Magstrip1;

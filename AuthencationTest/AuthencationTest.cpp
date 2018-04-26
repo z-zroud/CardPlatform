@@ -6,6 +6,23 @@
 
 int main()
 {
+    //int a = 3;
+    //int b = 4;
+    //int c = a ^ b;
+    //int d = a ^ c;
+    string keyA = "1654A92373B4853434C375834D245645";
+    string AC = "38893731468C431F7A1558F2B0322CBA";
+    string keyB = "2EDD9E123538C62B4ED62D71FD167AFF";
+    string result;
+    for (int i = 0; i < 32; i++)
+    {
+        int a = stoi(keyA.substr(i,1), 0, 16);
+        int b = stoi(keyB.substr(i, 1), 0, 16);
+        int c = a ^ b;
+        char temp[2] = { 0 };
+        sprintf_s(temp, "%X", c);
+        result += temp;
+    }
     string dgi0201 = "EHFIWHEF5F340101shdifewh";
     int pos = dgi0201.find("5F34");
     int len = stoi(dgi0201.substr(pos + 4, 2), 0, 16);

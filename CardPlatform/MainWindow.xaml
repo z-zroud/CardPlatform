@@ -12,7 +12,6 @@
         ShowTitleBar="True"
         Height="700" 
         Width="1200" 
-        Loaded="MetroWindow_Loaded"
         DataContext="{Binding Source={StaticResource Locator}, Path=Main}">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands ShowLastSeparator="False">

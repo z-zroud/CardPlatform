@@ -15,6 +15,8 @@ namespace CardPlatform.Config
             DpType = new DpDll();
         }
 
+        public string ConfigName { get; set; }
+
         private string _dpFilePath;
         public string DpFilePath
         {

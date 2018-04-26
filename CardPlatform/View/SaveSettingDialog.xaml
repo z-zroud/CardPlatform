@@ -4,9 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:vm="clr-namespace:CardPlatform.ViewModel"
         xmlns:local="clr-namespace:CardPlatform.View"
+        xmlns:helper="clr-namespace:CardPlatform.Helper"
+        helper:DialogCloseHelper.DialogResult="{Binding DialogResult}"
         mc:Ignorable="d"
-        Title="保存预置" Height="160" Width="430" ResizeMode="NoResize">
+        Title="保存预置" Height="160" Width="430" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Controls:MetroWindow.DataContext>
+        <vm:SaveSettingViewModel/>
+    </Controls:MetroWindow.DataContext>
     <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -14,11 +20,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Content="键入唯一的名称以创建新预置" Margin="10,0,0,0" VerticalContentAlignment="Center" Grid.Row="0"/>
-        <TextBox Name="tbSettingName" Grid.Row="1" Height="25" Margin="15,0,20,0" VerticalContentAlignment="Center"></TextBox>
+        <TextBox Name="tbSettingName" Grid.Row="1" Height="25" Margin="15,0,20,0" VerticalContentAlignment="Center" Text="{Binding ConfigName}" />
         <DockPanel LastChildFill="False" Grid.Row="2">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                <Button Name="btnOK" Content="确定" Width="70" Height="25" Margin="0,0,20,0"/>
-                <Button Name="btnCancel" Content="取消" Width="70" Height="25" Margin="0,0,20,0"/>
+                <Button Name="btnOK" Content="确定" Width="70" Height="25" Margin="0,0,20,0" Command="{Binding SaveConfigCmd}"/>
+                <Button Name="btnCancel" Content="取消" Width="70" Height="25" Margin="0,0,20,0" Command="{Binding CloseCmd}"/>
             </StackPanel>
         </DockPanel>
     </Grid>

@@ -37,8 +37,8 @@
                             </StackPanel>
                         </MenuItem.Header>
                         <MenuItem Name="menuLoadPreSetting" Header="加载预置" MinWidth="180"/>
-                        <MenuItem Name="menuSave" Header="保存预置..." MinWidth="180"/>
-                        <MenuItem Name="menuManage" Header="管理预置" MinWidth="180"/>
+                        <MenuItem Name="menuSave" Header="保存预置..." MinWidth="180" Command="{Binding LoadConfigCmd}"/>
+                        <MenuItem Name="menuManage" Header="管理预置" MinWidth="180" Command="{Binding SaveConfigCmd}"/>
                     </MenuItem>
                 </Menu>
             </Grid>
@@ -85,7 +85,9 @@
                             <TextBlock Text="结果: "/>
                             <TextBlock Text="{Binding DpParseResult.Info}" Foreground="Black" Width="100"/>
                         </StackPanel>
-                        <ListBox Height="150" BorderThickness="1"
+                        <ListBox Height="150"
+                                 BorderThickness="1"
+                                 Width="300"
                          Margin="0,5,0,0"
                          ItemsSource="{Binding DpGenCpsResults}">
                             <ListBox.ItemTemplate>
