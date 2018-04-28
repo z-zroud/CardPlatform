@@ -9,6 +9,9 @@ using CardPlatform.Config;
 
 namespace CardPlatform.Business
 {
+    /*************************************************************
+     * 该类描述了QPBOC交易流程
+     *************************************************************/
     public class BusinessQPBOC : BusinessBase
     {
         private TagDict tagDict = TagDict.GetInstance();
@@ -30,39 +33,33 @@ namespace CardPlatform.Business
             locator.Terminal.TermianlSettings.Tag9F66 = "2A000080"; //终端交易属性
             locator.Terminal.TermianlSettings.TagDF60 = "00";   //扩展交易指示位
 
-            // do des qpboc transaction
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            // 基于DES算法的QPBOC流程
             if (doDesTrans)
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "00";   //SM算法支持指示位
-                var caseNo = MethodBase.GetCurrentMethod().Name;
-
-                //Step 1 选择应用
-                var resp = SelectAid(aid);
-                if (resp.SW != 0x9000)
+                
+                if(!SelectApp(aid))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择QPBOC应用失败");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                     return;
                 }
-
-                //Step 2 GPO
-                var tls = DataParse.ParseTL(tagDict.GetTag("9F38"));
-                string PDOLData = string.Empty;
-                foreach (var tl in tls)
+                var AFLs = GPOEx();
+                if(AFLs.Count == 0)
                 {
-                    PDOLData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
+                    return;
                 }
-                var AFLs = GPOEx(PDOLData);
-
-                //Step 3 读应用记录
-                ReadRecords(AFLs);
+                if(ReadAppRecords(AFLs))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                    return;
+                }
 
                 //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
                 if (isQPBOCTranction)
                 {
                     OfflineAuthcation();
-                    HandleLimitation();
-                    CardHolderVerify();
-                    TerminalRiskManagement();
                 }
                 else
                 {
@@ -71,25 +68,37 @@ namespace CardPlatform.Business
                 }
 
             }
-            if (doSMTrans)   // do sm uics transaction
+
+            //基于国密算法的交易流程
+            if (doSMTrans)   
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
-                SelectAid(aid);
-                string tag9F38 = tagDict.GetTag("9F38");
-                var tls = DataParse.ParseTL(tag9F38);
-                string pdol = string.Empty;
-                foreach (var tl in tls)
+                if (!SelectApp(aid))
                 {
-                    pdol += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
+                    return;
                 }
-                var AFLs = GPOEx(pdol);
-                ReadRecords(AFLs);
+                var AFLs = GPOEx();
+                if (AFLs.Count == 0)
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
+                    return;
+                }
+                if (ReadAppRecords(AFLs))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                    return;
+                }
+
+                //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
                 if (isQPBOCTranction)
                 {
                     OfflineAuthcation();
-                    HandleLimitation();
-                    CardHolderVerify();
-                    TerminalRiskManagement();
+                }
+                else
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "进行QPBOC交易失败");
+                    return;
                 }
             }
         }
@@ -99,15 +108,28 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="aid"></param>
         /// <returns></returns>
-        protected override ApduResponse SelectAid(string aid)
+        protected bool SelectApp(string aid)
         {
+            bool result = false;
             ApduResponse response = base.SelectAid(aid);
-            ParseAndSave(response.Response);
-
-            IExcuteCase excuteCase = new SelectAidCase();
-            excuteCase.ExcuteCase(response);
-
-            return response;
+            if(response.SW == 0x9000)
+            {
+                if(ParseAndSave(response.Response))
+                {
+                    IExcuteCase excuteCase = new SelectAidCase();
+                    excuteCase.ExcuteCase(response);
+                    result = true;
+                }
+            }
+            else
+            {
+                var caseNo = MethodBase.GetCurrentMethod().Name;
+                if(response.SW != 0x9000)
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
+                }             
+            }
+            return result;
         }
 
         /// <summary>
@@ -115,17 +137,37 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="pdol"></param>
         /// <returns></returns>
-        protected List<AFL> GPOEx(string pdol)
+        protected List<AFL> GPOEx()
         {
-            ApduResponse response = base.GPO(pdol);
+            var AFLs = new List<AFL>();
 
-            ParseAndSave(response.Response);
+            var tls = DataParse.ParseTL(tagDict.GetTag("9F38"));
+            string PDOLData = string.Empty;
+            foreach (var tl in tls)
+            {
+                PDOLData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+            }
 
-            var AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
+            ApduResponse response = base.GPO(PDOLData);
+            
+            if (response.SW != 0x9000)
+            {
+                var caseNo = MethodBase.GetCurrentMethod().Name;
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
+                return AFLs;
+            }
+            if(ParseAndSave(response.Response))
+            {
+                AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
+                string tag9F26 = tagDict.GetTag("9F26");
+                if (!string.IsNullOrEmpty(tag9F26))
+                {
+                    isQPBOCTranction = true;    //表明卡片支持QPBOC交易
+                }
 
-            IExcuteCase excuteCase = new GPOCase();
-            excuteCase.ExcuteCase(response);
-
+                IExcuteCase excuteCase = new GPOCase();
+                excuteCase.ExcuteCase(response);
+            }
             return AFLs;
         }
 
@@ -134,33 +176,28 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="afls"></param>
         /// <returns></returns>
-        protected override List<ApduResponse> ReadRecords(List<AFL> afls)
+        protected bool ReadAppRecords(List<AFL> afls)
         {
             var resps = base.ReadRecords(afls);
+            var caseNo = MethodBase.GetCurrentMethod().Name;
 
             foreach (var resp in resps)
             {
-                ParseAndSave(resp.Response);
-            }
-
-            //IExcuteCase excuteCase = new ReadRecordCase();
-            //excuteCase.ExcuteCase(resps);
-
-            var tag9F74 = tagDict.GetTag("9F74");
-            if (tag9F74.Length == 12)
-            {
-                var resp = APDU.GetDataCmd("9F79");
-                ParseAndSave(resp.Response);
-                resp = APDU.GetDataCmd("9F6D");
-                ParseAndSave(resp.Response);
-                var tag9F79 = tagDict.GetTag("9F79");
-                if (int.Parse(tag9F79) > 0)
+                if(resp.SW != 0x9000)
                 {
-                    isQPBOCTranction = true;  //说明是电子现金交易
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
+                    return false;
                 }
+                if(!ParseAndSave(resp.Response))
+                {
+                    return false;
+                }               
             }
 
-            return resps;
+            IExcuteCase excuteCase = new ReadRecordCase();
+            excuteCase.ExcuteCase(resps);
+
+            return true;
         }
 
         /// <summary>
@@ -170,24 +207,23 @@ namespace CardPlatform.Business
         protected int OfflineAuthcation()
         {
             int result;
-            IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (aid.Length < 10)
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "应用AID长度太短");
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "应用AID长度太短");
                 return -1;
             }
             string rid = aid.Substring(0, 10);
             string CAIndex = tagDict.GetTag("8F");
             if (CAIndex.Length != 2)
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA 索引,请检查8F是否存在");
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA 索引,请检查8F是否存在");
                 return -2;
             }
             string CAPublicKey = Authencation.GenCAPublicKey(CAIndex, rid);
             if (string.IsNullOrWhiteSpace(CAPublicKey))
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA公钥，请检查RID及索引是否正确");
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA公钥，请检查RID及索引是否正确");
                 return -3;
             }
 
@@ -198,15 +234,12 @@ namespace CardPlatform.Business
             string iccPublicCert = tagDict.GetTag("9F46");
             string AIP = tagDict.GetTag("82");
 
-            string ddol = tagDict.GetTag("9F49");
-            string terminalRandom = "12345678";
-
-            var tag9F4B = APDU.GenDynamicDataCmd(terminalRandom);
-            if (string.IsNullOrWhiteSpace(tag9F4B))
-            {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
-                return -7;
-            }
+            string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");
+            string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");
+            string tag5F2A = locator.Terminal.TermianlSettings.GetTag("5F2A");
+            string tag9F69 = tagDict.GetTag("9F69");
+            string hashInput = tag9F37 + tag9F02 + tag5F2A + tag9F69;
+            string tag9F4B = tagDict.GetTag("9F4B");
 
             if (doDesTrans) //DES算法
             {
@@ -215,14 +248,14 @@ namespace CardPlatform.Business
                 issuerPublicKey = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp);
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在");
                     return -4;
                 }
 
                 result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "静态数据认证失败!");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "静态数据认证失败!");
                     return -5;
                 }
 
@@ -231,14 +264,14 @@ namespace CardPlatform.Business
                 string iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
                     return -6;
                 }
 
-                result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, terminalRandom);
+                result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, hashInput);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "动态数据认证失败!");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "动态数据认证失败!");
                     return -8;
                 }
             }
@@ -247,75 +280,30 @@ namespace CardPlatform.Business
                 issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
                     return -4;
                 }
 
                 result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 静态数据认证失败!");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 静态数据认证失败!");
                     return -9;
                 }
 
                 string iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN);
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥");
                     return -4;
                 }
-                result = Authencation.SM_DDA(iccPublicKey, tag9F4B, terminalRandom);
+                result = Authencation.SM_DDA(iccPublicKey, tag9F4B, hashInput);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 动态数据认证失败!");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 动态数据认证失败!");
                     return -10;
                 }
             }
-            return 0;
-        }
-
-        /// <summary>
-        /// 处理限制
-        /// </summary>
-        /// <returns></returns>
-        protected int HandleLimitation()
-        {
-            int expiryDate;
-            int effectiveDate;
-            int currentDate;
-            int.TryParse(tagDict.GetTag("5F24"), out expiryDate);
-            int.TryParse(tagDict.GetTag("5F25"), out effectiveDate);
-            int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
-
-            var caseBase = new CaseBase();
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (expiryDate < currentDate)    //应用已失效
-            {
-                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用失效日期大于当前日期，应用已失效");
-            }
-
-            if (effectiveDate < currentDate) // 应用未生效
-            {
-                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用生效日期大于当前日期，应用未生效");
-            }
-
-            if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
-            {
-                caseBase.TraceInfo(CaseLevel.Failed, caseNo, "应用失效日期大于生效日期，应用不合法");
-            }
-            return 0;
-        }
-
-        protected int CardHolderVerify()
-        {
-            //电子现金不包括持卡人认证，这里仅判断数据是否为1E031F00
-            //联机PIN不能设为首选CVM
-            string CVM = tagDict.GetTag("8E");
-            return 0;
-        }
-
-        protected int TerminalRiskManagement()
-        {
             return 0;
         }
     }

@@ -1,6 +1,8 @@
-﻿using CardPlatform.ViewModel;
+﻿using CardPlatform.Cases;
+using CardPlatform.ViewModel;
 using CplusplusDll;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace CardPlatform.Business
 {
@@ -49,13 +51,24 @@ namespace CardPlatform.Business
             this.aid = aid;
         }
 
-        protected List<TLV> ParseAndSave(string response)
+        protected bool ParseAndSave(string response)
         {
-            List<TLV> arrTLV = DataParse.ParseTLV(response);
-            TagDict tagDict = TagDict.GetInstance();
-            tagDict.SetTags(arrTLV);
+            bool result = false;
+            if (DataParse.IsTLV(response))
+            {
+                var arrTLV = DataParse.ParseTLV(response);
+                TagDict tagDict = TagDict.GetInstance();
+                tagDict.SetTags(arrTLV);
+                result = true;
+            }
+            else
+            {
+                IExcuteCase cases = new CaseBase();
+                var caseNo = MethodBase.GetCurrentMethod().Name;
+                cases.TraceInfo(Config.CaseLevel.Failed, caseNo, "解析TLV格式失败");
+            }
 
-            return arrTLV;
+            return result;
         }
 
 

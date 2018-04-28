@@ -301,16 +301,19 @@ namespace CardPlatform.ViewModel
             {
                 DpGenCpsModel cpsInfo = new DpGenCpsModel();
                 cpsInfo.CpsFilePath = cpsFile;
+                cpsInfo.CpsFileName = Path.GetFileName(cpsFile);
                 cpsInfo.IsSelected = true;
                 DpGenCpsResults.Add(cpsInfo);
             }
             if (DpGenCpsResults.Count > 0)
             {
                 DpParseResult.Info = "成功";
+                DpParseResult.StatusColor = "blue";
             }
             else
             {
                 DpParseResult.Info = "失败";
+                DpParseResult.StatusColor = "red";
             }
         }
 

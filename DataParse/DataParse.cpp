@@ -67,28 +67,19 @@ void ParseTL(char* buffer, PTL pTls, unsigned int& count)
 			{
 				//最高位1
 				unsigned int lengthSize = 2 * ((buffer[currentIndex] & 0x07) * 8 + (buffer[++currentIndex] & 0x0f));
-
 				currentIndex += 1; //从下一个字节开始算Length域
-				//pTls[currentTLVIndex].len = (unsigned char *)malloc(lengthSize);
                 char szLen[5] = { 0 };
 				memcpy(szLen, buffer + currentIndex, lengthSize);
-				//pTls[currentTLVIndex].len[lengthSize] = 0;
-
                 pTls[currentTLVIndex].len = std::stoi(szLen, 0, 16);
-
 				currentIndex += lengthSize;
 
 			}
 			else
 			{
 				//最高位0
-				//pTls[currentTLVIndex].len = (unsigned char *)malloc(2);
                 char szLen[5] = { 0 };
 				memcpy(szLen, buffer + currentIndex, 2);
-				//pTls[currentTLVIndex].len[2] = 0;
-
                 pTls[currentTLVIndex].len = std::stoi(szLen, 0, 16);
-
 				currentIndex += 2;
 			}
 			currentTLVIndex++;
@@ -130,6 +121,11 @@ void _ParseTLVEx(PBCD_TLV ptlvs, unsigned int tlvCount, int level, vector<TLV>& 
             vecTlv.push_back(tlv);
         }
     }
+}
+
+bool IsTLV(char* bcdBuffer, int buffLen)
+{
+    return IsBcdTlvStruct(bcdBuffer, buffLen);
 }
 
 bool ParseTLV(char* buffer, PTLV pTlvs, unsigned int& count)

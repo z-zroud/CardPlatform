@@ -80,22 +80,5 @@ namespace UtilLib
             
             return result;
         }
-
-        /// <summary>
-        /// 判断字符串是否为数字字母组合
-        /// </summary>
-        /// <param name="str"></param>
-        /// <returns></returns>
-        public static bool IsAlphaNum(string str)
-        {
-            string alphaNum = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            foreach(var c in str)
-            {
-                if (!alphaNum.Contains(c))
-                    return false;
-            }
-
-            return true;
-        }
     }
 }

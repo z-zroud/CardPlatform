@@ -12,6 +12,7 @@
 
 #ifdef _DEBUG
 #pragma comment(lib,"..\\lib\\Debug\\DataParse.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
 #else
 #pragma comment(lib,"..\\lib\\Release\\DataParse.lib")
 #endif

@@ -3,9 +3,6 @@
 #include "Tool.h"
 #include <string>
 
-
-
-
 bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
 {
     unsigned int	currentIndex = 0;				//用于标记buffer
@@ -51,7 +48,7 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                 //分析子TLV中的Tag
                 int subTlvLength = 0;			//子TLV长度
                 char * temp;			//子TLV所包含的数据
-                                                //先判断length域的长度,length域字节如果最高位为1，后续字节代表长度，为0，1--7位代表数据长度
+                //先判断length域的长度,length域字节如果最高位为1，后续字节代表长度，为0，1--7位代表数据长度
                 unsigned int nStartIndex = currentIndex;
                 int lenOffset = 0;
                 if (Tool::ctoi(buffer[nStartIndex]) & 0x08)
@@ -95,7 +92,7 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
 
                 unsigned int oSize;//输出有多少个同等级的子TLV，解析时也应该用到
 
-                                   //不清楚子TLV同等级的TLV有多少个，申请32TLV大小的内存肯定够用
+                //不清楚子TLV同等级的TLV有多少个，申请32TLV大小的内存肯定够用
                 pTlvs[currentTLVIndex].subTLVEntity = new BCD_TLV[sizeof(PBCD_TLV[32])];
                 memset(pTlvs[currentTLVIndex].subTLVEntity, 0, sizeof(PBCD_TLV[32]));
                 if (!ParseBcdTLV((char*)temp, pTlvs[currentTLVIndex].subTLVEntity, oSize)) {

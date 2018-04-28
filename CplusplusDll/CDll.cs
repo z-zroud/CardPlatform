@@ -160,6 +160,9 @@ namespace CplusplusDll
         [DllImport(@"DataParse.dll", EntryPoint = "ParseTLV", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void ParseTLV(string bcdBuffer, IntPtr arrTlv, ref int count);
 
+        [DllImport(@"DataParse.dll", EntryPoint = "IsTLV", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static byte IsTLV(string bcdBuffer, int len);
+
         [DllImport(@"DataParse.dll", EntryPoint = "ParseAFL", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void ParseAFL(string bcdBuffer, IntPtr arrAFL, ref int count);
         #endregion

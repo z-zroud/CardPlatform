@@ -7,31 +7,34 @@ using System.Xml;
 
 namespace CardPlatform.Config
 {
-    public class ComparedTag
+    /// <summary>
+    /// 定义了模板数据结构
+    /// </summary>
+    public class TemplateTag
     {
         public string Name { get; set; }
         public string Value { get; set; }
         public string TipLevel { get; set; }
     }
 
-    public class DataCompareConfig
+    public class DataTemplateConfig
     {
-        private static DataCompareConfig config;
-        private Dictionary<string, ComparedTag> ComparedTags;
+        private static DataTemplateConfig config;
+        private Dictionary<string, TemplateTag> ComparedTags;
 
         public bool HasLoaded { get; private set; }
 
-        private DataCompareConfig()
+        private DataTemplateConfig()
         {
             HasLoaded = false;
-            ComparedTags = new Dictionary<string, ComparedTag>();
+            ComparedTags = new Dictionary<string, TemplateTag>();
         }
 
-        public static DataCompareConfig GetInstance()
+        public static DataTemplateConfig GetInstance()
         {
             if(config == null)
             {
-                config = new DataCompareConfig();
+                config = new DataTemplateConfig();
             }
             return config;
         }
@@ -55,7 +58,7 @@ namespace CardPlatform.Config
                 {
                     if (reader.Name == "Tag")
                     {
-                        ComparedTag comparedTag = new ComparedTag();
+                        TemplateTag comparedTag = new TemplateTag();
                         bool hasAttr = reader.MoveToFirstAttribute();
                         while (hasAttr)
                         {
@@ -79,7 +82,7 @@ namespace CardPlatform.Config
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public ComparedTag GetComparedTag(string tag)
+        public TemplateTag GetTemplateTag(string tag)
         {
             if (ComparedTags.ContainsKey(tag))
                 return ComparedTags[tag];

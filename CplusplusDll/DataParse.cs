@@ -57,6 +57,16 @@ namespace CplusplusDll
             return tlvs;
         }
 
+        public static bool IsTLV(string bcdBuffer)
+        {
+            bool isTlv = false;
+            byte ret = CDll.IsTLV(bcdBuffer, bcdBuffer.Length);
+
+            isTlv = ret == 0 ? false : true;
+
+            return isTlv;
+        }
+
         public static List<TL> ParseTL(string bcdBuffer)
         {
             var tls = new List<TL>();

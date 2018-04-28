@@ -84,16 +84,16 @@
                             <TextBlock Text="结果: "/>
                             <TextBlock Text="{Binding DpParseResult.Info}" Foreground="Black" Width="100"/>
                         </StackPanel>
-                        <ListBox Height="150"
+                        <ListBox Height="159"
                                  BorderThickness="1"
-                                 Width="300"
+                                 Width="280"
                          Margin="0,5,0,0"
                          ItemsSource="{Binding DpGenCpsResults}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <CheckBox IsChecked="{Binding IsSelected}"/>
-                                        <TextBlock Text="{Binding CpsFilePath}"/>
+                                        <TextBlock Text="{Binding CpsFileName}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>

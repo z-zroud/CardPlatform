@@ -90,6 +90,7 @@
     <Compile Include="Business\Constant.cs" />
     <Compile Include="Business\TagDict.cs" />
     <Compile Include="Cases\CaseBase.cs" />
+    <Compile Include="Cases\CaseUtil.cs" />
     <Compile Include="Cases\DataComparedCase.cs" />
     <Compile Include="Cases\FirstGACCase.cs" />
     <Compile Include="Cases\GPOCase.cs" />

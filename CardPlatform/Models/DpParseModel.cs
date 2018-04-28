@@ -60,6 +60,19 @@ namespace CardPlatform.Models
         }
 
         /// <summary>
+        /// 文件名
+        /// </summary>
+        private string _cpsFileName;
+        public string CpsFileName
+        {
+            get { return _cpsFileName; }
+            set
+            {
+                Set(ref _cpsFileName, value);
+            }
+        }
+
+        /// <summary>
         /// 是否需要进行个人化
         /// </summary>
         private bool _isSelected;

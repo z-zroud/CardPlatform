@@ -58,6 +58,9 @@ extern "C" DATAPARSE_EXPORTS_API void ParseTL(char* bcdBuffer, PTL pTls, unsigne
 extern "C" DATAPARSE_EXPORTS_API bool ParseTLV(char* bcdBuffer, PTLV pTlv, unsigned int& count);
 
 
+extern "C" DATAPARSE_EXPORTS_API bool IsTLV(char* bcdBuffer, int buffLen);
+
+
 
 /**********************************************************************
 * 解析AFL结构，方便后续读取记录数据
