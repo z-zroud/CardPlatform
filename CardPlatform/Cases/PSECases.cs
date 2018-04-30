@@ -175,7 +175,7 @@ namespace CardPlatform.Cases
                 if(item.Tag == "5F2D")
                 {
                     string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if(UtilLib.Utils.IsAlphaNum(value))
+                    if(CaseUtil.IsAlpha(value))
                     {
                         TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
                     }

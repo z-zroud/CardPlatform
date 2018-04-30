@@ -50,10 +50,10 @@ int main()
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
     string dpFormat = "神舟数码";
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\稷山河东村镇银行.txt";
+    string dpPath = dpDir + dpFormat + "\\33_496121_20201018_20201018803_ic.txt";
     rulePath += "河东村镇银行_神码_华大_G81140042.xml";
     string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
-    //GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);

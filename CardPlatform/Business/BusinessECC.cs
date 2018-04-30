@@ -15,9 +15,10 @@ namespace CardPlatform.Business
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         private bool isEccTranction = false;
+        private AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default
 
         /// <summary>
-        /// 开始交易流程
+        /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存
         /// </summary>
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
@@ -29,7 +30,7 @@ namespace CardPlatform.Business
             locator.Terminal.TermianlSettings.Tag9F7A = "01";
             locator.Terminal.TermianlSettings.Tag9C = "00";
 
-            // do des uics transaction
+            // 做国际交易
             if (doDesTrans)
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "00";
@@ -38,16 +39,11 @@ namespace CardPlatform.Business
                 var resp = SelectAid(aid);
                 if (resp.SW != 0x9000)
                 {
-                    //baseCase.ShowInfo(caseNo,string.Format()
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
+                    return;
                 }
-                string tag9F38 = tagDict.GetTag("9F38");
-                var tls = DataParse.ParseTL(tag9F38);
-                string pdol = string.Empty;
-                foreach (var tl in tls)
-                {
-                    pdol += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
-                }
-                var AFLs = GPOEx(pdol);
+
+                var AFLs = GPOEx();
                 ReadRecords(AFLs);
                 if(isEccTranction)
                 {
@@ -70,7 +66,7 @@ namespace CardPlatform.Business
                 {
                     pdol += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
                 }
-                var AFLs = GPOEx(pdol);
+                var AFLs = GPOEx();
                 ReadRecords(AFLs);
                 if (isEccTranction)
                 {
@@ -103,9 +99,17 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="pdol"></param>
         /// <returns></returns>
-        protected List<AFL> GPOEx(string pdol)
+        protected List<AFL> GPOEx()
         {
-            ApduResponse response = base.GPO(pdol);
+            string tag9F38 = tagDict.GetTag("9F38");
+            var tls = DataParse.ParseTL(tag9F38);
+            string pdolData = string.Empty;
+            foreach (var tl in tls)
+            {
+                pdolData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+            }
+
+            ApduResponse response = base.GPO(pdolData);
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count == 1 &&
                 tlvs[0].Value.Length > 4)

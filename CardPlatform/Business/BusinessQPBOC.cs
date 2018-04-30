@@ -9,6 +9,7 @@ using CardPlatform.Config;
 
 namespace CardPlatform.Business
 {
+
     /*************************************************************
      * 该类描述了QPBOC交易流程
      *************************************************************/
@@ -18,6 +19,7 @@ namespace CardPlatform.Business
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         private bool isQPBOCTranction = false;
+        private AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default
 
         /// <summary>
         /// 开始交易流程
@@ -38,8 +40,8 @@ namespace CardPlatform.Business
             if (doDesTrans)
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "00";   //SM算法支持指示位
-                
-                if(!SelectApp(aid))
+                curTransAlgorithmCategory = AlgorithmCategory.DES;
+                if (!SelectApp(aid))
                 {
                     baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                     return;
@@ -50,7 +52,7 @@ namespace CardPlatform.Business
                     baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                     return;
                 }
-                if(ReadAppRecords(AFLs))
+                if(!ReadAppRecords(AFLs))
                 {
                     baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                     return;
@@ -73,20 +75,21 @@ namespace CardPlatform.Business
             if (doSMTrans)   
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
+                curTransAlgorithmCategory = AlgorithmCategory.SM;
                 if (!SelectApp(aid))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用步骤失败，交易流程终止");
                     return;
                 }
                 var AFLs = GPOEx();
                 if (AFLs.Count == 0)
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO步骤失败，交易流程终止");
                     return;
                 }
-                if (ReadAppRecords(AFLs))
+                if (!ReadAppRecords(AFLs))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录步骤失败，交易流程终止");
                     return;
                 }
 
@@ -140,31 +143,56 @@ namespace CardPlatform.Business
         protected List<AFL> GPOEx()
         {
             var AFLs = new List<AFL>();
-
+            var caseNo = MethodBase.GetCurrentMethod().Name;
             var tls = DataParse.ParseTL(tagDict.GetTag("9F38"));
+
+            var tlTags = from tl in tls select tl.Tag;
+            if (curTransAlgorithmCategory == AlgorithmCategory.SM)
+            {   //国密算法判断PDOL是否包含tagDF69 SM算法指示器
+
+                if(!tlTags.Contains("DF69"))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "国密算法，PDOL中缺少tagDF69");
+                    return AFLs;
+                }
+            }
+            string[] terminalTags = { "9F66", "9F37","9F02","5F2A" }; //QPBOC交易中，PDOL需包含关键tag值
+            foreach(var tag in terminalTags)
+            {
+                if(!tlTags.Contains(tag))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "PDOL中缺少tag{0}", tag);
+                    return AFLs;
+                }
+            }
+            
             string PDOLData = string.Empty;
             foreach (var tl in tls)
             {
                 PDOLData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
             }
 
-            ApduResponse response = base.GPO(PDOLData);
-            
+            ApduResponse response = base.GPO(PDOLData);           
             if (response.SW != 0x9000)
-            {
-                var caseNo = MethodBase.GetCurrentMethod().Name;
+            {               
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
                 return AFLs;
             }
             if(ParseAndSave(response.Response))
-            {
-                AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
+            {               
                 string tag9F26 = tagDict.GetTag("9F26");
+                string tag9F27 = tagDict.GetTag("9F27");
                 if (!string.IsNullOrEmpty(tag9F26))
                 {
                     isQPBOCTranction = true;    //表明卡片支持QPBOC交易
                 }
-
+                int cardAction = Convert.ToInt32(tag9F27, 16);
+                if(cardAction != Constant.TC)
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "卡片拒绝此次交易，卡片代码[{0}]", tag9F27);
+                    return AFLs;
+                }
+                AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
                 IExcuteCase excuteCase = new GPOCase();
                 excuteCase.ExcuteCase(response);
             }
@@ -194,8 +222,10 @@ namespace CardPlatform.Business
                 }               
             }
 
-            IExcuteCase excuteCase = new ReadRecordCase();
-            excuteCase.ExcuteCase(resps);
+            CheckTag9F10Mac();  //校验MAC值
+
+            //IExcuteCase excuteCase = new ReadRecordCase();
+            //excuteCase.ExcuteCase(resps);
 
             return true;
         }
@@ -241,7 +271,7 @@ namespace CardPlatform.Business
             string hashInput = tag9F37 + tag9F02 + tag5F2A + tag9F69;
             string tag9F4B = tagDict.GetTag("9F4B");
 
-            if (doDesTrans) //DES算法
+            if (curTransAlgorithmCategory == AlgorithmCategory.DES) //DES算法
             {
                 string issuerPublicKeyRemainder = tagDict.GetTag("92");
                 string issuerExp = tagDict.GetTag("9F32");
@@ -305,6 +335,61 @@ namespace CardPlatform.Business
                 }
             }
             return 0;
+        }
+
+        private bool CheckTag9F10Mac()
+        {
+            string tag9F10 = tagDict.GetTag("9F10");
+            string tag9F10Mac = tag9F10.Substring(tag9F10.Length - 8);
+            string ATC = tagDict.GetTag("9F36");
+            string data = string.Empty;
+
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            if (tag9F10.Substring(18,2) == "01") //暂时只支持IDD为01类型
+            {
+                var tag9F79 = tag9F10.Substring(20, 10);
+                data = ATC + tag9F79 + "00";
+            }
+            
+            string macSessionKey = string.Empty;
+            string cardAcct = tagDict.GetTag("5A");
+            string cardSeq = tagDict.GetTag("5F34");
+            string mac = string.Empty;
+
+            if (curTransAlgorithmCategory == AlgorithmCategory.DES)
+            {
+                if (KeyType == TransKeyType.MDK)
+                {
+                    string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
+                    macSessionKey = Authencation.GenUdkSessionKey(UDKMACKey, ATC);
+                }
+                else
+                {
+                    macSessionKey = Authencation.GenUdkSessionKey(TransDesACKey, ATC);
+                }
+                mac = Authencation.GenTag9F10Mac(macSessionKey, data);
+            }
+            else
+            {
+                if (KeyType == TransKeyType.MDK)
+                {
+                    string UDKMACKey = Authencation.GenUdk(TransSMMACKey, cardAcct, cardSeq, 1);
+                    macSessionKey = Authencation.GenUdkSessionKey(UDKMACKey, ATC, 1);
+                }
+                else
+                {
+                    macSessionKey = Authencation.GenUdkSessionKey(TransSMMACKey, ATC, 1);
+                }
+                mac = Authencation.GenTag9F10Mac(macSessionKey, data,1);
+            }
+            
+            if(mac == tag9F10Mac)
+            {
+                baseCase.TraceInfo(CaseLevel.Sucess, caseNo, "校验tag9F10 mac成功");
+                return true;
+            }
+            baseCase.TraceInfo(CaseLevel.Failed, caseNo, "校验tag9F10 mac失败");
+            return false;
         }
     }
 }

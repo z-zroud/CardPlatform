@@ -150,7 +150,7 @@ namespace CardPlatform.Cases
                 var str9F12 = Utils.BcdToStr(tag9F12.Value);
                 if(tag9F12.Len < 1 ||
                     tag9F12.Len > 16 ||
-                    !Utils.IsAlphaNum(str9F12))
+                    !CaseUtil.IsAlpha(str9F12))
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }

@@ -6,10 +6,11 @@
 
 int main()
 {
-    //int a = 3;
-    //int b = 4;
-    //int c = a ^ b;
-    //int d = a ^ c;
+    char mac[17] = { 0 };
+    char* xxx = "6270420433000000214";
+    char temp[33] = { 0 };
+    GenUdk("72F157B16AF707F1168BD513A731AFE3", xxx, "00", temp, 1);
+    GenIssuerScriptMac("45678327482367637265736475632364", "12334534675656", mac, 1);
     string keyA = "1654A92373B4853434C375834D245645";
     string AC = "38893731468C431F7A1558F2B0322CBA";
     string keyB = "2EDD9E123538C62B4ED62D71FD167AFF";

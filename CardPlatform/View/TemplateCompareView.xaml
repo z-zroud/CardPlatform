@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="CardPlatform.View.TemplateCompareView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CardPlatform.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             Background="AliceBlue"
+             DataContext="{Binding Source={StaticResource Locator}, Path=Transaction}">
+    <Grid  Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+            <TextBlock Text="选择模板:" Width="60" VerticalAlignment="Center" />
+            <ComboBox  Margin="2" Height="30" Width="500"
+                            Style="{DynamicResource VirtualisedMetroComboBox}"
+                            ItemsSource="{Binding Aids}"
+                            SelectedItem="{Binding SelectedAid}"
+                            MaxDropDownHeight="125" />
+        </StackPanel>
+        <DataGrid Grid.Row="2" VerticalAlignment="Top"  RenderOptions.ClearTypeHint="Enabled"
+                                TextOptions.TextFormattingMode="Display"
+                                Margin="5"
+                                Height="500"
+                                ItemsSource="{Binding Path=CaseInfos}"
+                                Style="{DynamicResource AzureDataGrid}"
+                                AutoGenerateColumns="False"
+                               ScrollViewer.VerticalScrollBarVisibility="Auto"
+                               ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center">
+                    </Setter>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn IsReadOnly="True" Header="标签"  Width="100" Binding="{Binding CaseNo}"/>
+                <DataGridTextColumn IsReadOnly="True" Header="卡片值" Width="350" Binding="{Binding CaseInfo}"/>
+                <DataGridTextColumn IsReadOnly="True" Header="模板值" Width="350" Binding="{Binding CaseInfo}"/>
+                <DataGridTemplateColumn Header="结果">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CaseLevel}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Foreground="{Binding ColorMark}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

@@ -168,23 +168,25 @@ void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* ma
 	string rightSessionMacKey = sessionMacKey.substr(16);
 	string calcData = data;
 
-	if (calcData.length() % 16 == 0)
-	{
-		calcData += "8000000000000000";
-	}
-	else {
-		calcData += "80";
-		int remaindZero = calcData.length() % 16;
-		calcData.append(remaindZero, '0');
-	}
-	//printf("MAC: %s", calcData);
+    if (keyType == 0)   //SM算法中，已经强制补80了，因此，这里无需再补
+    {
+        if (calcData.length() % 16 == 0)
+        {
+            calcData += "8000000000000000";
+        }
+        else {
+            calcData += "80";
+            int remaindZero = calcData.length() % 16;
+            calcData.append(remaindZero, '0');
+        }
+    }
 
-	int blocks = calcData.length() / 16;
-	char szOutput[17] = { 0 };
-
-	string blockData = calcData.substr(0, 16);
+    char szOutput[33] = { 0 };
     if (keyType == DES_KEY)
     {
+        int blocks = calcData.length() / 16;
+        
+        string blockData = calcData.substr(0, 16);
         for (int i = 1; i < blocks; i++)
         {
             Des(szOutput, (char*)leftSessionMacKey.c_str(), (char*)blockData.c_str());
@@ -196,8 +198,11 @@ void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* ma
         Des(szOutput, (char*)leftSessionMacKey.c_str(), szOutput);
     }
     else {
-        //PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
-        //PDllSM4_ECB_ENC Dll_SM4_ECB_ENC = GetSMFunc<PDllSM4_ECB_ENC>("dllSM4_ECB_ENC");
+        PDllSM4_CBC_MAC DllSM4_CBC_MAC = GetSMFunc<PDllSM4_CBC_MAC>("dllSM4_CBC_MAC");
+        if (DllSM4_CBC_MAC)
+        {
+            DllSM4_CBC_MAC((char*)udkMacSessionKey, (char*)calcData.c_str(), "0000000000000000", szOutput);
+        }
     }
 
 

@@ -19,7 +19,7 @@ namespace CardPlatform.Business
 
 
         /// <summary>
-        /// 开始交易流程
+        /// 开始UICS交易流程
         /// </summary>
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>

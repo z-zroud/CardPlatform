@@ -48,6 +48,9 @@ namespace CardPlatform.Cases
                         GetType().GetMethod(item).Invoke(this, null);
                 }
             }
+            var compObj = DataTemplateConfig.GetInstance();
+            if (!compObj.HasLoaded)
+                compObj.Load("ProjectTemplate");
         }
 
         /// <summary>
@@ -75,10 +78,6 @@ namespace CardPlatform.Cases
             locator.Transaction.CaseInfos.Add(caseInfo);
         }
 
-        public virtual void ShowComparedResult(string tag)
-        {
-
-        }
 
         /// <summary>
         /// 根据case编号获取描述信息

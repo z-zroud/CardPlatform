@@ -114,5 +114,13 @@ namespace CplusplusDll
 
             return mac.ToString().Substring(0, 16);
         }
+
+        public static string GenTag9F10Mac(string udkMacSessionKey, string data, int keyType = 0)
+        {
+            StringBuilder mac = new StringBuilder(9);
+            CDll.GenIssuerScriptMac(udkMacSessionKey, data, mac, keyType);
+
+            return mac.ToString().Substring(0, 8);
+        }
     }
 }
