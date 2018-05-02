@@ -108,6 +108,7 @@
     <Compile Include="Models\AlgorithmModel.cs" />
     <Compile Include="Models\DpParseModel.cs" />
     <Compile Include="Models\SecureChannelModel.cs" />
+    <Compile Include="Models\TemplateComparedInfo.cs" />
     <Compile Include="Models\TerminalModel.cs" />
     <Compile Include="Models\TransConfig.cs" />
     <Compile Include="Models\TransInfoModel.cs" />

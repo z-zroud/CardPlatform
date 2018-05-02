@@ -105,7 +105,7 @@ namespace CardPlatform.ViewModel
                                 locator.Personlize.ConfigCollection.RemoveAt(i);
                                 ConfigCollection.RemoveAt(i);
                                 ISerialize serialize = new XmlSerialize();
-                                serialize.Serialize(locator.Personlize.ConfigCollection, "PersonlizeSettings.xml");
+                                serialize.Serialize(locator.Personlize.ConfigCollection, ".\\Configuration\\AppConfig\\PersonlizeSettings.xml");
                                 break;
                             }
                         }

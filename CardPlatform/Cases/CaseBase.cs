@@ -106,7 +106,7 @@ namespace CardPlatform.Cases
             var caseConfig = CaseConfig.GetInstance();
             if(!caseConfig.HasLoaded)
             {
-                CaseDict = caseConfig.Load("CaseConfiguration.xml");
+                CaseDict = caseConfig.Load(".\\Configuration\\AppConfig\\CaseConfiguration.xml");
             }
             CaseDict.TryGetValue(Step, out CaseInfos);
         }

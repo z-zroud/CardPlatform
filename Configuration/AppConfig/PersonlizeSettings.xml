@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfPersonlizeConfig>
+  <PersonlizeConfig>
+    <ConfigName>333333</ConfigName>
+    <DpType Name="银联" DllName="DpParse_YL.dll" FuncName="HandleDp" />
+    <ISD>A000000003000000</ISD>
+    <KMC>404142434445464748494A4B4C4D4E4F</KMC>
+    <DivMethod>0</DivMethod>
+    <SecureLevel>0</SecureLevel>
+    <DelInst>0</DelInst>
+  </PersonlizeConfig>
+  <PersonlizeConfig>
+    <ConfigName>666</ConfigName>
+    <DpFilePath>123</DpFilePath>
+    <DpType Name="华腾" DllName="DpParse_HT.dll" FuncName="HandleDp" />
+    <DpRulePath>567</DpRulePath>
+    <ISD>A000000004000000</ISD>
+    <KMC>47454D5850524553534F53414D504C45</KMC>
+    <DivMethod>1</DivMethod>
+    <SecureLevel>1</SecureLevel>
+    <DelInst>1</DelInst>
+  </PersonlizeConfig>
+  <PersonlizeConfig>
+    <ConfigName>44444</ConfigName>
+    <DpFilePath>344</DpFilePath>
+    <DpType Name="银联" DllName="DpParse_YL.dll" FuncName="HandleDp" />
+    <DpRulePath>大概</DpRulePath>
+    <ISD>A000000003000000</ISD>
+    <KMC>404142434445464748494A4B4C4D4E4F</KMC>
+    <DivMethod>2</DivMethod>
+    <SecureLevel>1</SecureLevel>
+    <InstallParamsFilePath>升格为</InstallParamsFilePath>
+    <DelInst>1</DelInst>
+  </PersonlizeConfig>
+</ArrayOfPersonlizeConfig>

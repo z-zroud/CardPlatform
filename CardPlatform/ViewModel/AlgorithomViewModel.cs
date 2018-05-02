@@ -321,7 +321,7 @@ namespace CardPlatform.ViewModel
         private void Load()
         {
             ISerialize serialize = new XmlSerialize();
-            var algorithmCfg = (AlgorithmConfig)serialize.DeserizlizeFromFile("AlgorithmConfiguration.xml", typeof(AlgorithmConfig));
+            var algorithmCfg = (AlgorithmConfig)serialize.DeserizlizeFromFile(".\\Configuration\\AppConfig\\AlgorithmConfiguration.xml", typeof(AlgorithmConfig));
             EncryptType = algorithmCfg.AlgorithmType;
             if (EncryptType.Count > 0)
                 SelectedEncryptType = 0;

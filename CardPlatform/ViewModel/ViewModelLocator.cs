@@ -49,6 +49,7 @@ namespace CardPlatform.ViewModel
             SimpleIoc.Default.Register<CardCheckViewModel>();
             SimpleIoc.Default.Register<TransactionViewModel>();
             SimpleIoc.Default.Register<TerminalViewModel>();
+            SimpleIoc.Default.Register<TemplateCompareViewModel>();
         }
 
         public MainViewModel Main
@@ -88,6 +89,14 @@ namespace CardPlatform.ViewModel
             get
             {
                 return ServiceLocator.Current.GetInstance<CardCheckViewModel>();
+            }
+        }
+
+        public TemplateCompareViewModel TemplateCompare
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<TemplateCompareViewModel>();
             }
         }
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PersonlizeConfiguartion>
+      <DpType>
+            <Type name="银联" dllName="DpParse_YL.dll" funcName="HandleDp" />
+            <Type name="华腾" dllName="DpParse_HT.dll" funcName="HandleDp" />
+            <Type name="神码" dllName="DpParse_SZSM.dll" funcName="HandleDp"  />
+            <Type name="中信" dllName="DpParse_ZJ_TL.dll" funcName="HandleDp"  />
+            <Type name="深圳华信" dllName="DpParse_DXT.dll" funcName="HandleDp"  />
+      </DpType>
+      <AIDs>
+            <AID>A000000003000000</AID>
+            <AID>A000000004000000</AID>
+      </AIDs>
+      <KMCs>
+            <KMC>404142434445464748494A4B4C4D4E4F</KMC>
+            <KMC>47454D5850524553534F53414D504C45</KMC>
+      </KMCs>
+      <DivType>
+            <Type>No Div</Type>
+            <Type>CPG 202</Type>
+            <Type>CPG 212</Type>
+      </DivType>
+      <Secure>
+            <SecureLevel>No Secure</SecureLevel>
+            <SecureLevel>Mac Secure</SecureLevel>
+      </Secure>
+      <DelInst>
+            <Type>Del Be Ready Install</Type>
+            <Type>Del All</Type>
+      </DelInst>
+</PersonlizeConfiguartion>

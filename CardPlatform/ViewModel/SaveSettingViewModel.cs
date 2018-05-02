@@ -67,7 +67,7 @@ namespace CardPlatform.ViewModel
             locator.Personlize.Config.ConfigName = ConfigName;
             locator.Personlize.ConfigCollection.Add(locator.Personlize.Config);
             ISerialize serialize = new XmlSerialize();
-            serialize.Serialize(locator.Personlize.ConfigCollection, "PersonlizeSettings.xml");           
+            serialize.Serialize(locator.Personlize.ConfigCollection, ".\\Configuration\\AppConfig\\PersonlizeSettings.xml");           
             ConfigName = string.Empty;
             Close();
         }

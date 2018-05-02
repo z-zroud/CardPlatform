@@ -1,0 +1,23 @@
+<param project="PBOC CPS">
+    <Install_APP>
+        <Package_AID>A0000000180F000001833032</Package_AID>
+        <Applet_AID> A0000000180F0000018303</Applet_AID>
+        <App_permissions>10</App_permissions>
+        <Install_Param>C90100</Install_Param>
+        <Token></Token>
+    </Install_APP>    
+    <Perso_PSE>
+        <Mode>CPS</Mode>
+        <AuthenAID>[AID]Instance_AID</AuthenAID>
+        <IsPersoEnd>TRUE</IsPersoEnd>
+    </Perso_PSE>
+    <Perso_PPSE>
+        <Mode>CPS</Mode>
+        <AuthenAID>[AID]Instance_AID</AuthenAID>
+        <IsPersoEnd>TRUE</IsPersoEnd>
+    </Perso_PPSE>
+    <Perso_APP>
+        <Mode>CPS</Mode>
+        <IsPersoEnd>TRUE</IsPersoEnd>
+    </Perso_APP>
+</param>

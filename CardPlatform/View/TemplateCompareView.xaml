@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000"
              Background="AliceBlue"
-             DataContext="{Binding Source={StaticResource Locator}, Path=Transaction}">
+             DataContext="{Binding Source={StaticResource Locator}, Path=TemplateCompare}">
     <Grid  Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>

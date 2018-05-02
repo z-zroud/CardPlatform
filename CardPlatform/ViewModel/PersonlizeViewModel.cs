@@ -324,7 +324,7 @@ namespace CardPlatform.ViewModel
         /// </summary>
         private void Load()
         {
-            XDocument doc = XDocument.Load("PersonlizeConfiguration.xml");
+            XDocument doc = XDocument.Load(".\\Configuration\\AppConfig\\PersonlizeConfiguration.xml");
             if(doc != null)
             {
                 var root = doc.Root;
@@ -373,7 +373,7 @@ namespace CardPlatform.ViewModel
             }
 
             ISerialize serialize = new XmlSerialize();
-            ConfigCollection = (List< PersonlizeConfig>)serialize.DeserizlizeFromFile("PersonlizeSettings.xml", typeof(List<PersonlizeConfig>));
+            ConfigCollection = (List< PersonlizeConfig>)serialize.DeserizlizeFromFile(".\\Configuration\\AppConfig\\PersonlizeSettings.xml", typeof(List<PersonlizeConfig>));
         }
     }
 }

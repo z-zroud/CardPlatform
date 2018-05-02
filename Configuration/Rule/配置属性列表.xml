@@ -1,0 +1,59 @@
+<!-- -->
+<Rule>
+	<Encrypt>
+		<Attribute name="DGI" comment=""/>
+		<Attribute name="type" comment="(DES,SM)"/>
+		<Attribute name="key" comment=""/>
+		<Attribute name="delete80" comment="(false, true)/>
+	</Encrypt>
+	<AddTagToValue>
+	      <Attribute name="DGI" comment=""/>
+	</AddTagToValue>
+	<SpliteEF02> <!--->	  
+	</SpliteEF02>
+	<AddKcv>
+	      <Attribute name="srcDGI" comment=">
+	      <Attribute name="dstDGI" comment=">
+	      <Attribute name="keyType" comment="(DES,SM)"/>
+	</AddKcv>
+	<TagEncrypt>
+	      <Attribute name="tag" comment=""/>
+	      <Attribute name="type" comment="(DES,SM)"/>
+	      <Attribute name="key" comment=""/>
+	      <Attribute name="startPos" comment=""/>
+	      <Attribute name="len" comment="?/>
+	</TagEncrypt>
+	<Map>
+	      <Attribute name="srcDGI" comment=""/>
+	      <Attribute name="dstDGI" comment=""/>
+	</Map>
+	<MergeTag>
+	      <Attribute name="srcDGI" comment=""/>
+	      <Attribute name="srcTag" comment=""/>
+	      <Attribute name="dstDGI" comment=""/>
+	      <Attribute name="dstTag" comment=""/>
+	</MergeTag>
+	<Exchange>
+	      <Attribute name="srcDGI" comment=""/>
+	      <Attribute name="exchangedDGI" comment=""/>
+	</Exchange>
+	<AddTagFromDGI>
+	      <Attribute name="srcDGI" comment=""/>
+	      <Attribute name="srcTag" comment=""/>
+	      <Attribute name="dstDGI" comment=""/>
+	      <Attribute name="dstTag" comment=""/>
+	</AddTagFromDGI>
+	<AddFixedTag>
+	      <Attribute name="srcDGI" comment=""/>
+	      <Attribute name="tag" comment=""/>
+	      <Attribute name="tagValue" comment=""/>
+	</AddFixedTag>
+	<DeletedDGI>
+	      <Attribute name="DGI" comment=""/>
+	</DeletedDGI>
+	<DeletedTag>
+	      <Attribute name="DGI" comment=""/>
+	      <Attribute name="tag" comment=""/>
+	</DeletedTag>
+</Rule>
+	

@@ -234,7 +234,7 @@ namespace CardPlatform.ViewModel
         private void Load()
         {
             ISerialize serialize = new XmlSerialize();
-            var transactionCfg = (TransConfig)serialize.DeserizlizeFromFile("TransConfiguration.xml", typeof(TransConfig));
+            var transactionCfg = (TransConfig)serialize.DeserizlizeFromFile(".\\Configuration\\AppConfig\\TransConfiguration.xml", typeof(TransConfig));
             TransCategorys = transactionCfg.TransCates;
             if (TransCategorys.Count > 0)
                 SelectedCategory = 0;

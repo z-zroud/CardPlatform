@@ -26,19 +26,20 @@ namespace CardPlatform.Config
         public string Value { get; set; }
         public string TipLevel { get; set; }
         public CheckMode Mode { get; set; }
+        public bool HasCheckted { get; set; }
     }
 
     public class DataTemplateConfig
     {
         private static DataTemplateConfig config;
-        private Dictionary<string, TemplateTag> TemplateTagDict;
+        private Dictionary<string, TemplateTag> TemplateTags;
 
         public bool HasLoaded { get; private set; }
 
         private DataTemplateConfig()
         {
             HasLoaded = false;
-            TemplateTagDict = new Dictionary<string, TemplateTag>();
+            TemplateTags = new Dictionary<string, TemplateTag>();
         }
 
         public static DataTemplateConfig GetInstance()
@@ -72,11 +73,11 @@ namespace CardPlatform.Config
                         templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value);
                         templateTag.Value = item.Attribute("value").Value;
                         templateTag.TipLevel = item.Attribute("level").Value;
-                        TemplateTagDict.Add(templateTag.Name, templateTag);
+                        templateTag.HasCheckted = false;
+                        TemplateTags.Add(templateTag.Name, templateTag);
                     }
                 }
             }
-
         }
 
         /// <summary>
@@ -86,8 +87,12 @@ namespace CardPlatform.Config
         /// <returns></returns>
         public TemplateTag GetTemplateTag(string tag)
         {
-            if (TemplateTagDict.ContainsKey(tag))
-                return TemplateTagDict[tag];
+            if (TemplateTags.ContainsKey(tag))
+            {
+                TemplateTags[tag].HasCheckted = true;
+                return TemplateTags[tag];
+            }
+                
             return null;
         }
     }

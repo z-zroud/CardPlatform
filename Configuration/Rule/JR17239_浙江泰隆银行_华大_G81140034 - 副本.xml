@@ -1,0 +1,19 @@
+<Rule>
+      <Encrypt DGI="8000" type="DES" key="EA4A94803E3D85A21A2376DF973EB515"/>
+      <Encrypt DGI="8020" type="DES" key="EA4A94803E3D85A21A2376DF973EB515"/>
+      <Encrypt DGI="8201" type="DES" key="EA4A94803E3D85A21A2376DF973EB515"/>
+      <Encrypt DGI="8202" type="DES" key="EA4A94803E3D85A21A2376DF973EB515"/>
+      <Encrypt DGI="8203" type="DES" key="EA4A94803E3D85A21A2376DF973EB515"/>
+      <Encrypt DGI="8204" type="DES" key="EA4A94803E3D85A21A2376DF973EB515"/>         
+      <Encrypt DGI="8205" type="DES" key="EA4A94803E3D85A21A2376DF973EB515"/>
+      <Encrypt DGI="8100" type="SM" key="00000000000000000000000000000000"/>
+      <Encrypt DGI="8030" type="SM" key="00000000000000000000000000000000"/>
+      <Map srcDGI="8402" dstDGI="8100"/>
+      <Map srcDGI="8001" dstDGI="8030"/>
+      <Map srcDGI="9001" dstDGI="9030"/>
+      <Map srcDGI="9105" dstDGI="9114"/>
+      <Map srcDGI="9204" dstDGI="9213"/>
+      <Map srcDGI="9208" dstDGI="9217"/>
+      <DeletedDGI DGI="AID_8888"/>
+      <DeletedDGI DGI="KMC_7777"/>
+</Rule>

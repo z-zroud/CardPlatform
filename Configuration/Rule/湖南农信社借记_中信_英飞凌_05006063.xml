@@ -1,0 +1,13 @@
+<Rule>
+      <Encrypt DGI="8000" type="DES" key="76767676767676767676767676767676" />
+      <Encrypt DGI="8020" type="DES" key="76767676767676767676767676767676" />
+      <Encrypt DGI="8201" type="DES" key="76767676767676767676767676767676" delete80="true"/>
+      <Encrypt DGI="8202" type="DES" key="76767676767676767676767676767676" delete80="true"/>
+      <Encrypt DGI="8203" type="DES" key="76767676767676767676767676767676" delete80="true"/>
+      <Encrypt DGI="8204" type="DES" key="76767676767676767676767676767676" delete80="true"/>         
+      <Encrypt DGI="8205" type="DES" key="76767676767676767676767676767676" delete80="true"/>
+      <InsertValue DGI="9207" tag="94" pos="24" value="30010200"/>
+      <DeletedDGI DGI="8888"/>
+      <DeletedDGI DGI="7777"/>
+      <DeletedTag DGI="0801" tag="9F69"/>
+</Rule>

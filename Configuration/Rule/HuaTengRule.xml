@@ -1,0 +1,22 @@
+<Rule>
+      <Encrypt DGI="8000" type="DES" key="386B83A75B08615E161549B3346826C1"/>
+      <Encrypt DGI="8201" type="DES" key="386B83A75B08615E161549B3346826C1"/>
+      <Encrypt DGI="8202" type="DES" key="386B83A75B08615E161549B3346826C1"/>
+      <Encrypt DGI="8203" type="DES" key="386B83A75B08615E161549B3346826C1"/>
+      <Encrypt DGI="8204" type="DES" key="386B83A75B08615E161549B3346826C1"/>         
+      <Encrypt DGI="8205" type="DES" key="386B83A75B08615E161549B3346826C1"/>
+      <Encrypt DGI="8002" type="SM" key="6F0878CC046AD13B0E4CD1CA80867B5F"/>
+      <Encrypt DGI="8302" type="SM" key="6F0878CC046AD13B0E4CD1CA80867B5F"/>
+      <TagEncrypt tag="57" type="DES" key="6BAB7337801AD007702AA2575E2CD36E" startPos="12" len="36"/>
+      <Map srcDGI="9105" dstDGI="9114"/>
+      <Map srcDGI="9204" dstDGI="9213"/>
+      <Map srcDGI="9208" dstDGI="9217"/>
+      <Map srcDGI="8302" dstDGI="8100"/>
+      <Map srcDGI="8002" dstDGI="8030"/>
+      <Map srcDGI="9002" dstDGI="9030"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="3000" dstTag="9F36"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="3000" dstTag="9F4F"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="3000" dstTag="DF4F"/>
+      <AddFixedTag srcDGI="0E01" tag="9F13" tagValue="0000"/>
+      <DeletedDGI DGI="3000"/>
+</Rule>
