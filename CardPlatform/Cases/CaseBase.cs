@@ -50,7 +50,7 @@ namespace CardPlatform.Cases
             }
             var compObj = DataTemplateConfig.GetInstance();
             if (!compObj.HasLoaded)
-                compObj.Load("ProjectTemplate");
+                compObj.Load(".\\Configuration\\AppConfig\\TemplateConfig\\ProjectTemplate.xml");
         }
 
         /// <summary>

@@ -19,7 +19,6 @@ namespace CardPlatform.Business
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         private bool isQPBOCTranction = false;
-        private AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default
 
         /// <summary>
         /// 开始交易流程
@@ -236,160 +235,35 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int OfflineAuthcation()
         {
-            int result;
+            IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (aid.Length < 10)
+
+            string issuerPublicKey = string.Empty;
+            if (!SDA(ref issuerPublicKey))
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "应用AID长度太短");
-                return -1;
-            }
-            string rid = aid.Substring(0, 10);
-            string CAIndex = tagDict.GetTag("8F");
-            if (CAIndex.Length != 2)
-            {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA 索引,请检查8F是否存在");
-                return -2;
-            }
-            string CAPublicKey = Authencation.GenCAPublicKey(CAIndex, rid);
-            if (string.IsNullOrWhiteSpace(CAPublicKey))
-            {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA公钥，请检查RID及索引是否正确");
+                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
                 return -3;
             }
-
-            string issuerPublicKey;
-            string issuerPublicCert = tagDict.GetTag("90");
-            string PAN = tagDict.GetTag("5A");
-            string signedStaticAppData = tagDict.GetTag("93");
-            string iccPublicCert = tagDict.GetTag("9F46");
-            string AIP = tagDict.GetTag("82");
 
             string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");
             string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");
             string tag5F2A = locator.Terminal.TermianlSettings.GetTag("5F2A");
             string tag9F69 = tagDict.GetTag("9F69");
-            string hashInput = tag9F37 + tag9F02 + tag5F2A + tag9F69;
+            string ddolData = tag9F37 + tag9F02 + tag5F2A + tag9F69;
             string tag9F4B = tagDict.GetTag("9F4B");
-
-            if (curTransAlgorithmCategory == AlgorithmCategory.DES) //DES算法
+            if (string.IsNullOrWhiteSpace(tag9F4B))
             {
-                string issuerPublicKeyRemainder = tagDict.GetTag("92");
-                string issuerExp = tagDict.GetTag("9F32");
-                issuerPublicKey = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp);
-                if (string.IsNullOrWhiteSpace(issuerPublicKey))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在");
-                    return -4;
-                }
-
-                result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
-                if (result != 0)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "静态数据认证失败!");
-                    return -5;
-                }
-
-                string iccPublicKeyRemainder = tagDict.GetTag("9F48");
-                string iccPublicKeyExp = tagDict.GetTag("9F47");
-                string iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
-                if (string.IsNullOrWhiteSpace(iccPublicKey))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
-                    return -6;
-                }
-
-                result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, hashInput);
-                if (result != 0)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "动态数据认证失败!");
-                    return -8;
-                }
+                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
+                return -7;
             }
-            else //SM算法
+
+            if (!DDA(issuerPublicKey, tag9F4B, ddolData))
             {
-                issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
-                if (string.IsNullOrWhiteSpace(issuerPublicKey))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
-                    return -4;
-                }
-
-                result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
-                if (result != 0)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 静态数据认证失败!");
-                    return -9;
-                }
-
-                string iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN);
-                if (string.IsNullOrWhiteSpace(iccPublicKey))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥");
-                    return -4;
-                }
-                result = Authencation.SM_DDA(iccPublicKey, tag9F4B, hashInput);
-                if (result != 0)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 动态数据认证失败!");
-                    return -10;
-                }
+                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                return -3;
             }
             return 0;
-        }
-
-        private bool CheckTag9F10Mac()
-        {
-            string tag9F10 = tagDict.GetTag("9F10");
-            string tag9F10Mac = tag9F10.Substring(tag9F10.Length - 8);
-            string ATC = tagDict.GetTag("9F36");
-            string data = string.Empty;
-
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (tag9F10.Substring(18,2) == "01") //暂时只支持IDD为01类型
-            {
-                var tag9F79 = tag9F10.Substring(20, 10);
-                data = ATC + tag9F79 + "00";
-            }
             
-            string macSessionKey = string.Empty;
-            string cardAcct = tagDict.GetTag("5A");
-            string cardSeq = tagDict.GetTag("5F34");
-            string mac = string.Empty;
-
-            if (curTransAlgorithmCategory == AlgorithmCategory.DES)
-            {
-                if (KeyType == TransKeyType.MDK)
-                {
-                    string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
-                    macSessionKey = Authencation.GenUdkSessionKey(UDKMACKey, ATC);
-                }
-                else
-                {
-                    macSessionKey = Authencation.GenUdkSessionKey(TransDesACKey, ATC);
-                }
-                mac = Authencation.GenTag9F10Mac(macSessionKey, data);
-            }
-            else
-            {
-                if (KeyType == TransKeyType.MDK)
-                {
-                    string UDKMACKey = Authencation.GenUdk(TransSMMACKey, cardAcct, cardSeq, 1);
-                    macSessionKey = Authencation.GenUdkSessionKey(UDKMACKey, ATC, 1);
-                }
-                else
-                {
-                    macSessionKey = Authencation.GenUdkSessionKey(TransSMMACKey, ATC, 1);
-                }
-                mac = Authencation.GenTag9F10Mac(macSessionKey, data,1);
-            }
-            
-            if(mac == tag9F10Mac)
-            {
-                baseCase.TraceInfo(CaseLevel.Sucess, caseNo, "校验tag9F10 mac成功");
-                return true;
-            }
-            baseCase.TraceInfo(CaseLevel.Failed, caseNo, "校验tag9F10 mac失败");
-            return false;
-        }
+        }        
     }
 }

@@ -13,8 +13,8 @@ namespace CardPlatform.Config
     /// </summary>
     public enum CheckMode
     {
-        FixedMode = 0,
-        RegMode = 1
+        Fixed = 0,
+        Regex = 1
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ namespace CardPlatform.Config
                     {
                         var templateTag = new TemplateTag();
                         templateTag.Name = item.Attribute("name").Value;
-                        templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value);
+                        templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value, true);
                         templateTag.Value = item.Attribute("value").Value;
                         templateTag.TipLevel = item.Attribute("level").Value;
                         templateTag.HasCheckted = false;

@@ -27,6 +27,9 @@ namespace CardPlatform.Models
             return (string)GetType().GetProperty(propertyName).GetValue(this);
         }
 
+        /// <summary>
+        /// 授权金额
+        /// </summary>
         private string _tag9F02;
         public string Tag9F02
         {
@@ -37,6 +40,9 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 其他金额
+        /// </summary>
         private string _tag9F03;
         public string Tag9F03
         {
@@ -57,6 +63,9 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 终端国家代码
+        /// </summary>
         private string _tag9F1A;
         public string Tag9F1A
         {
@@ -67,6 +76,9 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 交易货币代码
+        /// </summary>
         private string _tag5F2A;
         public string Tag5F2A
         {
@@ -90,6 +102,9 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 商户名称
+        /// </summary>
         private string _tag9F4E;
         public string Tag9F4E
         {
