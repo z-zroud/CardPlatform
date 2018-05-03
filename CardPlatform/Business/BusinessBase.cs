@@ -29,7 +29,7 @@ namespace CardPlatform.Business
         protected string toBeSignAppData;
         protected string aid;
         protected AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default
-        //protected List<AFL> AFLs;
+
 
         public void SetTransDESKeys(string acKey,string macKey,string encKey)
         {
@@ -86,6 +86,7 @@ namespace CardPlatform.Business
 
         protected virtual List<ApduResponse> ReadRecords(List<AFL> afls)
         {
+            toBeSignAppData = string.Empty; //每次读取记录时，置空
             var responses = new List<ApduResponse>();
             foreach(var afl in afls)
             {

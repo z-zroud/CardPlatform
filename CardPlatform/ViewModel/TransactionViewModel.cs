@@ -124,6 +124,11 @@ namespace CardPlatform.ViewModel
         public AlgorithmModel AlgorithmType { get; set; }
 
         /// <summary>
+        /// 交易结果显示
+        /// </summary>
+        public TransResultModel TransResult { get; set; }
+
+        /// <summary>
         /// 选中国密
         /// </summary>
         private bool _hasSelectedSMKey;

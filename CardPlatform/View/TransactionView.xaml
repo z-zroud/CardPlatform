@@ -107,17 +107,17 @@
                         <TextBlock Text="交易结果 :"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                             <TextBlock Text="PBOC" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False"/>
+                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.PBOCResult}"/>
                             <Control Width="20"/>
                             <TextBlock Text="UICS" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False"/>
+                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.UICSResult}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="ECC" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False"/>
+                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.ECCResult}"/>
                             <Control Width="20"/>
                             <TextBlock Text="QPBOC" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False"/>
+                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.QPBOCResult}"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>

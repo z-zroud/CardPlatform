@@ -32,76 +32,53 @@ namespace CardPlatform.Business
 
             locator.Terminal.TermianlSettings.Tag9C = "00";         //交易类型(消费交易)
             locator.Terminal.TermianlSettings.Tag9F66 = "2A000080"; //终端交易属性
-            locator.Terminal.TermianlSettings.TagDF60 = "00";   //扩展交易指示位
-
-            var caseNo = MethodBase.GetCurrentMethod().Name;
+            locator.Terminal.TermianlSettings.TagDF60 = "00";   //扩展交易指示位           
             // 基于DES算法的QPBOC流程
             if (doDesTrans)
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "00";   //SM算法支持指示位
                 curTransAlgorithmCategory = AlgorithmCategory.DES;
-                if (!SelectApp(aid))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
-                    return;
-                }
-                var AFLs = GPOEx();
-                if(AFLs.Count == 0)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
-                    return;
-                }
-                if(!ReadAppRecords(AFLs))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                    return;
-                }
-
-                //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
-                if (isQPBOCTranction)
-                {
-                    OfflineAuthcation();
-                }
-                else
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "进行QPBOC交易失败");
-                    return;
-                }
-
+                DoTransEx();
             }
-
             //基于国密算法的交易流程
             if (doSMTrans)   
             {
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
                 curTransAlgorithmCategory = AlgorithmCategory.SM;
-                if (!SelectApp(aid))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用步骤失败，交易流程终止");
-                    return;
-                }
-                var AFLs = GPOEx();
-                if (AFLs.Count == 0)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO步骤失败，交易流程终止");
-                    return;
-                }
-                if (!ReadAppRecords(AFLs))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录步骤失败，交易流程终止");
-                    return;
-                }
+                DoTransEx();
+            }
+        }
 
-                //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
-                if (isQPBOCTranction)
-                {
-                    OfflineAuthcation();
-                }
-                else
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "进行QPBOC交易失败");
-                    return;
-                }
+        protected void DoTransEx()
+        {
+            tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            if (!SelectApp(aid))
+            {
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
+                return;
+            }
+            var AFLs = GPOEx();
+            if (AFLs.Count == 0)
+            {
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
+                return;
+            }
+            if (!ReadAppRecords(AFLs))
+            {
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                return;
+            }
+
+            //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
+            if (isQPBOCTranction)
+            {
+                OfflineAuthcation();
+            }
+            else
+            {
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "进行QPBOC交易失败");
+                return;
             }
         }
 

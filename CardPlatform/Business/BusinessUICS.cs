@@ -25,6 +25,7 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public override void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
         {
+            tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTrans(aid, doDesTrans, doSMTrans);
             locator.Terminal.TermianlSettings.Tag9F7A = "00";   //电子现金支持指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型

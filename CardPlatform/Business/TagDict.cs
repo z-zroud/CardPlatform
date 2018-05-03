@@ -30,6 +30,13 @@ namespace CardPlatform.Business
         }
 
         /// <summary>
+        /// 清空tag集合
+        /// </summary>
+        public void Clear()
+        {
+            tagDict.Clear();
+        }
+        /// <summary>
         /// 保存TLV格式的list集合
         /// </summary>
         /// <param name="arrTLV"></param>

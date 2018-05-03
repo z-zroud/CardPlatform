@@ -47,6 +47,7 @@ namespace CardPlatform.Business
 
         protected void DoTransEx()
         {
+            tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
@@ -124,8 +125,7 @@ namespace CardPlatform.Business
 
             ApduResponse response = base.GPO(pdolData);
             var tlvs = DataParse.ParseTLV(response.Response);
-            if (tlvs.Count == 1 &&
-                tlvs[0].Value.Length > 4)
+            if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
             {
 
                 tagDict.SetTag("82", tlvs[0].Value.Substring(0, 4));

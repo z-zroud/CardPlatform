@@ -113,6 +113,7 @@
     <Compile Include="Models\TransConfig.cs" />
     <Compile Include="Models\TransInfoModel.cs" />
     <Compile Include="Models\TransKeyModel.cs" />
+    <Compile Include="Models\TransResultModel.cs" />
     <Compile Include="Models\TransTypeModel.cs" />
     <Compile Include="ViewModel\AlgorithomViewModel.cs" />
     <Compile Include="ViewModel\CardCheckViewModel.cs" />
