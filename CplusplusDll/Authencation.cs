@@ -93,6 +93,12 @@ namespace CplusplusDll
 
         public static string GenUdk(string mdk, string cardNo, string cardSequence, int keyType = 0)
         {
+            if(mdk.Length != 32 ||
+                string.IsNullOrEmpty(cardNo) ||
+                string.IsNullOrEmpty(cardSequence))
+            {
+                return string.Empty;
+            }
             StringBuilder udk = new StringBuilder(33);
             CDll.GenUdk(mdk, cardNo, cardSequence, udk, keyType);
 
@@ -101,6 +107,12 @@ namespace CplusplusDll
 
         public static string GenArpc(string udkAuthSessionKey, string ac, string authCode, int keyType = 0)
         {
+            if(udkAuthSessionKey.Length != 32 ||
+                ac.Length != 16 ||
+                authCode.Length != 4)
+            {
+                return string.Empty;
+            }
             StringBuilder arpc = new StringBuilder(17);
             CDll.GenArpc(udkAuthSessionKey, ac, authCode, arpc, keyType);
 
@@ -117,6 +129,11 @@ namespace CplusplusDll
 
         public static string GenTag9F10Mac(string udkMacSessionKey, string data, int keyType = 0)
         {
+            if(udkMacSessionKey.Length != 32 ||
+                string.IsNullOrEmpty(data))
+            {
+                return string.Empty;
+            }
             StringBuilder mac = new StringBuilder(9);
             CDll.GenIssuerScriptMac(udkMacSessionKey, data, mac, keyType);
 

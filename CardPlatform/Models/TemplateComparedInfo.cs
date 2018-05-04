@@ -64,5 +64,7 @@ namespace CardPlatform.Models
                 Set(ref _colorMark, value);
             }
         }
+
+        public bool HasCheck { get; set; }
     }
 }

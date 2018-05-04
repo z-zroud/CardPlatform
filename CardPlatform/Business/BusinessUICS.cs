@@ -90,7 +90,10 @@ namespace CardPlatform.Business
             CardHolderVerify();
             TerminalRiskManagement();
             TerminalActionAnalyze();
+
             IssuerAuthencation();
+
+            
             TransactionEnd();
 
             return true;
@@ -318,14 +321,24 @@ namespace CardPlatform.Business
         {
             string acSessionKey;
             string ATC = tagDict.GetTag("9F36");
-            var caseBase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
+            
             if (curTransAlgorithmCategory == AlgorithmCategory.DES)
             {
+                if(string.IsNullOrEmpty(TransDesACKey))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "国际算法UDK/MDK不存在");
+                    return -1;
+                }
                 acSessionKey = GenSessionKey(TransDesACKey, KeyType, curTransAlgorithmCategory);
             }
             else
             {
+                if (string.IsNullOrEmpty(TransSMACKey))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "国密算法UDK/MDK不存在");
+                    return -1;
+                }
                 acSessionKey = GenSessionKey(TransSMACKey, KeyType, curTransAlgorithmCategory);
             }
             string AC = tagDict.GetTag("9F26");
@@ -354,6 +367,7 @@ namespace CardPlatform.Business
 
         protected int HandleIssuerScript(string tag, string value)
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
             string macSessionKey;
             string ATC = tagDict.GetTag("9F36");
             if (KeyType == TransKeyType.MDK)

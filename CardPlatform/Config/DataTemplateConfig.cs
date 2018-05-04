@@ -24,21 +24,18 @@ namespace CardPlatform.Config
     {
         public string Name { get; set; }
         public string Value { get; set; }
-        public string TipLevel { get; set; }
+        public CaseLevel TipLevel { get; set; }
         public CheckMode Mode { get; set; }
-        public bool HasCheckted { get; set; }
     }
 
     public class DataTemplateConfig
     {
         private static DataTemplateConfig config;
-        private Dictionary<string, TemplateTag> TemplateTags;
+        public Dictionary<string, TemplateTag> TemplateTags;
 
-        public bool HasLoaded { get; private set; }
 
         private DataTemplateConfig()
         {
-            HasLoaded = false;
             TemplateTags = new Dictionary<string, TemplateTag>();
         }
 
@@ -58,24 +55,19 @@ namespace CardPlatform.Config
         /// <returns></returns>
         public void Load(string path)
         {
-            if(!HasLoaded)
+            XDocument doc = XDocument.Load(path);
+            if (doc != null)
             {
-                XDocument doc = XDocument.Load(path);
-                if (doc != null)
+                var root = doc.Root;
+                var templateTags = root.Element("TagTemplate").Elements("Tag");
+                foreach (var item in templateTags)
                 {
-                    HasLoaded = true;
-                    var root = doc.Root;
-                    var templateTags = root.Element("TagTemplate").Elements("Tag");
-                    foreach (var item in templateTags)
-                    {
-                        var templateTag = new TemplateTag();
-                        templateTag.Name = item.Attribute("name").Value;
-                        templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value, true);
-                        templateTag.Value = item.Attribute("value").Value;
-                        templateTag.TipLevel = item.Attribute("level").Value;
-                        templateTag.HasCheckted = false;
-                        TemplateTags.Add(templateTag.Name, templateTag);
-                    }
+                    var templateTag = new TemplateTag();
+                    templateTag.Name = item.Attribute("name").Value;
+                    templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value, true);
+                    templateTag.Value = item.Attribute("value").Value;
+                    templateTag.TipLevel = (CaseLevel)Enum.Parse(typeof(CaseLevel), item.Attribute("level").Value, true);
+                    TemplateTags.Add(templateTag.Name, templateTag);
                 }
             }
         }
@@ -89,7 +81,6 @@ namespace CardPlatform.Config
         {
             if (TemplateTags.ContainsKey(tag))
             {
-                TemplateTags[tag].HasCheckted = true;
                 return TemplateTags[tag];
             }
                 

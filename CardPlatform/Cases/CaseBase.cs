@@ -48,25 +48,36 @@ namespace CardPlatform.Cases
                         GetType().GetMethod(item).Invoke(this, null);
                 }
             }
-            var compObj = DataTemplateConfig.GetInstance();
-            if (!compObj.HasLoaded)
-                compObj.Load(".\\Configuration\\AppConfig\\TemplateConfig\\ProjectTemplate.xml");
-            //ViewModelLocator locator = new ViewModelLocator();
-            
-            //foreach (var tlv in arrTLV)
-            //{
-            //    foreach(var item in locator.TemplateCompare.TemplateComparedInfos)
-            //    {
-            //        if(tlv.Tag == item.Tag)
-            //        {
-            //            item.CardValue = tlv.Value;
-            //            if(tlv.Value == item.TemplateValue)
-            //            {
-            //                item.ColorMark = new SolidColorBrush(Colors.Black);
-            //            }
-            //        }
-            //    }
-            //}
+            CheckTemplateTag();    
+        }
+
+        protected virtual void CheckTemplateTag()
+        {
+            ViewModelLocator locator = new ViewModelLocator();
+            var compareObj = DataTemplateConfig.GetInstance();
+            foreach (var tlv in arrTLV)
+            {
+                foreach (var item in locator.TemplateCompare.TemplateComparedInfos)
+                {
+                    if (tlv.Tag == item.Tag)
+                    {
+                        item.CardValue = tlv.Value;
+                        item.HasCheck = true;
+                        if (tlv.Value == item.TemplateValue)
+                        {
+                            item.ColorMark = new SolidColorBrush(Colors.Black);
+                            item.CaseLevel = "成功";
+                        }
+                        else
+                        {
+                            var level = compareObj.GetTemplateTag(item.Tag).TipLevel;
+                            if (level == CaseLevel.Sucess) { item.ColorMark = new SolidColorBrush(Colors.Black); item.CaseLevel = "成功"; }
+                            else if (level == CaseLevel.Warn) { item.ColorMark = new SolidColorBrush(Colors.Yellow); item.CaseLevel = "警告"; }
+                            else if (level == CaseLevel.Failed) { item.ColorMark = new SolidColorBrush(Colors.Red); item.CaseLevel = "失败"; }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
