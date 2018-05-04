@@ -24,6 +24,13 @@ namespace CardPlatform.Business
 
     }
 
+    public enum TransResult
+    {
+        Sucess = 0,
+        Failed = 1,
+        Unknown = 2
+    }
+
     public enum TransCategory
     {
         Contact = 0,
@@ -32,10 +39,14 @@ namespace CardPlatform.Business
 
     public enum TransType
     {
-        PBOC,
-        UICS,
-        ECC,
-        QPBOC
+        PBOC_DES,
+        UICS_DES,
+        ECC_DES,
+        QPBOC_DES,
+        PBOC_SM,
+        UICS_SM,
+        ECC_SM,
+        QPBOC_SM
     }
 
     public enum AlgorithmCategory

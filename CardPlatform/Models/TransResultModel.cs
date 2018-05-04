@@ -1,51 +1,89 @@
-﻿using GalaSoft.MvvmLight;
+﻿using CardPlatform.Business;
+using GalaSoft.MvvmLight;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace CardPlatform.Models
 {
     public class TransResultModel : ObservableObject
     {
-        private string _PBOCResult;
-        public string PBOCResult
+        public TransResultModel(TransType type, TransResult result)
         {
-            get { return _PBOCResult; }
+            Result = result;
+            TransType = type;
+        }
+
+        private TransResult _result;
+        public TransResult Result
+        {
+            get { return _result; }
             set
             {
-                Set(ref _PBOCResult, value);
+                Set(ref _result, value);
+                switch(_result)
+                {
+                    case TransResult.Failed:
+                        ResultDescripton = "失败"; ColorMark = new SolidColorBrush(Colors.Red); break;
+                    case TransResult.Sucess:
+                        ResultDescripton = "成功"; ColorMark = new SolidColorBrush(Colors.Black); break;
+                    case TransResult.Unknown:
+                        ResultDescripton= "未执行"; ColorMark = new SolidColorBrush(Colors.Yellow); break;
+                }
             }
         }
 
-        private string _UICSResult;
-        public string UICSResult
+        private TransType _transType;
+        public TransType TransType
         {
-            get { return _UICSResult; }
+            get { return _transType; }
             set
             {
-                Set(ref _UICSResult, value);
+                Set(ref _transType, value);
+                switch(_transType)
+                {
+                    case TransType.PBOC_DES: TransTypeDescription = "PBOC 国际";break;
+                    case TransType.PBOC_SM: TransTypeDescription = "PBOC 国密"; break;
+                    case TransType.UICS_DES: TransTypeDescription = "UICS 国际"; break;
+                    case TransType.UICS_SM: TransTypeDescription = "UICS 国密"; break;
+                    case TransType.ECC_DES: TransTypeDescription = "ECC 国际"; break;
+                    case TransType.ECC_SM: TransTypeDescription = "ECC 国密"; break;
+                    case TransType.QPBOC_DES: TransTypeDescription = "QPBOC 国际"; break;
+                    case TransType.QPBOC_SM: TransTypeDescription = "QPBOC 国密"; break;
+                }
             }
         }
 
-        private string _ECCResult;
-        public string ECCResult
+        private string _transTypeDescription;
+        public string TransTypeDescription
         {
-            get { return _ECCResult; }
+            get { return _transTypeDescription; }
             set
             {
-                Set(ref _ECCResult, value);
+                Set(ref _transTypeDescription, value);
             }
         }
 
-        private string _QPBOCResult;
-        public string QPBOCResult
+        private string _resultDescription;
+        public string ResultDescripton
         {
-            get { return _QPBOCResult; }
+            get { return _resultDescription; }
             set
             {
-                Set(ref _QPBOCResult, value);
+                Set(ref _resultDescription, value);
+            }
+        }
+
+        private SolidColorBrush _colorMark;
+        public SolidColorBrush ColorMark
+        {
+            get { return _colorMark; }
+            set
+            {
+                Set(ref _colorMark, value);
             }
         }
     }

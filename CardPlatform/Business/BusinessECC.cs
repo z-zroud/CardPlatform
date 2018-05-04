@@ -6,6 +6,7 @@ using CardPlatform.Cases;
 using System.Reflection;
 using CplusplusDll;
 using CardPlatform.Config;
+using CardPlatform.Models;
 
 namespace CardPlatform.Business
 {
@@ -15,7 +16,7 @@ namespace CardPlatform.Business
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         private bool isEccTranction = false;
-
+        
         /// <summary>
         /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存
         /// </summary>
@@ -28,42 +29,62 @@ namespace CardPlatform.Business
 
             locator.Terminal.TermianlSettings.Tag9F7A = "01";   //电子现金交易指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)
-
+            
             // 做国际交易
             if (doDesTrans)
             {
+                TransResultModel TransactionResult = new TransResultModel(TransType.ECC_DES, TransResult.Unknown);
+                TransactionResult.TransType = TransType.ECC_DES;
                 curTransAlgorithmCategory = AlgorithmCategory.DES;
                 locator.Terminal.TermianlSettings.TagDF69 = "00";
-                DoTransEx();
+                if(DoTransEx())
+                {
+                    TransactionResult.Result = TransResult.Sucess;
+                }
+                else
+                {
+                    TransactionResult.Result = TransResult.Failed;
+                }
+                locator.Transaction.TransResult.Add(TransactionResult);
             }
             // 做国密交易
             if (doSMTrans)
             {
+                TransResultModel TransactionResult = new TransResultModel(TransType.ECC_DES, TransResult.Unknown);
+                TransactionResult.TransType = TransType.ECC_SM;
                 curTransAlgorithmCategory = AlgorithmCategory.SM;
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
-                DoTransEx();
+                if (DoTransEx())
+                {
+                    TransactionResult.Result = TransResult.Sucess;
+                }
+                else
+                {
+                    TransactionResult.Result = TransResult.Failed;
+                }
+                locator.Transaction.TransResult.Add(TransactionResult);
             }
         }
 
-        protected void DoTransEx()
+        protected bool DoTransEx()
         {
             tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
-                return;
+                return false;
             }
             var AFLs = GPOEx();
             if (AFLs.Count == 0)
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
-                return;
+                return false;
             }
             if (!ReadAppRecords(AFLs))
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                return;
+                return false;
             }
             if (isEccTranction)
             {
@@ -77,6 +98,7 @@ namespace CardPlatform.Business
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "此交易不是脱机电子现金交易");
             }
+            return true;
         }
 
         /// <summary>
@@ -186,13 +208,13 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int OfflineAuthcation()
         {
-            IExcuteCase excuteCase = new CaseBase();
+            
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             string issuerPublicKey = string.Empty;
             if (!SDA(ref issuerPublicKey))
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
                 return -3;
             }
 
@@ -201,13 +223,13 @@ namespace CardPlatform.Business
             var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
             if (string.IsNullOrWhiteSpace(tag9F4B))
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
                 return -7;
             }
 
             if (!DDA(issuerPublicKey, tag9F4B, ddolData))
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
                 return -3;
             }
             return 0;
@@ -277,6 +299,16 @@ namespace CardPlatform.Business
                     tagDict.SetTag("9F36", tag9F36);
                     tagDict.SetTag("9F26", tag9F26);
                     tagDict.SetTag("9F10", tag9F10);    //更新后的电子余额在此处返回
+
+                    CheckTag9F10Mac();
+                    TransType type = curTransAlgorithmCategory == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
+                    int cardAction = Convert.ToInt32(tag9F27, 16);
+                    if(cardAction != Constant.TC)
+                    {
+                        var caseNo = MethodBase.GetCurrentMethod().Name;
+                        baseCase.TraceInfo(CaseLevel.Failed,caseNo, "脱机电子现金交易失败");
+                        
+                    }                                       
                 }
             }
 

@@ -51,6 +51,22 @@ namespace CardPlatform.Cases
             var compObj = DataTemplateConfig.GetInstance();
             if (!compObj.HasLoaded)
                 compObj.Load(".\\Configuration\\AppConfig\\TemplateConfig\\ProjectTemplate.xml");
+            //ViewModelLocator locator = new ViewModelLocator();
+            
+            //foreach (var tlv in arrTLV)
+            //{
+            //    foreach(var item in locator.TemplateCompare.TemplateComparedInfos)
+            //    {
+            //        if(tlv.Tag == item.Tag)
+            //        {
+            //            item.CardValue = tlv.Value;
+            //            if(tlv.Value == item.TemplateValue)
+            //            {
+            //                item.ColorMark = new SolidColorBrush(Colors.Black);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         /// <summary>

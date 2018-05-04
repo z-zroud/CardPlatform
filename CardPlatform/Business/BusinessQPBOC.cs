@@ -6,6 +6,7 @@ using CardPlatform.Cases;
 using System.Reflection;
 using CplusplusDll;
 using CardPlatform.Config;
+using CardPlatform.Models;
 
 namespace CardPlatform.Business
 {
@@ -36,38 +37,58 @@ namespace CardPlatform.Business
             // 基于DES算法的QPBOC流程
             if (doDesTrans)
             {
+                TransResultModel TransactionResult = new TransResultModel(TransType.QPBOC_DES, TransResult.Unknown);
+                TransactionResult.TransType = TransType.QPBOC_DES;
                 locator.Terminal.TermianlSettings.TagDF69 = "00";   //SM算法支持指示位
                 curTransAlgorithmCategory = AlgorithmCategory.DES;
-                DoTransEx();
+                if (DoTransEx())
+                {
+                    TransactionResult.Result = TransResult.Sucess;
+                }
+                else
+                {
+                    TransactionResult.Result = TransResult.Failed;
+                }
+                locator.Transaction.TransResult.Add(TransactionResult);
             }
             //基于国密算法的交易流程
             if (doSMTrans)   
             {
+                TransResultModel TransactionResult = new TransResultModel(TransType.QPBOC_SM, TransResult.Unknown);
+                TransactionResult.TransType = TransType.QPBOC_SM;
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
                 curTransAlgorithmCategory = AlgorithmCategory.SM;
-                DoTransEx();
+                if (DoTransEx())
+                {
+                    TransactionResult.Result = TransResult.Sucess;
+                }
+                else
+                {
+                    TransactionResult.Result = TransResult.Failed;
+                }
+                locator.Transaction.TransResult.Add(TransactionResult);
             }
         }
 
-        protected void DoTransEx()
+        protected bool DoTransEx()
         {
             tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
-                return;
+                return false;
             }
             var AFLs = GPOEx();
             if (AFLs.Count == 0)
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
-                return;
+                return false;
             }
             if (!ReadAppRecords(AFLs))
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                return;
+                return false;
             }
 
             //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
@@ -78,8 +99,9 @@ namespace CardPlatform.Business
             else
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "进行QPBOC交易失败");
-                return;
+                return false;
             }
+            return true;
         }
 
         /// <summary>

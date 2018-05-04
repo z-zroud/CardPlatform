@@ -8,6 +8,7 @@ using CardPlatform.Cases;
 using CardPlatform.ViewModel;
 using System.Reflection;
 using CardPlatform.Config;
+using CardPlatform.Models;
 
 namespace CardPlatform.Business
 {
@@ -33,36 +34,56 @@ namespace CardPlatform.Business
             // 做国际算法交易
             if (doDesTrans)  
             {
+                TransResultModel TransactionResult = new TransResultModel(TransType.UICS_DES, TransResult.Unknown);
+                TransactionResult.TransType = TransType.UICS_DES;
                 locator.Terminal.TermianlSettings.TagDF69 = "00";
-                DoTransEx();
+                if (DoTransEx())
+                {
+                    TransactionResult.Result = TransResult.Sucess;
+                }
+                else
+                {
+                    TransactionResult.Result = TransResult.Failed;
+                }
+                locator.Transaction.TransResult.Add(TransactionResult);
             }
             //做国密算法交易
             if (doSMTrans)
             {
+                TransResultModel TransactionResult = new TransResultModel(TransType.UICS_SM, TransResult.Unknown);
+                TransactionResult.TransType = TransType.UICS_SM;
                 curTransAlgorithmCategory = AlgorithmCategory.SM;
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
-                DoTransEx();
+                if (DoTransEx())
+                {
+                    TransactionResult.Result = TransResult.Sucess;
+                }
+                else
+                {
+                    TransactionResult.Result = TransResult.Failed;
+                }
+                locator.Transaction.TransResult.Add(TransactionResult);
             }
         }
 
-        protected void DoTransEx()
+        protected bool DoTransEx()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
-                return;
+                return false;
             }
             var AFLs = GPOEx();
             if (AFLs.Count == 0)
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
-                return;
+                return false;
             }
             if (!ReadAppRecords(AFLs))
             {
                 baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                return;
+                return false;
             }
             OfflineAuthcation();
             HandleLimitation();
@@ -71,6 +92,8 @@ namespace CardPlatform.Business
             TerminalActionAnalyze();
             IssuerAuthencation();
             TransactionEnd();
+
+            return true;
         }
 
         /// <summary>

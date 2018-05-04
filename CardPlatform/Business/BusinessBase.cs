@@ -1,5 +1,6 @@
 ﻿using CardPlatform.Cases;
 using CardPlatform.Config;
+using CardPlatform.Models;
 using CardPlatform.ViewModel;
 using CplusplusDll;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace CardPlatform.Business
         protected string toBeSignAppData;
         protected string aid;
         protected AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default
+       
 
 
         public void SetTransDESKeys(string acKey,string macKey,string encKey)

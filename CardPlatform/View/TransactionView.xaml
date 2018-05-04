@@ -6,7 +6,7 @@
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:CardPlatform.View"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000"
+             d:DesignHeight="600" d:DesignWidth="1100"
              DataContext="{Binding Source={StaticResource Locator}, Path=Transaction}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -91,9 +91,9 @@
                 </StackPanel>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Column="3" Margin="20">
-            <DockPanel LastChildFill="True" Height="200">
-                <Button  DockPanel.Dock="Bottom" Margin="0,0,50,0" Width="60" Height="30" Content="交易" Style="{DynamicResource AccentedSquareButtonStyle}" HorizontalAlignment="Right" Command="{Binding DoTransCmd}"/>
+        <StackPanel Grid.Column="3" >
+            <DockPanel LastChildFill="True" Height="260">
+                <Button  DockPanel.Dock="Bottom" Margin="0,0,30,20" Width="60" Height="30" Content="交易" Style="{DynamicResource AccentedSquareButtonStyle}" HorizontalAlignment="Right" Command="{Binding DoTransCmd}"/>
                 <StackPanel DockPanel.Dock="Top">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="卡号" Width="40"  VerticalAlignment="Center"/>
@@ -105,20 +105,35 @@
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="交易结果 :"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                            <TextBlock Text="PBOC" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.PBOCResult}"/>
-                            <Control Width="20"/>
-                            <TextBlock Text="UICS" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.UICSResult}"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="ECC" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.ECCResult}"/>
-                            <Control Width="20"/>
-                            <TextBlock Text="QPBOC" Width="50" VerticalAlignment="Center"/>
-                            <TextBox Width="50" IsEnabled="False" Text="{Binding TransResult.QPBOCResult}"/>
-                        </StackPanel>
+                        <DataGrid  RenderOptions.ClearTypeHint="Enabled"
+                                TextOptions.TextFormattingMode="Display"
+                                Margin="5"
+                                ItemsSource="{Binding Path=TransResult}"
+                                   BorderThickness="1"
+                                AutoGenerateColumns="False"
+                               Height="120"
+                                   Width="300"
+                                   HorizontalAlignment="Left"
+                               ScrollViewer.VerticalScrollBarVisibility="Auto"
+                               ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="HorizontalContentAlignment" Value="Center">
+                                    </Setter>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn IsReadOnly="True" Header="交易类型"  Width="190" Binding="{Binding TransTypeDescription}"/>
+                                <DataGridTemplateColumn Header="结果" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding ResultDescripton}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Foreground="{Binding ColorMark}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </StackPanel>
                 </StackPanel>
             </DockPanel>

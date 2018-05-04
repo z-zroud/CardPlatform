@@ -38,6 +38,7 @@ namespace CardPlatform.ViewModel
             TransCategorys = new List<string>();
             KeyTypeList = new List<string>();
             TransKeyList = new TransKeyModel();
+            TransResult = new ObservableCollection<TransResultModel>();
             Load();
         }
 
@@ -126,7 +127,7 @@ namespace CardPlatform.ViewModel
         /// <summary>
         /// 交易结果显示
         /// </summary>
-        public TransResultModel TransResult { get; set; }
+        public ObservableCollection<TransResultModel> TransResult { get; set; }
 
         /// <summary>
         /// 选中国密

@@ -45,6 +45,16 @@ namespace CardPlatform.Models
             }
         }
 
+        private string _caseLevel;
+        public string CaseLevel
+        {
+            get { return _caseLevel; }
+            set
+            {
+                Set(ref _caseLevel, value);
+            }
+        }
+
         private SolidColorBrush _colorMark;
         public SolidColorBrush ColorMark
         {

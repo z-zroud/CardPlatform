@@ -247,12 +247,7 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
     strncpy_s(cmdHeader, 10, noSpaceCmd, 8);
     strncpy_s(szCmdLen, 3, noSpaceCmd + 8, 2);
     //Log->Debug("APDU: %s %s %s", cmdHeader, szCmdLen, noSpaceCmd + 10);
-#ifdef _DEBUG
-    if (cmdLen > 8)
-        printf("APDU: %s %s %s\n", cmdHeader, szCmdLen, noSpaceCmd + 10);
-    else
-        printf("APDU: %s\n", noSpaceCmd);
-#endif // DEBUG
+
 
 
     if (cmdLen < 8 || cmdLen % 2 != 0)	//bcd码命令必须包含命令头8字节，必须是偶数字节
@@ -289,9 +284,9 @@ bool  SendApduCmd(const char* cmd, char* output, int &len)
     //memcpy(output, tmp, strlen(tmp) - 4);
     int result = strtol(tmp + strlen(tmp) - 4, NULL, 16);
 
-    #if _DEBUG
-        printf("SW = %4X\n", result);
-    #endif
+    //#if _DEBUG
+    //Log->Debug("SW = %4X\n", result);
+    //#endif
     return true;
 }
 
@@ -318,6 +313,19 @@ int  SendApdu(const char* cmd, char* output, int len)
     memset(g_cmd, 0, sizeof(g_cmd));
     memset(output, 0, len);
     Tool::DeleteSpace(cmd, g_cmd, sizeof(g_cmd));
+
+    int cmdLen = strlen(g_cmd);
+
+    char cmdHeader[10] = { 0 };
+    char szCmdLen[3] = { 0 };
+    strncpy_s(cmdHeader, 10, g_cmd, 8);
+    strncpy_s(szCmdLen, 3, g_cmd + 8, 2);
+#ifdef _DEBUG
+    if (cmdLen > 10)
+        Log->Debug("APDU: %s %s %s\n", cmdHeader, szCmdLen, g_cmd + 10);
+    else
+        Log->Debug("APDU: %s\n", g_cmd);
+#endif // DEBUG
     if (!SendApduCmd(cmd, response, responseLen))
     {
         return -1;
@@ -360,7 +368,16 @@ int  SendApdu(const char* cmd, char* output, int len)
 	}
 	memcpy(output, tmp, strlen(tmp) - 4);
 	int result = strtol(tmp + strlen(tmp) - 4, NULL, 16);
-
+#ifdef _DEBUG
+    if (result != 0x9000)
+    {
+        Log->Error("Response: %s    SW=%04X\n", output, result);
+    }
+    else {
+        Log->Debug("Response: %s    SW=%04X\n", output, result);
+    }
+        
+#endif
 	return result;
 }
 
