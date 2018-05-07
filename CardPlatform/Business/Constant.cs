@@ -17,6 +17,8 @@ namespace CardPlatform.Business
         public static readonly int TC = 0x40;
         public static readonly int AAC = 0x00;
         public static readonly int CDA = 0x10;
+        public static readonly int TC_CDA = 0x50;
+        public static readonly int ARQC_CDA = 0x90;
 
         public static readonly string DataComparedConfigFile = "ProjectTemplate.xml";
 

@@ -3,6 +3,7 @@ using CardPlatform.Config;
 using CardPlatform.Models;
 using CardPlatform.ViewModel;
 using CplusplusDll;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -30,8 +31,76 @@ namespace CardPlatform.Business
         protected string toBeSignAppData;
         protected string aid;
         protected AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default
-       
 
+        #region Check AIP support functions
+        private int GetFirstByteOfAIP(string AIP)
+        {
+            if (AIP.Length != 4)
+            {
+                return 0;
+            }
+            return Convert.ToInt32(AIP.Substring(0, 2), 16);
+        }
+        public bool IsSupportSDA(string AIP)
+        {
+            var firstByte = GetFirstByteOfAIP(AIP);
+            if ((firstByte & 0x40) == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsSupportDDA(string AIP)
+        {
+            var firstByte = GetFirstByteOfAIP(AIP);
+            if ((firstByte & 0x20) == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsSupportCardHolderVerify(string AIP)
+        {
+            var firstByte = GetFirstByteOfAIP(AIP);
+            if ((firstByte & 0x10) == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsSupportTerminalRiskManagement(string AIP)
+        {
+            var firstByte = GetFirstByteOfAIP(AIP);
+            if ((firstByte & 0x08) == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsSupportIssuerAuth(string AIP)
+        {
+            var firstByte = GetFirstByteOfAIP(AIP);
+            if ((firstByte & 0x04) == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsSupportCDA(string AIP)
+        {
+            var firstByte = GetFirstByteOfAIP(AIP);
+            if ((firstByte & 0x01) == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+        #endregion
 
         public void SetTransDESKeys(string acKey,string macKey,string encKey)
         {
@@ -111,19 +180,15 @@ namespace CardPlatform.Business
             return responses;
         }
 
-        /// <summary>
-        /// 进行SDA验证
-        /// </summary>
-        /// <returns></returns>
-        protected virtual bool SDA(ref string issuerPublicKey)
+        protected string GetIssuerPublicKey()
         {
-            int result;
+            string issuerPublicKey = string.Empty;
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (aid.Length < 10 || aid.Length > 16)
             {
                 excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "应用AID长度为{0}不在规范内", aid.Length);
-                return false;
+                return issuerPublicKey;
             }
 
             //获取CA公钥
@@ -133,13 +198,13 @@ namespace CardPlatform.Business
             if (CAIndex.Length != 2)
             {
                 excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA 索引,请检查8F是否存在");
-                return false;
+                return issuerPublicKey;
             }
             string CAPublicKey = Authencation.GenCAPublicKey(CAIndex, rid);
             if (string.IsNullOrWhiteSpace(CAPublicKey))
             {
                 excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA公钥，请检查RID及索引是否正确");
-                return false;
+                return issuerPublicKey;
             }
 
             string issuerPublicCert = tagDict.GetTag("90");
@@ -156,9 +221,70 @@ namespace CardPlatform.Business
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
                     excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在");
-                    return false;
+                    return issuerPublicKey;
                 }
+            }
+            else //SM算法
+            {
+                issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
+                if (string.IsNullOrWhiteSpace(issuerPublicKey))
+                {
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
+                    return issuerPublicKey;
+                }
+            }
+            return issuerPublicKey;
+        }
 
+        protected string GetIccPublicKey(string issuerPublicKey)
+        {
+            string iccPublicKey = string.Empty;
+            TagDict tagDict = TagDict.GetInstance();
+            IExcuteCase excuteCase = new CaseBase();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            string iccPublicCert = tagDict.GetTag("9F46");
+            string PAN = tagDict.GetTag("5A");
+            string AIP = tagDict.GetTag("82");
+            if (curTransAlgorithmCategory == AlgorithmCategory.DES)
+            {
+                //获取IC卡公钥
+                string iccPublicKeyRemainder = tagDict.GetTag("9F48");
+                string iccPublicKeyExp = tagDict.GetTag("9F47");
+                iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
+                if (string.IsNullOrWhiteSpace(iccPublicKey))
+                {
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
+                    return iccPublicKey;
+                }
+            }
+            else
+            {
+                iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN);
+                if (string.IsNullOrWhiteSpace(iccPublicKey))
+                {
+                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥");
+                    return iccPublicKey;
+                }
+            }
+            return iccPublicKey;
+        }
+        /// <summary>
+        /// 进行SDA验证
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool SDA()
+        {
+            int result;
+            IExcuteCase excuteCase = new CaseBase();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            TagDict tagDict = TagDict.GetInstance();
+            string signedStaticAppData = tagDict.GetTag("93");
+            string AIP = tagDict.GetTag("82");
+            string issuerPublicKey = GetIssuerPublicKey();
+
+            if (curTransAlgorithmCategory == AlgorithmCategory.DES) //DES算法
+            {
+                string issuerExp = tagDict.GetTag("9F32");
                 //验证hash签名
                 result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
                 if (result != 0)
@@ -169,13 +295,6 @@ namespace CardPlatform.Business
             }
             else //SM算法
             {
-                issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
-                if (string.IsNullOrWhiteSpace(issuerPublicKey))
-                {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
-                    return false;
-                }
-
                 result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
                 if (result != 0)
                 {
@@ -198,20 +317,12 @@ namespace CardPlatform.Business
             TagDict tagDict = TagDict.GetInstance();
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string iccPublicCert = tagDict.GetTag("9F46");
-            string PAN = tagDict.GetTag("5A");
-            string AIP = tagDict.GetTag("82");
+            var iccPublicKey = GetIccPublicKey(issuerPublicKey);
             if (curTransAlgorithmCategory == AlgorithmCategory.DES)
             {
                 //获取IC卡公钥
                 string iccPublicKeyRemainder = tagDict.GetTag("9F48");
                 string iccPublicKeyExp = tagDict.GetTag("9F47");
-                string iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
-                if (string.IsNullOrWhiteSpace(iccPublicKey))
-                {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
-                    return false;
-                }
 
                 //校验动态签名的hash值
                 var result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, ddolData);
@@ -223,12 +334,6 @@ namespace CardPlatform.Business
             }
             else
             {
-                string iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN);
-                if (string.IsNullOrWhiteSpace(iccPublicKey))
-                {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥");
-                    return false;
-                }
                 var result = Authencation.SM_DDA(iccPublicKey, tag9F4B, ddolData);
                 if (result != 0)
                 {
@@ -334,28 +439,40 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected bool CheckAC(string AC)
         {
-            string acSessionKey = string.Empty;
-            if (curTransAlgorithmCategory == AlgorithmCategory.DES)
+            string udkACKey = string.Empty;
+            var tagDict = TagDict.GetInstance();
+            string ATC = tagDict.GetTag("9F36");
+            if (KeyType == TransKeyType.MDK)
             {
-                acSessionKey = GenSessionKey(TransDesACKey, KeyType, curTransAlgorithmCategory);
+                string cardAcct = tagDict.GetTag("5A");
+                string cardSeq = tagDict.GetTag("5F34");
+                udkACKey = Authencation.GenUdk(TransDesACKey, cardAcct, cardSeq);
             }
             else
             {
-                acSessionKey = GenSessionKey(TransSMACKey, KeyType, curTransAlgorithmCategory);
+                udkACKey = TransDesACKey;
             }
 
             string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");  //授权金额
             string tag9F03 = locator.Terminal.TermianlSettings.GetTag("9F03");  //其他金额
             string tag9F1A = locator.Terminal.TermianlSettings.GetTag("9F1A");  //终端国家代码
             string tag95 = locator.Terminal.TermianlSettings.GetTag("95");      //终端验证结果           
-            string tag5F2A = locator.Terminal.TermianlSettings.GetTag("5F2A");  //交易货币代码
+            string tag5A = locator.Terminal.TermianlSettings.GetTag("5F2A");  //交易货币代码
             string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
             string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
             string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
             string tag82 = TagDict.GetInstance().GetTag("82");
             string tag9F36 = TagDict.GetInstance().GetTag("9F36");
+            string tag9F10 = TagDict.GetInstance().GetTag("9F10");
+            var customData = tag9F10.Substring(6);
 
-            string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5F2A + tag9A + tag9C + tag9F37 + tag82 + tag9F36;
+            string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + customData;
+            int zeroCount = input.Length % 16;
+            if (zeroCount != 0)
+            {
+                input.PadRight(zeroCount, '0');
+            }
+            var mac = Authencation.GenEMVAC(udkACKey, input);
             //Authencation.
             return true;
         }

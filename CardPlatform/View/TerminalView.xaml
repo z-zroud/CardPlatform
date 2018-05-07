@@ -55,5 +55,9 @@
             <TextBlock Text="9F66(终端商户名称)" Width="120"  VerticalAlignment="Center" Margin="0,0,10,0"/>
             <TextBox Width="490" VerticalContentAlignment="Center"  Text="{Binding TermianlSettings.Tag9F4E}"/>
         </StackPanel>
+        <StackPanel Grid.Column="0"  Grid.Row="3"  Orientation="Horizontal" Height="30" Margin="5">
+            <TextBlock Text="9F35" Width="120"  VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox Width="120" VerticalContentAlignment="Center"  Text="{Binding TermianlSettings.Tag9F35}"/>
+        </StackPanel>
     </Grid>
 </UserControl>

@@ -81,8 +81,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Business\BusinessAMEX.cs" />
     <Compile Include="Business\BusinessBase.cs" />
     <Compile Include="Business\BusinessECC.cs" />
+    <Compile Include="Business\BusinessJETCO.cs" />
+    <Compile Include="Business\BusinessMC.cs" />
+    <Compile Include="Business\BusinessVISA.cs" />
     <Compile Include="Business\BusinessPPSE.cs" />
     <Compile Include="Business\BusinessPSE.cs" />
     <Compile Include="Business\BusinessQPBOC.cs" />

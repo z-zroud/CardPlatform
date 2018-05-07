@@ -16,6 +16,7 @@ namespace CardPlatform.Business
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         private bool isEccTranction = false;
+        private bool isCDA = false;
         
         /// <summary>
         /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存
@@ -207,30 +208,33 @@ namespace CardPlatform.Business
         /// </summary>
         /// <returns></returns>
         protected int OfflineAuthcation()
-        {
-            
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-
-            string issuerPublicKey = string.Empty;
-            if (!SDA(ref issuerPublicKey))
+        {           
+            var caseNo = MethodBase.GetCurrentMethod().Name;         
+            string AIP = tagDict.GetTag("82");
+            if(IsSupportSDA(AIP))
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
-                return -3;
+                if (!SDA())
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                    return -3;
+                }
             }
-
-            string ddol = tagDict.GetTag("9F49");
-            string ddolData = "12345678";
-            var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
-            if (string.IsNullOrWhiteSpace(tag9F4B))
+            if(IsSupportDDA(AIP))
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
-                return -7;
-            }
-
-            if (!DDA(issuerPublicKey, tag9F4B, ddolData))
-            {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
-                return -3;
+                string ddol = tagDict.GetTag("9F49");
+                string ddolData = "12345678";
+                var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
+                if (string.IsNullOrWhiteSpace(tag9F4B))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
+                    return -7;
+                }
+                string issuerPublicKey = GetIssuerPublicKey();
+                if (!DDA(issuerPublicKey, tag9F4B, ddolData))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                    return -3;
+                }
             }
             return 0;
         }

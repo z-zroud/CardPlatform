@@ -22,7 +22,7 @@
             <ColumnDefinition Width="350"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="1" Margin="20">
+        <StackPanel Grid.Column="1" >
             <StackPanel>
                 <TextBlock Text="交易类型"/>
                 <ComboBox  Margin="2" Width="240" HorizontalAlignment="Left"
@@ -45,12 +45,16 @@
             </StackPanel>
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="交易方式" VerticalAlignment="Bottom" Margin="0,0,0,5" />
-                <StackPanel  Orientation="Horizontal">
-                    <CheckBox Content="PBOC" Margin="0,0,20,0" IsChecked="{Binding TransType.IsCheckPBOC}" />
-                    <CheckBox Content="UICS" Margin="0,0,20,0" IsChecked="{Binding TransType.IsCheckUICS}"/>
-                    <CheckBox Content="ECC" Margin="0,0,20,0" IsChecked="{Binding TransType.IsCheckECC}"/>
-                    <CheckBox Content="QPBOC" Margin="0,0,20,0" IsChecked="{Binding TransType.IsCheckQPBOC}"/>
-                </StackPanel>
+                <WrapPanel  Orientation="Horizontal" Margin="0,0,20,0">
+                    <CheckBox Content="PBOC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckPBOC}" />
+                    <CheckBox Content="UICS" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckUICS}"/>
+                    <CheckBox Content="ECC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckECC}"/>
+                    <CheckBox Content="QPBOC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckQPBOC}"/>
+                    <CheckBox Content="VISA" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckVISA}"/>
+                    <CheckBox Content="MC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckMC}"/>
+                    <CheckBox Content="JETCO" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckJETCO}"/>
+                    <CheckBox Content="AMEX" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckAMEX}"/>
+                </WrapPanel>
             </StackPanel>
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="算法类型"  VerticalAlignment="Bottom" Margin="0,0,0,5"/>
@@ -60,18 +64,20 @@
                 </StackPanel>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Column="2" Margin="20">
+        <StackPanel Grid.Column="2" >
             <StackPanel Margin="0,0,10,10">
                 <TextBlock Text="MDK/UDK"  VerticalAlignment="Bottom"/>
                 <ComboBox  Margin="2"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding KeyTypeList}"
                             SelectedIndex="{Binding SelectedKeyType}"
-                            MaxDropDownHeight="125" />
+                            MaxDropDownHeight="125" 
+                           HorizontalAlignment="Left"
+                           Width="300"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <CheckBox Name="cbDES"  Margin="0,0,20,0" Visibility="Hidden" IsChecked="{Binding HasSelectedDESKey}"/>
-                <CheckBox Name="cbSM" Content="国密" Margin="0,0,20,0" IsChecked="{Binding HasSelectedSMKey}" Command="{Binding SelectSMCmd}"/>
+                <CheckBox Name="cbSM" Content="国密" Margin="0,0,54,0" HorizontalAlignment="Left" IsChecked="{Binding HasSelectedSMKey}" Command="{Binding SelectSMCmd}"/>
             </StackPanel>
             <StackPanel>
                 <StackPanel  Orientation="Horizontal">

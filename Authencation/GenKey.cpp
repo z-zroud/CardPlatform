@@ -161,6 +161,48 @@ void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc
     }	
 }
 
+
+void GenEMVAC(const char* udkAC, const char* data, char* mac)
+{
+    string sessionMacKey = udkAC;
+    string leftSessionMacKey = sessionMacKey.substr(0, 16);
+    string rightSessionMacKey = sessionMacKey.substr(16);
+    string calcData = data;
+
+
+    if (calcData.length() % 16 == 0)
+    {
+        calcData = data;
+    }
+    else {
+        calcData += "00";
+        int remaindZero = calcData.length() % 16;
+        calcData.append(remaindZero, '0');
+    }
+
+
+    char szOutput[33] = { 0 };
+
+    int blocks = calcData.length() / 16;
+
+    string blockData = calcData.substr(0, 16);
+    for (int i = 1; i < blocks; i++)
+    {
+        Des(szOutput, (char*)leftSessionMacKey.c_str(), (char*)blockData.c_str());
+        str_xor(szOutput, (char*)calcData.substr(i * 16, 16).c_str(), 16);
+        blockData = szOutput;
+    }
+    Des(szOutput, (char*)leftSessionMacKey.c_str(), szOutput);
+    _Des(szOutput, (char*)rightSessionMacKey.c_str(), szOutput);
+    Des(szOutput, (char*)leftSessionMacKey.c_str(), szOutput);
+
+
+
+    string result = string(szOutput).substr(0, 16);
+
+    strcpy(mac, result.c_str());
+}
+
 void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* mac, int keyType)
 {
 	string sessionMacKey = udkMacSessionKey;

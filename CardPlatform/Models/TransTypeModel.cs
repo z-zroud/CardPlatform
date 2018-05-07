@@ -9,6 +9,11 @@ namespace CardPlatform.Models
 {
     public class TransTypeModel : ObservableObject
     {
+        public TransTypeModel()
+        {
+            IsCheckUICS = true;
+        }
+
         private bool _isCheckPBOC;
         public bool IsCheckPBOC
         {
@@ -46,6 +51,46 @@ namespace CardPlatform.Models
             set
             {
                 Set(ref _isCheckQPBOC, value);
+            }
+        }
+
+        private bool _isCheckVISA;
+        public bool IsCheckVISA
+        {
+            get { return _isCheckVISA; }
+            set
+            {
+                Set(ref _isCheckVISA, value);
+            }
+        }
+
+        private bool _isCheckMC;
+        public bool IsCheckMC
+        {
+            get { return _isCheckMC; }
+            set
+            {
+                Set(ref _isCheckMC, value);
+            }
+        }
+
+        private bool _isCheckJETCO;
+        public bool IsCheckJETCO
+        {
+            get { return _isCheckJETCO; }
+            set
+            {
+                Set(ref _isCheckJETCO, value);
+            }
+        }
+
+        private bool _isCheckAMEX;
+        public bool IsCheckAMEX
+        {
+            get { return _isCheckAMEX; }
+            set
+            {
+                Set(ref _isCheckAMEX, value);
             }
         }
     }

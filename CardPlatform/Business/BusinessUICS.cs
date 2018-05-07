@@ -207,29 +207,32 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int OfflineAuthcation()
         {
-            IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-     
-            string ddol = tagDict.GetTag("9F49");
-            string ddolData = "12345678";
-
-            var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
-            if (string.IsNullOrWhiteSpace(tag9F4B))
+            string AIP = tagDict.GetTag("82");
+            if (IsSupportSDA(AIP))
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
-                return -7;
+                if (!SDA())
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                    return -3;
+                }
             }
-
-            string issuerPublicKey = string.Empty;
-            if(!SDA(ref issuerPublicKey))
+            if (IsSupportDDA(AIP))
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
-                return -3;
-            }
-            if(!DDA(issuerPublicKey,tag9F4B,ddolData))
-            {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
-                return -3;
+                string ddol = tagDict.GetTag("9F49");
+                string ddolData = "12345678";
+                var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
+                if (string.IsNullOrWhiteSpace(tag9F4B))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
+                    return -7;
+                }
+                string issuerPublicKey = GetIssuerPublicKey();
+                if (!DDA(issuerPublicKey, tag9F4B, ddolData))
+                {
+                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                    return -3;
+                }
             }
             return 0;
         }

@@ -20,11 +20,6 @@ namespace CardPlatform.ViewModel
         {
             TransType = new TransTypeModel();
 
-            TransType.IsCheckPBOC = true;
-            TransType.IsCheckUICS = true;
-            TransType.IsCheckECC = true;
-            TransType.IsCheckQPBOC = true;
-
 
             AlgorithmType = new AlgorithmModel();
             AlgorithmType.IsCheckDES = true;
@@ -41,8 +36,6 @@ namespace CardPlatform.ViewModel
             TransResult = new ObservableCollection<TransResultModel>();
             Load();
         }
-
-
 
         #region data binding
         /// <summary>
@@ -253,30 +246,59 @@ namespace CardPlatform.ViewModel
         {
             BusinessBase trans;
 
-            if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
+            //if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
+            //{
+            //    trans = new BusinessUICS();
+            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
+            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+            //    trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //}
+            //if (TransType.IsCheckECC)
+            //{
+            //    trans = new BusinessECC();
+            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
+            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+            //    trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //}
+            //if (TransType.IsCheckQPBOC)
+            //{
+            //    trans = new BusinessQPBOC();
+            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
+            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+            //    trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //}
+            if(TransType.IsCheckVISA)
             {
-                trans = new BusinessUICS();
+                trans = new BusinessVISA();
                 trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
-                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
             }
-            if (TransType.IsCheckECC)
+            if (TransType.IsCheckAMEX)
             {
-                trans = new BusinessECC();
+                trans = new BusinessAMEX();
                 trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
-                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
             }
-            if (TransType.IsCheckQPBOC)
+            if (TransType.IsCheckMC)
             {
-                trans = new BusinessQPBOC();
+                trans = new BusinessMC();
                 trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
-                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
+            }
+            if (TransType.IsCheckJETCO)
+            {
+                trans = new BusinessJETCO();
+                trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
+                trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
             }
         }
+
     }
 }

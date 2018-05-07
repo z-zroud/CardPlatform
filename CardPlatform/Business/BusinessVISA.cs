@@ -10,19 +10,15 @@ using CardPlatform.Models;
 
 namespace CardPlatform.Business
 {
-
-    /*************************************************************
-     * 该类描述了QPBOC交易流程
-     *************************************************************/
-    public class BusinessQPBOC : BusinessBase
+    public class BusinessVISA : BusinessBase
     {
         private TagDict tagDict = TagDict.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
-        private bool isQPBOCTranction = false;
+        private bool isEccTranction = false;
 
         /// <summary>
-        /// 开始交易流程
+        /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存
         /// </summary>
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
@@ -31,33 +27,16 @@ namespace CardPlatform.Business
         {
             base.DoTrans(aid, doDesTrans, doSMTrans);
 
-            locator.Terminal.TermianlSettings.Tag9C = "00";         //交易类型(消费交易)
-            locator.Terminal.TermianlSettings.Tag9F66 = "2A000080"; //终端交易属性
-            locator.Terminal.TermianlSettings.TagDF60 = "00";   //扩展交易指示位           
-            // 基于DES算法的QPBOC流程
+            locator.Terminal.TermianlSettings.Tag9F7A = "01";   //电子现金交易指示器
+            locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)
+
+            // 做国际交易
             if (doDesTrans)
             {
-                TransResultModel TransactionResult = new TransResultModel(TransType.QPBOC_DES, TransResult.Unknown);
-                TransactionResult.TransType = TransType.QPBOC_DES;
-                locator.Terminal.TermianlSettings.TagDF69 = "00";   //SM算法支持指示位
+                TransResultModel TransactionResult = new TransResultModel(TransType.ECC_DES, TransResult.Unknown);
+                TransactionResult.TransType = TransType.ECC_DES;
                 curTransAlgorithmCategory = AlgorithmCategory.DES;
-                if (DoTransEx())
-                {
-                    TransactionResult.Result = TransResult.Sucess;
-                }
-                else
-                {
-                    TransactionResult.Result = TransResult.Failed;
-                }
-                locator.Transaction.TransResult.Add(TransactionResult);
-            }
-            //基于国密算法的交易流程
-            if (doSMTrans)   
-            {
-                TransResultModel TransactionResult = new TransResultModel(TransType.QPBOC_SM, TransResult.Unknown);
-                TransactionResult.TransType = TransType.QPBOC_SM;
-                locator.Terminal.TermianlSettings.TagDF69 = "01";
-                curTransAlgorithmCategory = AlgorithmCategory.SM;
+                locator.Terminal.TermianlSettings.TagDF69 = "00";
                 if (DoTransEx())
                 {
                     TransactionResult.Result = TransResult.Sucess;
@@ -91,16 +70,12 @@ namespace CardPlatform.Business
                 return false;
             }
 
-            //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
-            if (isQPBOCTranction)
-            {
-                OfflineAuthcation();
-            }
-            else
-            {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "进行QPBOC交易失败");
-                return false;
-            }
+            OfflineAuthcation();
+            HandleLimitation();
+            CardHolderVerify();
+            TerminalRiskManagement();
+            TerminalActionAnalyze();
+
             return true;
         }
 
@@ -113,9 +88,9 @@ namespace CardPlatform.Business
         {
             bool result = false;
             ApduResponse response = base.SelectAid(aid);
-            if(response.SW == 0x9000)
+            if (response.SW == 0x9000)
             {
-                if(ParseAndSave(response.Response))
+                if (ParseAndSave(response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAidCase();
                     excuteCase.ExcuteCase(response);
@@ -125,10 +100,10 @@ namespace CardPlatform.Business
             else
             {
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                if(response.SW != 0x9000)
+                if (response.SW != 0x9000)
                 {
                     baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
-                }             
+                }
             }
             return result;
         }
@@ -140,60 +115,28 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected List<AFL> GPOEx()
         {
-            var AFLs = new List<AFL>();
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var tls = DataParse.ParseTL(tagDict.GetTag("9F38"));
-
-            var tlTags = from tl in tls select tl.Tag;
-            if (curTransAlgorithmCategory == AlgorithmCategory.SM)
-            {   //国密算法判断PDOL是否包含tagDF69 SM算法指示器
-
-                if(!tlTags.Contains("DF69"))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "国密算法，PDOL中缺少tagDF69");
-                    return AFLs;
-                }
-            }
-            string[] terminalTags = { "9F66", "9F37","9F02","5F2A" }; //QPBOC交易中，PDOL需包含关键tag值
-            foreach(var tag in terminalTags)
-            {
-                if(!tlTags.Contains(tag))
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "PDOL中缺少tag{0}", tag);
-                    return AFLs;
-                }
-            }
-            
-            string PDOLData = string.Empty;
+            string tag9F38 = tagDict.GetTag("9F38");
+            var tls = DataParse.ParseTL(tag9F38);
+            string pdolData = string.Empty;
             foreach (var tl in tls)
             {
-                PDOLData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                pdolData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
             }
 
-            ApduResponse response = base.GPO(PDOLData);           
-            if (response.SW != 0x9000)
-            {               
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
-                return AFLs;
+            ApduResponse response = base.GPO(pdolData);
+            var tlvs = DataParse.ParseTLV(response.Response);
+            if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
+            {
+
+                tagDict.SetTag("82", tlvs[0].Value.Substring(0, 4));
+                tagDict.SetTag("94", tlvs[0].Value.Substring(4));
             }
-            if(ParseAndSave(response.Response))
-            {               
-                string tag9F26 = tagDict.GetTag("9F26");
-                string tag9F27 = tagDict.GetTag("9F27");
-                if (!string.IsNullOrEmpty(tag9F26))
-                {
-                    isQPBOCTranction = true;    //表明卡片支持QPBOC交易
-                }
-                int cardAction = Convert.ToInt32(tag9F27, 16);
-                if(cardAction != Constant.TC)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "卡片拒绝此次交易，卡片代码[{0}]", tag9F27);
-                    return AFLs;
-                }
-                AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
-                IExcuteCase excuteCase = new GPOCase();
-                excuteCase.ExcuteCase(response);
-            }
+
+            var AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
+
+            IExcuteCase excuteCase = new GPOCase();
+            excuteCase.ExcuteCase(response);
+
             return AFLs;
         }
 
@@ -209,21 +152,16 @@ namespace CardPlatform.Business
 
             foreach (var resp in resps)
             {
-                if(resp.SW != 0x9000)
+                if (resp.SW != 0x9000)
                 {
                     baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if(!ParseAndSave(resp.Response))
+                if (!ParseAndSave(resp.Response))
                 {
                     return false;
-                }               
+                }
             }
-
-            CheckTag9F10Mac();  //校验MAC值
-
-            //IExcuteCase excuteCase = new ReadRecordCase();
-            //excuteCase.ExcuteCase(resps);
 
             return true;
         }
@@ -262,6 +200,77 @@ namespace CardPlatform.Business
                 }
             }
             return 0;
-        }        
+        }
+
+        /// <summary>
+        /// 处理限制
+        /// </summary>
+        /// <returns></returns>
+        protected int HandleLimitation()
+        {
+            int expiryDate;
+            int effectiveDate;
+            int currentDate;
+            int.TryParse(tagDict.GetTag("5F24"), out expiryDate);
+            int.TryParse(tagDict.GetTag("5F25"), out effectiveDate);
+            int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
+
+            var caseBase = new CaseBase();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            if (expiryDate < currentDate)    //应用已失效
+            {
+                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用失效日期大于当前日期，应用已失效");
+            }
+
+            if (effectiveDate < currentDate) // 应用未生效
+            {
+                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用生效日期大于当前日期，应用未生效");
+            }
+
+            if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
+            {
+                caseBase.TraceInfo(CaseLevel.Failed, caseNo, "应用失效日期大于生效日期，应用不合法");
+            }
+            return 0;
+        }
+
+        protected int CardHolderVerify()
+        {
+            //电子现金不包括持卡人认证，这里仅判断数据是否为1E031F00
+            //联机PIN不能设为首选CVM
+            string CVM = tagDict.GetTag("8E");
+            return 0;
+        }
+
+        protected int TerminalRiskManagement()
+        {
+            return 0;
+        }
+
+        protected int TerminalActionAnalyze()
+        {
+            string CDOL1 = tagDict.GetTag("8C");
+            ApduResponse resp = GAC1(Constant.ARQC, CDOL1);
+            if (resp.SW == 0x9000)
+            {
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                if (tlvs.Count > 0 && tlvs[0].Tag == "80")
+                {
+                    string result = tlvs[0].Value;  //第一次GAC返回的数据
+                    string tag9F27 = result.Substring(0, 2);
+                    string tag9F36 = result.Substring(2, 4);
+                    string tag9F26 = result.Substring(6, 16);
+                    string tag9F10 = result.Substring(22);
+
+                    tagDict.SetTag("9F27", tag9F27);
+                    tagDict.SetTag("9F36", tag9F36);
+                    tagDict.SetTag("9F26", tag9F26);
+                    tagDict.SetTag("9F10", tag9F10);    //更新后的电子余额在此处返回
+                    CheckAC(tag9F26);
+                }
+            }
+
+            return 0;
+        }
     }
 }

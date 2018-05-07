@@ -127,6 +127,9 @@ namespace CplusplusDll
         [DllImport(@"Authencation.dll", EntryPoint = "GenIssuerScriptMac", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void GenIssuerScriptMac(string udkMacSessionKey, string data, StringBuilder mac, int keyType);
 
+        [DllImport(@"Authencation.dll", EntryPoint = "GenEMVAC", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void GenEMVAC(string udkAC, string data, StringBuilder mac);
+
         #endregion
         #region import DataParse.dll
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
