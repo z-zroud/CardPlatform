@@ -45,7 +45,7 @@
             </StackPanel>
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="交易方式" VerticalAlignment="Bottom" Margin="0,0,0,5" />
-                <WrapPanel  Orientation="Horizontal" Margin="0,0,20,0">
+                <UniformGrid  Rows="2">
                     <CheckBox Content="PBOC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckPBOC}" />
                     <CheckBox Content="UICS" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckUICS}"/>
                     <CheckBox Content="ECC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckECC}"/>
@@ -54,7 +54,7 @@
                     <CheckBox Content="MC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckMC}"/>
                     <CheckBox Content="JETCO" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckJETCO}"/>
                     <CheckBox Content="AMEX" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckAMEX}"/>
-                </WrapPanel>
+                </UniformGrid>
             </StackPanel>
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="算法类型"  VerticalAlignment="Bottom" Margin="0,0,0,5"/>
