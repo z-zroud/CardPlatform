@@ -17,6 +17,20 @@ namespace  Tool
         return path.substr(0, index + 1);
     }
 
+    string BcdToStr(const char* bcd)
+    {
+        int bcdLen = strlen(bcd);
+        char* str = new char[bcdLen];
+        memset(str, 0, bcdLen);
+
+        BcdToStr(bcd, str, bcdLen);
+
+        string reuslt = str;
+        delete str;
+
+        return reuslt;
+    }
+
     void BcdToStr(const char* bcd, char* str, int strLen)
     {
         int bcdLen = strlen(bcd);

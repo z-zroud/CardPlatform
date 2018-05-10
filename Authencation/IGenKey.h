@@ -13,6 +13,8 @@ using namespace std;
 const int DES_KEY = 0;
 const int SM_KEY = 1;
 
+extern "C" GENKEY_API void Decrypt_Des3_CBC(const char* key, const char* input, char* output, int outputLen);
+
 extern "C" GENKEY_API void GenEMVAC(const char* udkAC, const char* data, char* mac);
 
 extern "C" GENKEY_API int GenDesKcv(const char* key, char* kcv, int kcvLen);

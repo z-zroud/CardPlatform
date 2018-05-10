@@ -17,6 +17,7 @@ using namespace std;
 namespace Tool 
 {
 	//typedef unsigned char byte;
+    string BcdToStr(const char* bcd);
 	void BcdToAsc(unsigned char *asc, unsigned char *bcd, long bcd_len);	//Ascii 转 BCD
 	long AscToBin(char *ptr, int len);	//Ascii 转 二进制
 	void AscToBcd(char *bcd, char *asc, long asc_len);	//BCD转Ascii

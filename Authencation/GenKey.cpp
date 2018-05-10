@@ -12,6 +12,33 @@ using namespace std;
 //string KeyGenerator::m_caPublicKey = "";
 
 /***************************************************************************/
+
+void Decrypt_Des3_CBC(const char* key, const char* input, char* output, int outputLen)
+{
+    int dataLen = strlen(input);
+    int count = dataLen / 16;
+
+    string leftKey = string(key).substr(0, 16);
+    string rightKey = string(key).substr(16);
+    string result;
+    char output1[17] = { 0 };
+    string data = input;
+    for (int i = count - 1; i >= 0; i--)
+    {
+        _Des(output1, (char*)leftKey.c_str(), (char*)data.substr(i * 16, 16).c_str());
+        Des(output1, (char*)rightKey.c_str(), output1);
+        _Des(output1, (char*)leftKey.c_str(), output1);
+        if (i != 0)
+        {
+            char temp[17] = { 0 };
+            strncpy_s(temp, 17, data.substr((i - 1) * 16, 16).c_str(), 16);
+            str_xor(output1, temp, 16);
+        }
+        result = output1 + result;
+    }
+    int len = result.length();
+    strncpy_s(output, outputLen, result.c_str(), result.length());
+}
 /*******************************************************************
 * Func: ÆæÅ¼Ğ£Ñé
 *******************************************************************/

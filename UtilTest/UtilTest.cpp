@@ -17,7 +17,7 @@ int main()
     char* bcd = "50525950463030303031";
     char str[32] = { 0 };
     Tool::BcdToStr(bcd, str, 32);
-
+    string asciiStr = Tool::BcdToStr(bcd);
 	//Test IntToStr
 	int value = 12;
 	char hexStr[5] = { 0 };
