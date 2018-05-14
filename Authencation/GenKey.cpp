@@ -578,6 +578,34 @@ int SM_SDA(const char* issuerPublicKey, const char* toBeSignedStaticAppData, con
 	return 2;   //校验不成功
 }
 
+int DES_GenRecovery(const char* publicKey, const char* publicKeyExp, const char* encryptionData, char* recoveryData, int len)
+{
+	//从动态签名数据中获取恢复数据
+	char result[2048] = { 0 };
+	RSA_STD((char*)publicKey, (char*)publicKeyExp, (char*)encryptionData, result);
+	int resultLen = strlen(result);
+	if (resultLen == 0)
+	{
+		return -1;
+	}
+	strncpy_s(recoveryData, len, result, resultLen);
+
+	return 0;
+}
+
+int GenHash(const char* input, char* hash, int len)
+{
+	CSHA1 sha1;
+	string hashResult = sha1.GetBCDHash(input);
+	if (hashResult.length() == 0)
+	{
+		return -1;
+	}
+	strncpy_s(hash, len, hashResult.c_str(), hashResult.length());
+
+	return 0;
+}
+
 int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4B, const char* dynamicData)
 {
 	//从动态签名数据中获取恢复数据
