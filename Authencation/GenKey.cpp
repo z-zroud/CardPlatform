@@ -189,7 +189,7 @@ void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc
 }
 
 
-void GenEMVAC(const char* udkAC, const char* data, char* mac)
+void GenEMVMac(const char* udkAC, const char* data, char* mac)
 {
     string sessionMacKey = udkAC;
     string leftSessionMacKey = sessionMacKey.substr(0, 16);
@@ -230,7 +230,7 @@ void GenEMVAC(const char* udkAC, const char* data, char* mac)
     strcpy(mac, result.c_str());
 }
 
-void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* mac, int keyType)
+void GenPBOCMac(const char* udkMacSessionKey, const char* data, char* mac, int keyType)
 {
 	string sessionMacKey = udkMacSessionKey;
 	string leftSessionMacKey = sessionMacKey.substr(0, 16);
@@ -275,7 +275,7 @@ void GenIssuerScriptMac(const char* udkMacSessionKey, const char* data, char* ma
     }
 
 
-	string result = string(szOutput).substr(0, 8);
+	string result = string(szOutput).substr(0, 16);
 
 	strcpy(mac, result.c_str());
 }

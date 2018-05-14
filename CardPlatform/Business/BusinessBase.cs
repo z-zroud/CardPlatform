@@ -19,19 +19,20 @@ namespace CardPlatform.Business
         }
 
         public TransKeyType KeyType { get; set; }
-        public string TransDesACKey { get; set; }
-        public string TransDesMACKey { get; set; }
-        public string TransDesENCKey { get; set; }
-        public string TransSMACKey { get; set; }
-        public string TransSMMACKey { get; set; }
-        public string TransSMENCKey { get; set; }
+        public string TransDesACKey { get; set; }       //DES_AC (MDK/UDK) 由KeyType决定
+        public string TransDesMACKey { get; set; }      //DES_MAC
+        public string TransDesENCKey { get; set; }      //DES_ENC
+        public string TransSMACKey { get; set; }        //SM_AC
+        public string TransSMMACKey { get; set; }       //SM_MAC
+        public string TransSMENCKey { get; set; }       //SM_ENC
 
-        protected bool doDesTrans = false;
-        protected bool doSMTrans = false;
-        protected string toBeSignAppData;
-        protected string aid;
-        protected AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default
+        protected bool doDesTrans = false;  //是否执行DES算法的交易
+        protected bool doSMTrans = false;   //是否执行国密算法
+        protected string toBeSignAppData;   //当前交易流程认证数据
+        protected string aid;       //当前应用AID
+        protected AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default 当前交易流程使用的算法
 
+        //检查AIP支持的功能
         #region Check AIP support functions
         private int GetFirstByteOfAIP(string AIP)
         {
@@ -44,7 +45,7 @@ namespace CardPlatform.Business
         public bool IsSupportSDA(string AIP)
         {
             var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x40) == 1)
+            if ((firstByte & 0x40) == 0x40)
             {
                 return true;
             }
@@ -54,7 +55,7 @@ namespace CardPlatform.Business
         public bool IsSupportDDA(string AIP)
         {
             var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x20) == 1)
+            if ((firstByte & 0x20) == 0x20)
             {
                 return true;
             }
@@ -64,7 +65,7 @@ namespace CardPlatform.Business
         public bool IsSupportCardHolderVerify(string AIP)
         {
             var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x10) == 1)
+            if ((firstByte & 0x10) == 0x10)
             {
                 return true;
             }
@@ -74,7 +75,7 @@ namespace CardPlatform.Business
         public bool IsSupportTerminalRiskManagement(string AIP)
         {
             var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x08) == 1)
+            if ((firstByte & 0x08) == 0x08)
             {
                 return true;
             }
@@ -84,7 +85,7 @@ namespace CardPlatform.Business
         public bool IsSupportIssuerAuth(string AIP)
         {
             var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x04) == 1)
+            if ((firstByte & 0x04) == 0x04)
             {
                 return true;
             }
@@ -94,7 +95,7 @@ namespace CardPlatform.Business
         public bool IsSupportCDA(string AIP)
         {
             var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x01) == 1)
+            if ((firstByte & 0x01) == 0x01)
             {
                 return true;
             }
@@ -102,6 +103,12 @@ namespace CardPlatform.Business
         }
         #endregion
 
+        /// <summary>
+        /// 设置DES应用秘钥
+        /// </summary>
+        /// <param name="acKey"></param>
+        /// <param name="macKey"></param>
+        /// <param name="encKey"></param>
         public void SetTransDESKeys(string acKey,string macKey,string encKey)
         {
             TransDesACKey = acKey;
@@ -109,6 +116,12 @@ namespace CardPlatform.Business
             TransDesENCKey = encKey;
         }
 
+        /// <summary>
+        /// 设置国密应用秘钥
+        /// </summary>
+        /// <param name="acKey"></param>
+        /// <param name="macKey"></param>
+        /// <param name="encKey"></param>
         public void SetTransSMKeys(string acKey,string macKey,string encKey)
         {
             TransSMACKey = acKey;
@@ -116,6 +129,12 @@ namespace CardPlatform.Business
             TransSMENCKey = encKey;
         }
 
+        /// <summary>
+        /// 执行交易的入口
+        /// </summary>
+        /// <param name="aid"></param>
+        /// <param name="doDesTrans"></param>
+        /// <param name="doSMTrans"></param>
         public virtual void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
         {
             this.doDesTrans = doDesTrans;
@@ -123,7 +142,13 @@ namespace CardPlatform.Business
             this.aid = aid;
         }
 
-        protected bool ParseAndSave(string response)
+
+        /// <summary>
+        /// 解析TLV结构，并保存到数据字典中
+        /// </summary>
+        /// <param name="response"></param>
+        /// <returns></returns>
+        protected bool ParseTLVAndSave(string response)
         {
             bool result = false;
             if (DataParse.IsTLV(response))
@@ -144,17 +169,32 @@ namespace CardPlatform.Business
         }
 
 
+        /// <summary>
+        /// 选择应用，基类中的所有执行流程仅包含基本命令的交互，
+        /// 不涉及应用逻辑的检查
+        /// </summary>
+        /// <param name="aid"></param>
+        /// <returns></returns>
         protected virtual ApduResponse SelectAid(string aid)
         {
             return APDU.SelectCmd(aid);
         }
 
-        protected virtual ApduResponse GPO(string pdol)
+        /// <summary>
+        /// 发送GPO命令
+        /// </summary>
+        /// <param name="pdol"></param>
+        /// <returns></returns>
+        protected virtual ApduResponse GPO(string pdolData)
         {
-            var response = APDU.GPOCmd(pdol);
-            return response;
+            return APDU.GPOCmd(pdolData);
         }
 
+        /// <summary>
+        /// 根据AFL结构，读取SFI指定的记录文件
+        /// </summary>
+        /// <param name="afls"></param>
+        /// <returns></returns>
         protected virtual List<ApduResponse> ReadRecords(List<AFL> afls)
         {
             toBeSignAppData = string.Empty; //每次读取记录时，置空
@@ -180,6 +220,10 @@ namespace CardPlatform.Business
             return responses;
         }
 
+        /// <summary>
+        /// 获取发卡行公钥
+        /// </summary>
+        /// <returns></returns>
         protected string GetIssuerPublicKey()
         {
             string issuerPublicKey = string.Empty;
@@ -236,6 +280,11 @@ namespace CardPlatform.Business
             return issuerPublicKey;
         }
 
+        /// <summary>
+        /// 获取IC卡公钥
+        /// </summary>
+        /// <param name="issuerPublicKey"></param>
+        /// <returns></returns>
         protected string GetIccPublicKey(string issuerPublicKey)
         {
             string iccPublicKey = string.Empty;
@@ -344,6 +393,12 @@ namespace CardPlatform.Business
             return true;
         }
 
+        /// <summary>
+        /// 发送第一次GAC
+        /// </summary>
+        /// <param name="acType"></param>
+        /// <param name="CDOL1"></param>
+        /// <returns></returns>
         protected virtual ApduResponse GAC1(int acType, string CDOL1)
         {
             string CDOL1Data = string.Empty;
@@ -355,6 +410,12 @@ namespace CardPlatform.Business
             return APDU.GACCmd(acType, CDOL1Data);
         }
 
+        /// <summary>
+        /// 发送第二次GAC
+        /// </summary>
+        /// <param name="acType"></param>
+        /// <param name="CDOL2"></param>
+        /// <returns></returns>
         protected virtual ApduResponse GAC2(int acType, string CDOL2)
         {
             string CDOL2Data = string.Empty;
@@ -430,6 +491,46 @@ namespace CardPlatform.Business
                 return true;
             }
             return false;
+        }
+
+        protected string GenAC()
+        {
+            string udkACKey = string.Empty;
+            var tagDict = TagDict.GetInstance();
+            string ATC = tagDict.GetTag("9F36");
+            if (KeyType == TransKeyType.MDK)
+            {
+                string cardAcct = tagDict.GetTag("5A");
+                string cardSeq = tagDict.GetTag("5F34");
+                udkACKey = Authencation.GenUdk(TransDesACKey, cardAcct, cardSeq);
+            }
+            else
+            {
+                udkACKey = TransDesACKey;
+            }
+
+            string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");  //授权金额
+            string tag9F03 = locator.Terminal.TermianlSettings.GetTag("9F03");  //其他金额
+            string tag9F1A = locator.Terminal.TermianlSettings.GetTag("9F1A");  //终端国家代码
+            string tag95 = locator.Terminal.TermianlSettings.GetTag("95");      //终端验证结果           
+            string tag5A = locator.Terminal.TermianlSettings.GetTag("5F2A");  //交易货币代码
+            string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
+            string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
+            string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
+            string tag82 = TagDict.GetInstance().GetTag("82");
+            string tag9F36 = TagDict.GetInstance().GetTag("9F36");
+            string tag9F10 = TagDict.GetInstance().GetTag("9F10");
+            var customData = tag9F10.Substring(6);
+
+            string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + customData;
+            int zeroCount = input.Length % 16;
+            if (zeroCount != 0)
+            {
+                input.PadRight(zeroCount, '0');
+            }
+            var mac = Authencation.GenEMVAC(udkACKey, input);
+            //Authencation.
+            return true;
         }
 
         /// <summary>

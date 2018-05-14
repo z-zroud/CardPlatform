@@ -29,7 +29,7 @@ namespace CardPlatform.Business
             {
                 return new List<string>();
             }
-            ParseAndSave(response.Response);
+            ParseTLVAndSave(response.Response);
 
             IExcuteCase cases = new PSECases();
             cases.ExcuteCase(response);

@@ -16,7 +16,7 @@ namespace CardPlatform.Business
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         private bool isEccTranction = false;
-        private bool isCDA = false;
+        private bool isSupportCDA = false;
         
         /// <summary>
         /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存
@@ -113,7 +113,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseAndSave(response.Response))
+                if (ParseTLVAndSave(response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAidCase();
                     excuteCase.ExcuteCase(response);
@@ -123,10 +123,7 @@ namespace CardPlatform.Business
             else
             {
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                if (response.SW != 0x9000)
-                {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
-                }
+                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
             }
             return result;
         }
@@ -180,7 +177,7 @@ namespace CardPlatform.Business
                     baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!ParseAndSave(resp.Response))
+                if (!ParseTLVAndSave(resp.Response))
                 {
                     return false;
                 }
@@ -190,9 +187,9 @@ namespace CardPlatform.Business
             if(tag9F74.Length == 12)
             {
                 var resp = APDU.GetDataCmd("9F79");
-                ParseAndSave(resp.Response);
+                ParseTLVAndSave(resp.Response);
                 resp = APDU.GetDataCmd("9F6D");
-                ParseAndSave(resp.Response);
+                ParseTLVAndSave(resp.Response);
                 var tag9F79 = tagDict.GetTag("9F79");
                 if(int.Parse(tag9F79) > 0)
                 {
@@ -236,6 +233,7 @@ namespace CardPlatform.Business
                     return -3;
                 }
             }
+            isSupportCDA = IsSupportCDA(AIP);
             return 0;
         }
 
@@ -286,11 +284,33 @@ namespace CardPlatform.Business
 
         protected int TerminalActionAnalyze()
         {
-            string CDOL1 = tagDict.GetTag("8C");
-            ApduResponse resp = GAC1(Constant.TC, CDOL1);
-            if (resp.SW == 0x9000)
+            //如果卡片支持CDA，在执行终端行为分析之前获取发卡行公钥、IC卡公钥
+            string issuerPublicKey = string.Empty;
+            string iccPulicKey = string.Empty;
+            if(isSupportCDA)
             {
-                var tlvs = DataParse.ParseTLV(resp.Response);
+                issuerPublicKey = GetIssuerPublicKey();
+                iccPulicKey = GetIccPublicKey(issuerPublicKey);
+            }
+            string CDOL1 = tagDict.GetTag("8C");
+            var response = new ApduResponse();
+            if(isSupportCDA)
+            {
+                response = GAC1(Constant.TC_CDA, CDOL1);
+                if(ParseTLVAndSave(response.Response))
+                {
+                    string tag9F4B = tagDict.GetTag("9F4B");
+                    DDA
+                }
+            }
+            else
+            {
+                response = GAC1(Constant.TC, CDOL1);
+            }
+            
+            if (response.SW == 0x9000)
+            {
+                var tlvs = DataParse.ParseTLV(response.Response);
                 if (tlvs.Count > 0 && tlvs[0].Tag == "80")
                 {
                     string result = tlvs[0].Value;  //第一次GAC返回的数据

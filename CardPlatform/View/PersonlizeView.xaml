@@ -8,15 +8,41 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1200"
              DataContext="{Binding Source={StaticResource Locator}, Path=Personlize}">
+    <UserControl.Resources>
+        <Style x:Key="CustomMetroToggleSwitchButton"
+                       BasedOn="{StaticResource MahApps.Metro.Styles.ToggleSwitchButton}"
+                       TargetType="{x:Type Controls:ToggleSwitchButton}">
+            <Setter Property="SwitchForeground" Value="YellowGreen" />
+            <Setter Property="FontWeight" Value="Light"/>
+        </Style>
+        <Style x:Key="CustomMetroToggleSwitchButton2"
+           BasedOn="{StaticResource MahApps.Metro.Styles.ToggleSwitch}"
+           TargetType="{x:Type Controls:ToggleSwitch}">
+            <Setter Property="ContentDirection" Value="RightToLeft" />
+            <Setter Property="Controls:ControlsHelper.HeaderFontSize" Value="{DynamicResource ToggleSwitchHeaderFontSize.Win10}" />
+            <Setter Property="FontFamily" Value="{DynamicResource ToggleSwitchFontFamily.Win10}" />
+            <Setter Property="FontSize" Value="{DynamicResource ToggleSwitchFontSize.Win10}" />
+            <!--Setter Property="HeaderFontFamily" Value="{DynamicResource ToggleSwitchHeaderFontFamily.Win10}" /-->
+            <Setter Property="OffSwitchBrush" Value="{DynamicResource MahApps.Metro.Brushes.ToggleSwitchButton.OffSwitchBrush.Win10}" />
+            <Setter Property="OnSwitchBrush" Value="{DynamicResource MahApps.Metro.Brushes.ToggleSwitchButton.OnSwitchBrush.Win10}" />
+            <Setter Property="ThumbIndicatorBrush" Value="{DynamicResource MahApps.Metro.Brushes.ToggleSwitchButton.ThumbIndicatorBrush.Win10}" />
+            <Setter Property="ThumbIndicatorDisabledBrush" Value="{DynamicResource MahApps.Metro.Brushes.ToggleSwitchButton.ThumbIndicatorDisabledBrush.Win10}" />
+            <Setter Property="ThumbIndicatorWidth" Value="10" />
+            <Setter Property="ToggleSwitchButtonStyle" Value="{StaticResource MahApps.Metro.Styles.ToggleSwitchButton.Win10}" />
+            <!--  for v1.5.0 or later  -->
+            <!--        <Setter Property="ContentPadding" Value="0 0 10 0" />-->
+            <!--        <Style.Triggers>-->
+            <!--            <Trigger Property="ContentDirection" Value="RightToLeft">-->
+            <!--                <Setter Property="ContentPadding" Value="10 0 0 0" />-->
+            <!--            </Trigger>-->
+            <!--        </Style.Triggers>-->
+        </Style>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
         <DockPanel Name="personlizeTitle" HorizontalAlignment="Stretch" Background="#FFF0F0F0" Grid.ColumnSpan="2">
             <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                 <Image Source="/Images/PersonlizeTitle.png" Width="50" Height="Auto"/>
@@ -42,128 +68,148 @@
                 </Menu>
             </Grid>
         </DockPanel>
-        <!--数据解析面板-->
-        <StackPanel Name="PeronlizeContentPanel" Grid.Row="1" Margin="60,0,20,0" Background="AliceBlue" MinWidth="350">
+        
+        <ScrollViewer Grid.Row="1"  Background="White" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="40"/>
-                </Grid.RowDefinitions>
-                <DockPanel Background="#FF104E8B">
-                    <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">数据解析</Label>
-                    <Button Name="btnDataParseHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
-                </DockPanel>
-                <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="选择DP文件"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <TextBox Width="220" Height="30" Text="{Binding Config.DpFilePath}"/>
-                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenDpFileCmd}"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="数据类型"/>
-                        <ComboBox 
-                            Margin="0, 10, 0, 0"
-                            Style="{DynamicResource VirtualisedMetroComboBox}"
-                            ItemsSource="{Binding DpParseParams.DpTypeCollection}"
-                            DisplayMemberPath="Name"
-                            SelectedItem="{Binding Config.DpType}"
-                            MaxDropDownHeight="125" />
-                    </StackPanel>
-                    <StackPanel Margin="5" Width="280">
-                        <TextBlock Text="规则配置路径"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <TextBox Width="220" Height="30" Text="{Binding Config.DpRulePath}"/>
-                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenDpRuleFileCmd}"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Margin="5,5,5,0" Height="180">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="结果: "/>
-                            <TextBlock Text="{Binding DpParseResult.Info}" Foreground="Black" Width="100"/>
-                        </StackPanel>
-                        <ListBox Height="159"
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="350" Width="auto"/>
+                    <ColumnDefinition MinWidth="350" Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <!--数据解析面板-->
+                <StackPanel Name="PeronlizeContentPanel" Grid.Row="1" Margin="60,0,20,0" Background="AliceBlue" MinWidth="350">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Background="#FF104E8B">
+                            <Label DockPanel.Dock="Left" FontSize="25" Foreground="White">数据解析</Label>
+                            <Button Name="btnDataParseHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+                        </DockPanel>
+                        <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="选择DP文件"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBox Width="220" Height="30" Text="{Binding Config.DpFilePath}"/>
+                                    <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenDpFileCmd}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="数据类型"/>
+                                <ComboBox 
+                                        Margin="0, 10, 0, 0"
+                                        Style="{DynamicResource VirtualisedMetroComboBox}"
+                                        ItemsSource="{Binding DpParseParams.DpTypeCollection}"
+                                        DisplayMemberPath="Name"
+                                        SelectedItem="{Binding Config.DpType}"
+                                        MaxDropDownHeight="125" />
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <TextBlock Text="规则配置路径"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                    <TextBox Width="220" Height="30" Text="{Binding Config.DpRulePath}"/>
+                                    <Button Width="60" Height="30"  Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenDpRuleFileCmd}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Margin="5" Width="280">
+                                <Controls:ToggleSwitch Margin="0,5,0,0"
+                                                       Header="生成开发文档"
+                                                        IsChecked="False"
+                                                       FontSize="13"
+                                                       Controls:ControlsHelper.HeaderFontSize="13"
+                                                    FontFamily="{DynamicResource ToggleSwitchFontFamily.Win10}" 
+                                                    HeaderFontFamily="{DynamicResource ToggleSwitchHeaderFontFamily.Win10}"
+                                                    OnLabel="开" OffLabel="关" >
+                                </Controls:ToggleSwitch>
+                            </StackPanel>
+                            <StackPanel Margin="5,5,5,0" Height="370">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="结果: "/>
+                                    <TextBlock Text="{Binding DpParseResult.Info}" Foreground="Black" Width="100"/>
+                                </StackPanel>
+                                <ListBox Height="350"
                                  BorderThickness="1"
                                  Width="280"
                          Margin="0,5,0,0"
                          ItemsSource="{Binding DpGenCpsResults}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <CheckBox IsChecked="{Binding IsSelected}"/>
-                                        <TextBlock Text="{Binding CpsFileName}"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </StackPanel>
-                </WrapPanel>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <CheckBox IsChecked="{Binding IsSelected}"/>
+                                                <TextBlock Text="{Binding CpsFileName}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </WrapPanel>
 
-                <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Content="解析" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding ParseDpCmd}"/>
+                        <StackPanel Grid.Row="3" HorizontalAlignment="Right" Margin="10,10,40,0">
+                            <Button Width="80" Height="30" Content="解析" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding ParseDpCmd}"/>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
-            </Grid>
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,0,60,0" Background="AliceBlue">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="40"/>
-                </Grid.RowDefinitions>
-                <DockPanel Background="#FF104E8B">
-                    <Label Name="lblLayout" DockPanel.Dock="Left" FontSize="25" Foreground="White">个人化</Label>
-                    <Button Name="btnPersonlizeHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
-                </DockPanel>
-                <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
-                    <StackPanel Margin="10,10,10,10" Width="280">
-                        <TextBlock Text="CMD AID"/>
-                        <ComboBox 
+                <!--个人化面板-->
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="20,0,60,0" Background="AliceBlue">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+                        <DockPanel Background="#FF104E8B">
+                            <Label Name="lblLayout" DockPanel.Dock="Left" FontSize="25" Foreground="White">个人化</Label>
+                            <Button Name="btnPersonlizeHelp" Style="{DynamicResource MetroCircleButtonStyle}" Margin="0,0,5,0" DockPanel.Dock="Right" MinWidth="40" HorizontalAlignment="Right"  FontSize="15" FontWeight="Bold" Foreground="White">?</Button>
+                        </DockPanel>
+                        <WrapPanel Grid.Row="1" Margin="20,20,20,20" Orientation="Vertical" Height="380">
+                            <StackPanel Margin="10,10,10,10" Width="280">
+                                <TextBlock Text="CMD AID"/>
+                                <ComboBox 
                             Margin="0, 10, 0, 0"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             IsEditable="True"
                             ItemsSource="{Binding SecureChannelParams.ISDCollection}"
                             SelectedItem="{Binding Config.ISD}"
                             MaxDropDownHeight="125"/>
-                    </StackPanel>
-                    <StackPanel Margin="10,10,10,10" Width="280">
-                        <TextBlock Text="KMC"/>
-                        <ComboBox 
+                            </StackPanel>
+                            <StackPanel Margin="10,10,10,10" Width="280">
+                                <TextBlock Text="KMC"/>
+                                <ComboBox 
                             Margin="0, 10, 0, 0"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             IsEditable="True"
                             ItemsSource="{Binding SecureChannelParams.KMCCollection}"
                             SelectedItem="{Binding Config.KMC}"
                             MaxDropDownHeight="125"/>
-                    </StackPanel>
-                    <StackPanel Width="280" Margin="10">
-                        <TextBlock Margin="0,0,0,10">分散方式</TextBlock>
-                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DivMethodCollection}" SelectedIndex="{Binding Config.DivMethod}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
-                    </StackPanel>
-                    <StackPanel Width="280" Margin="10">
-                        <TextBlock Margin="0,0,0,10">安全等级</TextBlock>
-                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding SecureLevelCollection}" SelectedIndex="{Binding Config.SecureLevel}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
-                    </StackPanel>
-                    <StackPanel Margin="10,10,10,10" Width="280">
-                        <TextBlock Text="安装参数配置路径"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <TextBox Width="220" Height="30" Text="{Binding Config.InstallParamsFilePath}"/>
-                            <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenInstallParamFileCmd}"/>
+                            </StackPanel>
+                            <StackPanel Width="280" Margin="10">
+                                <TextBlock Margin="0,0,0,10">分散方式</TextBlock>
+                                <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DivMethodCollection}" SelectedIndex="{Binding Config.DivMethod}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
+                            </StackPanel>
+                            <StackPanel Width="280" Margin="10">
+                                <TextBlock Margin="0,0,0,10">安全等级</TextBlock>
+                                <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding SecureLevelCollection}" SelectedIndex="{Binding Config.SecureLevel}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
+                            </StackPanel>
+                            <StackPanel Margin="10,10,10,10" Width="280">
+                                <TextBlock Text="安装参数配置路径"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <TextBox Width="220" Height="30" Text="{Binding Config.InstallParamsFilePath}"/>
+                                    <Button Width="60" Height="30" Content="浏览.." Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenInstallParamFileCmd}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Width="280" Margin="10">
+                                <TextBlock Margin="0,0,0,10">删除实例</TextBlock>
+                                <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DelInstCollection}" SelectedIndex="{Binding Config.DelInst}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
+                            </StackPanel>
+                        </WrapPanel>
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,40,0">
+                            <Button Width="80" Height="30" Content="个人化" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding PersonlizeCmd}"/>
                         </StackPanel>
-                    </StackPanel>
-                    <StackPanel Width="280" Margin="10">
-                        <TextBlock Margin="0,0,0,10">删除实例</TextBlock>
-                        <ListBox ItemContainerStyle="{StaticResource RadioButtonGroupStyle}"  ItemsSource="{Binding DelInstCollection}" SelectedIndex="{Binding Config.DelInst}" Background="{Binding ElementName=PeronlizeContentPanel, Path=Background}"/>
-                    </StackPanel>
-                </WrapPanel>
-                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10,10,40,0">
-                    <Button Width="80" Height="30" Content="个人化" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding PersonlizeCmd}"/>
+                    </Grid>
+
                 </StackPanel>
             </Grid>
-
-        </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

@@ -110,7 +110,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseAndSave(response.Response))
+                if (ParseTLVAndSave(response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAidCase();
                     excuteCase.ExcuteCase(response);
@@ -193,7 +193,7 @@ namespace CardPlatform.Business
                     baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!ParseAndSave(resp.Response))
+                if (!ParseTLVAndSave(resp.Response))
                 {
                     return false;
                 }
