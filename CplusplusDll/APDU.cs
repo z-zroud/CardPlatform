@@ -51,8 +51,8 @@ namespace CplusplusDll
         public static ApduResponse ReadRecordCmd(int SFI, int recordNo)
         {
             SFI = (SFI << 3) + 4;
-            string p1 = Utils.IntToString(recordNo, 2);
-            string p2 = Utils.IntToString(SFI, 2);
+            string p1 = Utils.IntToHexStr(recordNo, 2);
+            string p2 = Utils.IntToHexStr(SFI, 2);
 
             string cmd = "00B2" + p1 + p2;
 

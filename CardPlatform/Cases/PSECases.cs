@@ -216,7 +216,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                TraceInfo(CaseLevel.Warn, caseNo, "PSE响应数据中缺少tag9F11");
             }
         }
 

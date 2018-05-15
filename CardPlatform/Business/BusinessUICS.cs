@@ -95,7 +95,7 @@ namespace CardPlatform.Business
 
             
             TransactionEnd();
-
+            LoadBalance("9F79", "000000010000");
             return true;
         }
 
@@ -368,7 +368,7 @@ namespace CardPlatform.Business
             return 0;
         }
 
-        protected int HandleIssuerScript(string tag, string value)
+        protected int LoadBalance(string tag, string value)
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string macSessionKey;
@@ -388,9 +388,8 @@ namespace CardPlatform.Business
             {
                 tag = "00" + tag;
             }
-            var DataLen = UtilLib.Utils.GetBcdLen(value);
-            var macData = "04DA" + tag + DataLen + value;
-            string mac = Authencation.GenIssuerScriptMac(macSessionKey, value);
+            var macData = "04DA" + tag + "0A" + tagDict.GetTag("9F36") + tagDict.GetTag("9F26") + value;
+            string mac = Authencation.GenIssuerScriptMac(macSessionKey, macData);
             var resp = APDU.PutDataCmd(tag, value, mac);
             if(resp.SW == 0x9000)
             {

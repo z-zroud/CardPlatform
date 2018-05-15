@@ -138,9 +138,9 @@ namespace CplusplusDll
         public static string GenIssuerScriptMac(string udkMacSessionKey, string data, int keyType = 0)
         {
             StringBuilder mac = new StringBuilder(17);
-            CDll.GenIssuerScriptMac(udkMacSessionKey, data, mac,keyType);
+            CDll.GenPBOCMac(udkMacSessionKey, data, mac,keyType);
 
-            return mac.ToString().Substring(0, 16);
+            return mac.ToString().Substring(0, 8);
         }
 
         public static string GenEMVAC(string udkAC,string data)
@@ -159,7 +159,7 @@ namespace CplusplusDll
                 return string.Empty;
             }
             StringBuilder mac = new StringBuilder(9);
-            CDll.GenIssuerScriptMac(udkMacSessionKey, data, mac, keyType);
+            CDll.GenPBOCMac(udkMacSessionKey, data, mac, keyType);
 
             return mac.ToString().Substring(0, 8);
         }

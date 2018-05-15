@@ -223,7 +223,7 @@ namespace CardPlatform.Business
                 var tls = DataParse.ParseTL(ddol);
                 foreach(var tl in tls)
                 {
-                    ddolData += tl.Tag;
+                    ddolData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
                 }
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
@@ -324,8 +324,23 @@ namespace CardPlatform.Business
                     {
 
                     }
+                    string recoveryTag9F36 = recoveryData.Substring(10, 4);
+                    string recoveryTag9F27 = recoveryData.Substring(14, 2);
+                    string recoveryTag9F26 = recoveryData.Substring(16, 16);
+                    string recoveryHash2 = recoveryData.Substring(32, 40);
+                    string hashInput2 = pdolData + CDOL1Data;
+                    string[] tags = { "9F27", "9F36", "9F10" };
+                    foreach(var tag in tags)
+                    {
+                        string tagValue = tagDict.GetTag(tag);
+                        string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
+                        hashInput2 += tag + len + tagValue;
+                    }
+                    string hash2 = Authencation.GetHash(hashInput2);
+                    if(hash2 != recoveryHash2)
+                    {
 
-                    string hashInput2 = pdolData + CDOL1Data + 
+                    }
                 }
             }
             else
@@ -335,30 +350,32 @@ namespace CardPlatform.Business
             
             if (response.SW == 0x9000)
             {
-                var tlvs = DataParse.ParseTLV(response.Response);
-                if (tlvs.Count > 0 && tlvs[0].Tag == "80")
+                if (!isSupportCDA)
                 {
-                    string result = tlvs[0].Value;  //第一次GAC返回的数据
-                    string tag9F27 = result.Substring(0, 2);
-                    string tag9F36 = result.Substring(2, 4);
-                    string tag9F26 = result.Substring(6, 16);
-                    string tag9F10 = result.Substring(22);
-
-                    tagDict.SetTag("9F27", tag9F27);
-                    tagDict.SetTag("9F36", tag9F36);
-                    tagDict.SetTag("9F26", tag9F26);
-                    tagDict.SetTag("9F10", tag9F10);    //更新后的电子余额在此处返回
-
-                    CheckTag9F10Mac();
-                    TransType type = curTransAlgorithmCategory == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
-                    int cardAction = Convert.ToInt32(tag9F27, 16);
-                    if(cardAction != Constant.TC)
+                    var tlvs = DataParse.ParseTLV(response.Response);
+                    if (tlvs.Count > 0 && tlvs[0].Tag == "80")
                     {
-                        var caseNo = MethodBase.GetCurrentMethod().Name;
-                        baseCase.TraceInfo(CaseLevel.Failed,caseNo, "脱机电子现金交易失败");
-                        
-                    }                                       
+                        string result = tlvs[0].Value;  //第一次GAC返回的数据
+                        string tag9F27 = result.Substring(0, 2);
+                        string tag9F36 = result.Substring(2, 4);
+                        string tag9F26 = result.Substring(6, 16);
+                        string tag9F10 = result.Substring(22);
+
+                        tagDict.SetTag("9F27", tag9F27);
+                        tagDict.SetTag("9F36", tag9F36);
+                        tagDict.SetTag("9F26", tag9F26);
+                        tagDict.SetTag("9F10", tag9F10);    //更新后的电子余额在此处返回
+                    }
                 }
+                CheckTag9F10Mac();
+                TransType type = curTransAlgorithmCategory == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
+                int cardAction = Convert.ToInt32(tagDict.GetTag("9F27"), 16);
+                if(cardAction != Constant.TC)
+                {
+                    var caseNo = MethodBase.GetCurrentMethod().Name;
+                    baseCase.TraceInfo(CaseLevel.Failed,caseNo, "脱机电子现金交易失败");
+                        
+                }                                       
             }
 
             return 0;

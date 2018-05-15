@@ -30,7 +30,7 @@ namespace UtilLib
         /// <param name="intValue"></param>
         /// <param name="strLen">指定字符串长度</param>
         /// <returns></returns>
-        public static string IntToString(int intValue, int strLen)
+        public static string IntToHexStr(int intValue, int strLen)
         {
             string ret = Convert.ToString(intValue, 16).ToUpper();
             if (ret.Length < strLen)
