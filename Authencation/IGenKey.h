@@ -139,7 +139,7 @@ extern "C" GENKEY_API void GenEMVMac(const char* udkAC, const char* data, char* 
 
 extern "C" GENKEY_API void Decrypt_Des3_CBC(const char* key, const char* input, char* output, int outputLen);
 
-int GenHash(const char* input, char* hash, int len);
+extern "C" GENKEY_API int GenHash(const char* input, char* hash, int len);
 
-int DES_GenRecovery(const char* publicKey, const char* publicKeyExp, const char* encryptionData, char* recoveryData, int len);
+extern "C" GENKEY_API int DES_GenRecovery(const char* publicKey, const char* publicKeyExp, const char* encryptionData, char* recoveryData, int len);
 

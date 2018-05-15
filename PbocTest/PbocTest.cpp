@@ -297,13 +297,13 @@ int main()
 	GenUdkSessionKey(udkMacKey, atc.c_str(), udkMacSessionKey);
 
 	string data = "04DA9F790A" + GetTag("9F36") + GetTag("9F26") + "000000050000";
-	GenIssuerScriptMac(udkMacSessionKey, data.c_str(), mac);
-	sw = PutDataCmd("9F79", "000000050000", mac);
-	if (sw != SW_9000)
-	{
-		printf("È¦´æ Ê§°Ü!\n");
-		return 2;
-	}
+	//GenIssuerScriptMac(udkMacSessionKey, data.c_str(), mac);
+	//sw = PutDataCmd("9F79", "000000050000", mac);
+	//if (sw != SW_9000)
+	//{
+	//	printf("È¦´æ Ê§°Ü!\n");
+	//	return 2;
+	//}
     return 0;
 }
 

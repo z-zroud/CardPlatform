@@ -530,7 +530,7 @@ namespace CardPlatform.Business
             }
             var mac = Authencation.GenEMVAC(udkACKey, input);
             //Authencation.
-            return true;
+            return "";
         }
 
         /// <summary>

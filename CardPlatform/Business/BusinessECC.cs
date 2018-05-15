@@ -17,6 +17,7 @@ namespace CardPlatform.Business
         private IExcuteCase baseCase = new CaseBase();
         private bool isEccTranction = false;
         private bool isSupportCDA = false;
+        private string pdolData = string.Empty;
         
         /// <summary>
         /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存
@@ -137,7 +138,6 @@ namespace CardPlatform.Business
         {
             string tag9F38 = tagDict.GetTag("9F38");
             var tls = DataParse.ParseTL(tag9F38);
-            string pdolData = string.Empty;
             foreach (var tl in tls)
             {
                 pdolData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
@@ -218,8 +218,13 @@ namespace CardPlatform.Business
             }
             if(IsSupportDDA(AIP))
             {
+                string ddolData = string.Empty;
                 string ddol = tagDict.GetTag("9F49");
-                string ddolData = "12345678";
+                var tls = DataParse.ParseTL(ddol);
+                foreach(var tl in tls)
+                {
+                    ddolData += tl.Tag;
+                }
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
                 {
@@ -285,22 +290,42 @@ namespace CardPlatform.Business
         protected int TerminalActionAnalyze()
         {
             //如果卡片支持CDA，在执行终端行为分析之前获取发卡行公钥、IC卡公钥
-            string issuerPublicKey = string.Empty;
             string iccPulicKey = string.Empty;
             if(isSupportCDA)
             {
-                issuerPublicKey = GetIssuerPublicKey();
+                string issuerPublicKey = GetIssuerPublicKey();
                 iccPulicKey = GetIccPublicKey(issuerPublicKey);
             }
             string CDOL1 = tagDict.GetTag("8C");
             var response = new ApduResponse();
             if(isSupportCDA)
             {
-                response = GAC1(Constant.TC_CDA, CDOL1);
-                if(ParseTLVAndSave(response.Response))
+                string CDOL1Data = string.Empty;
+                var tls = DataParse.ParseTL(CDOL1);
+                foreach (var tl in tls)
+                {
+                    CDOL1Data += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                }
+                response = APDU.GACCmd(Constant.TC_CDA, CDOL1Data);
+                if (ParseTLVAndSave(response.Response))
                 {
                     string tag9F4B = tagDict.GetTag("9F4B");
-                    DDA
+                    string exp = tagDict.GetTag("9F47");
+                    string recoveryData = Authencation.GenRecoveryData(iccPulicKey, exp, tag9F4B);
+                    if(recoveryData.Length == 0 || !recoveryData.StartsWith("6A05"))
+                    {
+
+                    }
+                    string recoveryHash = recoveryData.Substring(recoveryData.Length - 42, 40);
+                    string hashInput = recoveryData.Substring(2, recoveryData.Length - 44);
+                    hashInput += locator.Terminal.TermianlSettings.GetTag("9F37");
+                    string hash = Authencation.GetHash(hashInput);
+                    if(hash != recoveryHash)
+                    {
+
+                    }
+
+                    string hashInput2 = pdolData + CDOL1Data + 
                 }
             }
             else

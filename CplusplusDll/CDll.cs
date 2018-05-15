@@ -130,6 +130,12 @@ namespace CplusplusDll
         [DllImport(@"Authencation.dll", EntryPoint = "GenEMVAC", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void GenEMVAC(string udkAC, string data, StringBuilder mac);
 
+        [DllImport(@"Authencation.dll", EntryPoint = "GenHash", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void GenHash(string input, StringBuilder hash, int len);
+
+        [DllImport(@"Authencation.dll", EntryPoint = "DES_GenRecovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void DES_GenRecovery(string publicKey, string publicKeyExp, string encryptionData, StringBuilder recoveryData, int len);
+
         #endregion
         #region import DataParse.dll
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]

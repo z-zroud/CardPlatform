@@ -7,6 +7,22 @@ namespace CplusplusDll
 {
     public static class Authencation
     {
+        public static string GetHash(string input)
+        {
+            StringBuilder hash = new StringBuilder(64);
+            CDll.GenHash(input, hash, 64);
+
+            return hash.ToString();
+        }
+
+        public static string GenRecoveryData(string publicKey, string publicKeyExp, string encryptionData)
+        {
+            StringBuilder recoveryData = new StringBuilder(2048);
+            CDll.DES_GenRecovery(publicKey, publicKeyExp, encryptionData, recoveryData, 2048);
+
+            return recoveryData.ToString();
+        }
+
         public static string GenDesKcv(string key)
         {
             StringBuilder kcv = new StringBuilder(7);
