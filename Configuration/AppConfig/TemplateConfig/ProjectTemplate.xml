@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Application>
-      <TagTemplate>
-            <Tag name="9F08" checkMode="fixed" value="0030" level="failed" />
-            <Tag name="9F4D" checkMode="fixed" value="0030" level="failed" />
-            <Tag name="DF4D" checkMode="fixed" value="0030" level="failed" />
-            <Tag name="5F2D" checkMode="fixed" value="0030" level="failed" />
-            <Tag name="4F" checkMode="fixed" value="0030" level="failed" />
-            <Tag name="50" checkMode="fixed" value="0030" level="failed" />
-      </TagTemplate>
+	<UICS>
+		<TagTemplate>
+			<Step name="SelectApp">
+				<Tag name="9F08" checkMode="fixed" value="0030" level="failed" />
+				<Tag  name="9F4D" checkMode="fixed" value="0030" level="failed" />
+				<Tag  name="DF4D" checkMode="fixed" value="0030" level="failed" />
+				<Tag name="5F2D" checkMode="fixed" value="0030" level="failed" />
+				<Tag  name="4F" checkMode="fixed" value="0030" level="failed" />
+				<Tag  name="50" checkMode="fixed" value="0030" level="failed" />
+			</Step>
+		</TagTemplate>
+	</UICS>
 </Application>

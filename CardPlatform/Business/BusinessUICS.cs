@@ -112,7 +112,7 @@ namespace CardPlatform.Business
             {
                 if (ParseTLVAndSave(response.Response))
                 {
-                    IExcuteCase excuteCase = new SelectAidCase();
+                    IExcuteCase excuteCase = new SelectAidCase();    
                     excuteCase.ExcuteCase(response);
                     result = true;
                 }

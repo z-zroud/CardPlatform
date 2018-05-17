@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using CardPlatform.Business;
 
 namespace CardPlatform.Config
 {
@@ -28,15 +29,27 @@ namespace CardPlatform.Config
         public CheckMode Mode { get; set; }
     }
 
+    /// <summary>
+    /// 定义了在每个交易流程步骤中，需要校验tag值的集合
+    /// </summary>
+    public class ProcssStep
+    {
+        public ProcssStep()
+        {
+            Tags = new List<TemplateTag>();
+        }
+        public string Step { get; set; }
+        public List<TemplateTag> Tags;
+    }
+
     public class DataTemplateConfig
     {
         private static DataTemplateConfig config;
-        public Dictionary<string, TemplateTag> TemplateTags;
-
+        public Dictionary<string, List<ProcssStep>> TemplateTags;
 
         private DataTemplateConfig()
         {
-            TemplateTags = new Dictionary<string, TemplateTag>();
+            TemplateTags = new Dictionary<string, List<ProcssStep>>();
         }
 
         public static DataTemplateConfig GetInstance()
@@ -59,16 +72,33 @@ namespace CardPlatform.Config
             if (doc != null)
             {
                 var root = doc.Root;
-                var templateTags = root.Element("TagTemplate").Elements("Tag");
-                foreach (var item in templateTags)
+                var apps = new List<string> { Constant.APP_UICS, Constant.APP_ECC, Constant.APP_QUICS };
+                foreach(var app in apps)
                 {
-                    var templateTag = new TemplateTag();
-                    templateTag.Name = item.Attribute("name").Value;
-                    templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value, true);
-                    templateTag.Value = item.Attribute("value").Value;
-                    templateTag.TipLevel = (CaseLevel)Enum.Parse(typeof(CaseLevel), item.Attribute("level").Value, true);
-                    TemplateTags.Add(templateTag.Name, templateTag);
+                    var appNode = root.Element(app);
+                    string appName = appNode.Value;
+                    var steps = appNode.Element("TagTemplate").Elements("Step");
+                    var appTags = new List<ProcssStep>();
+                    foreach(var step in steps)
+                    {
+                        var templateTags = step.Elements("Tag");
+                        var stepName = step.Attribute("name");                
+                        var processStep = new ProcssStep();
+                        processStep.Step = stepName.Value;
+                        foreach (var item in templateTags)
+                        {
+                            var templateTag = new TemplateTag();
+                            templateTag.Name = item.Attribute("name").Value;
+                            templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value, true);
+                            templateTag.Value = item.Attribute("value").Value;
+                            templateTag.TipLevel = (CaseLevel)Enum.Parse(typeof(CaseLevel), item.Attribute("level").Value, true);
+                            processStep.Tags.Add(templateTag);
+                        }
+                        appTags.Add(processStep);
+                    }
+                    TemplateTags.Add(appName, appTags);
                 }
+
             }
         }
 
@@ -77,7 +107,7 @@ namespace CardPlatform.Config
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public TemplateTag GetTemplateTag(string tag)
+        public TemplateTag GetTemplateTag(string app, string step, string tag)
         {
             if (TemplateTags.ContainsKey(tag))
             {

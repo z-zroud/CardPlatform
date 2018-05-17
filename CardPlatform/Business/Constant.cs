@@ -13,6 +13,10 @@ namespace CardPlatform.Business
         public static readonly string DebitAid = "A000000333010101";
         public static readonly string CreditAid = "A000000333010102";
 
+        public static readonly string APP_UICS = "UICS";
+        public static readonly string APP_ECC = "ECC";
+        public static readonly string APP_QUICS = "QUICS";
+
         public static readonly int ARQC = 0x80;
         public static readonly int TC = 0x40;
         public static readonly int AAC = 0x00;
@@ -23,6 +27,8 @@ namespace CardPlatform.Business
         public static readonly string DataComparedConfigFile = "ProjectTemplate.xml";
 
         public static readonly string TransactionCase = "Transcation case";
+
+
 
     }
 
