@@ -15,8 +15,9 @@ namespace CardPlatform.Cases
     /// </summary>
     public class CaseBase : IExcuteCase
     {
-        private static Dictionary<string, Dictionary<string,CaseInfo>> CaseDict = new Dictionary<string, Dictionary<string, CaseInfo>>();
-        private static Dictionary<string, CaseInfo> CaseInfos = new Dictionary<string, CaseInfo>();
+        private static Dictionary<string, Dictionary<string,CaseInfo>> caseDict = new Dictionary<string, Dictionary<string, CaseInfo>>();
+        private static Dictionary<string, CaseInfo> caseInfos = new Dictionary<string, CaseInfo>();
+        public string CurrentApp { get; set; }
         public string Step { get; set; }
 
         protected List<TLV> arrTLV;
@@ -26,7 +27,7 @@ namespace CardPlatform.Cases
         {
             response = new ApduResponse();
             arrTLV = new List<TLV>();
-            Step = "CaseBase";
+            Step = "BaseStep";
             Load();           
         }
 
@@ -39,9 +40,9 @@ namespace CardPlatform.Cases
             response = (ApduResponse)srcData;
             arrTLV = DataParse.ParseTLV(response.Response);
 
-            if(CaseInfos != null)
+            if(caseInfos != null)
             {
-                foreach (var item in CaseInfos.Keys)
+                foreach (var item in caseInfos.Keys)
                 {
                     //var methods = GetType().GetMethods();
                     if (!string.IsNullOrEmpty(item))
@@ -59,21 +60,23 @@ namespace CardPlatform.Cases
             {
                 foreach (var item in locator.TemplateCompare.TemplateComparedInfos)
                 {
-                    if (tlv.Tag == item.Tag)
+                    if(CurrentApp == item.CurrentApp && Step == item.Step)
                     {
-                        item.CardValue = tlv.Value;
-                        item.HasCheck = true;
-                        if (tlv.Value == item.TemplateValue)
+                        if (tlv.Tag == item.Tag)
                         {
-                            item.ColorMark = new SolidColorBrush(Colors.Black);
-                            item.CaseLevel = "成功";
-                        }
-                        else
-                        {
-                            var level = compareObj.GetTemplateTag(item.Tag).TipLevel;
-                            if (level == CaseLevel.Sucess) { item.ColorMark = new SolidColorBrush(Colors.Black); item.CaseLevel = "成功"; }
-                            else if (level == CaseLevel.Warn) { item.ColorMark = new SolidColorBrush(Colors.Yellow); item.CaseLevel = "警告"; }
-                            else if (level == CaseLevel.Failed) { item.ColorMark = new SolidColorBrush(Colors.Red); item.CaseLevel = "失败"; }
+                            item.CardValue = tlv.Value;
+                            item.HasCheck = true;
+                            if (tlv.Value == item.TemplateValue)
+                            {
+                                item.ColorMark = new SolidColorBrush(Colors.Black);
+                                item.CaseLevel = "成功";
+                            }
+                            else
+                            {
+                                if (item.Level == TipLevel.Sucess) { item.ColorMark = new SolidColorBrush(Colors.Black); item.CaseLevel = "成功"; }
+                                else if (item.Level == TipLevel.Warn) { item.ColorMark = new SolidColorBrush(Colors.Yellow); item.CaseLevel = "警告"; }
+                                else if (item.Level == TipLevel.Failed) { item.ColorMark = new SolidColorBrush(Colors.Red); item.CaseLevel = "失败"; }
+                            }
                         }
                     }
                 }
@@ -87,15 +90,15 @@ namespace CardPlatform.Cases
         /// <param name="caseNo"></param>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        public virtual void TraceInfo(CaseLevel level, string caseNo, string format, params object[] args)
+        public virtual void TraceInfo(TipLevel level, string caseNo, string format, params object[] args)
         {
             string description = string.Format(format, args);
             string caseLevel = string.Empty;
             TransInfoModel caseInfo = new TransInfoModel();
 
-            if (level == CaseLevel.Sucess) { caseInfo.ColorMark = new SolidColorBrush(Colors.Black); caseLevel = "成功"; }
-            else if (level == CaseLevel.Warn) { caseInfo.ColorMark = new SolidColorBrush(Colors.Yellow); caseLevel = "警告"; }
-            else if (level == CaseLevel.Failed) { caseInfo.ColorMark = new SolidColorBrush(Colors.Red); caseLevel = "失败"; }
+            if (level == TipLevel.Sucess) { caseInfo.ColorMark = new SolidColorBrush(Colors.Black); caseLevel = "成功"; }
+            else if (level == TipLevel.Warn) { caseInfo.ColorMark = new SolidColorBrush(Colors.Yellow); caseLevel = "警告"; }
+            else if (level == TipLevel.Failed) { caseInfo.ColorMark = new SolidColorBrush(Colors.Red); caseLevel = "失败"; }
 
             caseInfo.CaseNo = caseNo;
             caseInfo.CaseInfo = description;
@@ -113,10 +116,10 @@ namespace CardPlatform.Cases
         /// <returns></returns>
         public CaseInfo GetCaseItem(string caseNo)
         {
-            if(CaseInfos != null)
+            if(caseInfos != null)
             {
                 CaseInfo item;
-                if (CaseInfos.TryGetValue(caseNo, out item))
+                if (caseInfos.TryGetValue(caseNo, out item))
                 {
                     return item;
                 }
@@ -133,9 +136,9 @@ namespace CardPlatform.Cases
             var caseConfig = CaseConfig.GetInstance();
             if(!caseConfig.HasLoaded)
             {
-                CaseDict = caseConfig.Load(".\\Configuration\\AppConfig\\CaseConfiguration.xml");
+                caseDict = caseConfig.Load(".\\Configuration\\AppConfig\\CaseConfiguration.xml");
             }
-            CaseDict.TryGetValue(Step, out CaseInfos);
+            caseDict.TryGetValue(Step, out caseInfos);
         }
     }
 }

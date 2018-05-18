@@ -31,8 +31,8 @@ namespace CardPlatform.Business
             }
             ParseTLVAndSave(response.Response);
 
-            IExcuteCase cases = new PSECases();
-            cases.ExcuteCase(response);
+            IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_PSE, Constant.STEP_SELECT_PSE);
+            stepCase.ExcuteCase(response);
 
             //获取AID列表
             List<string> Aids = new List<string>();
@@ -67,13 +67,17 @@ namespace CardPlatform.Business
             ApduResponse response = new ApduResponse();
             response = APDU.ReadRecordCmd(SFI, recordNo);
 
-            IExcuteCase cases = new PSEDirCase();
-            if (response.SW != 0x9000 && response.SW != 0x6700)
+            IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_PSE, Constant.STEP_READ_PSE_DIR);
+            if (response.SW != 0x9000 && response.SW != 0x6A83)
             {
-                cases.TraceInfo(Config.CaseLevel.Failed, "ReadPSERecord", "读到最后一条记录后再读下一条应返回6700");
+                caseObj.TraceInfo(Config.TipLevel.Failed, "ReadPSERecord", "读到最后一条记录后再读下一条应返回6A83");
                 return string.Empty;
-            }           
-            cases.ExcuteCase(response);
+            }
+            if(response.SW == 0x6A83)
+            {
+                return string.Empty;
+            }
+            stepCase.ExcuteCase(response);
 
             List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
             var aid = from tlv in arrTLV where tlv.Tag == "4F" select tlv.Value;

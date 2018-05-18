@@ -36,7 +36,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
@@ -64,7 +64,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
@@ -86,7 +86,7 @@ namespace CardPlatform.Cases
                     }
                     else
                     {
-                        TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
                     break;
                 }
@@ -124,7 +124,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
@@ -154,7 +154,7 @@ namespace CardPlatform.Cases
             }
             if(hasTag5F2D)
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
@@ -177,7 +177,7 @@ namespace CardPlatform.Cases
                     string value = UtilLib.Utils.BcdToStr(item.Value);
                     if(CaseUtil.IsAlpha(value))
                     {
-                        TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
                     else
                     {
@@ -212,11 +212,11 @@ namespace CardPlatform.Cases
             }
             if (hasTag9F11)
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
-                TraceInfo(CaseLevel.Warn, caseNo, "PSE响应数据中缺少tag9F11");
+                TraceInfo(TipLevel.Warn, caseNo, "PSE响应数据中缺少tag9F11");
             }
         }
 
@@ -264,7 +264,7 @@ namespace CardPlatform.Cases
                     tags.Add(item.Tag, item);
                 }
             }
-            TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

@@ -46,9 +46,11 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
+                <DataGridTextColumn IsReadOnly="True" Header="应用类型"  Width="100" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding CurrentApp}"/>
+                <DataGridTextColumn IsReadOnly="True" Header="交易步骤"  Width="100" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding Step}"/>
                 <DataGridTextColumn IsReadOnly="True" Header="标签"  Width="100" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding Tag}"/>
-                <DataGridTextColumn IsReadOnly="True" Header="模板值" Width="380" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding TemplateValue}"/>
-                <DataGridTextColumn IsReadOnly="True" Header="卡片值" Width="380" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding CardValue}"/>
+                <DataGridTextColumn IsReadOnly="True" Header="模板值" Width="300" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding TemplateValue}"/>
+                <DataGridTextColumn IsReadOnly="True" Header="卡片值" Width="300" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding CardValue}"/>
                 <DataGridTemplateColumn Header="结果" Width="60">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

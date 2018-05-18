@@ -55,18 +55,18 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
             }
             var AFLs = GPOEx();
             if (AFLs.Count == 0)
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                 return false;
             }
             if (!ReadAppRecords(AFLs))
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                 return false;
             }
 
@@ -92,7 +92,7 @@ namespace CardPlatform.Business
             {
                 if (ParseTLVAndSave(response.Response))
                 {
-                    IExcuteCase excuteCase = new SelectAidCase();
+                    IExcuteCase excuteCase = new SelectAppCase();
                     excuteCase.ExcuteCase(response);
                     result = true;
                 }
@@ -102,7 +102,7 @@ namespace CardPlatform.Business
                 var caseNo = MethodBase.GetCurrentMethod().Name;
                 if (response.SW != 0x9000)
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
                 }
             }
             return result;
@@ -154,7 +154,7 @@ namespace CardPlatform.Business
             {
                 if (resp.SW != 0x9000)
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
                 if (!ParseTLVAndSave(resp.Response))
@@ -178,7 +178,7 @@ namespace CardPlatform.Business
             {
                 if (!SDA())
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
                     return -3;
                 }
             }
@@ -189,13 +189,13 @@ namespace CardPlatform.Business
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
                     return -7;
                 }
                 string issuerPublicKey = GetIssuerPublicKey();
                 if (!DDA(issuerPublicKey, tag9F4B, ddolData))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
                     return -3;
                 }
             }
@@ -219,17 +219,17 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (expiryDate < currentDate)    //应用已失效
             {
-                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用失效日期大于当前日期，应用已失效");
+                caseBase.TraceInfo(TipLevel.Warn, caseNo, "应用失效日期大于当前日期，应用已失效");
             }
 
             if (effectiveDate < currentDate) // 应用未生效
             {
-                caseBase.TraceInfo(CaseLevel.Warn, caseNo, "应用生效日期大于当前日期，应用未生效");
+                caseBase.TraceInfo(TipLevel.Warn, caseNo, "应用生效日期大于当前日期，应用未生效");
             }
 
             if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
             {
-                caseBase.TraceInfo(CaseLevel.Failed, caseNo, "应用失效日期大于生效日期，应用不合法");
+                caseBase.TraceInfo(TipLevel.Failed, caseNo, "应用失效日期大于生效日期，应用不合法");
             }
             return 0;
         }

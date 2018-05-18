@@ -28,7 +28,7 @@ namespace CardPlatform.ViewModel
             {
                 var fileName = Path.GetFileName(file);
                 TemplatePath.Add(fileName);
-                if(fileName == "AppTemplate.xml")
+                if(fileName == "DataTemplate.xml")
                 {
                     SelectedTemplatePath = fileName;
                 }
@@ -91,16 +91,25 @@ namespace CardPlatform.ViewModel
             var path = Directory.GetCurrentDirectory() + subAppTemplateDir + "\\" + SelectedTemplatePath;
             compObj.Load(path);
             TemplateComparedInfos.Clear();
-            foreach (var item in compObj.TemplateTags)
+            foreach (var app in compObj.TemplateTags.Keys)
             {
-                TemplateComparedInfo comparedItem = new TemplateComparedInfo();
-                comparedItem.TemplateValue = item.Value.Value;
-                comparedItem.Tag = item.Key;
-                comparedItem.HasCheck = false;
-                comparedItem.ColorMark = new SolidColorBrush(Colors.Blue);
-                comparedItem.CaseLevel = "未校验";
-                TemplateComparedInfos.Add(comparedItem);
-                
+                var appTags = compObj.TemplateTags[app];
+                foreach(var stepTags in appTags)
+                {
+                    foreach(var item in stepTags.Tags)
+                    {
+                        TemplateComparedInfo comparedItem = new TemplateComparedInfo();
+                        comparedItem.TemplateValue = item.Value;
+                        comparedItem.Tag = item.Name;
+                        comparedItem.CurrentApp = app;
+                        comparedItem.Step = stepTags.Step;
+                        comparedItem.HasCheck = false;
+                        comparedItem.ColorMark = new SolidColorBrush(Colors.Blue);
+                        comparedItem.CaseLevel = "未校验";
+                        comparedItem.Level = item.Level;
+                        TemplateComparedInfos.Add(comparedItem);
+                    }
+                }             
             }
         }
     }

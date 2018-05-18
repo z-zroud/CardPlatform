@@ -16,6 +16,7 @@ namespace CardPlatform.Business
         {
             KeyType = TransKeyType.MDK;
             locator = new ViewModelLocator();
+            caseObj = new CaseBase();
         }
 
         public TransKeyType KeyType { get; set; }
@@ -31,6 +32,7 @@ namespace CardPlatform.Business
         protected string toBeSignAppData;   //当前交易流程认证数据
         protected string aid;       //当前应用AID
         protected AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default 当前交易流程使用的算法
+        protected IExcuteCase caseObj;  //定义了基本的case,涉及到程序逻辑，不在case配置文件中配置
 
         //检查AIP支持的功能
         #region Check AIP support functions
@@ -162,7 +164,7 @@ namespace CardPlatform.Business
             {
                 IExcuteCase cases = new CaseBase();
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                cases.TraceInfo(Config.CaseLevel.Failed, caseNo, "解析TLV格式失败");
+                cases.TraceInfo(TipLevel.Failed, caseNo, "解析TLV格式失败");
             }
 
             return result;
@@ -231,7 +233,7 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (aid.Length < 10 || aid.Length > 16)
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "应用AID长度为{0}不在规范内", aid.Length);
+                excuteCase.TraceInfo(TipLevel.Failed, caseNo, "应用AID长度为{0}不在规范内", aid.Length);
                 return issuerPublicKey;
             }
 
@@ -241,13 +243,13 @@ namespace CardPlatform.Business
             string CAIndex = tagDict.GetTag("8F");
             if (CAIndex.Length != 2)
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA 索引,请检查8F是否存在");
+                excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取CA 索引,请检查8F是否存在");
                 return issuerPublicKey;
             }
             string CAPublicKey = Authencation.GenCAPublicKey(CAIndex, rid);
             if (string.IsNullOrWhiteSpace(CAPublicKey))
             {
-                excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取CA公钥，请检查RID及索引是否正确");
+                excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取CA公钥，请检查RID及索引是否正确");
                 return issuerPublicKey;
             }
 
@@ -264,7 +266,7 @@ namespace CardPlatform.Business
                 issuerPublicKey = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp);
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在");
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在");
                     return issuerPublicKey;
                 }
             }
@@ -273,7 +275,7 @@ namespace CardPlatform.Business
                 issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
                     return issuerPublicKey;
                 }
             }
@@ -302,7 +304,7 @@ namespace CardPlatform.Business
                 iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
                     return iccPublicKey;
                 }
             }
@@ -311,7 +313,7 @@ namespace CardPlatform.Business
                 iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN);
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "无法获取IC卡公钥");
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取IC卡公钥");
                     return iccPublicKey;
                 }
             }
@@ -338,7 +340,7 @@ namespace CardPlatform.Business
                 result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "静态数据认证失败! 返回码: {0}", result);
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "静态数据认证失败! 返回码: {0}", result);
                     return false;
                 }
             }
@@ -347,7 +349,7 @@ namespace CardPlatform.Business
                 result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 静态数据认证失败! 返回码: {0}", result);
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "SM算法 静态数据认证失败! 返回码: {0}", result);
                     return false;
                 }
             }
@@ -377,7 +379,7 @@ namespace CardPlatform.Business
                 var result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, ddolData);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "动态数据认证失败! 返回码: {0}", result);
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "动态数据认证失败! 返回码: {0}", result);
                     return false;
                 }
             }
@@ -386,7 +388,7 @@ namespace CardPlatform.Business
                 var result = Authencation.SM_DDA(iccPublicKey, tag9F4B, ddolData);
                 if (result != 0)
                 {
-                    excuteCase.TraceInfo(CaseLevel.Failed, caseNo, "SM算法 动态数据认证失败! 返回码: {0}", result);
+                    excuteCase.TraceInfo(TipLevel.Failed, caseNo, "SM算法 动态数据认证失败! 返回码: {0}", result);
                     return false;
                 }
             }

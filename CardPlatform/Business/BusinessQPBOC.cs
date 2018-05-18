@@ -76,18 +76,18 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用失败，交易流程终止");
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
             }
             var AFLs = GPOEx();
             if (AFLs.Count == 0)
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                 return false;
             }
             if (!ReadAppRecords(AFLs))
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                 return false;
             }
 
@@ -98,7 +98,7 @@ namespace CardPlatform.Business
             }
             else
             {
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "进行QPBOC交易失败");
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "进行QPBOC交易失败");
                 return false;
             }
             return true;
@@ -117,7 +117,7 @@ namespace CardPlatform.Business
             {
                 if(ParseTLVAndSave(response.Response))
                 {
-                    IExcuteCase excuteCase = new SelectAidCase();
+                    IExcuteCase excuteCase = new SelectAppCase();
                     excuteCase.ExcuteCase(response);
                     result = true;
                 }
@@ -127,7 +127,7 @@ namespace CardPlatform.Business
                 var caseNo = MethodBase.GetCurrentMethod().Name;
                 if(response.SW != 0x9000)
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
                 }             
             }
             return result;
@@ -150,7 +150,7 @@ namespace CardPlatform.Business
 
                 if(!tlTags.Contains("DF69"))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "国密算法，PDOL中缺少tagDF69");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "国密算法，PDOL中缺少tagDF69");
                     return AFLs;
                 }
             }
@@ -159,7 +159,7 @@ namespace CardPlatform.Business
             {
                 if(!tlTags.Contains(tag))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "PDOL中缺少tag{0}", tag);
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "PDOL中缺少tag{0}", tag);
                     return AFLs;
                 }
             }
@@ -173,7 +173,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.GPO(PDOLData);           
             if (response.SW != 0x9000)
             {               
-                baseCase.TraceInfo(CaseLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
+                baseCase.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
                 return AFLs;
             }
             if(ParseTLVAndSave(response.Response))
@@ -187,7 +187,7 @@ namespace CardPlatform.Business
                 int cardAction = Convert.ToInt32(tag9F27, 16);
                 if(cardAction != Constant.TC)
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "卡片拒绝此次交易，卡片代码[{0}]", tag9F27);
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "卡片拒绝此次交易，卡片代码[{0}]", tag9F27);
                     return AFLs;
                 }
                 AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
@@ -211,7 +211,7 @@ namespace CardPlatform.Business
             {
                 if(resp.SW != 0x9000)
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
                 if(!ParseTLVAndSave(resp.Response))
@@ -240,7 +240,7 @@ namespace CardPlatform.Business
             {
                 if (!SDA())
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
                     return -3;
                 }
             }
@@ -251,13 +251,13 @@ namespace CardPlatform.Business
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "Tag9F4B不存在");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
                     return -7;
                 }
                 string issuerPublicKey = GetIssuerPublicKey();
                 if (!DDA(issuerPublicKey, tag9F4B, ddolData))
                 {
-                    baseCase.TraceInfo(CaseLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
                     return -3;
                 }
             }

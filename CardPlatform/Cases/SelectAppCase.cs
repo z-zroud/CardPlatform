@@ -10,7 +10,7 @@ using CplusplusDll;
 
 namespace CardPlatform.Cases
 {
-    public class SelectAidCase : CaseBase
+    public class SelectAppCase : CaseBase
     {
 
         protected override void Load()
@@ -33,7 +33,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
@@ -62,7 +62,7 @@ namespace CardPlatform.Cases
                 }
                 else
                 {
-                    TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
@@ -108,7 +108,7 @@ namespace CardPlatform.Cases
             }
             if (!hasOtherTag)
             {
-                TraceInfo(CaseLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 

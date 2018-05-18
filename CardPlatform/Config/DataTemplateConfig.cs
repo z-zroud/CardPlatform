@@ -25,7 +25,7 @@ namespace CardPlatform.Config
     {
         public string Name { get; set; }
         public string Value { get; set; }
-        public CaseLevel TipLevel { get; set; }
+        public TipLevel Level { get; set; }
         public CheckMode Mode { get; set; }
     }
 
@@ -45,7 +45,7 @@ namespace CardPlatform.Config
     public class DataTemplateConfig
     {
         private static DataTemplateConfig config;
-        public Dictionary<string, List<ProcssStep>> TemplateTags;
+        public Dictionary<string, List<ProcssStep>> TemplateTags { get; private set; }
 
         private DataTemplateConfig()
         {
@@ -76,7 +76,9 @@ namespace CardPlatform.Config
                 foreach(var app in apps)
                 {
                     var appNode = root.Element(app);
-                    string appName = appNode.Value;
+                    if (appNode == null)
+                        continue;   //表明没有此应用的模板
+                    string appName = appNode.Name.LocalName;
                     var steps = appNode.Element("TagTemplate").Elements("Step");
                     var appTags = new List<ProcssStep>();
                     foreach(var step in steps)
@@ -91,7 +93,7 @@ namespace CardPlatform.Config
                             templateTag.Name = item.Attribute("name").Value;
                             templateTag.Mode = (CheckMode)Enum.Parse(typeof(CheckMode), item.Attribute("checkMode").Value, true);
                             templateTag.Value = item.Attribute("value").Value;
-                            templateTag.TipLevel = (CaseLevel)Enum.Parse(typeof(CaseLevel), item.Attribute("level").Value, true);
+                            templateTag.Level = (TipLevel)Enum.Parse(typeof(TipLevel), item.Attribute("level").Value, true);
                             processStep.Tags.Add(templateTag);
                         }
                         appTags.Add(processStep);
@@ -109,9 +111,19 @@ namespace CardPlatform.Config
         /// <returns></returns>
         public TemplateTag GetTemplateTag(string app, string step, string tag)
         {
-            if (TemplateTags.ContainsKey(tag))
+            if (TemplateTags.ContainsKey(app))
             {
-                return TemplateTags[tag];
+                var stepDict = TemplateTags[app];
+                foreach(var processStep in stepDict)
+                {
+                    if(processStep.Step == step)
+                    {
+                        var templateTag = from item in processStep.Tags where tag == item.Name select item;
+                        if (templateTag != null)
+                            return templateTag.First();
+                        break;
+                    }
+                }
             }
                 
             return null;

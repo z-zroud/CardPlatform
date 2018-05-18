@@ -16,6 +16,14 @@ namespace CardPlatform.Business
         public static readonly string APP_UICS = "UICS";
         public static readonly string APP_ECC = "ECC";
         public static readonly string APP_QUICS = "QUICS";
+        public static readonly string APP_PSE = "PSE";
+        public static readonly string APP_PPSE = "PPSE";
+
+        public const string STEP_SELECT_PSE = "SelectPSE";
+        public const string STEP_READ_PSE_DIR = "ReadPSEDir";
+        public const string STEP_SELECT_APP = "SelectApp";
+        public const string STEP_GPO = "GPO";
+        public const string STEP_READ_RECORD = "ReadRecord";
 
         public static readonly int ARQC = 0x80;
         public static readonly int TC = 0x40;

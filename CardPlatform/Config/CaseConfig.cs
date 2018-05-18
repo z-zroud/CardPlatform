@@ -7,19 +7,28 @@ using System.Xml;
 
 namespace CardPlatform.Config
 {
-    public enum CaseLevel
+    /// <summary>
+    /// 定义了当Case执行不成功时，该如何显示Case结果
+    /// </summary>
+    public enum TipLevel
     {
         Sucess = 0,
         Warn = 1,
         Failed = 2
     }
 
+
+    /// <summary>
+    /// 定义了在UI界面中执行Case显示的内容
+    /// </summary>
     public class CaseInfo
     {
+        public string CaseApp { get; set; }
+        public string CaseStep { get; set; }
         public string CaseNo { get; set; }
         public string Description { get; set; }
         public string Result { get; set; }
-        public CaseLevel Level { get; set; }
+        public TipLevel Level { get; set; }
     }
 
     public class CaseConfig
@@ -76,7 +85,7 @@ namespace CardPlatform.Config
                         CaseInfo caseInfo = new CaseInfo();
                         caseInfo.CaseNo = reader.GetAttribute("num");
                         caseInfo.Description = reader.GetAttribute("desc");
-                        caseInfo.Level = (CaseLevel)Enum.Parse(typeof(CaseLevel), reader.GetAttribute("level"), true);
+                        caseInfo.Level = (TipLevel)Enum.Parse(typeof(TipLevel), reader.GetAttribute("level"), true);
                         
                         items.Add(caseInfo.CaseNo, caseInfo);
                     }
@@ -91,17 +100,5 @@ namespace CardPlatform.Config
 
             return CaseDict;
         }
-
-        /// <summary>
-        /// 获取指定的tag
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <returns></returns>
-        //public ComparedTag GetComparedTag(string tag)
-        //{
-        //    if (ComparedTags.ContainsKey(tag))
-        //        return ComparedTags[tag];
-        //    return null;
-        //}
     }
 }
