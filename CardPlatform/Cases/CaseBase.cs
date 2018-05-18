@@ -6,6 +6,7 @@ using UtilLib;
 using System.Windows.Media;
 using CardPlatform.Config;
 using CplusplusDll;
+using System.Linq;
 
 namespace CardPlatform.Cases
 {
@@ -15,8 +16,8 @@ namespace CardPlatform.Cases
     /// </summary>
     public class CaseBase : IExcuteCase
     {
-        private static Dictionary<string, Dictionary<string,CaseInfo>> caseDict = new Dictionary<string, Dictionary<string, CaseInfo>>();
-        private static Dictionary<string, CaseInfo> caseInfos = new Dictionary<string, CaseInfo>();
+        private static Dictionary<string, List<TransStepCase>> caseDict = new Dictionary<string, List<TransStepCase>>();
+        private static List<CaseInfo> caseInfos = new List<CaseInfo>();
         public string CurrentApp { get; set; }
         public string Step { get; set; }
 
@@ -42,11 +43,11 @@ namespace CardPlatform.Cases
 
             if(caseInfos != null)
             {
-                foreach (var item in caseInfos.Keys)
+                foreach (var item in caseInfos)
                 {
                     //var methods = GetType().GetMethods();
-                    if (!string.IsNullOrEmpty(item))
-                        GetType().GetMethod(item).Invoke(this, null);
+                    if (!string.IsNullOrEmpty(item.CaseNo))
+                        GetType().GetMethod(item.CaseNo).Invoke(this, null);
                 }
             }
             CheckTemplateTag();    
@@ -118,11 +119,9 @@ namespace CardPlatform.Cases
         {
             if(caseInfos != null)
             {
-                CaseInfo item;
-                if (caseInfos.TryGetValue(caseNo, out item))
-                {
-                    return item;
-                }
+                var item = from info in caseInfos where caseNo == info.CaseNo select info;
+                if (item != null)
+                    return item.First();
             }
 
             return null;
@@ -138,7 +137,18 @@ namespace CardPlatform.Cases
             {
                 caseDict = caseConfig.Load(".\\Configuration\\AppConfig\\CaseConfiguration.xml");
             }
-            caseDict.TryGetValue(Step, out caseInfos);
+            var allStepCases = new List<TransStepCase>();
+            caseDict.TryGetValue(CurrentApp, out allStepCases);
+            if(allStepCases != null)
+            {
+                foreach(var stepCases in allStepCases)
+                {
+                    if(stepCases.Step == Step)
+                    {
+                        caseInfos = stepCases.Cases;
+                    }
+                }
+            }
         }
     }
 }

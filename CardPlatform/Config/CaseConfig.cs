@@ -1,9 +1,11 @@
-﻿using System;
+﻿using CardPlatform.Business;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace CardPlatform.Config
 {
@@ -31,17 +33,31 @@ namespace CardPlatform.Config
         public TipLevel Level { get; set; }
     }
 
+    /// <summary>
+    /// 定义每个交易流程中需要执行的Case
+    /// </summary>
+    public class TransStepCase
+    {
+        public TransStepCase()
+        {
+            Cases = new List<CaseInfo>();
+        }
+
+        public string Step { get; set; }
+        public List<CaseInfo> Cases { get; set; }
+    }
+
     public class CaseConfig
     {
         private static CaseConfig config;
-        private Dictionary<string,Dictionary<string, CaseInfo>> CaseDict;
+        private Dictionary<string,List<TransStepCase>> allAppCases;
 
         public bool HasLoaded { get; private set; }
 
         private CaseConfig()
         {
             HasLoaded = false;
-            CaseDict = new Dictionary<string, Dictionary<string, CaseInfo>>();
+            allAppCases = new Dictionary<string, List<TransStepCase>>();
         }
 
         /// <summary>
@@ -62,43 +78,50 @@ namespace CardPlatform.Config
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public Dictionary<string, Dictionary<string, CaseInfo>> Load(string path)
+        public Dictionary<string, List<TransStepCase>> Load(string path)
         {
-            var reader = new XmlTextReader(path);
-            if (reader == null)
+            XDocument doc = XDocument.Load(path);
+            if (doc != null)
             {
-                return null;
-            }
-            HasLoaded = true;
-            string casesName = string.Empty;
-            Dictionary<string, CaseInfo> items = new Dictionary<string, CaseInfo>();
-            while (reader.Read())
-            {               
-                if (reader.NodeType == XmlNodeType.Element)
+                var root = doc.Root;
+                var apps = new List<string>
                 {
-                    if (reader.Name == "Cases")
-                    {
-                        items = new Dictionary<string, CaseInfo>();
-                        casesName = reader.GetAttribute("name");
-                    }else if(reader.Name == "CaseItem")
-                    {
-                        CaseInfo caseInfo = new CaseInfo();
-                        caseInfo.CaseNo = reader.GetAttribute("num");
-                        caseInfo.Description = reader.GetAttribute("desc");
-                        caseInfo.Level = (TipLevel)Enum.Parse(typeof(TipLevel), reader.GetAttribute("level"), true);
-                        
-                        items.Add(caseInfo.CaseNo, caseInfo);
-                    }
-                }else if(reader.NodeType == XmlNodeType.EndElement)
+                    Constant.APP_PSE,
+                    Constant.APP_PPSE,
+                    Constant.APP_UICS,
+                    Constant.APP_ECC,
+                    Constant.APP_QUICS
+                };
+                foreach (var app in apps)
                 {
-                    if(reader.Name == "Cases")
+                    var appNode = root.Element(app);
+                    if (appNode == null)
+                        continue;   //表明没有此应用的模板
+                    string appName = appNode.Name.LocalName;    //应用类型
+                    var stepCaseNodes = appNode.Elements("StepCase");   //交易步骤节点
+                    var appCase = new List<TransStepCase>();
+                    foreach (var stepCase in stepCaseNodes) //遍历每个交易步骤节点下的Case
                     {
-                        CaseDict.Add(casesName, items);
+                        var caseItems = stepCase.Elements("CaseItem");
+                        var transStepCase = new TransStepCase();
+                        transStepCase.Step = stepCase.Attribute("name").Value;
+                        foreach (var item in caseItems)
+                        {
+                            CaseInfo caseInfo = new CaseInfo();
+                            caseInfo.CaseApp = appName;
+                            caseInfo.CaseStep = transStepCase.Step;
+                            caseInfo.CaseNo = item.Attribute("num").Value;
+                            caseInfo.Description = item.Attribute("desc").Value;
+                            caseInfo.Level = (TipLevel)Enum.Parse(typeof(TipLevel), item.Attribute("level").Value, true);
+
+                            transStepCase.Cases.Add(caseInfo);
+                        }
+                        appCase.Add(transStepCase); //保存了应用下的case案例
                     }
+                    allAppCases.Add(appName, appCase); //保存所有应用下的case案例
                 }
             }
-
-            return CaseDict;
+            return allAppCases;
         }
     }
 }
