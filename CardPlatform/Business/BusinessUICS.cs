@@ -237,7 +237,7 @@ namespace CardPlatform.Business
                 var resp = APDU.GetDataCmd(tagStandards[i].Tag);
                 if(resp.SW != 0x9000)
                 {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[%s],返回码:[%02X]", tagStandards[i].Tag, resp.SW);
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[{0}],返回码:[{1}]", tagStandards[i].Tag, resp.SW);
                 }
                 else
                 {
@@ -248,7 +248,7 @@ namespace CardPlatform.Business
                     {
                         if(tlv.First().Len != tagStandards[i].Len)
                         {
-                            caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[%s]长度不匹配，标准规范为[],实际长度为", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
+                            caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
                 }
@@ -439,7 +439,13 @@ namespace CardPlatform.Business
             }
             else
             {
-                macSessionKey = Authencation.GenUdkSessionKey(TransDesACKey, ATC);
+                if(TransDesACKey != null)
+                    macSessionKey = Authencation.GenUdkSessionKey(TransDesACKey, ATC);
+            }
+            if(macSessionKey.Length != 32)
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取mac session密钥");
+                return -1;
             }
             if(tag.Length == 2)
             {

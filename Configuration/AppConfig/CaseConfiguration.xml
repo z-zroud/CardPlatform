@@ -13,7 +13,13 @@
                   <CaseItem level="failed" num="PBOC_sPSE_CFX_001" desc="每个Tag只能存在一个，包括6F，A5，BF0C模板"/>
             </StepCase>
             <StepCase name="ReadPSEDir">
-                  <CaeItem level="failed" num="" desc=""/>
+                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_001" desc="是否以70开头"/>
+                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_003" desc="70后是否仅包含61模板"/>
+                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_005" desc="61中是否包含4F（必选包含）4F的长度是否在5～16字节之间"/>
+                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_007" desc="50必须包含在61模板内，50的长度是否在1～16字节之间"/>
+                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_008" desc="61中可包含的其他Tag有 50.9F12、87、73，其他Tag不能出现"/>
+                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_009" desc="9F12的长度应在1～16字节之间,BCD码显示"/>
+                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_010" desc="87的长度是否为1字节"/>
             </StepCase>
       </PSE>
       <PPSE>
@@ -21,4 +27,11 @@
                   <CaseItem level="failed" num="" desc=""/>
             </StepCase>           
       </PPSE>
+      <UICS>
+            <StepCase name="GPO">
+                  <CaseItem level="failed" num="PBOC_GPO_SJHGX_001" desc="响应数据是否以80开头"/>
+                  <CaseItem level="failed" num="PBOC_GPO_SJHGX_003" desc="去除AIP后检查AFL是否为4字节的倍数"/>
+                  <CaseItem level="failed" num="PBOC_GPO_SJHGX_004" desc="AFL中记录没有重复/AIP重复"/>
+            </StepCase>
+      </UICS>
 </CaseConfig>
