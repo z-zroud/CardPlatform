@@ -9,6 +9,20 @@ using System.Reflection;
 
 namespace CardPlatform.Business
 {
+    public class TagStandard
+    {
+        public TagStandard(string tag, int len, TipLevel level)
+        {
+            Tag = tag;
+            Len = len;
+            Level = level;
+        }
+
+        public string Tag { get; set; }
+        public int Len { get; set; }
+        public TipLevel Level { get; set; }
+    }
+
     public class BusinessBase
     {
         private ViewModelLocator locator;
@@ -144,6 +158,10 @@ namespace CardPlatform.Business
             this.aid = aid;
         }
 
+        public virtual void GetRequirementData()
+        {
+
+        }
 
         /// <summary>
         /// 解析TLV结构，并保存到数据字典中

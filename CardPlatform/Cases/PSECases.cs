@@ -12,14 +12,27 @@ namespace CardPlatform.Cases
 {
     public class PSECases : CaseBase
     {
+        private ApduResponse response;
+        private List<TLV> TLVs;
+
         public PSECases()
         {
+            response = new ApduResponse();
+            TLVs = new List<TLV>();
         }
 
         protected override void Load()
         {
             Step = "SelectPSE";
             base.Load();           
+        }
+
+        public override void ExcuteCase(object srcData)
+        {
+            response = (ApduResponse)srcData;
+            TLVs = DataParse.ParseTLV(response.Response);
+            CheckTemplateTag(TLVs);
+            base.ExcuteCase(srcData);
         }
 
         /// <summary>
@@ -30,7 +43,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            if (response.Response.Length < 2 || response.Response.Substring(0,2) != "6F")
+            if (!CaseUtil.RespStartWith(response.Response, "6F"))
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
@@ -49,7 +62,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             var subItemOf61 = new List<TLV>();
-            foreach(var item in arrTLV)
+            foreach(var item in TLVs)
             {
                 if(item.Level == 1)
                 {
@@ -76,7 +89,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in arrTLV)
+            foreach(var item in TLVs)
             {
                 if(item.Tag == "84")
                 {
@@ -103,7 +116,7 @@ namespace CardPlatform.Cases
 
             List<string> tags = new List<string>() { "88", "5F2D", "9F11", "BF0C" };
             bool hasTag88 = false;
-            foreach(var item in arrTLV)
+            foreach(var item in TLVs)
             {
                 if(item.Level == 2) //A5模板的数据
                 {
@@ -137,7 +150,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             bool hasTag5F2D = false;
-            foreach (var item in arrTLV)
+            foreach (var item in TLVs)
             {
                 if(item.Tag == "5F2D")
                 {
@@ -170,12 +183,12 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in arrTLV)
+            foreach (var item in TLVs)
             {
                 if(item.Tag == "5F2D")
                 {
-                    string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if(CaseUtil.IsAlpha(value))
+                    //string value = UtilLib.Utils.BcdToStr(item.Value);
+                    if(CaseUtil.IsAlpha(item.Value))
                     {
                         TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
@@ -196,7 +209,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             bool hasTag9F11 = false;
-            foreach (var item in arrTLV)
+            foreach (var item in TLVs)
             {
                 if (item.Tag == "9F11")
                 {
@@ -228,19 +241,13 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in arrTLV)
+            foreach (var item in TLVs)
             {
                 if(item.Len == 0)
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
-        }
-
-
-        public void PBOC_sPSE_GLX_001()
-        {
-
         }
 
         /// <summary>
@@ -252,7 +259,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             Dictionary<string, TLV> tags = new Dictionary<string, TLV>();
-            foreach(var item in arrTLV)
+            foreach(var item in TLVs)
             {
                 if(tags.ContainsKey(item.Tag))
                 {

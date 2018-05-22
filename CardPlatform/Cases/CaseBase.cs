@@ -8,6 +8,7 @@ using System.Windows.Media;
 using CardPlatform.Config;
 using CplusplusDll;
 using System.Linq;
+using CardPlatform.Business;
 
 namespace CardPlatform.Cases
 {
@@ -22,13 +23,13 @@ namespace CardPlatform.Cases
         public string CurrentApp { get; set; }
         public string Step { get; set; }
 
-        protected List<TLV> arrTLV;
-        protected ApduResponse response;
+        //protected List<TLV> arrTLV;
+        //protected ApduResponse response;
 
         public CaseBase()
         {
-            response = new ApduResponse();
-            arrTLV = new List<TLV>();
+            //response = new ApduResponse();
+            //arrTLV = new List<TLV>();
             Step = "BaseStep";
             Load();           
         }
@@ -39,8 +40,22 @@ namespace CardPlatform.Cases
         /// <param name="srcData"></param>
         public virtual void ExcuteCase(object srcData)
         {
-            response = (ApduResponse)srcData;
-            arrTLV = DataParse.ParseTLV(response.Response);
+            //if(Step != Constant.STEP_READ_RECORD)
+            //{
+            //    var response = (ApduResponse)srcData;
+            //    var TLVs = DataParse.ParseTLV(response.Response);
+            //    CheckTemplateTag(TLVs);
+            //}
+            //else
+            //{
+            //    var resps = (List<ApduResponse>)srcData;
+            //    foreach(var resp in resps)
+            //    {
+            //        var TLVs = DataParse.ParseTLV(resp.Response);
+            //        CheckTemplateTag(TLVs);
+            //    }
+            //}
+
             Load();
             if(caseInfos.Count > 0)
             {
@@ -52,17 +67,17 @@ namespace CardPlatform.Cases
                         GetType().GetMethod(item.CaseNo).Invoke(this, null);
                 }
             }
-            CheckTemplateTag();    
+               
         }
 
         /// <summary>
         /// 检测模板数据是否合规
         /// </summary>
-        public virtual void CheckTemplateTag()
+        public virtual void CheckTemplateTag(List<TLV> TLVs)
         {
             ViewModelLocator locator = new ViewModelLocator();
             var compareObj = DataTemplateConfig.GetInstance();
-            foreach (var tlv in arrTLV)
+            foreach (var tlv in TLVs)
             {
                 foreach (var item in locator.TemplateCompare.TemplateComparedInfos)
                 {

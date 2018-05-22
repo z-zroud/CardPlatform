@@ -5,6 +5,12 @@ using System.Linq;
 
 namespace CardPlatform.Cases
 {
+    public class OrderedTag
+    {
+        public string tag { get; set; }
+        public int level { get; set; }
+    }
+
     public static class CaseUtil
     {
         /// <summary>
@@ -47,6 +53,22 @@ namespace CardPlatform.Cases
                 }
                 return true;
             }
+            return false;
+        }
+
+        public static bool RespConstainsTagByOrder(string buffer, params OrderedTag[] tags)
+        {
+            //if (DataParse.IsTLV(buffer))
+            //{
+            //    var tlvItems = DataParse.ParseTLV(buffer);
+            //    var item = from tlv in tlvItems where tlv.Level == tag.level select tlv;
+            //    foreach (var tag in tags)
+            //    {
+                    
+                    
+            //    }
+            //    return true;
+            //}
             return false;
         }
 
@@ -149,8 +171,9 @@ namespace CardPlatform.Cases
         /// <returns></returns>
         public static bool IsAlpha(string str)
         {
-            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            foreach (var c in str)
+            var ascii = UtilLib.Utils.BcdToStr(str);
+            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            foreach (var c in ascii)
             {
                 if (!alphaNum.Contains(c))
                     return false;

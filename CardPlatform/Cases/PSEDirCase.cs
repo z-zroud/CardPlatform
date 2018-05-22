@@ -1,4 +1,5 @@
 ﻿using CardPlatform.Config;
+using CplusplusDll;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,27 @@ namespace CardPlatform.Cases
 {
     public class PSEDirCase : CaseBase
     {
+        private ApduResponse response;
+        private List<TLV> TLVs;
+
+        public PSEDirCase()
+        {
+            response = new ApduResponse();
+            TLVs = new List<TLV>();
+        }
+
         protected override void Load()
         {
             Step = "ReadPSEDir";
             base.Load();
+        }
+
+        public override void ExcuteCase(object srcData)
+        {
+            response = (ApduResponse)srcData;
+            TLVs = DataParse.ParseTLV(response.Response);
+            CheckTemplateTag(TLVs);
+            base.ExcuteCase(srcData);
         }
 
         /// <summary>
@@ -41,7 +59,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in arrTLV)
+            foreach(var item in TLVs)
             {
                 if(item.Level == 1)
                 {
@@ -65,12 +83,12 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var item = from tlv in arrTLV where tlv.Tag == "4F" select tlv;
-            var item1 = from tlv in arrTLV where tlv.Level == 2 select tlv;
+            var item = from tlv in TLVs where tlv.Tag == "4F" select tlv;
+            var item1 = from tlv in TLVs where tlv.Level == 2 select tlv;
 
             var result = item.Union(item1);
 
-            if(result == null ||
+            if(result.FirstOrDefault() == null ||
                 result.Count() != 1 || 
                 result.First().Len < 5 ||
                 result.First().Len > 16)
@@ -91,12 +109,12 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var item = from tlv in arrTLV where tlv.Tag == "50" select tlv;
-            var item1 = from tlv in arrTLV where tlv.Level == 3 select tlv;
+            var item = from tlv in TLVs where tlv.Tag == "50" select tlv;
+            var item1 = from tlv in TLVs where tlv.Level == 3 select tlv;
 
             var result = item.Union(item1);
 
-            if (result == null ||
+            if (result.FirstOrDefault() == null ||
                 result.Count() != 1 ||
                 result.First().Len < 1 ||
                 result.First().Len > 16)
@@ -118,7 +136,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             var tag61SubItems = new List<string>() { "50", "9F12", "87", "73" };
-            var items = from tlv in arrTLV where tlv.Level == 3 select tlv;
+            var items = from tlv in TLVs where tlv.Level == 3 select tlv;
 
             bool hasOtherTag = false;
             foreach(var item in items)
@@ -143,8 +161,8 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var item = from tlv in arrTLV where tlv.Tag == "9F12" select tlv;
-            if(item != null)
+            var item = from tlv in TLVs where tlv.Tag == "9F12" select tlv;
+            if(item.FirstOrDefault() != null )
             {
                 var tag9F12 = item.First();
                 var str9F12 = Utils.BcdToStr(tag9F12.Value);
@@ -169,8 +187,8 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var item = from tlv in arrTLV where tlv.Tag == "87" select tlv;
-            if (item != null)
+            var item = from tlv in TLVs where tlv.Tag == "87" select tlv;
+            if (item.FirstOrDefault() != null)
             {
                 if (item.First().Len != 1)
                 {

@@ -84,6 +84,7 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                 return false;
             }
+            GetRequirementData();   //在脱机之前先进行必要数据的获取
             OfflineAuthcation();
             HandleLimitation();
             CardHolderVerify();
@@ -194,7 +195,64 @@ namespace CardPlatform.Business
                     return false;
                 }
             }
+            IExcuteCase stepCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_READ_RECORD };
+            stepCase.ExcuteCase(resps);
             return true;
+        }
+
+        public override void GetRequirementData()
+        {
+            base.GetRequirementData();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+
+            TagStandard[] tagStandards =
+            {
+                new TagStandard("9F51",2,TipLevel.Failed),
+                new TagStandard("9F52",2,TipLevel.Failed),
+                new TagStandard("9F53",1,TipLevel.Failed),
+                new TagStandard("9F54",6,TipLevel.Failed),
+                new TagStandard("9F55",0,TipLevel.Failed),
+                new TagStandard("9F56",1,TipLevel.Failed),
+                new TagStandard("9F57",2,TipLevel.Failed),
+                new TagStandard("9F58",1,TipLevel.Failed),
+                new TagStandard("9F59",1,TipLevel.Failed),
+                new TagStandard("9F5C",6,TipLevel.Failed),
+                new TagStandard("9F5D",0,TipLevel.Failed),
+                new TagStandard("9F72",1,TipLevel.Failed),
+                new TagStandard("9F75",1,TipLevel.Failed),
+                new TagStandard("9F76",0,TipLevel.Failed),
+                new TagStandard("9F77",0,TipLevel.Failed),
+                new TagStandard("9F78",0,TipLevel.Failed),
+                new TagStandard("9F79",0,TipLevel.Failed),
+                new TagStandard("9F4F",0,TipLevel.Failed),
+                new TagStandard("9F68",0,TipLevel.Failed),
+                new TagStandard("9F6B",0,TipLevel.Failed),
+                new TagStandard("9F6D",0,TipLevel.Failed),
+                new TagStandard("9F36",2,TipLevel.Failed),
+                new TagStandard("9F13",0,TipLevel.Failed),
+                new TagStandard("9F17",0,TipLevel.Failed),
+            };
+            for(int i = 0; i < tagStandards.Length; i++)
+            {
+                var resp = APDU.GetDataCmd(tagStandards[i].Tag);
+                if(resp.SW != 0x9000)
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[%s],返回码:[%02X]", tagStandards[i].Tag, resp.SW);
+                }
+                else
+                {
+                    var tlvs = DataParse.ParseTLV(resp.Response);
+                    var tlv = from tmp in tlvs where tmp.Tag == tagStandards[i].Tag select tmp;
+
+                    if(tagStandards[i].Len != 0)
+                    {
+                        if(tlv.First().Len != tagStandards[i].Len)
+                        {
+                            caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[%s]长度不匹配，标准规范为[],实际长度为", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -367,14 +425,17 @@ namespace CardPlatform.Business
         protected int LoadBalance(string tag, string value)
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string macSessionKey;
+            string macSessionKey = string.Empty;
             string ATC = tagDict.GetTag("9F36");
             if (KeyType == TransKeyType.MDK)
             {
                 string cardAcct = tagDict.GetTag("5A");
                 string cardSeq = tagDict.GetTag("5F34");
-                string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
-                macSessionKey = Authencation.GenUdkSessionKey(UDKMACKey, ATC);
+                if(TransDesMACKey != null)
+                {
+                    string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
+                    macSessionKey = Authencation.GenUdkSessionKey(UDKMACKey, ATC);
+                }
             }
             else
             {
