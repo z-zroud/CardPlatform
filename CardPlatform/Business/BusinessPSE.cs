@@ -31,7 +31,7 @@ namespace CardPlatform.Business
             }
             ParseTLVAndSave(response.Response);
 
-            IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_PSE, Constant.STEP_SELECT_PSE);
+            IExcuteCase stepCase = new PSECases() { CurrentApp = Constant.APP_PSE, Step = Constant.STEP_SELECT_PSE };
             stepCase.ExcuteCase(response);
 
             //获取AID列表
@@ -67,7 +67,8 @@ namespace CardPlatform.Business
             ApduResponse response = new ApduResponse();
             response = APDU.ReadRecordCmd(SFI, recordNo);
 
-            IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_PSE, Constant.STEP_READ_PSE_DIR);
+            //IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_PSE, Constant.STEP_READ_PSE_DIR);
+            IExcuteCase stepCase = new PSECases() { CurrentApp = Constant.APP_PSE, Step = Constant.STEP_READ_PSE_DIR };
             if (response.SW != 0x9000 && response.SW != 0x6A83)
             {
                 caseObj.TraceInfo(Config.TipLevel.Failed, "ReadPSERecord", "读到最后一条记录后再读下一条应返回6A83");

@@ -121,6 +121,7 @@ namespace CardPlatform.Config
                     allAppCases.Add(appName, appCase); //保存所有应用下的case案例
                 }
             }
+            HasLoaded = true;   //只load一次
             return allAppCases;
         }
     }

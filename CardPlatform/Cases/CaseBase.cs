@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CardPlatform.ViewModel;
 using CardPlatform.Models;
 using UtilLib;
+using System.Reflection;
 using System.Windows.Media;
 using CardPlatform.Config;
 using CplusplusDll;
@@ -40,20 +41,24 @@ namespace CardPlatform.Cases
         {
             response = (ApduResponse)srcData;
             arrTLV = DataParse.ParseTLV(response.Response);
-
-            if(caseInfos != null)
+            Load();
+            if(caseInfos.Count > 0)
             {
                 foreach (var item in caseInfos)
                 {
-                    //var methods = GetType().GetMethods();
-                    if (!string.IsNullOrEmpty(item.CaseNo))
+                    var methods = GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                    var methodsName = from method in methods select method.Name;
+                    if (methodsName.Contains(item.CaseNo))
                         GetType().GetMethod(item.CaseNo).Invoke(this, null);
                 }
             }
             CheckTemplateTag();    
         }
 
-        protected virtual void CheckTemplateTag()
+        /// <summary>
+        /// 检测模板数据是否合规
+        /// </summary>
+        public virtual void CheckTemplateTag()
         {
             ViewModelLocator locator = new ViewModelLocator();
             var compareObj = DataTemplateConfig.GetInstance();
@@ -138,14 +143,18 @@ namespace CardPlatform.Cases
                 caseDict = caseConfig.Load(".\\Configuration\\AppConfig\\CaseConfiguration.xml");
             }
             var allStepCases = new List<TransStepCase>();
-            caseDict.TryGetValue(CurrentApp, out allStepCases);
-            if(allStepCases != null)
+            caseInfos.Clear();
+            if (CurrentApp != null)
             {
-                foreach(var stepCases in allStepCases)
+                caseDict.TryGetValue(CurrentApp, out allStepCases);
+                if (allStepCases != null)
                 {
-                    if(stepCases.Step == Step)
+                    foreach (var stepCases in allStepCases)
                     {
-                        caseInfos = stepCases.Cases;
+                        if (stepCases.Step == Step)
+                        {
+                            caseInfos = stepCases.Cases;
+                        }
                     }
                 }
             }

@@ -15,7 +15,7 @@ namespace CardPlatform.Business
         private TagDict tagDict = TagDict.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
-        private bool isEccTranction = false;
+        //private bool isEccTranction = false;
 
         /// <summary>
         /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存

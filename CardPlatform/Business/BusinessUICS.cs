@@ -111,7 +111,7 @@ namespace CardPlatform.Business
             {
                 if (ParseTLVAndSave(response.Response))
                 {
-                    IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_UICS, Constant.STEP_SELECT_APP);
+                    IExcuteCase stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_SELECT_APP };
                     stepCase.ExcuteCase(response);
                     result = true;
                 }
@@ -166,7 +166,7 @@ namespace CardPlatform.Business
 
             AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
 
-            IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_UICS, Constant.STEP_GPO);
+            IExcuteCase stepCase = new GPOCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_GPO };
             stepCase.ExcuteCase(response);
 
             return AFLs;
