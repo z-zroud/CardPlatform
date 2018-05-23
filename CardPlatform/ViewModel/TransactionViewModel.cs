@@ -156,6 +156,19 @@ namespace CardPlatform.ViewModel
         }
 
         /// <summary>
+        /// 个人化信息表路径
+        /// </summary>
+        private string _tagInfoFile;
+        public string TagInfoFile
+        {
+            get { return _tagInfoFile; }
+            set
+            {
+                Set(ref _tagInfoFile, value);
+            }
+        }
+
+        /// <summary>
         /// 应用密钥信息
         /// </summary>
         public TransKeyModel TransKeyList { get; set; }
@@ -195,6 +208,20 @@ namespace CardPlatform.ViewModel
                 return _doTransCmd;
             }
         }
+
+        /// <summary>
+        /// 打开选择DP文件对话框
+        /// </summary>
+        private ICommand _openTagInfoFileCmd;
+        public ICommand OpenTagInfoFileCmd
+        {
+            get
+            {
+                if (_openTagInfoFileCmd == null)
+                    _openTagInfoFileCmd = new RelayCommand(() => { TagInfoFile = OpenFileDialog(); });
+                return _openTagInfoFileCmd;
+            }
+        }
         #endregion
 
         private void LoadApp()
@@ -228,6 +255,21 @@ namespace CardPlatform.ViewModel
         private void SelectSMKey()
         {
             HasSelectedDESKey = !HasSelectedSMKey;
+        }
+
+        /// <summary>
+        /// 打开系统默认的文件对话框，返回选中文件的路径
+        /// </summary>
+        /// <returns></returns>
+        private string OpenFileDialog()
+        {
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Filter = "*|*";
+            if (dialog.ShowDialog() == true)
+            {
+                return dialog.FileName;
+            }
+            return string.Empty;
         }
 
         private void Load()

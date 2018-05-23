@@ -108,6 +108,9 @@
     <Compile Include="Config\DataTemplateConfig.cs" />
     <Compile Include="Config\PersonlizeConfig.cs" />
     <Compile Include="Helper\DialogCloseHelper.cs" />
+    <Compile Include="Helper\Tag57Helper.cs" />
+    <Compile Include="Helper\Tag5AHelper.cs" />
+    <Compile Include="Helper\TagFileHelper.cs" />
     <Compile Include="Models\AlgorithmConfig.cs" />
     <Compile Include="Models\AlgorithmModel.cs" />
     <Compile Include="Models\DpParseModel.cs" />

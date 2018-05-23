@@ -287,10 +287,19 @@ namespace UtilLib
 
             if (targetRow == null)
                 return null;
-
-            return targetRow.Elements<Cell>().Where(c =>
+            var cell = targetRow.Elements<Cell>().Where(c =>
                string.Compare(c.CellReference.Value, columnName + row,
-               true) == 0).First();
+               true) == 0);
+
+            if(cell.FirstOrDefault() == null)
+            {
+                return null;
+            }
+            return cell.First();
+
+            //return targetRow.Elements<Cell>().Where(c =>
+            //   string.Compare(c.CellReference.Value, columnName + row,
+            //   true) == 0).First();
         }
         private static Row GetRow(SheetData sheetData, int row)
         {
@@ -323,24 +332,38 @@ namespace UtilLib
         {
             var cell = new Cell
             {
-                DataType = CellValues.InlineString,
+                DataType = new EnumValue<CellValues>(CellValues.String),
                 CellReference = ColumnLetter(column) + row
             };
-
-            var istring = new InlineString();
-            var t = new Text { Text = text };
-            istring.AppendChild(t);
-            cell.AppendChild(istring);
+            CellValue v = new CellValue();
+            v.Text = text;
+            cell.AppendChild(v);
             return cell;
         }
 
         private void InsertTextCellValue(Worksheet worksheet, int column, uint row, string value)
         {
             Cell cell = ReturnCell(worksheet, ColumnLetter(column), row);
-            CellValue v = new CellValue();
-            v.Text = value;
-            cell.AppendChild(v);
-            cell.DataType = new EnumValue<CellValues>(CellValues.String);
+            if(cell == null)
+            {
+                var sheetData = worksheet.Elements<SheetData>().First();
+                cell = CreateTextCell(column, (int)row, value);
+                cell.DataType = new EnumValue<CellValues>(CellValues.String);
+                var newRow = GetRow(sheetData, (int)row);
+                newRow.AppendChild(cell);
+            }
+            else
+            {
+                CellValue v = new CellValue();
+                v.Text = value;
+
+                var cellValues = cell.Elements<CellValue>();
+                if (cellValues.FirstOrDefault() != null)
+                    cell.RemoveChild<CellValue>(cellValues.First());
+                cell.AppendChild(v);
+                cell.DataType = new EnumValue<CellValues>(CellValues.String);
+            }
+
             worksheet.Save();
         }
         private void InsertNumberCellValue(Worksheet worksheet, int column, uint row, string value)

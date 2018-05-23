@@ -181,5 +181,85 @@ namespace CardPlatform.Cases
 
             return true;
         }
+
+        /// <summary>
+        /// 判断是否为数字
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsDigit(string str)
+        {
+            string num = "0123456789";
+            foreach (var c in num)
+            {
+                if (!num.Contains(c))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 判断tag57格式是否正确
+        /// </summary>
+        /// <param name="tag57"></param>
+        /// <returns></returns>
+        public static bool IsCorrectTag57Format(string tag57)
+        {
+            string format1 = "0123456789D";
+            string format2 = "0123456789DF";
+            string format3 = "0123456789";
+            int len = tag57.Length;
+            if(len % 2 != 0)
+            {
+                if(tag57[len - 1] != 'F')
+                {
+                    return false;   //奇数位需补F
+                }
+                foreach(var c in tag57)
+                {
+                    if(!format2.Contains(c))
+                    {
+                        return false;   //数字必须是format2集合里面
+                    }
+                }
+            }
+            else
+            {
+                foreach (var c in tag57)
+                {
+                    if (!format1.Contains(c))
+                    {
+                        return false;   //数字必须是format1集合里面
+                    }
+                }
+            }
+
+            int indexD = tag57.IndexOf('D');
+            if(indexD < 17 || indexD > 20)
+            {
+                return false;   //字母D需在第17-20字节之间
+            }
+            string account = tag57.Substring(0, indexD);
+            foreach(var c in account)
+            {
+                if(!format3.Contains(c))
+                {
+                    return false;   //账号必须是数字
+                }
+            }
+            string MM = tag57.Substring(indexD + 2, 2);
+            int month = int.Parse(MM);
+            if(month > 12 || month < 1)
+            {
+                return false;   //失效月份检查
+            }
+            if(tag57[indexD + 4] != '2' || tag57[indexD + 4] != '6')
+            {
+                return false;   //服务码必须以2或6开头
+            }
+
+            return true;
+        }
     }
 }
