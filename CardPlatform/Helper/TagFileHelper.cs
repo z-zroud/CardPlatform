@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CardPlatform.Business;
+using UtilLib;
 
 namespace CardPlatform.Helper
 {
@@ -16,6 +18,22 @@ namespace CardPlatform.Helper
         public int Row { get; set; }
         public int Column { get; set; }
     }
+
+    /// <summary>
+    /// 定义写入的tag交易应用类型
+    /// </summary>
+    public enum TagType
+    {
+        ContactDC_DES = 1,
+        ContactDC_SM = 2,
+        ContactlessDC_DES = 3,
+        //ContactlessDC_SM = 4, //非接国际、国密填写的tag一致。
+        ECC_DES = 5,
+        ECC_SM = 6,
+        QPBOC_DES = 7,
+        QPBOC_SM = 8
+    }
+
     /// <summary>
     /// 该类用于填写个人化信息表
     /// </summary>
@@ -28,6 +46,16 @@ namespace CardPlatform.Helper
         private static Dictionary<string, TagLocaton> eccTable;
         private static Dictionary<string, TagLocaton> qpbocTable;
         private static Dictionary<string, TagLocaton> keyTable;
+
+        private static Dictionary<string, TagLocaton> sm_contactTable;
+        private static Dictionary<string, TagLocaton> sm_eccTable;
+        private static Dictionary<string, TagLocaton> sm_qpbocTable;
+
+        private string tagFile;
+        public TagFileHelper(string tagFile)
+        {
+            this.tagFile = tagFile;
+        }
 
         static TagFileHelper()
         {
@@ -77,17 +105,14 @@ namespace CardPlatform.Helper
             contactTable.Add("9F23", new TagLocaton(93));
             contactTable.Add("9F72", new TagLocaton(94));
             contactTable.Add("9F75", new TagLocaton(95));
-            contactTable.Add("9F10_des", new TagLocaton(96,5));
-            contactTable.Add("9F10_sm", new TagLocaton(97, 5));
+            contactTable.Add("9F10", new TagLocaton(96,5));
             contactTable.Add("5F28", new TagLocaton(98));
             contactTable.Add("9F57", new TagLocaton(99));
             contactTable.Add("9F51", new TagLocaton(100));
             contactTable.Add("9F42", new TagLocaton(101));
             contactTable.Add("5F25", new TagLocaton(102));
-            contactTable.Add("8F_des", new TagLocaton(103, 5));
-            contactTable.Add("8F_sm", new TagLocaton(104, 5));
-            contactTable.Add("90_des", new TagLocaton(105, 5));
-            contactTable.Add("90_sm", new TagLocaton(106, 5));
+            contactTable.Add("8F", new TagLocaton(103, 5));
+            contactTable.Add("90", new TagLocaton(105, 5));
             contactTable.Add("92", new TagLocaton(107));
             contactTable.Add("9F32", new TagLocaton(108));
             contactTable.Add("9F49", new TagLocaton(109));
@@ -103,14 +128,19 @@ namespace CardPlatform.Helper
             contactTable.Add("5F30", new TagLocaton(118));
             contactTable.Add("9F1F", new TagLocaton(119));
             contactTable.Add("57", new TagLocaton(120));
-            contactTable.Add("93_des", new TagLocaton(121, 5));
-            contactTable.Add("93_sm", new TagLocaton(122, 5));
+            contactTable.Add("93", new TagLocaton(121, 5));           
             contactTable.Add("9F4A", new TagLocaton(123));
             contactTable.Add("9F45", new TagLocaton(124));
-            contactTable.Add("9F46_des", new TagLocaton(125, 5));
-            contactTable.Add("9F46_sm", new TagLocaton(126, 5));
+            contactTable.Add("9F46", new TagLocaton(125, 5));
             contactTable.Add("9F47", new TagLocaton(127));
             contactTable.Add("9F48", new TagLocaton(128));
+
+            sm_contactTable = new Dictionary<string, TagLocaton>();
+            sm_contactTable.Add("93_", new TagLocaton(122, 5));
+            sm_contactTable.Add("9F10", new TagLocaton(97, 5));
+            sm_contactTable.Add("8F", new TagLocaton(104, 5));
+            sm_contactTable.Add("9F46", new TagLocaton(126, 5));
+            sm_contactTable.Add("90", new TagLocaton(106, 5));
 
             //非接触式选择应用
             contactlessTable = new Dictionary<string, TagLocaton>();
@@ -147,17 +177,16 @@ namespace CardPlatform.Helper
             eccTable.Add("9F23", new TagLocaton(151));
             eccTable.Add("9F72", new TagLocaton(152));
             eccTable.Add("9F75", new TagLocaton(153));
-            eccTable.Add("9F10_des", new TagLocaton(154, 5));
-            eccTable.Add("9F10_sm", new TagLocaton(155, 5));
+            eccTable.Add("9F10", new TagLocaton(154, 5));           
             eccTable.Add("5F28", new TagLocaton(156));
             eccTable.Add("9F57", new TagLocaton(157));
             eccTable.Add("9F51", new TagLocaton(158));
             eccTable.Add("9F42", new TagLocaton(159));
             eccTable.Add("5F25", new TagLocaton(160));
-            eccTable.Add("8F_des", new TagLocaton(161, 5));
-            eccTable.Add("8F_sm", new TagLocaton(162, 5));
-            eccTable.Add("90_des", new TagLocaton(163, 5));
-            eccTable.Add("90_sm", new TagLocaton(164, 5));
+            eccTable.Add("8F", new TagLocaton(161, 5));
+            
+            eccTable.Add("90", new TagLocaton(163, 5));
+            
             eccTable.Add("92", new TagLocaton(165));
             eccTable.Add("9F32", new TagLocaton(166));
             eccTable.Add("9F49", new TagLocaton(167));
@@ -173,12 +202,10 @@ namespace CardPlatform.Helper
             eccTable.Add("5F30", new TagLocaton(176));
             eccTable.Add("9F1F", new TagLocaton(177));
             eccTable.Add("57", new TagLocaton(178));
-            eccTable.Add("93_des", new TagLocaton(179, 5));
-            eccTable.Add("93_sm", new TagLocaton(180, 5));
+            eccTable.Add("93", new TagLocaton(179, 5));           
             eccTable.Add("9F4A", new TagLocaton(181));
             eccTable.Add("9F45", new TagLocaton(182));
-            eccTable.Add("9F46_des", new TagLocaton(183, 5));
-            eccTable.Add("9F46_sm", new TagLocaton(184, 5));
+            eccTable.Add("9F46", new TagLocaton(183, 5));          
             eccTable.Add("9F47", new TagLocaton(185));
             eccTable.Add("9F48", new TagLocaton(186));
             eccTable.Add("9F77", new TagLocaton(187));
@@ -192,6 +219,14 @@ namespace CardPlatform.Helper
             eccTable.Add("DF76", new TagLocaton(194));
             eccTable.Add("DF72", new TagLocaton(195));
 
+            sm_eccTable = new Dictionary<string, TagLocaton>();
+            sm_eccTable.Add("93", new TagLocaton(180, 5));
+            sm_eccTable.Add("9F46", new TagLocaton(184, 5));
+            sm_eccTable.Add("90", new TagLocaton(164, 5));
+            sm_eccTable.Add("8F", new TagLocaton(162, 5));
+            sm_eccTable.Add("9F10", new TagLocaton(155, 5));
+
+
             //快速借记/贷记(qPBOC/qUICS）部分
             qpbocTable = new Dictionary<string, TagLocaton>();
             qpbocTable.Add("82", new TagLocaton(198));
@@ -200,30 +235,122 @@ namespace CardPlatform.Helper
 
             //快速借记/贷记(qPBOC/qUICS)发卡行通用数据
             qpbocTable.Add("9F63", new TagLocaton(204));
-            qpbocTable.Add("9F10_des", new TagLocaton(205, 5));
-            qpbocTable.Add("9F10_sm", new TagLocaton(206, 5));
-            qpbocTable.Add("8F_des", new TagLocaton(207, 5));
-            qpbocTable.Add("8F_sm", new TagLocaton(208, 5));
-            qpbocTable.Add("90_des", new TagLocaton(209, 5));
-            qpbocTable.Add("90_sm", new TagLocaton(210, 5));
+            qpbocTable.Add("9F10", new TagLocaton(205, 5));           
+            qpbocTable.Add("8F", new TagLocaton(207, 5));            
+            qpbocTable.Add("90", new TagLocaton(209, 5));           
             qpbocTable.Add("92", new TagLocaton(211));
             qpbocTable.Add("9F32", new TagLocaton(212));
 
             //快速借记/贷记(qPBOC/qUICS)卡或持卡人特殊数据
             qpbocTable.Add("9F6B", new TagLocaton(214));
-            qpbocTable.Add("93_des", new TagLocaton(215, 5));
-            qpbocTable.Add("93_sm", new TagLocaton(216, 5));
+            qpbocTable.Add("93", new TagLocaton(215, 5));            
             qpbocTable.Add("9F4A", new TagLocaton(217));
             qpbocTable.Add("9F45", new TagLocaton(218));
-            qpbocTable.Add("9F46_des", new TagLocaton(219, 5));
-            qpbocTable.Add("9F46_sm", new TagLocaton(220, 5));
+            qpbocTable.Add("9F46", new TagLocaton(219, 5));         
             qpbocTable.Add("9F47", new TagLocaton(221));
             qpbocTable.Add("9F48", new TagLocaton(222));
 
             //qPBOC/UICS扩展部分
             qpbocTable.Add("DF62", new TagLocaton(224));
 
+            sm_qpbocTable = new Dictionary<string, TagLocaton>();
+            sm_qpbocTable.Add("9F10", new TagLocaton(206, 5));
+            sm_qpbocTable.Add("8F", new TagLocaton(208, 5));
+            sm_qpbocTable.Add("90", new TagLocaton(210, 5));
+            sm_qpbocTable.Add("9F46", new TagLocaton(220, 5));
+            sm_qpbocTable.Add("93", new TagLocaton(216, 5));
+        }
 
+        public bool WriteToFile(TagType type)
+        {
+            IExcelOp op = new ExcelOp();
+            if(!op.OpenExcel(tagFile,OpExcelType.Modify))
+            {
+                return false;
+            }
+            var tagDict = TagDict.GetInstance();
+            switch(type)
+            {
+                case TagType.ContactDC_DES:
+                    foreach(var item in contactTable)
+                    {
+                        var tag = tagDict.GetTag(item.Key);
+                        if(string.IsNullOrEmpty(tag))
+                        {
+                            tag = "无";
+                        }
+                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                    }
+                    break;
+                case TagType.ContactDC_SM:
+                    foreach (var item in sm_contactTable)
+                    {
+                        var tag = tagDict.GetTag(item.Key);
+                        if (string.IsNullOrEmpty(tag))
+                        {
+                            tag = "无";
+                        }
+                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                    }
+                    break;
+                case TagType.ContactlessDC_DES:
+                    foreach (var item in contactlessTable)
+                    {
+                        var tag = tagDict.GetTag(item.Key);
+                        if (string.IsNullOrEmpty(tag))
+                        {
+                            tag = "无";
+                        }
+                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                    }
+                    break;
+                case TagType.ECC_DES:
+                    foreach (var item in eccTable)
+                    {
+                        var tag = tagDict.GetTag(item.Key);
+                        if (string.IsNullOrEmpty(tag))
+                        {
+                            tag = "无";
+                        }
+                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                    }
+                    break;
+                case TagType.ECC_SM:
+                    foreach (var item in sm_eccTable)
+                    {
+                        var tag = tagDict.GetTag(item.Key);
+                        if (string.IsNullOrEmpty(tag))
+                        {
+                            tag = "无";
+                        }
+                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                    }
+                    break;
+                case TagType.QPBOC_DES:
+                    foreach (var item in qpbocTable)
+                    {
+                        var tag = tagDict.GetTag(item.Key);
+                        if (string.IsNullOrEmpty(tag))
+                        {
+                            tag = "无";
+                        }
+                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                    }
+                    break;
+                case TagType.QPBOC_SM:
+                    foreach (var item in sm_qpbocTable)
+                    {
+                        var tag = tagDict.GetTag(item.Key);
+                        if (string.IsNullOrEmpty(tag))
+                        {
+                            tag = "无";
+                        }
+                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                    }
+                    break;
+            }
+            op.Close();
+            return true;
         }
     }
 }
