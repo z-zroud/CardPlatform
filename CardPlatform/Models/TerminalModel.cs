@@ -20,6 +20,7 @@ namespace CardPlatform.Models
             Tag9F4E = "476F6C647061635F54435F4465706172746D656E";
             Tag9F37 = "11223344";
             Tag9F35 = "A3";
+            TagDF60 = "00";
         }
 
         public string GetTag(string tag)

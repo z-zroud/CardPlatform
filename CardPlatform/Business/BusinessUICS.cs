@@ -9,6 +9,7 @@ using CardPlatform.ViewModel;
 using System.Reflection;
 using CardPlatform.Config;
 using CardPlatform.Models;
+using CardPlatform.Helper;
 
 namespace CardPlatform.Business
 {
@@ -29,13 +30,14 @@ namespace CardPlatform.Business
             base.DoTrans(aid, doDesTrans, doSMTrans);
             locator.Terminal.TermianlSettings.Tag9F7A = "00";   //电子现金支持指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型
-
+            locator.Terminal.TermianlSettings.Tag9F66 = "46000000"; //终端交易属性
+            var tagFileHelper = new TagFileHelper(PersoFile);
             // 做国际算法交易
             if (doDesTrans)  
             {
                 TransResultModel TransactionResult = new TransResultModel(TransType.UICS_DES, TransResult.Unknown);
                 TransactionResult.TransType = TransType.UICS_DES;
-                locator.Terminal.TermianlSettings.TagDF69 = "00";
+                locator.Terminal.TermianlSettings.TagDF69 = "00";               
                 if (DoTransEx())
                 {
                     TransactionResult.Result = TransResult.Sucess;
@@ -45,6 +47,18 @@ namespace CardPlatform.Business
                     TransactionResult.Result = TransResult.Failed;
                 }
                 locator.Transaction.TransResult.Add(TransactionResult);
+                if(!string.IsNullOrEmpty(PersoFile))
+                {
+                    if (IsContactTrans)
+                    {
+                        tagFileHelper.WriteToFile(TagType.ContactDC_DES);
+                    }
+                    else
+                    {
+                        tagFileHelper.WriteToFile(TagType.ContactlessDC_DES);
+                    }
+                }
+
             }
             //做国密算法交易
             if (doSMTrans)
@@ -62,6 +76,10 @@ namespace CardPlatform.Business
                     TransactionResult.Result = TransResult.Failed;
                 }
                 locator.Transaction.TransResult.Add(TransactionResult);
+                if (IsContactTrans && !string.IsNullOrEmpty(PersoFile))
+                {
+                    tagFileHelper.WriteToFile(TagType.ContactDC_SM);
+                }
             }
         }
 
@@ -231,13 +249,15 @@ namespace CardPlatform.Business
                 new TagStandard("9F36",2,TipLevel.Failed),
                 new TagStandard("9F13",0,TipLevel.Failed),
                 new TagStandard("9F17",0,TipLevel.Failed),
+                new TagStandard("DF4F",0,TipLevel.Failed),
+                new TagStandard("DF62",0,TipLevel.Failed),
             };
             for(int i = 0; i < tagStandards.Length; i++)
             {
                 var resp = APDU.GetDataCmd(tagStandards[i].Tag);
                 if(resp.SW != 0x9000)
                 {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[{0}],返回码:[{1}]", tagStandards[i].Tag, resp.SW);
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[{0}],返回码:[{1:X}]", tagStandards[i].Tag, resp.SW);
                 }
                 else
                 {
@@ -251,6 +271,7 @@ namespace CardPlatform.Business
                             caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
+                    tagDict.SetTag(tlv.First().Tag, tlv.First().Value); //保存
                 }
             }
         }
@@ -320,21 +341,6 @@ namespace CardPlatform.Business
             {
                 caseBase.TraceInfo(TipLevel.Failed, caseNo, "应用失效日期大于生效日期，应用不合法");
             }
-
-            //模板值对比判断放到程序交易结束之后
-            //string appVersion = tagDict.GetTag("9F08"); //需要判断版本号
-            ////DataCompareConfig dataCompareConfig = DataCompareConfig.GetInstance();
-            ////if (!dataCompareConfig.HasLoaded)
-            ////    dataCompareConfig.Load(Constant.DataComparedConfigFile);
-            ////var templateAppVersion = dataCompareConfig.GetComparedTag("9F08").Value;
-            ////if(appVersion != templateAppVersion)
-            ////{
-            ////    caseBase.ShowInfo(caseNo, "应用版本不一致", CaseLevel.CaseFailed);
-            ////}
-            //string AUC = tagDict.GetTag("9F07");
-
-            //string cardIssuerCountryCode = tagDict.GetTag("5F28");
-
             return 0;
         }
 
@@ -352,7 +358,7 @@ namespace CardPlatform.Business
         protected int TerminalActionAnalyze()
         {
             string CDOL1 = tagDict.GetTag("8C");
-            ApduResponse resp = GAC1(Constant.ARQC, CDOL1);
+            ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
             if(resp.SW == 0x9000)
             {
                 var tlvs = DataParse.ParseTLV(resp.Response);
@@ -417,7 +423,7 @@ namespace CardPlatform.Business
         protected int TransactionEnd()
         {
             string CDOL2 = tagDict.GetTag("8D");
-            ApduResponse resp = GAC2(Constant.TC, CDOL2);
+            ApduResponse resp = SecondGAC(Constant.TC, CDOL2);
 
             return 0;
         }

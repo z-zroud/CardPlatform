@@ -606,6 +606,17 @@ int GenHash(const char* input, char* hash, int len)
 	return 0;
 }
 
+int GenSMHash(const char* input, const char* publicKey, char* hash, int len)
+{
+    PDllPBOC_GETMSG_HASH SM3_Hash = GetSMFunc<PDllPBOC_GETMSG_HASH>("dllPBOC_GETMSG_HASH");
+    if (SM3_Hash)
+    {
+        SM3_Hash((char*)input, (char*)publicKey, hash);
+        return 0;
+    }
+    return -1;
+}
+
 int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4B, const char* dynamicData)
 {
 	//从动态签名数据中获取恢复数据

@@ -23,6 +23,9 @@ namespace CardPlatform.Business
         public TipLevel Level { get; set; }
     }
 
+    /// <summary>
+    /// 所有应用交易的基础类
+    /// </summary>
     public class BusinessBase
     {
         private ViewModelLocator locator;
@@ -33,13 +36,14 @@ namespace CardPlatform.Business
             caseObj = new CaseBase();
         }
 
-        public TransKeyType KeyType { get; set; }
+        public TransKeyType KeyType { get; set; }       //定义界面中输入的是MDK/UDK类型
         public string TransDesACKey { get; set; }       //DES_AC (MDK/UDK) 由KeyType决定
         public string TransDesMACKey { get; set; }      //DES_MAC
         public string TransDesENCKey { get; set; }      //DES_ENC
         public string TransSMACKey { get; set; }        //SM_AC
         public string TransSMMACKey { get; set; }       //SM_MAC
         public string TransSMENCKey { get; set; }       //SM_ENC
+        public bool IsContactTrans { get; set; }    //需要此参数来判断写入到个人化信息表中的内容
 
         protected bool doDesTrans = false;  //是否执行DES算法的交易
         protected bool doSMTrans = false;   //是否执行国密算法
@@ -47,6 +51,8 @@ namespace CardPlatform.Business
         protected string aid;       //当前应用AID
         protected AlgorithmCategory curTransAlgorithmCategory = AlgorithmCategory.DES;    //default 当前交易流程使用的算法
         protected IExcuteCase caseObj;  //定义了基本的case,涉及到程序逻辑，不在case配置文件中配置
+        public static string PersoFile; //个人化信息表Excel文件
+        
 
         //检查AIP支持的功能
         #region Check AIP support functions
@@ -158,6 +164,9 @@ namespace CardPlatform.Business
             this.aid = aid;
         }
 
+        /// <summary>
+        /// 此函数定义了所有应用都应用GetData命令获取的数据
+        /// </summary>
         public virtual void GetRequirementData()
         {
 
@@ -182,7 +191,7 @@ namespace CardPlatform.Business
             {
                 IExcuteCase cases = new CaseBase();
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                cases.TraceInfo(TipLevel.Failed, caseNo, "解析TLV格式失败");
+                cases.TraceInfo(TipLevel.Failed, caseNo, "解析TLV格式失败,数据为{0}", response);
             }
 
             return result;
@@ -233,8 +242,7 @@ namespace CardPlatform.Business
                             toBeSignAppData += tlv.Value;
                             break;
                         }
-                    }
-                    
+                    }                   
                 }
             }
             return responses;
@@ -419,7 +427,7 @@ namespace CardPlatform.Business
         /// <param name="acType"></param>
         /// <param name="CDOL1"></param>
         /// <returns></returns>
-        protected virtual ApduResponse GAC1(int acType, string CDOL1)
+        protected virtual ApduResponse FirstGAC(int acType, string CDOL1)
         {
             string CDOL1Data = string.Empty;
             var tls = DataParse.ParseTL(CDOL1);
@@ -436,16 +444,16 @@ namespace CardPlatform.Business
         /// <param name="acType"></param>
         /// <param name="CDOL2"></param>
         /// <returns></returns>
-        protected virtual ApduResponse GAC2(int acType, string CDOL2)
+        protected virtual ApduResponse SecondGAC(int acType, string cdol2)
         {
-            string CDOL2Data = string.Empty;
-            var tls = DataParse.ParseTL(CDOL2);
+            string cdol2Data = string.Empty;
+            var tls = DataParse.ParseTL(cdol2);
             foreach (var tl in tls)
             {
-                CDOL2Data += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                cdol2Data += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
             }
 
-            return APDU.GACCmd(acType, CDOL2Data);
+            return APDU.GACCmd(acType, cdol2Data);
         }
 
         /// <summary>
@@ -499,10 +507,14 @@ namespace CardPlatform.Business
 
             if (curTransAlgorithmCategory == AlgorithmCategory.DES)
             {
+                if (string.IsNullOrEmpty(TransDesMACKey) || TransDesMACKey.Length != 32)
+                    return false;
                 macSessionKey = GenSessionKey(TransDesMACKey, KeyType, curTransAlgorithmCategory);
             }
             else
             {
+                if (string.IsNullOrEmpty(TransSMMACKey) || TransSMMACKey.Length != 32)
+                    return false;
                 macSessionKey = GenSessionKey(TransSMMACKey, KeyType, curTransAlgorithmCategory);               
             }
             mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)curTransAlgorithmCategory);

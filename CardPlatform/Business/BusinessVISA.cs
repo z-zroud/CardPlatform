@@ -250,7 +250,7 @@ namespace CardPlatform.Business
         protected int TerminalActionAnalyze()
         {
             string CDOL1 = tagDict.GetTag("8C");
-            ApduResponse resp = GAC1(Constant.ARQC, CDOL1);
+            ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
             if (resp.SW == 0x9000)
             {
                 var tlvs = DataParse.ParseTLV(resp.Response);

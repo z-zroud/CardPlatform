@@ -46,10 +46,10 @@
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="交易方式" VerticalAlignment="Bottom" Margin="0,0,0,5" />
                 <UniformGrid  Rows="2">
-                    <CheckBox Content="PBOC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckPBOC}" />
+                    <CheckBox Content="PBOC" Margin="0,5,10,0"  IsChecked="{Binding TransType.IsCheckPBOC}" />
                     <CheckBox Content="UICS" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckUICS}"/>
-                    <CheckBox Content="ECC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckECC}"/>
-                    <CheckBox Content="QPBOC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckQPBOC}"/>
+                    <CheckBox Content="ECC" Margin="0,5,10,0" IsEnabled="{Binding ContactEnable }" IsChecked="{Binding TransType.IsCheckECC}"/>
+                    <CheckBox Content="QPBOC" Margin="0,5,10,0" IsEnabled="{Binding ContactlessEnable }" IsChecked="{Binding TransType.IsCheckQPBOC}"/>
                     <CheckBox Content="VISA" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckVISA}"/>
                     <CheckBox Content="MC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckMC}"/>
                     <CheckBox Content="JETCO" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckJETCO}"/>
@@ -60,7 +60,7 @@
                 <TextBlock Text="算法类型"  VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                 <StackPanel  Orientation="Horizontal">
                     <CheckBox Content="国际" Margin="0,0,20,0" IsChecked="{Binding AlgorithmType.IsCheckDES}" />
-                    <CheckBox Content="国密" Margin="0,0,20,0" IsChecked="{Binding AlgorithmType.IsCheckSM}"/>
+                    <CheckBox Name="ckSM" Content="国密" Margin="0,0,20,0" IsChecked="{Binding AlgorithmType.IsCheckSM}"/>
                 </StackPanel>
             </StackPanel>
         </StackPanel>
@@ -77,7 +77,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <CheckBox Name="cbDES"  Margin="0,0,20,0" Visibility="Hidden" IsChecked="{Binding HasSelectedDESKey}"/>
-                <CheckBox Name="cbSM" Content="国密" Margin="0,0,54,0" HorizontalAlignment="Left" IsChecked="{Binding HasSelectedSMKey}" Command="{Binding SelectSMCmd}"/>
+                <CheckBox Name="cbSM" Content="国密" Margin="0,0,54,0" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=ckSM, Path=IsChecked}" IsChecked="{Binding HasSelectedSMKey}" Command="{Binding SelectSMCmd}"/>
             </StackPanel>
             <StackPanel>
                 <StackPanel  Orientation="Horizontal">

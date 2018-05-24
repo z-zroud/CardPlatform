@@ -7,6 +7,7 @@ using System.Reflection;
 using CplusplusDll;
 using CardPlatform.Config;
 using CardPlatform.Models;
+using CardPlatform.Helper;
 
 namespace CardPlatform.Business
 {
@@ -33,7 +34,9 @@ namespace CardPlatform.Business
 
             locator.Terminal.TermianlSettings.Tag9C = "00";         //交易类型(消费交易)
             locator.Terminal.TermianlSettings.Tag9F66 = "2A000080"; //终端交易属性
-            locator.Terminal.TermianlSettings.TagDF60 = "00";   //扩展交易指示位           
+            locator.Terminal.TermianlSettings.TagDF60 = "00";   //扩展交易指示位  
+
+            var tagFileHelper = new TagFileHelper(PersoFile);
             // 基于DES算法的QPBOC流程
             if (doDesTrans)
             {
@@ -50,6 +53,10 @@ namespace CardPlatform.Business
                     TransactionResult.Result = TransResult.Failed;
                 }
                 locator.Transaction.TransResult.Add(TransactionResult);
+                if(!string.IsNullOrEmpty(PersoFile))
+                {
+                    tagFileHelper.WriteToFile(TagType.QPBOC_DES);
+                }
             }
             //基于国密算法的交易流程
             if (doSMTrans)   
@@ -67,6 +74,10 @@ namespace CardPlatform.Business
                     TransactionResult.Result = TransResult.Failed;
                 }
                 locator.Transaction.TransResult.Add(TransactionResult);
+                if (!string.IsNullOrEmpty(PersoFile))
+                {
+                    tagFileHelper.WriteToFile(TagType.QPBOC_SM);
+                }
             }
         }
 
@@ -90,6 +101,8 @@ namespace CardPlatform.Business
                 baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                 return false;
             }
+
+            GetRequirementData();
 
             //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
             if (isQPBOCTranction)
@@ -226,6 +239,62 @@ namespace CardPlatform.Business
             //excuteCase.ExcuteCase(resps);
 
             return true;
+        }
+
+        public override void GetRequirementData()
+        {
+            base.GetRequirementData();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+
+            TagStandard[] tagStandards =
+            {
+                new TagStandard("9F51",2,TipLevel.Failed),
+                new TagStandard("9F52",2,TipLevel.Failed),
+                new TagStandard("9F53",1,TipLevel.Failed),
+                new TagStandard("9F54",6,TipLevel.Failed),
+                new TagStandard("9F55",0,TipLevel.Failed),
+                new TagStandard("9F56",1,TipLevel.Failed),
+                new TagStandard("9F57",2,TipLevel.Failed),
+                new TagStandard("9F58",1,TipLevel.Failed),
+                new TagStandard("9F59",1,TipLevel.Failed),
+                new TagStandard("9F5C",6,TipLevel.Failed),
+                new TagStandard("9F5D",0,TipLevel.Failed),
+                new TagStandard("9F72",1,TipLevel.Failed),
+                new TagStandard("9F75",1,TipLevel.Failed),
+                new TagStandard("9F76",0,TipLevel.Failed),
+                new TagStandard("9F77",0,TipLevel.Failed),
+                new TagStandard("9F78",0,TipLevel.Failed),
+                new TagStandard("9F79",0,TipLevel.Failed),
+                new TagStandard("9F4F",0,TipLevel.Failed),
+                new TagStandard("9F68",0,TipLevel.Failed),
+                new TagStandard("9F6B",0,TipLevel.Failed),
+                new TagStandard("9F6D",0,TipLevel.Failed),
+                new TagStandard("9F36",2,TipLevel.Failed),
+                new TagStandard("9F13",0,TipLevel.Failed),
+                new TagStandard("9F17",0,TipLevel.Failed),
+            };
+            for (int i = 0; i < tagStandards.Length; i++)
+            {
+                var resp = APDU.GetDataCmd(tagStandards[i].Tag);
+                if (resp.SW != 0x9000)
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[{0}],返回码:[{1}]", tagStandards[i].Tag, resp.SW);
+                }
+                else
+                {
+                    var tlvs = DataParse.ParseTLV(resp.Response);
+                    var tlv = from tmp in tlvs where tmp.Tag == tagStandards[i].Tag select tmp;
+
+                    if (tagStandards[i].Len != 0)
+                    {
+                        if (tlv.First().Len != tagStandards[i].Len)
+                        {
+                            caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
+                        }
+                    }
+                    tagDict.SetTag(tlv.First().Tag, tlv.First().Value); //保存
+                }
+            }
         }
 
         /// <summary>

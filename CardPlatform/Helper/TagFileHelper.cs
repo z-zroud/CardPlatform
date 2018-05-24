@@ -136,7 +136,7 @@ namespace CardPlatform.Helper
             contactTable.Add("9F48", new TagLocaton(128));
 
             sm_contactTable = new Dictionary<string, TagLocaton>();
-            sm_contactTable.Add("93_", new TagLocaton(122, 5));
+            sm_contactTable.Add("93", new TagLocaton(122, 5));
             sm_contactTable.Add("9F10", new TagLocaton(97, 5));
             sm_contactTable.Add("8F", new TagLocaton(104, 5));
             sm_contactTable.Add("9F46", new TagLocaton(126, 5));

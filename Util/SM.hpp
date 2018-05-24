@@ -97,7 +97,7 @@ typedef void(*PDllSM4_CBC_MAC)(char *sm4Key, char *input, char *InitVec, char *o
 
 //*******************************
 //使用SM3算法计算PBOC3.0信息摘要Hash值,h = SM3(Za|MSG)
-//函数名: dllGET_PBOCMSG_HASH
+//函数名: dllPBOC_GETMSG_HASH
 //参数1 : 信息摘要
 //参数2 : ilen 输入数据的长度，单位(字节)
 //参数3 : output(输出参数) Hash值

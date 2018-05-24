@@ -81,6 +81,18 @@ namespace CardPlatform.ViewModel
             set
             {
                 Set(ref _transCategory, value);
+                if(_transCategory == 0)
+                {
+                    ContactEnable = true;
+                    ContactlessEnable = false;
+                    TransType.IsCheckQPBOC = false;
+                }
+                else
+                {
+                    ContactEnable = false;
+                    TransType.IsCheckECC = false;
+                    ContactlessEnable = true;
+                }
             }
         }
 
@@ -107,6 +119,26 @@ namespace CardPlatform.ViewModel
             }
         }
 
+        private bool _contactEnable;
+        public bool ContactEnable
+        {
+            get { return _contactEnable; }
+            set
+            {
+                Set(ref _contactEnable, value);
+            }
+        }
+
+        private bool _contactlessEnable;
+        public bool ContactlessEnable
+        {
+            get { return _contactlessEnable; }
+            set
+            {
+                Set(ref _contactlessEnable, value);
+            }
+        }
+
         /// <summary>
         /// 交易类型 PBOC/UICS/ECC/QPBOC
         /// </summary>
@@ -115,7 +147,22 @@ namespace CardPlatform.ViewModel
         /// <summary>
         /// 交易使用的算法
         /// </summary>
-        public AlgorithmModel AlgorithmType { get; set; }
+        private AlgorithmModel _algorithmType;
+        public AlgorithmModel AlgorithmType
+        {
+            get
+            {
+                if(_algorithmType.IsCheckSM == false)
+                {
+                    HasSelectedSMKey = false;
+                }
+                return _algorithmType;
+            }
+            set
+            {
+                Set(ref _algorithmType, value);
+            }
+        }
 
         /// <summary>
         /// 交易结果显示
@@ -287,14 +334,16 @@ namespace CardPlatform.ViewModel
         private void DoTrans()
         {
             BusinessBase trans;
-
+            BusinessBase.PersoFile = TagInfoFile;
             if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
             {
                 trans = new BusinessUICS();
                 trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
                 trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
                 trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+
             }
             if (TransType.IsCheckECC)
             {
@@ -302,21 +351,24 @@ namespace CardPlatform.ViewModel
                 trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
                 trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
                 trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
             }
-            //if (TransType.IsCheckQPBOC)
-            //{
-            //    trans = new BusinessQPBOC();
-            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-            //    trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
-            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
-            //}
-            //if(TransType.IsCheckVISA)
+            if (TransType.IsCheckQPBOC)
+            {
+                trans = new BusinessQPBOC();
+                trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
+                trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            }
+            //if (TransType.IsCheckVISA)
             //{
             //    trans = new BusinessVISA();
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
             //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
             //if (TransType.IsCheckAMEX)
@@ -324,6 +376,7 @@ namespace CardPlatform.ViewModel
             //    trans = new BusinessAMEX();
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
             //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
             //if (TransType.IsCheckMC)
@@ -331,6 +384,7 @@ namespace CardPlatform.ViewModel
             //    trans = new BusinessMC();
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
             //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
             //if (TransType.IsCheckJETCO)
@@ -338,6 +392,7 @@ namespace CardPlatform.ViewModel
             //    trans = new BusinessJETCO();
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
             //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
         }

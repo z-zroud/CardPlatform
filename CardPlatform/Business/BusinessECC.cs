@@ -7,6 +7,7 @@ using System.Reflection;
 using CplusplusDll;
 using CardPlatform.Config;
 using CardPlatform.Models;
+using CardPlatform.Helper;
 
 namespace CardPlatform.Business
 {
@@ -31,7 +32,7 @@ namespace CardPlatform.Business
 
             locator.Terminal.TermianlSettings.Tag9F7A = "01";   //电子现金交易指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)
-            
+            var tagFileHelper = new TagFileHelper(PersoFile);
             // 做国际交易
             if (doDesTrans)
             {
@@ -39,6 +40,7 @@ namespace CardPlatform.Business
                 TransactionResult.TransType = TransType.ECC_DES;
                 curTransAlgorithmCategory = AlgorithmCategory.DES;
                 locator.Terminal.TermianlSettings.TagDF69 = "00";
+               
                 if(DoTransEx())
                 {
                     TransactionResult.Result = TransResult.Sucess;
@@ -48,11 +50,15 @@ namespace CardPlatform.Business
                     TransactionResult.Result = TransResult.Failed;
                 }
                 locator.Transaction.TransResult.Add(TransactionResult);
+                if (!string.IsNullOrEmpty(PersoFile))
+                {
+                    tagFileHelper.WriteToFile(TagType.ECC_DES);
+                }
             }
             // 做国密交易
             if (doSMTrans)
             {
-                TransResultModel TransactionResult = new TransResultModel(TransType.ECC_DES, TransResult.Unknown);
+                TransResultModel TransactionResult = new TransResultModel(TransType.ECC_SM, TransResult.Unknown);
                 TransactionResult.TransType = TransType.ECC_SM;
                 curTransAlgorithmCategory = AlgorithmCategory.SM;
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
@@ -65,12 +71,17 @@ namespace CardPlatform.Business
                     TransactionResult.Result = TransResult.Failed;
                 }
                 locator.Transaction.TransResult.Add(TransactionResult);
+                if (!string.IsNullOrEmpty(PersoFile))
+                {
+                    tagFileHelper.WriteToFile(TagType.ECC_SM);
+                }
             }
         }
 
         protected bool DoTransEx()
         {
             tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            pdolData = string.Empty;    //PDOL Data也需要清空，防止做CDA时，出现重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
@@ -88,6 +99,7 @@ namespace CardPlatform.Business
                 baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                 return false;
             }
+            GetRequirementData();
             if (isEccTranction)
             {
                 OfflineAuthcation();
@@ -200,6 +212,62 @@ namespace CardPlatform.Business
             return true;
         }
 
+        public override void GetRequirementData()
+        {
+            base.GetRequirementData();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+
+            TagStandard[] tagStandards =
+            {
+                new TagStandard("9F51",2,TipLevel.Failed),
+                new TagStandard("9F52",2,TipLevel.Failed),
+                new TagStandard("9F53",1,TipLevel.Failed),
+                new TagStandard("9F54",6,TipLevel.Failed),
+                new TagStandard("9F55",0,TipLevel.Failed),
+                new TagStandard("9F56",1,TipLevel.Failed),
+                new TagStandard("9F57",2,TipLevel.Failed),
+                new TagStandard("9F58",1,TipLevel.Failed),
+                new TagStandard("9F59",1,TipLevel.Failed),
+                new TagStandard("9F5C",6,TipLevel.Failed),
+                new TagStandard("9F5D",0,TipLevel.Failed),
+                new TagStandard("9F72",1,TipLevel.Failed),
+                new TagStandard("9F75",1,TipLevel.Failed),
+                new TagStandard("9F76",0,TipLevel.Failed),
+                new TagStandard("9F77",0,TipLevel.Failed),
+                new TagStandard("9F78",0,TipLevel.Failed),
+                new TagStandard("9F79",0,TipLevel.Failed),
+                new TagStandard("9F4F",0,TipLevel.Failed),
+                new TagStandard("9F68",0,TipLevel.Failed),
+                new TagStandard("9F6B",0,TipLevel.Failed),
+                new TagStandard("9F6D",0,TipLevel.Failed),
+                new TagStandard("9F36",2,TipLevel.Failed),
+                new TagStandard("9F13",0,TipLevel.Failed),
+                new TagStandard("9F17",0,TipLevel.Failed),
+            };
+            for (int i = 0; i < tagStandards.Length; i++)
+            {
+                var resp = APDU.GetDataCmd(tagStandards[i].Tag);
+                if (resp.SW != 0x9000)
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[{0}],返回码:[{1}]", tagStandards[i].Tag, resp.SW);
+                }
+                else
+                {
+                    var tlvs = DataParse.ParseTLV(resp.Response);
+                    var tlv = from tmp in tlvs where tmp.Tag == tagStandards[i].Tag select tmp;
+
+                    if (tagStandards[i].Len != 0)
+                    {
+                        if (tlv.First().Len != tagStandards[i].Len)
+                        {
+                            caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
+                        }
+                    }
+                    tagDict.SetTag(tlv.First().Tag, tlv.First().Value); //保存
+                }
+            }
+        }
+
         /// <summary>
         /// 脱机数据认证
         /// </summary>
@@ -307,45 +375,62 @@ namespace CardPlatform.Business
                     CDOL1Data += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
                 }
                 response = APDU.GACCmd(Constant.TC_CDA, CDOL1Data);
+
                 if (ParseTLVAndSave(response.Response))
                 {
-                    string tag9F4B = tagDict.GetTag("9F4B");
-                    string exp = tagDict.GetTag("9F47");
-                    string recoveryData = Authencation.GenRecoveryData(iccPulicKey, exp, tag9F4B);
-                    if(recoveryData.Length == 0 || !recoveryData.StartsWith("6A05"))
+                    if(curTransAlgorithmCategory == AlgorithmCategory.DES)
                     {
+                        string tag9F4B = tagDict.GetTag("9F4B");
+                        string exp = tagDict.GetTag("9F47");
+                        string recoveryData = Authencation.GenRecoveryData(iccPulicKey, exp, tag9F4B);
+                        if (recoveryData.Length == 0 || !recoveryData.StartsWith("6A05"))
+                        {
 
-                    }
-                    string recoveryHash = recoveryData.Substring(recoveryData.Length - 42, 40);
-                    string hashInput = recoveryData.Substring(2, recoveryData.Length - 44);
-                    hashInput += locator.Terminal.TermianlSettings.GetTag("9F37");
-                    string hash = Authencation.GetHash(hashInput);
-                    if(hash != recoveryHash)
-                    {
+                        }
+                        string recoveryHash = recoveryData.Substring(recoveryData.Length - 42, 40);
+                        string hashInput = recoveryData.Substring(2, recoveryData.Length - 44);
+                        hashInput += locator.Terminal.TermianlSettings.GetTag("9F37");
+                        string hash = Authencation.GetHash(hashInput);
+                        if (hash != recoveryHash)
+                        {
 
-                    }
-                    string recoveryTag9F36 = recoveryData.Substring(10, 4);
-                    string recoveryTag9F27 = recoveryData.Substring(14, 2);
-                    string recoveryTag9F26 = recoveryData.Substring(16, 16);
-                    string recoveryHash2 = recoveryData.Substring(32, 40);
-                    string hashInput2 = pdolData + CDOL1Data;
-                    string[] tags = { "9F27", "9F36", "9F10" };
-                    foreach(var tag in tags)
-                    {
-                        string tagValue = tagDict.GetTag(tag);
-                        string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
-                        hashInput2 += tag + len + tagValue;
-                    }
-                    string hash2 = Authencation.GetHash(hashInput2);
-                    if(hash2 != recoveryHash2)
-                    {
+                        }
+                        string recoveryTag9F36 = recoveryData.Substring(10, 4);
+                        string recoveryTag9F27 = recoveryData.Substring(14, 2);
+                        string recoveryTag9F26 = recoveryData.Substring(16, 16);
+                        string recoveryHash2 = recoveryData.Substring(32, 40);
+                        string hashInput2 = pdolData + CDOL1Data;
+                        string[] tags = { "9F27", "9F36", "9F10" };
+                        foreach (var tag in tags)
+                        {
+                            string tagValue = tagDict.GetTag(tag);
+                            string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
+                            hashInput2 += tag + len + tagValue;
+                        }
+                        string hash2 = Authencation.GetHash(hashInput2);
+                        if (hash2 != recoveryHash2)
+                        {
 
+                        }
                     }
+                    else
+                    {
+                        string hashInput = pdolData + CDOL1Data;
+                        string[] tags = { "9F27", "9F36", "9F10" };
+                        foreach (var tag in tags)
+                        {
+                            string tagValue = tagDict.GetTag(tag);
+                            string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
+                            hashInput += tag + len + tagValue;
+                        }
+                        string hash = Authencation.GenSMHash(hashInput, iccPulicKey);
+                    }
+                    
                 }
             }
             else
             {
-                response = GAC1(Constant.TC, CDOL1);
+                response = FirstGAC(Constant.TC, CDOL1);
             }
             
             if (response.SW == 0x9000)

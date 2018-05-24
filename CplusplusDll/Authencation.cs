@@ -15,6 +15,13 @@ namespace CplusplusDll
             return hash.ToString();
         }
 
+        public static string GenSMHash(string input, string publicKey)
+        {
+            StringBuilder hash = new StringBuilder(128);
+            CDll.GenSMHash(input, publicKey, hash, 128);
+            return hash.ToString();
+        }
+
         public static string GenRecoveryData(string publicKey, string publicKeyExp, string encryptionData)
         {
             StringBuilder recoveryData = new StringBuilder(2048);
