@@ -143,3 +143,6 @@ extern "C" GENKEY_API int GenHash(const char* input, char* hash, int len);
 extern "C" GENKEY_API int GenSMHash(const char* input, const char* publicKey, char* hash, int len);
 extern "C" GENKEY_API int DES_GenRecovery(const char* publicKey, const char* publicKeyExp, const char* encryptionData, char* recoveryData, int len);
 
+extern "C" GENKEY_API int SM2Verify(const char *pPublicKey, const char *pMSG, const char *pSignData);
+
+extern "C" GENKEY_API  int GenSMHash2(char *input, int inlen, char *output);

@@ -22,6 +22,11 @@ namespace CplusplusDll
             return hash.ToString();
         }
 
+        public static int SM2Verify(string publicKey, string signedMsg, string verifyData)
+        {
+            return CDll.SM2Verify(publicKey, signedMsg, verifyData);
+        }
+
         public static string GenRecoveryData(string publicKey, string publicKeyExp, string encryptionData)
         {
             StringBuilder recoveryData = new StringBuilder(2048);

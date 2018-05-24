@@ -617,6 +617,30 @@ int GenSMHash(const char* input, const char* publicKey, char* hash, int len)
     return -1;
 }
 
+int GenSMHash2(char *input, int inlen, char *output)
+{
+	PDllSM3_HASH SM3_Hash = GetSMFunc<PDllSM3_HASH>("dllSM3_HASH");
+	if (SM3_Hash)
+	{
+		char hash[128] = { 0 };
+		SM3_Hash((char*)input, inlen, hash);
+		strncpy_s(output, 128, hash, 128);
+		return 0;
+	}
+	return -1;
+}
+
+
+int SM2Verify(const char *pPublicKey, const char *pMSG, const char *pSignData)
+{
+	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
+	if (DllPBOC_SM2_Verify)
+	{
+		return DllPBOC_SM2_Verify((char*)pPublicKey, (char*)pMSG, (char*)pSignData);
+	}
+	return -1;
+}
+
 int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4B, const char* dynamicData)
 {
 	//从动态签名数据中获取恢复数据
