@@ -15,16 +15,16 @@ namespace CplusplusDll
             return hash.ToString();
         }
 
-        public static string GenSMHash(string input, string publicKey)
+        public static string GetSMHash(string input)
         {
             StringBuilder hash = new StringBuilder(128);
-            CDll.GenSMHash(input, publicKey, hash, 128);
+            CDll.GenSMHash(input, hash);
             return hash.ToString();
         }
 
-        public static int SM2Verify(string publicKey, string signedMsg, string verifyData)
+        public static int SM2Verify(string publicKey,  string verifyData,string signedMsg)
         {
-            return CDll.SM2Verify(publicKey, signedMsg, verifyData);
+            return CDll.SM2Verify(publicKey, verifyData, signedMsg);
         }
 
         public static string GenRecoveryData(string publicKey, string publicKeyExp, string encryptionData)

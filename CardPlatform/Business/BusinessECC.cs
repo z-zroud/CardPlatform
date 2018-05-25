@@ -249,7 +249,7 @@ namespace CardPlatform.Business
                 var resp = APDU.GetDataCmd(tagStandards[i].Tag);
                 if (resp.SW != 0x9000)
                 {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[{0}],返回码:[{1}]", tagStandards[i].Tag, resp.SW);
+                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, "无法获取tag[{0}],返回码:[{1:X}]", tagStandards[i].Tag, resp.SW);
                 }
                 else
                 {
@@ -260,7 +260,7 @@ namespace CardPlatform.Business
                     {
                         if (tlv.First().Len != tagStandards[i].Len)
                         {
-                            caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
+                            caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
                     tagDict.SetTag(tlv.First().Tag, tlv.First().Value); //保存
@@ -415,6 +415,25 @@ namespace CardPlatform.Business
                     }
                     else
                     {
+                        var tag9F4B = tagDict.GetTag("9F4B");
+                        if(string.IsNullOrEmpty(tag9F4B))
+                        {
+                            return -1;
+                        }
+                        if(!tag9F4B.StartsWith("15"))
+                        {
+                            return -2;
+                        }
+                        int icDynamicLen = Convert.ToInt32(tag9F4B.Substring(2, 2), 16);
+                        if(icDynamicLen < 44)
+                        {
+                            return -2;
+                        }
+                        int iccDynamicDigitLen = Convert.ToInt32(tag9F4B.Substring(4, 2));
+                        string dynamicDigit = tag9F4B.Substring(6, iccDynamicDigitLen * 2);
+                        string cryptoInfoData = tag9F4B.Substring(6 + iccDynamicDigitLen * 2, 2);
+                        string ac = tag9F4B.Substring(8 + iccDynamicDigitLen * 2, 16);
+                        string hash = tag9F4B.Substring(24 + iccDynamicDigitLen * 2, 64);
                         string hashInput = pdolData + CDOL1Data;
                         string[] tags = { "9F27", "9F36", "9F10" };
                         foreach (var tag in tags)
@@ -423,7 +442,18 @@ namespace CardPlatform.Business
                             string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
                             hashInput += tag + len + tagValue;
                         }
-                        string hash = Authencation.GenSMHash(hashInput, iccPulicKey);
+                        string verfiyHash = Authencation.GetSMHash(hashInput);
+                        if(hash != verfiyHash)
+                        {
+                            return -4;
+                        }
+                        string verifyData = tag9F4B.Substring(0, 4 + icDynamicLen * 2);
+                        verifyData += locator.Terminal.TermianlSettings.GetTag("9F37");
+                        string signedData = tag9F4B.Substring(4 + icDynamicLen * 2);
+                        if(Authencation.SM2Verify(iccPulicKey, verifyData, signedData) != 0)
+                        {
+                            return -5;
+                        }
                     }
                     
                 }

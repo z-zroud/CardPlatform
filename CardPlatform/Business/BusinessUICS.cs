@@ -257,7 +257,7 @@ namespace CardPlatform.Business
                 var resp = APDU.GetDataCmd(tagStandards[i].Tag);
                 if(resp.SW != 0x9000)
                 {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag[{0}],返回码:[{1:X}]", tagStandards[i].Tag, resp.SW);
+                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, "无法获取tag[{0}],返回码:[{1:X}]", tagStandards[i].Tag, resp.SW);
                 }
                 else
                 {
@@ -268,7 +268,7 @@ namespace CardPlatform.Business
                     {
                         if(tlv.First().Len != tagStandards[i].Len)
                         {
-                            caseObj.TraceInfo(TipLevel.Failed, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
+                            caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
                     tagDict.SetTag(tlv.First().Tag, tlv.First().Value); //保存

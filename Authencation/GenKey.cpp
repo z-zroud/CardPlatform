@@ -606,24 +606,14 @@ int GenHash(const char* input, char* hash, int len)
 	return 0;
 }
 
-int GenSMHash(const char* input, const char* publicKey, char* hash, int len)
-{
-    PDllPBOC_GETMSG_HASH SM3_Hash = GetSMFunc<PDllPBOC_GETMSG_HASH>("dllPBOC_GETMSG_HASH");
-    if (SM3_Hash)
-    {
-        SM3_Hash((char*)input, (char*)publicKey, hash);
-        return 0;
-    }
-    return -1;
-}
 
-int GenSMHash2(char *input, int inlen, char *output)
+int GenSMHash(char *input, char *output)
 {
 	PDllSM3_HASH SM3_Hash = GetSMFunc<PDllSM3_HASH>("dllSM3_HASH");
 	if (SM3_Hash)
 	{
 		char hash[128] = { 0 };
-		SM3_Hash((char*)input, inlen, hash);
+		SM3_Hash(input, strlen(input) / 2, hash);
 		strncpy_s(output, 128, hash, 128);
 		return 0;
 	}

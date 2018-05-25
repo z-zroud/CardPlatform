@@ -134,10 +134,10 @@ namespace CplusplusDll
         public extern static void GenHash(string input, StringBuilder hash, int len);
 
         [DllImport(@"Authencation.dll", EntryPoint = "GenSMHash", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void GenSMHash(string input,string publicKey, StringBuilder hash, int len);
+        public extern static void GenSMHash(string input, StringBuilder hash);
 
         [DllImport(@"Authencation.dll", EntryPoint = "SM2Verify", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int SM2Verify(string publicKey, string signedMsg, string verifyData);
+        public extern static int SM2Verify(string publicKey, string verifyData, string signedMsg);
 
         [DllImport(@"Authencation.dll", EntryPoint = "DES_GenRecovery", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void DES_GenRecovery(string publicKey, string publicKeyExp, string encryptionData, StringBuilder recoveryData, int len);
