@@ -53,8 +53,7 @@ namespace CardPlatform.Business
                     else
                     {
                         tagDict.Add(item.Tag, item.Value);
-                    }
-                    
+                    }                    
                 }
             }
         }
