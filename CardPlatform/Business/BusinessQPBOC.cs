@@ -315,18 +315,31 @@ namespace CardPlatform.Business
             }
             if (IsSupportDDA(AIP))
             {
-                string ddol = tagDict.GetTag("9F49");
-                string ddolData = "12345678";
-                var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
+                var tag9F4B = tagDict.GetTag("9F4B");
                 if (string.IsNullOrWhiteSpace(tag9F4B))
                 {
                     baseCase.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
                     return -7;
                 }
                 string issuerPublicKey = GetIssuerPublicKey();
-                if (!DDA(issuerPublicKey, tag9F4B, ddolData))
+                string tag9F37 = locator.Terminal.TermianlSettings.Tag9F37;
+                string tag9F02 = locator.Terminal.TermianlSettings.Tag9F02;
+                string tag5F2A = locator.Terminal.TermianlSettings.Tag5F2A;
+                string tag9F69 = tagDict.GetTag("9F69");
+                if(string.IsNullOrEmpty(tag9F69))
                 {
-                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "Tag9F69不存在");
+                    return -8;
+                }
+                if(string.IsNullOrEmpty(issuerPublicKey))
+                {
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取发卡行公钥");
+                    return -8;
+                }
+                string dynamicData = tag9F37 + tag9F02 + tag5F2A + tag9F69;
+                if (!DDA(issuerPublicKey, tag9F4B, dynamicData))
+                {
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "fDDA脱机数据认证失败");
                     return -3;
                 }
             }

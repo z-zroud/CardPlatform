@@ -273,10 +273,14 @@ namespace CardPlatform.ViewModel
 
         private void LoadApp()
         {
+            //在加载之前，清理上次加载信息
+            
+            Aids.Clear();
+            CaseInfos.Clear();
             ApduResponse response = new ApduResponse();
             List<string> aids = new List<string>();
             ViewModelLocator locator = new ViewModelLocator();
-            if(!APDU.RegisterReader(locator.Main.SelectedReader))
+            if (!APDU.RegisterReader(locator.Main.SelectedReader))
             {
                 return;
             }

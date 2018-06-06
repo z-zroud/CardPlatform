@@ -12,7 +12,7 @@
         ShowTitleBar="True"
         Height="700" 
         Width="1200" 
-        DataContext="{Binding Source={StaticResource Locator}, Path=Main}">
+        DataContext="{Binding Source={StaticResource Locator}, Path=Main}" Loaded="MetroWindow_Loaded">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands ShowLastSeparator="False">
             <ComboBox Width="400" Background="LightSkyBlue" ItemsSource="{Binding Readers}" SelectedItem="{Binding SelectedReader}"/>

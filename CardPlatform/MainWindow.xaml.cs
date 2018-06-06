@@ -24,5 +24,19 @@ namespace CardPlatform
         {
             InitializeComponent();
         }
+
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 设置全屏
+            this.WindowState = WindowState.Normal;
+            this.WindowStyle = WindowStyle.None;
+            this.ResizeMode = ResizeMode.CanResize;
+            //this.Topmost = true;
+
+            this.Left = 50;
+            this.Top = 50;
+            this.Width = SystemParameters.PrimaryScreenWidth - 100;
+            this.Height = SystemParameters.PrimaryScreenHeight - 100;
+        }
     }
 }
