@@ -117,13 +117,9 @@ namespace CardPlatform.Cases
             string caseLevel = string.Empty;
             TransInfoModel caseInfo = new TransInfoModel();
 
-            if (level == TipLevel.Sucess) { caseInfo.ColorMark = new SolidColorBrush(Colors.Black); caseLevel = "成功"; }
-            else if (level == TipLevel.Warn) { caseInfo.ColorMark = new SolidColorBrush(Colors.Yellow); caseLevel = "警告"; }
-            else if (level == TipLevel.Failed) { caseInfo.ColorMark = new SolidColorBrush(Colors.Red); caseLevel = "失败"; }
-
             caseInfo.CaseNo = caseNo;
             caseInfo.CaseInfo = description;
-            caseInfo.CaseLevel = caseLevel;
+            caseInfo.Level = level;
 
             ViewModelLocator locator = new ViewModelLocator();
             locator.Transaction.CaseInfos.Add(caseInfo);
@@ -168,7 +164,8 @@ namespace CardPlatform.Cases
                     {
                         if (stepCases.Step == Step)
                         {
-                            caseInfos = stepCases.Cases;
+                            caseInfos = new List<CaseInfo>(stepCases.Cases.ToArray());
+                            break;
                         }
                     }
                 }

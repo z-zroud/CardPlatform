@@ -4,12 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:helper="clr-namespace:CardPlatform.Helper"
              xmlns:local="clr-namespace:CardPlatform.View"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1100"
              DataContext="{Binding Source={StaticResource Locator}, Path=Transaction}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <helper:CaseLevelToColorConverter x:Key="CaseLevelToColorConverter"/>
+        <helper:CaseLevelToStringConverter x:Key="CaseLevelToStringConverter"/>
     </UserControl.Resources>
     <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
@@ -17,32 +20,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="350"/>
-            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="1" >
-            <StackPanel>
-                <TextBlock Text="交易类型"/>
-                <ComboBox  Margin="2" Width="240" HorizontalAlignment="Left"
+        <StackPanel Grid.Column="1" Margin="20">
+            <DockPanel  MaxHeight="30">
+                <TextBlock Text="交易类型 " MinWidth="50" VerticalAlignment="Center"/>
+                <ComboBox  Margin="2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding TransCategorys}"
                             SelectedIndex="{Binding SelectedCategory}"
                             MaxDropDownHeight="125" />
-            </StackPanel>
-            <StackPanel>
-                <TextBlock Text="AID" VerticalAlignment="Bottom"/>
-                <StackPanel Orientation="Horizontal">
-                    <ComboBox  Margin="2" Width="240"
+            </DockPanel>
+            <DockPanel MaxHeight="30" LastChildFill="True">
+                <TextBlock Text="AID" MinWidth="50" VerticalAlignment="Center"/>
+                <Button DockPanel.Dock="Right" MinWidth="60" Content="加载" Margin="2"  Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding LoadAppCmd}"/>
+                <ComboBox Margin="2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding Aids}"
                             SelectedItem="{Binding SelectedAid}"
                             MaxDropDownHeight="125" />
-                    <Button Content="加载" Margin="2" Width="60" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding LoadAppCmd}"/>
-                </StackPanel>
-           
-            </StackPanel>
+            </DockPanel>
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="交易方式" VerticalAlignment="Bottom" Margin="0,0,0,5" />
                 <UniformGrid  Rows="2">
@@ -58,133 +58,127 @@
             </StackPanel>
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="算法类型"  VerticalAlignment="Bottom" Margin="0,0,0,5"/>
-                <StackPanel  Orientation="Horizontal">
+                <UniformGrid Columns="4">
                     <CheckBox Content="国际" Margin="0,0,20,0" IsChecked="{Binding AlgorithmType.IsCheckDES}" />
                     <CheckBox Name="ckSM" Content="国密" Margin="0,0,20,0" IsChecked="{Binding AlgorithmType.IsCheckSM}"/>
-                </StackPanel>
+                </UniformGrid>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Column="2" >
-            <StackPanel Margin="0,0,10,10">
-                <TextBlock Text="MDK/UDK"  VerticalAlignment="Bottom"/>
+        <StackPanel Grid.Column="2" Margin="20">
+            <DockPanel>
+                <TextBlock Text="MDK/UDK"  VerticalAlignment="Center"/>
                 <ComboBox  Margin="2"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding KeyTypeList}"
                             SelectedIndex="{Binding SelectedKeyType}"
-                            MaxDropDownHeight="125" 
-                           HorizontalAlignment="Left"
-                           Width="300"/>
-            </StackPanel>
+                            MaxDropDownHeight="125" />
+            </DockPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <CheckBox Name="cbDES"  Margin="0,0,20,0" Visibility="Hidden" IsChecked="{Binding HasSelectedDESKey}"/>
-                <CheckBox Name="cbSM" Content="国密" Margin="0,0,54,0" HorizontalAlignment="Left" IsEnabled="{Binding ElementName=ckSM, Path=IsChecked}" IsChecked="{Binding HasSelectedSMKey}" Command="{Binding SelectSMCmd}"/>
+                <CheckBox Name="cbSM" Content="国密"  HorizontalAlignment="Left" IsEnabled="{Binding ElementName=ckSM, Path=IsChecked}" IsChecked="{Binding HasSelectedSMKey}" Command="{Binding SelectSMCmd}"/>
             </StackPanel>
             <StackPanel>
-                <StackPanel  Orientation="Horizontal">
-                    <TextBlock Text="AC" Width="30" VerticalAlignment="Center"/>
-                    <TextBox  Margin="2" Width="266" Text="{Binding TransKeyList.DES_AC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    <TextBox  Margin="2" Width="266" Text="{Binding TransKeyList.SM_AC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                </StackPanel>
-                <StackPanel  Orientation="Horizontal">
-                    <TextBlock Text="MAC" Width="30" VerticalAlignment="Center"/>
-                    <TextBox  Margin="2" Width="266" Text="{Binding TransKeyList.DES_MAC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    <TextBox  Margin="2" Width="266" Text="{Binding TransKeyList.SM_MAC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                </StackPanel>
-                <StackPanel  Orientation="Horizontal">
-                    <TextBlock Text="ENC" Width="30" VerticalAlignment="Center"/>
-                    <TextBox  Margin="2" Width="266" Text="{Binding TransKeyList.DES_ENC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    <TextBox  Margin="2" Width="266" Text="{Binding TransKeyList.SM_ENC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Button Content="信息表" Margin="2" Width="60" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenTagInfoFileCmd}"/>
-                <TextBox Margin="2" Width="250" Text="{Binding TagInfoFile}"/>
-            </StackPanel>
-        </StackPanel>
-        <StackPanel Grid.Column="3" >
-            <DockPanel LastChildFill="True" Height="260">
-                <Button  DockPanel.Dock="Bottom" Margin="0,0,30,20" Width="60" Height="30" Content="交易" Style="{DynamicResource AccentedSquareButtonStyle}" HorizontalAlignment="Right" Command="{Binding DoTransCmd}"/>
-                <StackPanel DockPanel.Dock="Top">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="卡号" Width="40"  VerticalAlignment="Center"/>
-                        <TextBox  Margin="2" Width="250" IsEnabled="False"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" >
-                        <TextBlock Text="序列号" Width="40" IsEnabled="False" VerticalAlignment="Center"/>
-                        <TextBox  Margin="2" Width="250" IsEnabled="False"/>
-                    </StackPanel>
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="AC" MinWidth="30" VerticalAlignment="Center"/>
                     <StackPanel>
-                        <TextBlock Text="交易结果 :"/>
-                        <DataGrid  RenderOptions.ClearTypeHint="Enabled"
-                                TextOptions.TextFormattingMode="Display"
-                                Margin="5"
-                                ItemsSource="{Binding Path=TransResult}"
-                                   BorderThickness="1"
-                                AutoGenerateColumns="False"
-                               Height="120"
-                                   Width="300"
-                                   HorizontalAlignment="Left"
-                               ScrollViewer.VerticalScrollBarVisibility="Auto"
-                               ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                            <DataGrid.ColumnHeaderStyle>
-                                <Style TargetType="DataGridColumnHeader">
-                                    <Setter Property="HorizontalContentAlignment" Value="Center">
-                                    </Setter>
-                                </Style>
-                            </DataGrid.ColumnHeaderStyle>
-                            <DataGrid.Columns>
-                                <DataGridTextColumn IsReadOnly="True" Header="交易类型"  Width="190" Binding="{Binding TransTypeDescription}"/>
-                                <DataGridTemplateColumn Header="结果" Width="100">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding ResultDescripton}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                               Foreground="{Binding ColorMark}"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeyList.DES_AC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeyList.SM_AC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     </StackPanel>
-                </StackPanel>
+                </DockPanel>
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="MAC" MinWidth="30" VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBox  Margin="2" Text="{Binding TransKeyList.DES_MAC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" Text="{Binding TransKeyList.SM_MAC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+                </DockPanel>
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="ENC" MinWidth="30" VerticalAlignment="Center"/>
+                    <StackPanel>
+                        <TextBox  Margin="2" Text="{Binding TransKeyList.DES_ENC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" Text="{Binding TransKeyList.SM_ENC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
+                </DockPanel>
+            </StackPanel>
+            <DockPanel>
+                <Button Content="信息表" Margin="2" MinWidth="60" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenTagInfoFileCmd}"/>
+                <TextBox Margin="2" Text="{Binding TagInfoFile}"/>
             </DockPanel>
         </StackPanel>
+        <StackPanel Grid.Column="3" Margin="20">
+            <DockPanel>
+                <TextBlock Text="卡号" MinWidth="40"  VerticalAlignment="Center"/>
+                <TextBox  Margin="2" IsEnabled="False"/>
+            </DockPanel>
+            <DockPanel>
+                <TextBlock Text="序列号" MinWidth="40" IsEnabled="False" VerticalAlignment="Center"/>
+                <TextBox  Margin="2" IsEnabled="False"/>
+            </DockPanel>
+            <DockPanel>
+                <DataGrid DockPanel.Dock="Bottom"  RenderOptions.ClearTypeHint="Enabled"
+                            TextOptions.TextFormattingMode="Display"
+                            Margin="5"
+                            ItemsSource="{Binding Path=TransResult}"
+                                BorderThickness="1"
+                            AutoGenerateColumns="False"
+                            MinHeight="130"
+                                HorizontalAlignment="Left"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                            ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center">
+                            </Setter>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn IsReadOnly="True" Header="交易类型"  Width="190" Binding="{Binding TransTypeDescription}"/>
+                        <DataGridTemplateColumn Header="结果" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ResultDescripton}" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                            Foreground="{Binding ColorMark}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <TextBlock Text="交易结果 :"/>
+            </DockPanel>
+            <Button Margin="0,10,0,0"  MinWidth="60"  Content="交易" Style="{DynamicResource AccentedSquareButtonStyle}" HorizontalAlignment="Right" Command="{Binding DoTransCmd}"/>
+        </StackPanel>
         <GridSplitter  Grid.ColumnSpan="4" Grid.Row="0" Height="2" VerticalAlignment="Bottom" Background="BurlyWood"  HorizontalAlignment="Stretch"/>
-        <StackPanel Grid.ColumnSpan="4" Grid.Row="1" Height="300">
+        <!--This is the hidden helper Grid which does the resizing -->
+        <Grid Visibility="Hidden" Grid.ColumnSpan="4" Margin="10,0,10,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="60"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" x:Name="col1"/>
+            <Grid Grid.Column="1" x:Name="col2"/>
+            <Grid Grid.Column="2" x:Name="col3"/>
+        </Grid>
+        <Grid Grid.ColumnSpan="4" Grid.Row="1" >
             <TabControl Controls:TabControlHelper.IsUnderlined="True" Background="AliceBlue">
                 <TabItem Header="输出" Controls:ControlsHelper.HeaderFontSize="15">
-                    <DataGrid  RenderOptions.ClearTypeHint="Enabled"
-                                TextOptions.TextFormattingMode="Display"
-                                Margin="5"
-                                ItemsSource="{Binding Path=CaseInfos}"
-                                Style="{DynamicResource AzureDataGrid}"
-                                AutoGenerateColumns="False"
-                               Height="250"
-                               ScrollViewer.VerticalScrollBarVisibility="Auto"
-                               ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="HorizontalContentAlignment" Value="Center">
-                                </Setter>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn IsReadOnly="True" Header="编号"  Width="200" Binding="{Binding CaseNo}"/>
-                            <DataGridTextColumn IsReadOnly="True" Header="描述" Width="760" Binding="{Binding CaseInfo}"/>
-                            <DataGridTemplateColumn Header="等级">
-                                    <DataGridTemplateColumn.CellTemplate>
+                    <ListView ItemsSource="{Binding CaseInfos}" helper:ListScrollHelper.IsEnabled="True">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="编号" DisplayMemberBinding="{Binding CaseNo}" Width="{Binding ElementName=col1,Path=ActualWidth}"/>
+                                <GridViewColumn Header="描述" DisplayMemberBinding="{Binding CaseInfo}" Width="{Binding ElementName=col2, Path=ActualWidth}" />
+                                <GridViewColumn Header="等级" Width="{Binding ElementName=col3,Path=ActualWidth}">
+                                    <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                        <TextBlock Text="{Binding CaseLevel}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                               Foreground="{Binding ColorMark}"/>
-                                    </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </TabItem>
-                <TabItem Header="错误" Controls:ControlsHelper.HeaderFontSize="15">
-                    <ListBox/>
+                                            <TextBlock Text="{Binding Level,Converter={StaticResource CaseLevelToStringConverter}}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{Binding Level,Converter={StaticResource CaseLevelToColorConverter}}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </TabItem>
             </TabControl>
-        </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>
