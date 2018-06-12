@@ -187,8 +187,8 @@ namespace CardPlatform.Cases
             {
                 if(item.Tag == "5F2D")
                 {
-                    //string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if(CaseUtil.IsAlpha(item.Value))
+                    string value = UtilLib.Utils.BcdToStr(item.Value);
+                    if(CaseUtil.IsAlpha(value))
                     {
                         TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }

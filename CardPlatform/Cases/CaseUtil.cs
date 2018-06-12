@@ -169,9 +169,9 @@ namespace CardPlatform.Cases
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
-        public static bool IsAlpha(string str)
+        public static bool IsAlpha(string ascii)
         {
-            var ascii = UtilLib.Utils.BcdToStr(str);
+            //var ascii = UtilLib.Utils.BcdToStr(str);
             string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
             foreach (var c in ascii)
             {

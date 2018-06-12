@@ -9,6 +9,7 @@ using CardPlatform.Config;
 using CplusplusDll;
 using System.Linq;
 using CardPlatform.Business;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.Cases
 {
@@ -23,13 +24,9 @@ namespace CardPlatform.Cases
         public string CurrentApp { get; set; }
         public string Step { get; set; }
 
-        //protected List<TLV> arrTLV;
-        //protected ApduResponse response;
 
         public CaseBase()
         {
-            //response = new ApduResponse();
-            //arrTLV = new List<TLV>();
             Step = "BaseStep";
             Load();           
         }
@@ -113,16 +110,21 @@ namespace CardPlatform.Cases
         /// <param name="args"></param>
         public virtual void TraceInfo(TipLevel level, string caseNo, string format, params object[] args)
         {
-            string description = string.Format(format, args);
-            string caseLevel = string.Empty;
-            TransInfoModel caseInfo = new TransInfoModel();
 
-            caseInfo.CaseNo = caseNo;
-            caseInfo.CaseInfo = description;
-            caseInfo.Level = level;
 
-            ViewModelLocator locator = new ViewModelLocator();
-            locator.Transaction.CaseInfos.Add(caseInfo);
+            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            {
+                string description = string.Format(format, args);
+                string caseLevel = string.Empty;
+                TransInfoModel caseInfo = new TransInfoModel();
+
+                caseInfo.CaseNo = caseNo;
+                caseInfo.CaseInfo = description;
+                caseInfo.Level = level;
+                ViewModelLocator locator = new ViewModelLocator();
+                locator.Transaction.CaseInfos.Add(caseInfo);
+            });
+
         }
 
 

@@ -11,6 +11,7 @@ using CplusplusDll;
 using UtilLib;
 using CardPlatform.Models;
 using CardPlatform.Business;
+using System.Threading;
 
 namespace CardPlatform.ViewModel
 {
@@ -251,7 +252,14 @@ namespace CardPlatform.ViewModel
             get
             {
                 if (_doTransCmd == null)
-                    _doTransCmd = new RelayCommand(DoTrans);
+                    _doTransCmd = new RelayCommand(()=>
+                    {
+                        Thread thread = new Thread(() =>
+                        {
+                            DoTrans();
+                        });
+                        thread.Start();
+                    });
                 return _doTransCmd;
             }
         }

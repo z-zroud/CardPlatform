@@ -10,6 +10,7 @@ using System.Reflection;
 using CardPlatform.Config;
 using CardPlatform.Models;
 using CardPlatform.Helper;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.Business
 {
@@ -32,21 +33,32 @@ namespace CardPlatform.Business
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型
             locator.Terminal.TermianlSettings.Tag9F66 = "46000000"; //终端交易属性
             var tagFileHelper = new TagFileHelper(PersoFile);
+
             // 做国际算法交易
             if (doDesTrans)  
             {
-                TransResultModel TransactionResult = new TransResultModel(TransType.UICS_DES, TransResult.Unknown);
-                TransactionResult.TransType = TransType.UICS_DES;
-                locator.Terminal.TermianlSettings.TagDF69 = "00";               
-                if (DoTransEx())
+
+
+                locator.Terminal.TermianlSettings.TagDF69 = "00";
+                bool isSucess = DoTransEx();
+                DispatcherHelper.CheckBeginInvokeOnUI(() =>
                 {
-                    TransactionResult.Result = TransResult.Sucess;
-                }
-                else
-                {
-                    TransactionResult.Result = TransResult.Failed;
-                }
-                locator.Transaction.TransResult.Add(TransactionResult);
+                    TransResultModel TransactionResult = new TransResultModel(TransType.UICS_DES, TransResult.Unknown);
+                    TransactionResult.TransType = TransType.UICS_DES;
+                    if (isSucess)
+                    {
+                        TransactionResult.Result = TransResult.Sucess;
+                    }
+                    else
+                    {
+                        TransactionResult.Result = TransResult.Failed;
+                    }
+
+                    locator.Transaction.TransResult.Add(TransactionResult);
+                });
+                
+
+
                 if(!string.IsNullOrEmpty(PersoFile))
                 {
                     if (IsContactTrans)
@@ -63,19 +75,25 @@ namespace CardPlatform.Business
             //做国密算法交易
             if (doSMTrans)
             {
-                TransResultModel TransactionResult = new TransResultModel(TransType.UICS_SM, TransResult.Unknown);
-                TransactionResult.TransType = TransType.UICS_SM;
                 curTransAlgorithmCategory = AlgorithmCategory.SM;
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
-                if (DoTransEx())
+                bool isSuccess = DoTransEx();
+                DispatcherHelper.CheckBeginInvokeOnUI(() => 
                 {
-                    TransactionResult.Result = TransResult.Sucess;
-                }
-                else
-                {
-                    TransactionResult.Result = TransResult.Failed;
-                }
-                locator.Transaction.TransResult.Add(TransactionResult);
+                    TransResultModel TransactionResult = new TransResultModel(TransType.UICS_SM, TransResult.Unknown);
+                    TransactionResult.TransType = TransType.UICS_SM;
+                    if (isSuccess)
+                    {
+                        TransactionResult.Result = TransResult.Sucess;
+                    }
+                    else
+                    {
+                        TransactionResult.Result = TransResult.Failed;
+                    }
+
+                    locator.Transaction.TransResult.Add(TransactionResult);
+                });
+
                 if (IsContactTrans && !string.IsNullOrEmpty(PersoFile))
                 {
                     tagFileHelper.WriteToFile(TagType.ContactDC_SM);
