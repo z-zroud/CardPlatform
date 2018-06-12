@@ -15,7 +15,7 @@ namespace CardPlatform.Business
 {
     public class BusinessUICS : BusinessBase
     {
-        private TagDict tagDict = TagDict.GetInstance();
+        private TagDict tagDic = TagDict.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public override void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
         {
-            tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            tagDic.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTrans(aid, doDesTrans, doSMTrans);
             locator.Terminal.TermianlSettings.Tag9F7A = "00";   //电子现金支持指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型
@@ -152,7 +152,7 @@ namespace CardPlatform.Business
         {
             var AFLs = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string tag9F38 = tagDict.GetTag("9F38");
+            string tag9F38 = tagDic.GetTag("9F38");
             if(string.IsNullOrEmpty(tag9F38))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag9F38");
@@ -174,8 +174,8 @@ namespace CardPlatform.Business
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
             {
-                tagDict.SetTag("82", tlvs[0].Value.Substring(0, 4));
-                tagDict.SetTag("94", tlvs[0].Value.Substring(4));
+                tagDic.SetTag("82", tlvs[0].Value.Substring(0, 4));
+                tagDic.SetTag("94", tlvs[0].Value.Substring(4));
             }
             else
             {
@@ -183,7 +183,7 @@ namespace CardPlatform.Business
                 return AFLs;
             }
 
-            AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
+            AFLs = DataParse.ParseAFL(tagDic.GetTag("94"));
 
             IExcuteCase stepCase = new GPOCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_GPO };
             stepCase.ExcuteCase(response);
@@ -271,7 +271,7 @@ namespace CardPlatform.Business
                             caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
-                    tagDict.SetTag(tlv.First().Tag, tlv.First().Value); //保存
+                    tagDic.SetTag(tlv.First().Tag, tlv.First().Value); //保存
                 }
             }
         }
@@ -283,7 +283,7 @@ namespace CardPlatform.Business
         protected int OfflineAuthcation()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string AIP = tagDict.GetTag("82");
+            string AIP = tagDic.GetTag("82");
             if (IsSupportSDA(AIP))
             {
                 if (!SDA())
@@ -294,7 +294,7 @@ namespace CardPlatform.Business
             }
             if (IsSupportDDA(AIP))
             {
-                string ddol = tagDict.GetTag("9F49");
+                string ddol = tagDic.GetTag("9F49");
                 string ddolData = "12345678";
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
@@ -321,8 +321,8 @@ namespace CardPlatform.Business
             int expiryDate;
             int effectiveDate;
             int currentDate;
-            int.TryParse(tagDict.GetTag("5F24"), out expiryDate);
-            int.TryParse(tagDict.GetTag("5F25"), out effectiveDate);
+            int.TryParse(tagDic.GetTag("5F24"), out expiryDate);
+            int.TryParse(tagDic.GetTag("5F25"), out effectiveDate);
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
 
             var caseBase = new CaseBase();
@@ -346,7 +346,7 @@ namespace CardPlatform.Business
 
         protected int CardHolderVerify()
         {
-            string CVM = tagDict.GetTag("8E");
+            string CVM = tagDic.GetTag("8E");
             return 0;
         }
 
@@ -357,7 +357,7 @@ namespace CardPlatform.Business
 
         protected int TerminalActionAnalyze()
         {
-            string CDOL1 = tagDict.GetTag("8C");
+            string CDOL1 = tagDic.GetTag("8C");
             ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
             if(resp.SW == 0x9000)
             {
@@ -370,10 +370,10 @@ namespace CardPlatform.Business
                     string tag9F26 = result.Substring(6, 16);
                     string tag9F10 = result.Substring(22);
 
-                    tagDict.SetTag("9F27", tag9F27);
-                    tagDict.SetTag("9F36", tag9F36);
-                    tagDict.SetTag("9F26", tag9F26);
-                    tagDict.SetTag("9F10", tag9F10);
+                    tagDic.SetTag("9F27", tag9F27);
+                    tagDic.SetTag("9F36", tag9F36);
+                    tagDic.SetTag("9F26", tag9F26);
+                    tagDic.SetTag("9F10", tag9F10);
                 }
             }
 
@@ -383,7 +383,7 @@ namespace CardPlatform.Business
         protected int IssuerAuthencation()
         {
             string acSessionKey;
-            string ATC = tagDict.GetTag("9F36");
+            string ATC = tagDic.GetTag("9F36");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             
             if (curTransAlgorithmCategory == AlgorithmCategory.DES)
@@ -404,7 +404,7 @@ namespace CardPlatform.Business
                 }
                 acSessionKey = GenSessionKey(TransSMACKey, KeyType, curTransAlgorithmCategory);
             }
-            string AC = tagDict.GetTag("9F26");
+            string AC = tagDic.GetTag("9F26");
             string ARPC;
             if(doDesTrans)
                 ARPC = Authencation.GenArpc(acSessionKey, AC, "3030", (int)AlgorithmCategory.DES);
@@ -422,7 +422,7 @@ namespace CardPlatform.Business
 
         protected int TransactionEnd()
         {
-            string CDOL2 = tagDict.GetTag("8D");
+            string CDOL2 = tagDic.GetTag("8D");
             ApduResponse resp = SecondGAC(Constant.TC, CDOL2);
 
             return 0;
@@ -432,11 +432,11 @@ namespace CardPlatform.Business
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string macSessionKey = string.Empty;
-            string ATC = tagDict.GetTag("9F36");
+            string ATC = tagDic.GetTag("9F36");
             if (KeyType == TransKeyType.MDK)
             {
-                string cardAcct = tagDict.GetTag("5A");
-                string cardSeq = tagDict.GetTag("5F34");
+                string cardAcct = tagDic.GetTag("5A");
+                string cardSeq = tagDic.GetTag("5F34");
                 if(TransDesMACKey != null)
                 {
                     string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
@@ -457,7 +457,7 @@ namespace CardPlatform.Business
             {
                 tag = "00" + tag;
             }
-            var macData = "04DA" + tag + "0A" + tagDict.GetTag("9F36") + tagDict.GetTag("9F26") + value;
+            var macData = "04DA" + tag + "0A" + tagDic.GetTag("9F36") + tagDic.GetTag("9F26") + value;
             string mac = Authencation.GenIssuerScriptMac(macSessionKey, macData);
             var resp = APDU.PutDataCmd(tag, value, mac);
             if(resp.SW == 0x9000)

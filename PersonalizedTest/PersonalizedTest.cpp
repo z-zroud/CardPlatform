@@ -47,13 +47,13 @@ int main()
 	{
 		printf("%s\n", readers[i]);
 	}
-    string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";
-    string dpFormat = "神舟数码";
+    string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";  
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpPath = dpDir + dpFormat + "\\稷山河东村镇银行.txt";
-    rulePath += "河东村镇银行_神码_华大_G81140042.xml";
-    string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
-    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string dpFormat = "CPS";
+    string dpPath = dpDir + dpFormat + "\\澳门立桥银行-1.DP";
+    rulePath += "澳门立桥借记_银联_英飞凌.xml";
+    string installParamCfg = "澳门立桥借记_英飞凌_非扩展.xml";
+    //GenCpsFile("DpParse_YL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
@@ -78,14 +78,22 @@ int main()
 
 
     bool isSongJan = true;
+    cout << "Put card into selected reader to do personlization(1 or 2): ";
+    int readerIndex;
+    cin >> readerIndex;
     if (isSongJan)
     {
         while(true)
         {
             cout << files[0] << endl;
+            cout << "Please confirm to do personlization(Y/N): ";
             char c;
             cin >> c;
-            if (!OpenReader(readers[1]))
+            if (c != 'Y' && c != 'y')
+            {
+                break;
+            }
+            if (!OpenReader(readers[readerIndex - 1]))
             {
                 return 1;
             }
@@ -99,9 +107,14 @@ int main()
         for (auto filePath : files)
         {
             cout << filePath << endl;
+            cout << "Please confirm to do personlization(Y/N): ";
             char c;
             cin >> c;
-            if (!OpenReader(readers[0]))
+            if (c != 'Y' || c != 'y')
+            {
+                break;
+            }
+            if (!OpenReader(readers[readerIndex - 1]))
             {
                 return 1;
             }
