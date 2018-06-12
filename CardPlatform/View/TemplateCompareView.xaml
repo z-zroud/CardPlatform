@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CardPlatform.View"
+             xmlns:helper="clr-namespace:CardPlatform.Helper"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000"
              Background="AliceBlue"
@@ -14,14 +15,16 @@
             <Setter Property="HorizontalAlignment"  
                     Value="Center" />
         </Style>
-    </UserControl.Resources>
+        <helper:CaseLevelToColorConverter x:Key="CaseLevelToColorConverter"/>
+        <helper:CaseLevelToStringConverter x:Key="CaseLevelToStringConverter"/>
+        </UserControl.Resources>
     <Grid  Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
             <TextBlock Text="选择模板:" Width="60" VerticalAlignment="Center" />
             <ComboBox  Margin="2" Height="30" Width="500"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
@@ -30,36 +33,40 @@
                             MaxDropDownHeight="125" />
             <Button Content="加载" Width="80" Height="30" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding LoadTemplateConfigCmd}"/>
         </StackPanel>
-        <DataGrid Grid.Row="2" VerticalAlignment="Top"  RenderOptions.ClearTypeHint="Enabled"
-                                TextOptions.TextFormattingMode="Display"
-                                Margin="5"
-                                Height="500"
-                                ItemsSource="{Binding Path=TemplateComparedInfos}"
-                                Style="{DynamicResource AzureDataGrid}"
-                                AutoGenerateColumns="False"
-                               ScrollViewer.VerticalScrollBarVisibility="Auto"
-                               ScrollViewer.HorizontalScrollBarVisibility="Auto">
-            <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="HorizontalContentAlignment" Value="Center">
-                    </Setter>
-                </Style>
-            </DataGrid.ColumnHeaderStyle>
-            <DataGrid.Columns>
-                <DataGridTextColumn IsReadOnly="True" Header="应用类型"  Width="100" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding CurrentApp}"/>
-                <DataGridTextColumn IsReadOnly="True" Header="交易步骤"  Width="100" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding Step}"/>
-                <DataGridTextColumn IsReadOnly="True" Header="标签"  Width="100" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding Tag}"/>
-                <DataGridTextColumn IsReadOnly="True" Header="模板值" Width="300" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding TemplateValue}"/>
-                <DataGridTextColumn IsReadOnly="True" Header="卡片值" Width="300" ElementStyle="{StaticResource contentCenterStyle}" Binding="{Binding CardValue}"/>
-                <DataGridTemplateColumn Header="结果" Width="60">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding CaseLevel}" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                               Foreground="{Binding ColorMark}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+        
+        <Grid Visibility="Hidden" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="60"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" x:Name="col1"/>
+            <Grid Grid.Column="1" x:Name="col2"/>
+            <Grid Grid.Column="2" x:Name="col3"/>
+            <Grid Grid.Column="3" x:Name="col4"/>
+            <Grid Grid.Column="4" x:Name="col5"/>
+            <Grid Grid.Column="5" x:Name="col6"/>
+        </Grid>
+        <ListView Grid.Row="2"  ItemsSource="{Binding Path=TemplateComparedInfos}" helper:ListScrollHelper.IsEnabled="True">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="应用类型" DisplayMemberBinding="{Binding CurrentApp}" Width="{Binding ElementName=col1,Path=ActualWidth}"/>
+                    <GridViewColumn Header="交易步骤" DisplayMemberBinding="{Binding Step}" Width="{Binding ElementName=col2, Path=ActualWidth}" />
+                    <GridViewColumn Header="标签" DisplayMemberBinding="{Binding Tag}" Width="{Binding ElementName=col3, Path=ActualWidth}" />
+                    <GridViewColumn Header="模板值" DisplayMemberBinding="{Binding TemplateValue}" Width="{Binding ElementName=col4, Path=ActualWidth}" />
+                    <GridViewColumn Header="卡片值" DisplayMemberBinding="{Binding CardValue}" Width="{Binding ElementName=col5, Path=ActualWidth}" />
+                    <GridViewColumn Header="结果" Width="{Binding ElementName=col6,Path=ActualWidth}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ActualLevel,Converter={StaticResource CaseLevelToStringConverter}}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{Binding ActualLevel,Converter={StaticResource CaseLevelToColorConverter}}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView> 
     </Grid>
 </UserControl>

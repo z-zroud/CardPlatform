@@ -22,6 +22,7 @@ namespace CardPlatform.Helper
                     case TipLevel.Failed: return new SolidColorBrush(Colors.Red);
                     case TipLevel.Warn: return new SolidColorBrush(Colors.Yellow);
                     case TipLevel.Sucess: return new SolidColorBrush(Colors.Black);
+                    case TipLevel.Unknown:  return new SolidColorBrush(Colors.Blue);
                 }
             }
             return new SolidColorBrush(Colors.Red);

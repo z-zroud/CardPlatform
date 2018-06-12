@@ -104,9 +104,8 @@ namespace CardPlatform.ViewModel
                         comparedItem.CurrentApp = app;
                         comparedItem.Step = stepTags.Step;
                         comparedItem.HasCheck = false;
-                        comparedItem.ColorMark = new SolidColorBrush(Colors.Blue);
-                        comparedItem.CaseLevel = "未校验";
-                        comparedItem.Level = item.Level;
+                        comparedItem.ConfigLevel = item.Level;
+                        comparedItem.ActualLevel = TipLevel.Unknown;
                         TemplateComparedInfos.Add(comparedItem);
                     }
                 }             

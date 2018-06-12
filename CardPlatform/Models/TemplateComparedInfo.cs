@@ -13,7 +13,7 @@ namespace CardPlatform.Models
     {
         public TemplateComparedInfo()
         {
-            ColorMark = new SolidColorBrush(Colors.Black);
+           
         }
 
         /// <summary>
@@ -82,30 +82,28 @@ namespace CardPlatform.Models
         }
 
         /// <summary>
-        /// 对比失败时，该Case显示的结果
+        /// 配置信息中所期望的等级
         /// </summary>
-        private string _caseLevel;
-        public string CaseLevel
+        private TipLevel _configLevel;
+        public TipLevel ConfigLevel
         {
-            get { return _caseLevel; }
+            get { return _configLevel; }
             set
             {
-                Set(ref _caseLevel, value);
+                Set(ref _configLevel, value);
             }
         }
 
-        public TipLevel Level { get; set; }
-
         /// <summary>
-        /// 对不同的结果显示不同的颜色
+        /// 实际结果中显示的等级
         /// </summary>
-        private SolidColorBrush _colorMark;
-        public SolidColorBrush ColorMark
+        private TipLevel _actualLevel;
+        public TipLevel ActualLevel
         {
-            get { return _colorMark; }
+            get { return _actualLevel; }
             set
             {
-                Set(ref _colorMark, value);
+                Set(ref _actualLevel, value);
             }
         }
 
