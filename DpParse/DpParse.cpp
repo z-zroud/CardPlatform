@@ -105,6 +105,11 @@ for (auto item : collection)
 return false;
 }
 
+void Dict::Clear()
+{
+    m_vecItems.clear();
+}
+
 bool Dict::TagExisted(string tag)
 {
     for (auto item : m_vecItems) {
@@ -471,6 +476,12 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             encryptTag.tag = node->first_attribute("tag")->value();
             encryptTag.type = node->first_attribute("type")->value();
             encryptTag.key = node->first_attribute("key")->value();
+            if (node->first_attribute("delete80") == NULL) {
+                encryptTag.isDelete80 = false;
+            }
+            else {
+                encryptTag.isDelete80 = true;
+            }
             if (node->first_attribute("startPos") == NULL) {
                 encryptTag.startPos = 0;
             }
@@ -808,8 +819,17 @@ void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
                 if (encryptedItem.type == "SM") {
                     decryptedData = SMDecryptDGI(encryptedItem.key, encryptData);
                 }
-                else {
+                else if(encryptedItem.type == "DES"){
                     decryptedData = DesDecryptDGI(encryptedItem.key, encryptData);
+                }
+                else if (encryptedItem.type == "BCD") {
+                    decryptedData = Tool::StrToBcd(encryptData.c_str());
+                }
+                else if (encryptedItem.type == "BASE64") {
+                    decryptedData = Tool::base64_decode(encryptData);
+                }
+                else {
+                    continue;   //防止出现错误
                 }
 
                 item.value.ReplaceItem(encryptedItem.tag, decryptedData); //将数据替换为临时解密数据

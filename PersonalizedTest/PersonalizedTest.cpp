@@ -49,18 +49,18 @@ int main()
 	}
     string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";  
     string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "CPS";
-    string dpPath = dpDir + dpFormat + "\\澳门立桥银行-1.DP";
-    rulePath += "澳门立桥借记_银联_英飞凌.xml";
+    string dpFormat = "格尔";
+    string dpPath = dpDir + dpFormat + "\\6251407433318961.txt";
+    rulePath += "中行泰国分行_格尔_英飞凌_05006081.xml";
     string installParamCfg = "澳门立桥借记_英飞凌_非扩展.xml";
-    //GenCpsFile("DpParse_YL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    //GenCpsFile("DpParse_GEER.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
     //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\26_808021_20180109_20180109421_ic.txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
     //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\27_808021_20180109_20180109441_ic.txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
-    //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\Goldpac\\项目\\DP\\23_808021_20180109_20180109363_ic (1).txt", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HeDongRule.xml");
-    //GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\华腾\\鞍山银行.dat", "F:\\CardPlatform\\bin\\Configuration\\Rule\\JR1792_鞍山银行_华腾_华大_G81140034.xml");
+    //GenCpsFile("DpParse_SZSM.dll", "HandleDp", "F:\\CardPlatform\\bin\\Debug\\DPTest\\神舟数码\\23_808021_20180109_20180109363_ic (1).txt", "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\河东村镇银行_神码_华大_G81140042.xml");
+    GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\Debug\\DPTest\\华腾\\鞍山银行.dat", "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\JR1792_鞍山银行_华腾_华大_G81140034.xml");
     //GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\华腾\\石阡村镇银行.dat", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HuaTengRule.xml");
     //GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\DPTest\\华腾\\HuaTeng.dp", "F:\\CardPlatform\\bin\\Configuration\\Rule\\HuaTengRule.xml");
     //GenCpsFile("DpParse_HT.dll", "HandleDp", "F:\\CardPlatform\\bin\\Debug\\DPTest\\华腾\\ICP623553586000021715.dp", "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\JR1454_沂源博商村镇银行_华腾_华大_G81140037.xml");
