@@ -10,10 +10,14 @@ using namespace std;
 int main()
 {
     //Test Base64 decode
-    string testBase64 = Tool::base64_decode("UBi/YRBxHM9s0ODGUqG8q4s7aLVXpbH4Gohu4uV/H4h34tAtN1B/2v/vuzJiippQW7jpOuXwK6aIKGEbMKsaCmp/+fEBJDh8z0cdcc4AjyYcmUdWfuXvbRCsGYz97zbR7OyTJBMEVwwJbSggnBwt/+iUkf5FKCk8NStyF+ohvw8mdq75+j9RoOWm3rOa+DJcLCY7NSlc/UQee9XSDpyq+/+yiv4Ui3dT5CdV2Y5Rds7/YF4tbpKyoiH9DqxdecvV/e1f+F0iVmHdGA0jxPQWp2asx++oWDwGW2hXF3ooFK3f4EIEG2UQj9Xgzai6cG5WOd3fV+lzp9k=");
-    string testBase641 = Tool::StrToBcd(testBase64.c_str());
-    //Test StrToBcd
-    string test = Tool::StrToBcd("en");
+    int len = 0;
+    string testBase64 = Tool::base64_decode("fccMwd6wotmr/UhcqZL1kdvI0BqmcJwI6fBEF374ecrbAZwPgp9b2hukA+PwoXeWRhyeoQV4jq4G//Wp4/Axp3OLeRxdYMRJiNJGr2HHPZdeXQcE9v41vA==",len);
+    string testBase641 = Tool::StrToBcd(testBase64.c_str(),len);
+    char tmp[2048] = { 0 };
+    Tool::AscToBcd(tmp, (char*)testBase64.c_str(), len * 2);
+    //Test StrToBcd 6C696A6965
+    char* a = "lijie";
+    string test = Tool::StrToBcd(a,5);
     //Test GetDirectory
     const char* filePath = "a\\b\\c.txt";
     string dir = Tool::GetDirectory(filePath);

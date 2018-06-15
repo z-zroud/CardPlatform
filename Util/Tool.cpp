@@ -19,8 +19,9 @@ namespace  Tool
         return (isalnum(c) || (c == '+') || (c == '/'));
     }
 
-    string base64_decode(string const& encoded_string) 
+    string base64_decode(string const& encoded_string, int &len) 
     {
+        len = 0;
         int in_len = encoded_string.size();
         int i = 0;
         int j = 0;
@@ -39,7 +40,11 @@ namespace  Tool
                 char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
                 for (i = 0; (i < 3); i++)
+                {
                     ret += char_array_3[i];
+                    len++;
+                }
+                    
                 i = 0;
             }
         }
@@ -55,7 +60,11 @@ namespace  Tool
             char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
             char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
 
-            for (j = 0; (j < i - 1); j++) ret += char_array_3[j];
+            for (j = 0; (j < i - 1); j++)
+            {
+                ret += char_array_3[j];
+                len++;
+            }
         }
 
         return ret;
@@ -69,17 +78,17 @@ namespace  Tool
         return path.substr(0, index + 1);
     }
 
-    string StrToBcd(const char* str)
+    string StrToBcd(const char* str, int len)
     {
-        int len = strlen(str);
         string bcd;
         for (int i = 0; i < len; i++)
         {
             unsigned char ascii = (unsigned char)str[i];
             char c[3] = { 0 };
-            snprintf(c, 3, "%0X", ascii);
+            snprintf(c, 3, "%02X", ascii);
             bcd += c;
         }
+        printf("%s\n", bcd.c_str());
         return bcd;
     }
 
