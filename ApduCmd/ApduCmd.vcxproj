@@ -22,7 +22,7 @@
     <ProjectGuid>{56BB62BE-70AF-4389-AED5-D6CE777ADAE9}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ApduCmd</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

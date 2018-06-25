@@ -23,7 +23,7 @@
     <ProjectGuid>{A8C37743-1504-46E1-9C90-D4E4B517E8A1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DpParseGEER</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
