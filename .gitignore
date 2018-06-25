@@ -17,3 +17,5 @@ ipch/
 bin/
 dll/
 __pycache__/
+/AGTestTool
+/UpgradeLog.htm
