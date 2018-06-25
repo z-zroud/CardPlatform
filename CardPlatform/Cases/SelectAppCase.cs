@@ -184,9 +184,10 @@ namespace CardPlatform.Cases
             var tag5F2D = from tlv in TLVs where tlv.Tag == "5F2D" select tlv;
             if (tag5F2D.First() != null)
             {
+                string value = UtilLib.Utils.BcdToStr(tag5F2D.First().Value);
                 if (tag5F2D.First().Value.Length % 2 != 0 &&
                     CaseUtil.IsExpectedLen(tag5F2D.First().Value,2,8) &&
-                    CaseUtil.IsAlpha(tag5F2D.First().Value))
+                    CaseUtil.IsAlpha(value))
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }

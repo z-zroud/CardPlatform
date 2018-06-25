@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -28,7 +28,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -107,7 +107,11 @@
     <Compile Include="Config\CaseConfig.cs" />
     <Compile Include="Config\DataTemplateConfig.cs" />
     <Compile Include="Config\PersonlizeConfig.cs" />
+    <Compile Include="Helper\CaseLevelToColorConverter.cs" />
+    <Compile Include="Helper\CaseLevelToStringConverter.cs" />
+    <Compile Include="Helper\ControlTreeHelper.cs" />
     <Compile Include="Helper\DialogCloseHelper.cs" />
+    <Compile Include="Helper\ListScrollHelper.cs" />
     <Compile Include="Helper\Tag57Helper.cs" />
     <Compile Include="Helper\Tag5AHelper.cs" />
     <Compile Include="Helper\TagFileHelper.cs" />

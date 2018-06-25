@@ -16,7 +16,8 @@ namespace CardPlatform.Config
     {
         Sucess = 0,
         Warn = 1,
-        Failed = 2
+        Failed = 2,
+        Unknown=3
     }
 
 

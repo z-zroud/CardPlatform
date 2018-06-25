@@ -25,6 +25,8 @@ namespace Tool
     void DeleteSpace(const char* src, char* dest, int len);
     string Trim(string str);
     int ctoi(unsigned char c);
+    string StrToBcd(const char* str, int len);
+    string base64_decode(string const& encoded_string, int& len);
 	/**********************************************************
 	* ¹¦ÄÜ£º
 	***********************************************************/

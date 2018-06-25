@@ -11,6 +11,8 @@ using CplusplusDll;
 using UtilLib;
 using CardPlatform.Models;
 using CardPlatform.Business;
+using System.Threading;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.ViewModel
 {
@@ -251,7 +253,14 @@ namespace CardPlatform.ViewModel
             get
             {
                 if (_doTransCmd == null)
-                    _doTransCmd = new RelayCommand(DoTrans);
+                    _doTransCmd = new RelayCommand(()=>
+                    {
+                        Thread thread = new Thread(() =>
+                        {
+                            DoTrans();
+                        });
+                        thread.Start();
+                    });
                 return _doTransCmd;
             }
         }
@@ -273,30 +282,42 @@ namespace CardPlatform.ViewModel
 
         private void LoadApp()
         {
+            //在加载之前，清理上次加载信息
+            
+            Aids.Clear();
+            CaseInfos.Clear();
+            
             ApduResponse response = new ApduResponse();
             List<string> aids = new List<string>();
             ViewModelLocator locator = new ViewModelLocator();
-            if(!APDU.RegisterReader(locator.Main.SelectedReader))
+            if (!APDU.RegisterReader(locator.Main.SelectedReader))
             {
                 return;
             }
-            switch ((TransCategory)SelectedCategory)
+            Thread thread = new Thread(() =>
             {
-                case TransCategory.Contact:                    
-                    BusinessPSE businessPSE = new BusinessPSE();
-                    aids = businessPSE.SelectPSE();
-                    break;
-                case TransCategory.Contactless:
-                    BusinessPPSE businessPPSE = new BusinessPPSE();
-                    aids = businessPPSE.SelectPPSE();
-                    break;
-            }
-            foreach(var aid in aids)
-            {               
-                Aids.Add(aid);
-            }
-            if(Aids.Count > 0)
-                SelectedAid = Aids.First();
+                switch ((TransCategory)SelectedCategory)
+                {
+                    case TransCategory.Contact:
+                        BusinessPSE businessPSE = new BusinessPSE();
+                        aids = businessPSE.SelectPSE();
+                        break;
+                    case TransCategory.Contactless:
+                        BusinessPPSE businessPPSE = new BusinessPPSE();
+                        aids = businessPPSE.SelectPPSE();
+                        break;
+                }
+                DispatcherHelper.CheckBeginInvokeOnUI(() =>
+                {
+                    foreach (var aid in aids)
+                    {
+                        Aids.Add(aid);
+                    }
+                    if (Aids.Count > 0)
+                        SelectedAid = Aids.First();
+                });
+            });
+            thread.Start();           
         }
 
         private void SelectSMKey()
@@ -335,6 +356,11 @@ namespace CardPlatform.ViewModel
         {
             BusinessBase trans;
             BusinessBase.PersoFile = TagInfoFile;
+            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            {
+                TransResult.Clear();
+            });
+            
             if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
             {
                 trans = new BusinessUICS();

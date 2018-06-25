@@ -9,6 +9,7 @@ using CardPlatform.Config;
 using CplusplusDll;
 using System.Linq;
 using CardPlatform.Business;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.Cases
 {
@@ -23,13 +24,9 @@ namespace CardPlatform.Cases
         public string CurrentApp { get; set; }
         public string Step { get; set; }
 
-        //protected List<TLV> arrTLV;
-        //protected ApduResponse response;
 
         public CaseBase()
         {
-            //response = new ApduResponse();
-            //arrTLV = new List<TLV>();
             Step = "BaseStep";
             Load();           
         }
@@ -40,21 +37,21 @@ namespace CardPlatform.Cases
         /// <param name="srcData"></param>
         public virtual void ExcuteCase(object srcData)
         {
-            //if(Step != Constant.STEP_READ_RECORD)
-            //{
-            //    var response = (ApduResponse)srcData;
-            //    var TLVs = DataParse.ParseTLV(response.Response);
-            //    CheckTemplateTag(TLVs);
-            //}
-            //else
-            //{
-            //    var resps = (List<ApduResponse>)srcData;
-            //    foreach(var resp in resps)
-            //    {
-            //        var TLVs = DataParse.ParseTLV(resp.Response);
-            //        CheckTemplateTag(TLVs);
-            //    }
-            //}
+            if (Step != Constant.STEP_READ_RECORD)
+            {
+                var response = (ApduResponse)srcData;
+                var TLVs = DataParse.ParseTLV(response.Response);
+                CheckTemplateTag(TLVs);
+            }
+            else
+            {
+                var resps = (List<ApduResponse>)srcData;
+                foreach (var resp in resps)
+                {
+                    var TLVs = DataParse.ParseTLV(resp.Response);
+                    CheckTemplateTag(TLVs);
+                }
+            }
 
             Load();
             if(caseInfos.Count > 0)
@@ -89,14 +86,11 @@ namespace CardPlatform.Cases
                             item.HasCheck = true;
                             if (tlv.Value == item.TemplateValue)
                             {
-                                item.ColorMark = new SolidColorBrush(Colors.Black);
-                                item.CaseLevel = "成功";
+                                item.ActualLevel = TipLevel.Sucess;
                             }
                             else
                             {
-                                if (item.Level == TipLevel.Sucess) { item.ColorMark = new SolidColorBrush(Colors.Black); item.CaseLevel = "成功"; }
-                                else if (item.Level == TipLevel.Warn) { item.ColorMark = new SolidColorBrush(Colors.Yellow); item.CaseLevel = "警告"; }
-                                else if (item.Level == TipLevel.Failed) { item.ColorMark = new SolidColorBrush(Colors.Red); item.CaseLevel = "失败"; }
+                                item.ActualLevel = item.ConfigLevel;
                             }
                         }
                     }
@@ -113,20 +107,19 @@ namespace CardPlatform.Cases
         /// <param name="args"></param>
         public virtual void TraceInfo(TipLevel level, string caseNo, string format, params object[] args)
         {
-            string description = string.Format(format, args);
-            string caseLevel = string.Empty;
-            TransInfoModel caseInfo = new TransInfoModel();
+            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            {
+                string description = string.Format(format, args);
+                string caseLevel = string.Empty;
+                TransInfoModel caseInfo = new TransInfoModel();
 
-            if (level == TipLevel.Sucess) { caseInfo.ColorMark = new SolidColorBrush(Colors.Black); caseLevel = "成功"; }
-            else if (level == TipLevel.Warn) { caseInfo.ColorMark = new SolidColorBrush(Colors.Yellow); caseLevel = "警告"; }
-            else if (level == TipLevel.Failed) { caseInfo.ColorMark = new SolidColorBrush(Colors.Red); caseLevel = "失败"; }
+                caseInfo.CaseNo = caseNo;
+                caseInfo.CaseInfo = description;
+                caseInfo.Level = level;
+                ViewModelLocator locator = new ViewModelLocator();
+                locator.Transaction.CaseInfos.Add(caseInfo);
+            });
 
-            caseInfo.CaseNo = caseNo;
-            caseInfo.CaseInfo = description;
-            caseInfo.CaseLevel = caseLevel;
-
-            ViewModelLocator locator = new ViewModelLocator();
-            locator.Transaction.CaseInfos.Add(caseInfo);
         }
 
 
@@ -168,7 +161,8 @@ namespace CardPlatform.Cases
                     {
                         if (stepCases.Step == Step)
                         {
-                            caseInfos = stepCases.Cases;
+                            caseInfos = new List<CaseInfo>(stepCases.Cases.ToArray());
+                            break;
                         }
                     }
                 }

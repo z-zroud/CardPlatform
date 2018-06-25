@@ -105,6 +105,11 @@ for (auto item : collection)
 return false;
 }
 
+void Dict::Clear()
+{
+    m_vecItems.clear();
+}
+
 bool Dict::TagExisted(string tag)
 {
     for (auto item : m_vecItems) {
@@ -470,7 +475,20 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             TagEncrypt encryptTag;
             encryptTag.tag = node->first_attribute("tag")->value();
             encryptTag.type = node->first_attribute("type")->value();
-            encryptTag.key = node->first_attribute("key")->value();
+            if (node->first_attribute("key") == NULL)
+            {
+                encryptTag.key = "";
+            }
+            else {
+                encryptTag.key = node->first_attribute("key")->value();
+            }
+            
+            if (node->first_attribute("delete80") == NULL) {
+                encryptTag.isDelete80 = false;
+            }
+            else {
+                encryptTag.isDelete80 = true;
+            }
             if (node->first_attribute("startPos") == NULL) {
                 encryptTag.startPos = 0;
             }
@@ -804,32 +822,62 @@ void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
         for (auto& item : cpsItem.items) {
             if (item.value.TagExisted(encryptedItem.tag)) {
                 string decryptedData;
-                string encryptData = item.value.GetItem(encryptedItem.tag).substr(encryptedItem.tag.length() + 2);
+                //string tagValue = item.value.GetItem(encryptedItem.tag);
+                //string encryptData = tagValue.substr(encryptedItem.tag.length() + 2);
+                string encryptData = item.value.GetItem(encryptedItem.tag);
                 if (encryptedItem.type == "SM") {
                     decryptedData = SMDecryptDGI(encryptedItem.key, encryptData);
                 }
-                else {
+                else if(encryptedItem.type == "DES"){
                     decryptedData = DesDecryptDGI(encryptedItem.key, encryptData);
                 }
-
-                item.value.ReplaceItem(encryptedItem.tag, decryptedData); //将数据替换为临时解密数据
-
-                if (decryptedData.length() > encryptedItem.len && encryptedItem.len >= 0) {
-                    if (encryptedItem.len == 0 && encryptedItem.tag == "57") { //单独处理57
-                        int indexD = decryptedData.find_first_of('D');
-                        if (indexD == string::npos)
-                            return;
-                        int indexF = decryptedData.find_first_of('F', indexD);
-                        if (indexF == string::npos)
-                            return;
-                        decryptedData = decryptedData.substr(encryptedItem.startPos, indexF + 1);
-                    }else
-                        decryptedData = decryptedData.substr(encryptedItem.startPos, encryptedItem.len);
+                else if (encryptedItem.type == "BCD") {
+                    decryptedData = Tool::StrToBcd(encryptData.c_str(),encryptData.size());
                 }
-                char decryptedDataLen[3];
-                Tool::GetBcdDataLen(decryptedData.c_str(), decryptedDataLen, 3);
-                decryptedData = encryptedItem.tag + decryptedDataLen + decryptedData;
-                item.value.ReplaceItem(encryptedItem.tag, decryptedData);
+                else if (encryptedItem.type == "BASE64") {
+                    int len = 0;
+                    string decodData = Tool::base64_decode(encryptData,len);
+                    decryptedData = Tool::StrToBcd(decodData.c_str(), len);
+                }
+                else {
+                    continue;   //防止出现错误
+                }
+
+                
+                if (encryptedItem.type == "DES" || encryptedItem.type == "SM")
+                {
+                    if (encryptedItem.isDelete80)
+                    {
+                        int index = decryptedData.rfind("80");
+                        if (index != string::npos)
+                        {
+                            decryptedData = decryptedData.substr(0, index);
+                        }
+                    }
+                    if (decryptedData.length() > encryptedItem.len && encryptedItem.len >= 0) {
+                        if (encryptedItem.len == 0 && encryptedItem.tag == "57") { //单独处理57
+                            int indexD = decryptedData.find_first_of('D');
+                            if (indexD == string::npos)
+                                return;
+                            int indexF = decryptedData.find_first_of('F', indexD);
+                            if (indexF == string::npos)
+                                return;
+                            decryptedData = decryptedData.substr(encryptedItem.startPos, indexF + 1);
+                        }
+                        else {
+                            if (encryptedItem.startPos != 0 || encryptedItem.len != 0)
+                            {
+                                decryptedData = decryptedData.substr(encryptedItem.startPos, encryptedItem.len);
+                            }                               
+                        }
+                            
+                    }
+                }
+                item.value.ReplaceItem(encryptedItem.tag, decryptedData); //将数据替换为临时解密数据
+                //char decryptedDataLen[3];
+                //Tool::GetBcdDataLen(decryptedData.c_str(), decryptedDataLen, 3);
+                //decryptedData = encryptedItem.tag + decryptedDataLen + decryptedData;
+                //item.value.ReplaceItem(encryptedItem.tag, decryptedData);
             }
         }
     }

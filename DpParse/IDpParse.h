@@ -19,6 +19,7 @@ public:
     void ReplaceKey(string oldKey, string newKey);
     void DeleteItem(string key);
     bool TagExisted(string tag);
+    void Clear();
 	vector<pair<string, string>> GetItems() { return m_vecItems; }
     string GetItem(string tag);
     string GetItem();   //返回DGI中唯一的一个tag的值，不需要考虑是那条tag
@@ -72,6 +73,7 @@ struct TagEncrypt
     string key;
     int startPos;   //表示解密后截取数据的起始位置
     int len;    //截取数据的长度
+    bool isDelete80;
 };
 
 struct TagMerge     //将old tag合并到 new tag中

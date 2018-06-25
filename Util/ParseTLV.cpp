@@ -252,7 +252,7 @@ bool IsBcdTlvStruct(char* buffer, unsigned int bufferLength)
             lenSize = 2;
             //currentIndex += lenSize;           
         }
-        if (lenSize > 4) {
+        if (lenSize > 4 || lenSize == 0) {
             return false;   //暂时不支持65535长度的TLV
         }
         char* szDataLen = new char[lenSize + 1];

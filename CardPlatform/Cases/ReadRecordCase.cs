@@ -194,7 +194,8 @@ namespace CardPlatform.Cases
             if (readRecordTags.ContainsKey("5F20"))
             {
                 var tag5F20 = readRecordTags["5F20"];
-                if(!CaseUtil.IsAlpha(tag5F20.Value))
+                string value = UtilLib.Utils.BcdToStr(tag5F20.Value);
+                if(!CaseUtil.IsAlpha(value))
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
@@ -215,7 +216,8 @@ namespace CardPlatform.Cases
             if (readRecordTags.ContainsKey("9F0B"))
             {
                 var tag9F0B = readRecordTags["9F0B"];
-                if (!CaseUtil.IsAlpha(tag9F0B.Value))
+                string value = UtilLib.Utils.BcdToStr(tag9F0B.Value);
+                if (!CaseUtil.IsAlpha(value))
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }

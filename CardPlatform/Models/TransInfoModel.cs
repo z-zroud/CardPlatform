@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight;
+﻿using CardPlatform.Config;
+using GalaSoft.MvvmLight;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,6 @@ namespace CardPlatform.Models
     {
         public TransInfoModel()
         {
-            ColorMark = new SolidColorBrush(Colors.Black);
         }
 
         private string _caseNo;
@@ -35,24 +35,15 @@ namespace CardPlatform.Models
             }
         }
 
-        private string _caseLevel;
-        public string CaseLevel
+        private TipLevel _tipLevel;
+        public TipLevel Level
         {
-            get { return _caseLevel; }
+            get { return _tipLevel; }
             set
             {
-                Set(ref _caseLevel, value);
+                Set(ref _tipLevel, value);
             }
         }
 
-        private SolidColorBrush _colorMark;
-        public SolidColorBrush ColorMark
-        {
-            get { return _colorMark; }
-            set
-            {
-                Set(ref _colorMark, value);
-            }
-        }
     }
 }

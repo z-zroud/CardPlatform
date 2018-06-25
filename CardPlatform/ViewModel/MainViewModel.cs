@@ -3,6 +3,7 @@ using GalaSoft.MvvmLight.Command;
 using System.Collections.Generic;
 using System.Windows.Input;
 using CplusplusDll;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.ViewModel
 {
@@ -33,6 +34,7 @@ namespace CardPlatform.ViewModel
             ////{
             ////    // Code runs "for real"
             ////}
+            DispatcherHelper.Initialize();
         }
 
         private List<string> _readers;
