@@ -18,6 +18,7 @@ using System.Xml;
 using System.Xml.Linq;
 using CardPlatform.Config;
 using CardPlatform.View;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.ViewModel
 {
@@ -284,18 +285,25 @@ namespace CardPlatform.ViewModel
         }
 
 
-        private async void DoParseDp()
+        private void DoParseDp()
         {
+            DpGenCpsResults.Clear();
             ICPS cps = new CPS();
-            var task = new Task<List<string>>(() => cps.GenCpsFile(Config.DpType.DllName, Config.DpType.FuncName, Config.DpFilePath, Config.DpRulePath));
-            var controller = await _dialog.ShowProgressAsync("Progress Dp File", "Progressing all the things, wait for seconds");
-            task.Start();
+            var cpsFiles = cps.GenCpsFile(Config.DpType.DllName, Config.DpType.FuncName, Config.DpFilePath, Config.DpRulePath);
+            //var task = new Task<List<string>>(() => cps.GenCpsFile(Config.DpType.DllName, Config.DpType.FuncName, Config.DpFilePath, Config.DpRulePath));
+            //ProgressDialogController controller;
+            //DispatcherHelper.CheckBeginInvokeOnUI(() => 
+            //{
+            //    controller = await _dialog.ShowProgressAsync("Progress Dp File", "Progressing all the things, wait for seconds");
+            //});
 
-            controller.SetIndeterminate();
-            task.Wait();
+            //task.Start();
 
-            await controller.CloseAsync();
-            var cpsFiles = task.Result;
+            //controller.SetIndeterminate();
+            //task.Wait();
+
+            //await controller.CloseAsync();
+            //var cpsFiles = task.Result;
 
             foreach (var cpsFile in cpsFiles)
             {
