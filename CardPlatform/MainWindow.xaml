@@ -43,6 +43,9 @@
                 <Separator Style="{StaticResource MetroStatusBarSeparator}" />
                 <StatusBarItem>选择应用:</StatusBarItem>
                 <StatusBarItem Content="{Binding ElementName=MainTabControl, Path=SelectedItem.Header, Mode=OneWay}" />
+                <Separator Style="{StaticResource MetroStatusBarSeparator}" />
+                <StatusBarItem>输出:</StatusBarItem>
+                <StatusBarItem Content="{Binding Output}" />
             </StatusBar>
         </Grid>
     </Controls:MetroContentControl>

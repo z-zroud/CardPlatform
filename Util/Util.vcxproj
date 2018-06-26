@@ -141,6 +141,7 @@
     <ClInclude Include="Des0.h" />
     <ClInclude Include="IniConfig.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="NamedPipe.h" />
     <ClInclude Include="ParseTLV.h" />
     <ClInclude Include="rapidxml\rapidxml.hpp" />
     <ClInclude Include="rapidxml\rapidxml_iterators.hpp" />
@@ -156,6 +157,7 @@
   <ItemGroup>
     <ClCompile Include="IniConfig.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="NamedPipe.cpp" />
     <ClCompile Include="ParseTLV.cpp" />
     <ClCompile Include="SHA1.cpp" />
     <ClCompile Include="SockServer.cpp" />

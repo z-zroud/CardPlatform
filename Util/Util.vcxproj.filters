@@ -63,6 +63,9 @@
     <ClInclude Include="SM.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NamedPipe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -84,6 +87,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SHA1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NamedPipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

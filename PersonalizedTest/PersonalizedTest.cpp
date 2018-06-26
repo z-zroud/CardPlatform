@@ -47,13 +47,13 @@ int main()
 	{
 		printf("%s\n", readers[i]);
 	}
-    string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";  
-    string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "格尔";
-    string dpPath = dpDir + dpFormat + "\\6251407433375375.txt";
+    string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
+    string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
+    string dpFormat = "ohter";
+    string dpPath = dpDir + dpFormat + "\\EXPORT_0000003396_20160607104529.dat";
     rulePath += "中行泰国分行_格尔_英飞凌_05006081.xml";
     string installParamCfg = "JR1792_鞍山银行_华大_G81140034.xml";
-    GenCpsFile("DpParse_GEER.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    GenCpsFile("DpParse_AC.dll", "HandleDp", dpPath.c_str(), NULL);
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);

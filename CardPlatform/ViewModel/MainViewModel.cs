@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using CplusplusDll;
 using GalaSoft.MvvmLight.Threading;
+using UtilLib;
 
 namespace CardPlatform.ViewModel
 {
@@ -35,6 +36,23 @@ namespace CardPlatform.ViewModel
             ////    // Code runs "for real"
             ////}
             DispatcherHelper.Initialize();
+            var logServer = new NamedPipeServer(@"\\.\pipe\LogNamedPipe", 0);
+            logServer.Start(OutputLog);
+        }
+
+        private void OutputLog(string message)
+        {
+            Output = message;
+        }
+
+        private string _output;
+        public string Output
+        {
+            get { return _output; }
+            set
+            {
+                Set(ref _output, value);
+            }
         }
 
         private List<string> _readers;

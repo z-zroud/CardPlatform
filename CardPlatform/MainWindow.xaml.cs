@@ -20,10 +20,7 @@ namespace CardPlatform
     /// </summary>
     public partial class MainWindow
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        public MainWindow() => InitializeComponent();
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -33,10 +30,10 @@ namespace CardPlatform
             this.ResizeMode = ResizeMode.CanResize;
             //this.Topmost = true;
 
-            this.Left = 50;
-            this.Top = 50;
+            this.Left = 20;
+            this.Top = 20;
             this.Width = SystemParameters.PrimaryScreenWidth - 100;
-            this.Height = SystemParameters.PrimaryScreenHeight - 100;
+            this.Height = SystemParameters.PrimaryScreenHeight - 50;
         }
     }
 }

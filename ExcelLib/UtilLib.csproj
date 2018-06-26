@@ -51,6 +51,7 @@
     <Compile Include="ExcelOp.cs" />
     <Compile Include="IExcelOp.cs" />
     <Compile Include="ISerialize.cs" />
+    <Compile Include="NamedPipeServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="XmlSerialize.cs" />

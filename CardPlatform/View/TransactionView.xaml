@@ -16,7 +16,7 @@
     </UserControl.Resources>
     <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
-            <RowDefinition MinHeight="100"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -149,7 +149,7 @@
         </StackPanel>
         <GridSplitter  Grid.ColumnSpan="4" Grid.Row="0" Height="2" VerticalAlignment="Bottom" Background="BurlyWood"  HorizontalAlignment="Stretch"/>
         <!--This is the hidden helper Grid which does the resizing -->
-        <Grid Visibility="Hidden" Grid.ColumnSpan="4" Margin="10,0,10,0">
+        <Grid Visibility="Hidden" Grid.ColumnSpan="4" Margin="10,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>

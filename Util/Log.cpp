@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Log.h"
 #include <time.h>
+#include "../Util/NamedPipe.h"
 
 #define LOG_INFO		"Info"
 #define LOG_DEBUG		"Debug"
@@ -148,6 +149,20 @@ void SimpleLog::WriteLog(char* szLogHeader, char* szFormatString)
 	{
 		printf(szMessage);
 	}
+
+    if (m_outputType & OUT_NAMED_PIPE)
+    {
+        static bool hasOpen = false;
+        NamedPipe* pipe = new NamedPipe();
+        
+        if (!hasOpen)
+        {
+            hasOpen = pipe->Open("LogNamedPipe", PIPE_MODE::PIPE_WRITE);
+        }
+            
+        if(hasOpen)
+            pipe->SendPipeMessage(szMessage);
+    }
 
     if(string(szLogHeader) == LOG_INFO)     m_vecInfoLog.push_back(szMessage);
     if (string(szLogHeader) == LOG_WARNING) m_vecWarningLog.push_back(szMessage);
