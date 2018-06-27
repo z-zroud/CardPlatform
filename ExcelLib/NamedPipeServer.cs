@@ -38,7 +38,7 @@ namespace UtilLib
             public FileStream stream;
         }
 
-        public const int BUFFER_SIZE = 100;
+        public const int BUFFER_SIZE = 256;
         public Client clientse = null;
 
         public string pipeName;
@@ -127,7 +127,7 @@ namespace UtilLib
                 int ReadLength = 0;
                 for (int i = 0; i < BUFFER_SIZE; i++)
                 {
-                    if (buffer[i].ToString("x2") != "cc")
+                    if (buffer[i] != '\n')
                     {
                         ReadLength++;
                     }

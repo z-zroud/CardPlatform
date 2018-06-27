@@ -153,15 +153,16 @@ void SimpleLog::WriteLog(char* szLogHeader, char* szFormatString)
     if (m_outputType & OUT_NAMED_PIPE)
     {
         static bool hasOpen = false;
-        NamedPipe* pipe = new NamedPipe();
+        static NamedPipe* pipe = NULL;
         
         if (!hasOpen)
         {
-            hasOpen = pipe->Open("LogNamedPipe", PIPE_MODE::PIPE_WRITE);
+            pipe = new NamedPipe();
+            hasOpen = pipe->Open("LogOutputNamedPipe", PIPE_MODE::PIPE_WRITE);
         }
             
-        if(hasOpen)
-            pipe->SendPipeMessage(szMessage);
+        if(hasOpen && pipe)
+            pipe->SendPipeMessage(szMessage,strlen(szMessage));
     }
 
     if(string(szLogHeader) == LOG_INFO)     m_vecInfoLog.push_back(szMessage);

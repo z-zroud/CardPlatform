@@ -36,13 +36,18 @@ namespace CardPlatform.ViewModel
             ////    // Code runs "for real"
             ////}
             DispatcherHelper.Initialize();
-            var logServer = new NamedPipeServer(@"\\.\pipe\LogNamedPipe", 0);
+            var logServer = new NamedPipeServer(@"\\.\pipe\LogOutputNamedPipe", 0);
             logServer.Start(OutputLog);
         }
 
         private void OutputLog(string message)
         {
-            Output = message;
+            DispatcherHelper.CheckBeginInvokeOnUI(() => 
+            {
+                message.Replace('\n', ' ');
+
+                Output = message;
+            });
         }
 
         private string _output;
