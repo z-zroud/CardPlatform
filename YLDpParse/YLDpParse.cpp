@@ -15,7 +15,7 @@ YLDpParser::YLDpParser()
 }
 
 
-int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
+int YLDpParser::ParsePSE(ifstream &dpFile, DGI &dgiItem)
 {
 	if (0x86 != (unsigned char)ReadDGIStartTag(dpFile)) {
 		return 1;
@@ -31,7 +31,7 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
 		{
             string value;
             GetBCDBuffer(dpFile, value, nFollowedDataLen);
-			dgiItem.value.InsertItem(dgiItem.dgi, value);
+			dgiItem.value.AddItem(dgiItem.dgi, value);
 		}
 	}
 	else {
@@ -43,7 +43,7 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
             Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
             string tag = "0101";
             value = tag + string(dataLen) + value;
-            dgiItem.value.InsertItem(tag, value);
+            dgiItem.value.AddItem(tag, value);
         }
         else if (dgiItem.dgi == "Store_PSE_2") {
             dgiItem.dgi = "PSE";
@@ -55,7 +55,7 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
             Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
             string tag = "9102";
             value = tag + dataLen + value;
-            dgiItem.value.InsertItem(tag, value);
+            dgiItem.value.AddItem(tag, value);
         }
         else {
             dgiItem.dgi = "PPSE";
@@ -68,7 +68,7 @@ int YLDpParser::ParsePSE(ifstream &dpFile, DGI_ITEM &dgiItem)
             Tool::GetBcdDataLen(value.c_str(), dataLen, 3);
             string tag = "9102";
             value = tag + dataLen + value;
-            dgiItem.value.InsertItem(tag, value);
+            dgiItem.value.AddItem(tag, value);
         }
 	}
 
@@ -91,7 +91,7 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile, char** cpsF
 	dpFile.seekg(m_reserved);
 	ReadDGIName(dpFile);		//第一步： 读取DGI分组
 
-	vector<CPS_ITEM> vecCpsItem;
+	vector<CPS> vecCpsItem;
     int cpsCount = 0;
 	while (dpFile.tellg() < dpFileSize)		//遍历后续数据，每一次遍历解析一个卡片数据
 	{
@@ -99,15 +99,15 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile, char** cpsF
 		GetBCDBufferLittleEnd(dpFile, cardSeq, 4);	//读取卡片序列号		
 		int oneCardDataLen = GetOneCardDpDataLen(dpFile); //读取该卡片个人化数据内容总长度
 		
-		CPS_ITEM cpsItem;
+		CPS cpsItem;
 		for (unsigned int i = 0; i < m_vecDGI.size(); i++)	//解析每张卡片数据
 		{   
-			DGI_ITEM dgiItem;
+            DGI dgiItem;
 			dgiItem.dgi = m_vecDGI[i];			
 			if (dgiItem.dgi == "DGIF001" || dgiItem.dgi.substr(0, 3) != "DGI")	//对于DGIF001和PSE/PPSE数据，需要特殊处理
 			{
 				ParsePSE(dpFile, dgiItem);
-				cpsItem.items.push_back(dgiItem);
+				cpsItem.dgis.push_back(dgiItem);
 				continue;
 			}
 		
@@ -150,9 +150,9 @@ bool YLDpParser::HandleDp(const char* fileName,const char* ruleFile, char** cpsF
 			}else{  
 				char szTag[5] = { 0 };
 				sprintf_s(szTag, "%X", sDgi);
-				dgiItem.value.InsertItem(szTag, buffer);
+				dgiItem.value.AddItem(szTag, buffer);
 			}			
-			cpsItem.items.push_back(dgiItem);			
+			cpsItem.dgis.push_back(dgiItem);
 		}
 
         //解析完成之后，调用规则

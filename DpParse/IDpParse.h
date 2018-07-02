@@ -6,23 +6,58 @@
 using namespace std;
 
 /****************************************************************
-* 由于涉及到插入元素的顺序关系，不能用标准的字典容器
+* 由于涉及到插入元素的顺序关系，不能用标准的字典容器。此Dict主要用于
+* DP分组中，存储每个DGI分组的tag=value集合，并进行操作。
 *****************************************************************/
 class Dict
 {
 public:
-	void InsertItem(string key, string value)
-	{
-		m_vecItems.push_back(pair<string, string>(key, value));
-	}
-    void ReplaceItem(string key, string value);
+    /***************************************************************
+    * 向字典容器中添加元素
+    ****************************************************************/
+	void AddItem(string key, string value){ m_vecItems.push_back(pair<string, string>(key, value)); }
+
+    /***************************************************************
+    *替换key所指定的值value
+    ****************************************************************/
+    void ReplaceValue(string existedKey, string value);
+
+    /***************************************************************
+    *更新key
+    ****************************************************************/
     void ReplaceKey(string oldKey, string newKey);
+
+    /***************************************************************
+    * 删除key指定的元素
+    ****************************************************************/
     void DeleteItem(string key);
-    bool TagExisted(string tag);
+
+    /***************************************************************
+    *判断key是否存在
+    ****************************************************************/
+    bool IsExisted(string key);
+
+    /***************************************************************
+    * 清空字典中的元素
+    ****************************************************************/
     void Clear();
+
+    /***************************************************************
+    *获取所有元素
+    ****************************************************************/
 	vector<pair<string, string>> GetItems() { return m_vecItems; }
-    string GetItem(string tag);
-    string GetItem();   //返回DGI中唯一的一个tag的值，不需要考虑是那条tag
+
+    /***************************************************************
+    *获取key指定的元素
+    ****************************************************************/
+    string GetItem(string key);
+
+    /***************************************************************
+    *若集合中只包含一条记录，则无需知道具体的key,可直接获取该key下的值
+    *特殊情况下，我们没办法知道key的前提下，请使用这个方法
+    ****************************************************************/
+    string GetItem();
+
 private:
 	vector<pair<string, string>> m_vecItems;
 };
@@ -30,22 +65,22 @@ private:
 /***************************************************************
 * 定义每个DGI分组格式
 ***************************************************************/
-struct DGI_ITEM
+struct DGI
 {
 	string dgi;
 	Dict value;
 };
 
-
 /**************************************************************
-* 定义标准CPS格式
+* 定义标准CPS格式,任何需要生成CPS标准文件的DP数据都需要转换为此
+* 结构体形式
 ***************************************************************/
-struct CPS_ITEM
+struct CPS
 {
-	string fileName;
-    string aid;
-	vector<DGI_ITEM> items;
-    void AddDgiItem(DGI_ITEM item);
+	string fileName;    //CPS文件名称
+    string aid;         //AID 借记 or 贷记
+	vector<DGI> dgis;    //DGI分组集合
+    void AddDGI(DGI item);
 };
 
 bool  CheckFolderExist(const string &strPath);
@@ -54,9 +89,7 @@ string DeleteSpace(string s);
 
 
 
-/************************************************************
-//定义DGI转换的基本规则，DP解析库调用该接口实现DGI的转换
-*************************************************************/
+
 
 struct DGIEncrypt
 {
@@ -74,6 +107,7 @@ struct TagEncrypt
     int startPos;   //表示解密后截取数据的起始位置
     int len;    //截取数据的长度
     bool isDelete80;
+    bool isWholeDecrypted;
 };
 
 struct TagMerge     //将old tag合并到 new tag中
@@ -132,27 +166,29 @@ struct AddKCV
     string keyType;
 };
 
-
+/************************************************************
+//定义DGI转换的基本规则，DP解析库调用该接口实现DGI的转换
+*************************************************************/
 class IRule
 {
 public:
 	virtual bool SetRuleCfg(const char* szRuleConfig);
-	virtual void HandleRule(CPS_ITEM& cpsItem);
+	virtual void HandleRule(CPS& cps);
 protected:
-	void HandleDGIMap(CPS_ITEM& cpsItem);           //处理DGI映射关系
-	void HandleDGIExchange(CPS_ITEM& cpsItem);      //处理DGI交换关系
-	void HandleDGIDecrypt(CPS_ITEM& cpsItem);       //处理DGI解密
-    void HandleTagDecrypt(CPS_ITEM& cpsItem);       //处理TAG解密
-    void HandleDGIDelete(CPS_ITEM& cpsItem);        //处理删除DGI
-    void HandleTagsMerge(CPS_ITEM& cpsItem);         //将多个tag合并
-    void HandleDGIAddTag(CPS_ITEM& cpsItem);        //处理DGI添加Tag
-    void HandleDGIAddFixedTag(CPS_ITEM& cpsItem);   //处理DGI添加固定值的Tag
-	void HandleTagDelete(CPS_ITEM& cpsItem);        //处理删除DGI某个tag
-    void HandleTagInsertValue(CPS_ITEM& cpsItem);   //处理Tag添加值的问题
-    void AddKcv(CPS_ITEM& cpsItem);                 //增加KCV
-    void AddTagToValue(CPS_ITEM& cpsItem);      //将tag及template到数据部分
-    void SpliteEF02(CPS_ITEM& cpsItem);             //解析EFO2 神舟数码专用 存储8201,8202...IC卡私钥
-    void AddPseAndPPSE(CPS_ITEM& cpsItem);      //增加PSE和PPSE DGI
+	void HandleDGIMap(CPS& cps);           //处理DGI映射关系
+	void HandleDGIExchange(CPS& cps);      //处理DGI交换关系
+	void HandleDGIDecrypt(CPS& cps);       //处理DGI解密
+    void HandleTagDecrypt(CPS& cps);       //处理TAG解密
+    void HandleDGIDelete(CPS& cps);        //处理删除DGI
+    void HandleTagMergeTagFromOtherTag(CPS& cps);         //将多个tag合并
+    void HandleDGIAddTagFromOtherDGI(CPS& cps);        //处理DGI添加Tag
+    void HandleDGIAddFixedTagValue(CPS& cps);   //处理DGI添加固定值的Tag
+	void HandleTagDelete(CPS& cps);        //处理删除DGI某个tag
+    void HandleTagInsertValue(CPS& cps);   //处理Tag添加值的问题
+    void AddKcv(CPS& cps);                 //增加KCV
+    void AddTagPrefix(CPS& cps);      //添加tag及长度到key=value 中的value部分
+    void SpliteEF02(CPS& cps);             //解析EFO2 神舟数码专用 存储8201,8202...IC卡私钥
+    void AddPseAndPPSE(CPS& cps);      //增加PSE和PPSE DGI
 
     /***************************************************************
     * 对DP分组数据进行解密
@@ -224,18 +260,18 @@ struct IDpParse
 	/***************************************************************
 	* 处理DP文件生成CPS规则
 	****************************************************************/
-	virtual void HandleRule(const char* szRuleConfig, CPS_ITEM& cpsItem);
+	virtual void HandleRule(const char* szRuleConfig, CPS& cpsItem);
 
     /***************************************************************
     * 从cpsItem中提取account作为文件名称
     ****************************************************************/
-    virtual string GetAccount(CPS_ITEM& cpsItem);
+    virtual string GetAccount(CPS& cpsItem);
     virtual string GetAccount2(string magstripData);
 
 	/***************************************************************
 	* 保存CPS数据到本地文件，该文件默认为DP数据的下级目录文件
 	****************************************************************/
-	virtual void Save(CPS_ITEM cpsItem);
+	virtual void Save(CPS cpsItem);
 
 
 

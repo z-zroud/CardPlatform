@@ -73,7 +73,7 @@ bool DXTDpParse::HandleDp(const char* szFileName, const char* szRuleFile, char**
         GetBCDBuffer(dpFile, appNum, 1);
         int nAppNum = stoi(appNum);
 
-        CPS_ITEM cpsItem;
+        CPS cpsItem;
         i.append("1");
         cpsItem.fileName = "F:\\CardPlatform\\bin\\huaxin3" + i + ".txt";
         for (int j = 0; j < nAppNum; j++)
@@ -108,7 +108,7 @@ bool DXTDpParse::HandleDp(const char* szFileName, const char* szRuleFile, char**
             vector<pair<string, string>> dgis;
             int i = 0;
 
-            DGI_ITEM item;
+            DGI item;
             item.dgi = aid;
             while (i < nICDataLen)
             {
@@ -134,11 +134,11 @@ bool DXTDpParse::HandleDp(const char* szFileName, const char* szRuleFile, char**
                         break;
                     }
                 }
-                item.value.InsertItem(dgi, dgiValue);
+                item.value.AddItem(dgi, dgiValue);
                 i += 4 + nDgiLen;
             }
 
-            cpsItem.items.push_back(item);
+            cpsItem.dgis.push_back(item);
             string dataMacLen;
             GetBCDBuffer(dpFile, dataMacLen, 1);
             string dataMac;

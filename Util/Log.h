@@ -29,7 +29,7 @@ enum LOG_LEVEL
 class SimpleLog
 {
 public:
-	static SimpleLog* GetInstance(LOG_LEVEL level = LEVEL_DEBUG, int outputType = OUT_NAMED_PIPE | OUT_FILE);
+	static SimpleLog* GetInstance(LOG_LEVEL level = LEVEL_DEBUG, int outputType = OUT_CONSOLE | OUT_NAMED_PIPE | OUT_FILE);
 	void SetLogLevel(LOG_LEVEL level);
 	void SetLogOutputType(int outputType);
 	void Info(char* szFormatString, ...);

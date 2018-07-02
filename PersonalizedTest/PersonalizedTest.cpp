@@ -53,7 +53,7 @@ int main()
     string dpPath = dpDir + dpFormat + "\\高青汇金村镇银行.dp";
     rulePath += "高青汇金村镇银行_华腾_华大_G81140034.xml";
     string installParamCfg = "高青汇金_华大_G81140034.xml";
-    //GenCpsFile("DpParse_HT.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    GenCpsFile("DpParse_HT.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);

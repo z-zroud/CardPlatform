@@ -18,7 +18,7 @@ protected:
     string GetDpMark(ifstream& dpFile);
     string GetDGIStartMark(ifstream& dpFile);
     int GetDGIDataLen(ifstream& dpFile, string &dgiName);
-    void ParsePSE(ifstream& dpFile, CPS_ITEM& cpsItem, string dgiName);
+    void ParsePSE(ifstream& dpFile, CPS& cpsItem, string dgiName);
 private:
 	vector<string>              m_vecDGI;
 	string						m_currentAccount;

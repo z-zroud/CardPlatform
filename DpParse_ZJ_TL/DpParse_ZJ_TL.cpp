@@ -22,7 +22,7 @@ string ZJTLDpParse::GetDpMark(ifstream& dpFile)
     return mic;
 }
 
-void ZJTLDpParse::ParsePSE(ifstream& dpFile, CPS_ITEM& cpsItem, string dgiName)
+void ZJTLDpParse::ParsePSE(ifstream& dpFile, CPS& cpsItem, string dgiName)
 {
     if ("86" != GetDGIStartMark(dpFile)) {
         return ;
@@ -32,7 +32,7 @@ void ZJTLDpParse::ParsePSE(ifstream& dpFile, CPS_ITEM& cpsItem, string dgiName)
     if (dgiLen == 0x81) {	//DGI数据为2字节
         GetLenTypeBuffer(dpFile, dgiLen, 2);
     }
-    DGI_ITEM dgiItem;
+    DGI dgiItem;
     string value;
     GetBCDBuffer(dpFile, value, dgiLen);
     string tag;
@@ -49,9 +49,9 @@ void ZJTLDpParse::ParsePSE(ifstream& dpFile, CPS_ITEM& cpsItem, string dgiName)
         value = "9102" + string(dataLen) + value.substr(42);
     }
     
-    dgiItem.value.InsertItem(tag, value);
+    dgiItem.value.AddItem(tag, value);
     //cpsItem.items.push_back(dgiItem);
-    cpsItem.AddDgiItem(dgiItem);
+    cpsItem.AddDGI(dgiItem);
 }
 
 string ZJTLDpParse::GetDGIStartMark(ifstream& dpFile)
@@ -151,10 +151,10 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile, char** cp
 		int oneCardDataLen;
 		GetLenTypeBuffer(dpFile, oneCardDataLen, 2); //读取该卡片个人化数据内容总长度
 
-		CPS_ITEM cpsItem;
+		CPS cpsItem;
 		for (unsigned int i = 0; i < m_vecDGI.size(); i++)	//解析每张卡片数据
 		{
-			DGI_ITEM dgiItem;
+            DGI dgiItem;
 			dgiItem.dgi = m_vecDGI[i];
 			if (dgiItem.dgi.substr(0, 3) == "PSE" ||
                 dgiItem.dgi.substr(0,4) == "PPSE")	//对于DGIF001和PSE/PPSE数据，需要特殊处理
@@ -178,9 +178,9 @@ bool ZJTLDpParse::HandleDp(const char* fileName, const char* ruleFile, char** cp
 			}
 			else {	
 
-				dgiItem.value.InsertItem(dgiItem.dgi, buffer);
+				dgiItem.value.AddItem(dgiItem.dgi, buffer);
 			}
-			cpsItem.items.push_back(dgiItem);
+			cpsItem.dgis.push_back(dgiItem);
 		}
 		//int pos = string(fileName).find_last_of('\\');
 		//string path = string(fileName).substr(0, pos + 1);

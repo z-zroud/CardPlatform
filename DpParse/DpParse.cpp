@@ -84,9 +84,9 @@ string DeleteSpace(string s)
 	return strResult;
 }
 
-bool ExistedInDGIs(string dgi, CPS_ITEM& cpsItem)
+bool ExistedInDGIs(string dgi, CPS& cpsItem)
 {
-    for (auto item : cpsItem.items)
+    for (auto item : cpsItem.dgis)
     {
         if (item.dgi == dgi)
             return true;
@@ -110,7 +110,7 @@ void Dict::Clear()
     m_vecItems.clear();
 }
 
-bool Dict::TagExisted(string tag)
+bool Dict::IsExisted(string tag)
 {
     for (auto item : m_vecItems) {
         if (item.first == tag) {
@@ -140,7 +140,7 @@ string Dict::GetItem()
     return "";
 }
 
-void Dict::ReplaceItem(string key, string value)
+void Dict::ReplaceValue(string key, string value)
 {
     for (auto& item : m_vecItems) {
         if (item.first == key) {
@@ -173,27 +173,27 @@ void Dict::DeleteItem(string key)
 /*************************************************************
 * 功能：将DGI item添加到容器中，若item所在DGI存在，则合并。
 **************************************************************/
-void CPS_ITEM::AddDgiItem(DGI_ITEM item)
+void CPS::AddDGI(DGI item)
 {
     bool hasDgiExisted = false;
-    for (auto &dgiItem : items) {
+    for (auto &dgiItem : dgis) {
         if (dgiItem.dgi == item.dgi) //说明有重复项，将该item下的所有tag合并到原DGI中
         {
             auto mergedItems = item.value.GetItems();
             for (auto mergedItem : mergedItems)
             {
-                dgiItem.value.InsertItem(mergedItem.first, mergedItem.second);
+                dgiItem.value.AddItem(mergedItem.first, mergedItem.second);
             }
             hasDgiExisted = true;
             break;
         }
     }
     if (!hasDgiExisted)
-        items.push_back(item);
+        dgis.push_back(item);
 }
 
 
-bool GreaterSort(DGI_ITEM item1, DGI_ITEM item2) 
+bool GreaterSort(DGI item1, DGI item2)
 {
     string compare1 = item1.dgi;
     string compare2 = item2.dgi;
@@ -231,7 +231,7 @@ bool GreaterSort(DGI_ITEM item1, DGI_ITEM item2)
 /*****************************************************
 * 保存CPS数据
 ******************************************************/
-void IDpParse::Save(CPS_ITEM cpsItem)
+void IDpParse::Save(CPS cpsItem)
 {
 	int pos = cpsItem.fileName.find_last_of('\\');
 	string folder = cpsItem.fileName.substr(0, pos);
@@ -244,8 +244,8 @@ void IDpParse::Save(CPS_ITEM cpsItem)
 		return;
     string privousDGI = "";
 
-    sort(cpsItem.items.begin(), cpsItem.items.end(), GreaterSort);
-	for (auto iter : cpsItem.items)
+    sort(cpsItem.dgis.begin(), cpsItem.dgis.end(), GreaterSort);
+	for (auto iter : cpsItem.dgis)
 	{
         if (iter.dgi != privousDGI) {
             outputFile << "[" << iter.dgi << "]" << endl;
@@ -383,7 +383,7 @@ void IDpParse::ParseTLV(char* dgiBuffer, unsigned int bufferLen, Dict& tlvs, boo
         }
         
         strValue = strTag + strLen + strValue;
-        tlvs.InsertItem(strTag, strValue);
+        tlvs.AddItem(strTag, strValue);
     }
 }
 
@@ -392,9 +392,9 @@ string IDpParse::GetAccount2(string magstripData)
     return "";
 }
 
-string IDpParse::GetAccount(CPS_ITEM& cpsItem)
+string IDpParse::GetAccount(CPS& cpsItem)
 {
-    for (auto item : cpsItem.items) {
+    for (auto item : cpsItem.dgis) {
         string tag57 = item.value.GetItem("57");
         if (tag57.length()) {
             int index = tag57.find('D');
@@ -412,7 +412,7 @@ bool IDpParse::IsTlvStruct(char* buffer, unsigned int bufferLength, bool littleE
     return IsBcdTlvStruct(buffer, bufferLength);
 }
 
-void IDpParse::HandleRule(const char* szRuleConfig, CPS_ITEM& cpsItem)
+void IDpParse::HandleRule(const char* szRuleConfig, CPS& cpsItem)
 {
     IRule ruleObj;
 	if(ruleObj.SetRuleCfg(szRuleConfig))
@@ -483,11 +483,17 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
                 encryptTag.key = node->first_attribute("key")->value();
             }
             
-            if (node->first_attribute("delete80") == NULL) {
+            if (node->first_attribute("delete80") == NULL || node->first_attribute("delete80")->value() == "false") {
                 encryptTag.isDelete80 = false;
             }
             else {
                 encryptTag.isDelete80 = true;
+            }
+            if (node->first_attribute("isWholeDecrypted") == NULL || node->first_attribute("isWholeDecrypted")->value() == "false") {
+                encryptTag.isWholeDecrypted = false;
+            }
+            else {
+                encryptTag.isWholeDecrypted = true;
             }
             if (node->first_attribute("startPos") == NULL) {
                 encryptTag.startPos = 0;
@@ -573,7 +579,7 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
     return true;
 }
 
-void IRule::HandleRule(CPS_ITEM& cpsItem)
+void IRule::HandleRule(CPS& cpsItem)
 {
     //处理原则
     //1. 调整DGI、tag
@@ -585,16 +591,22 @@ void IRule::HandleRule(CPS_ITEM& cpsItem)
 
     HandleDGIMap(cpsItem);
     HandleDGIExchange(cpsItem);   
-    HandleDGIAddTag(cpsItem);
-    HandleTagsMerge(cpsItem);
-    HandleDGIAddFixedTag(cpsItem);
-    SpliteEF02(cpsItem);
+
+
+
+    HandleDGIAddTagFromOtherDGI(cpsItem);
+    HandleTagMergeTagFromOtherTag(cpsItem);
 
     HandleDGIDecrypt(cpsItem);
     HandleTagDecrypt(cpsItem);
-    HandleTagInsertValue(cpsItem);
+
+    HandleDGIAddFixedTagValue(cpsItem);
+    SpliteEF02(cpsItem);
+
+
+    //HandleTagInsertValue(cpsItem);
     AddKcv(cpsItem);
-    AddTagToValue(cpsItem);
+    AddTagPrefix(cpsItem);
      
     HandleDGIDelete(cpsItem);
     HandleTagDelete(cpsItem);
@@ -619,12 +631,12 @@ string GetTLVData(string tag, string value)
     return tag + len + value;
 }
 
-void IRule::AddPseAndPPSE(CPS_ITEM& cpsItem)
+void IRule::AddPseAndPPSE(CPS& cpsItem)
 {
     if (m_addPse)
     {
         string dgi9102;
-        for (auto item : cpsItem.items)
+        for (auto item : cpsItem.dgis)
         {
             if (item.dgi == "9102") {
                 dgi9102 = item.value.GetItem();
@@ -661,26 +673,29 @@ void IRule::AddPseAndPPSE(CPS_ITEM& cpsItem)
         string ppseA5 = GetTLVData("BF0C", ppseBF0CTemplate);
         string ppse9102 = GetTLVData("A5", ppseA5);
 
-        DGI_ITEM dgiPSE;
+        DGI dgiPSE;
         dgiPSE.dgi = "PSE";
-        dgiPSE.value.InsertItem("0101", dgi0101);
-        dgiPSE.value.InsertItem("9102", dgi9102);
+        dgiPSE.value.AddItem("0101", dgi0101);
+        dgiPSE.value.AddItem("9102", dgi9102);
 
-        DGI_ITEM dgiPPSE;
+        DGI dgiPPSE;
         dgiPPSE.dgi = "PPSE";
-        dgiPPSE.value.InsertItem("9102", ppse9102);
+        dgiPPSE.value.AddItem("9102", ppse9102);
 
 
-        cpsItem.AddDgiItem(dgiPSE);
-        cpsItem.AddDgiItem(dgiPPSE);
+        cpsItem.AddDGI(dgiPSE);
+        cpsItem.AddDGI(dgiPPSE);
     }   
 }
 
-void IRule::AddTagToValue(CPS_ITEM& cpsItem)
+/****************************************************************
+* 
+*****************************************************************/
+void IRule::AddTagPrefix(CPS& cpsItem)
 {
     for (auto& dgi : m_vecAddTagAndTemplate)
     {
-        for (auto& dgiItem : cpsItem.items)
+        for (auto& dgiItem : cpsItem.dgis)
         {
             if (dgi == dgiItem.dgi) {
                 vector<pair<string, string>> tls = dgiItem.value.GetItems();                
@@ -695,24 +710,24 @@ void IRule::AddTagToValue(CPS_ITEM& cpsItem)
                     else {
                         newValue = item.first + bcdLen + item.second;
                     }
-                    dgiItem.value.ReplaceItem(item.first, newValue);
+                    dgiItem.value.ReplaceValue(item.first, newValue);
                 }
             }
         }
     }
 }
 
-void IRule::SpliteEF02(CPS_ITEM& cpsItem)
+void IRule::SpliteEF02(CPS& cpsItem)
 {
     if (m_hasEF02)
     {
-        DGI_ITEM item8201, item8202, item8203, item8204, item8205;
+        DGI item8201, item8202, item8203, item8204, item8205;
         item8201.dgi = "8201";
         item8202.dgi = "8202";
         item8203.dgi = "8203";
         item8204.dgi = "8204";
         item8205.dgi = "8205";
-        for (auto& dgiItem : cpsItem.items)
+        for (auto& dgiItem : cpsItem.dgis)
         {
             if (dgiItem.dgi == "01")
             {
@@ -730,11 +745,11 @@ void IRule::SpliteEF02(CPS_ITEM& cpsItem)
                     int iLen = 2 * stoi(ascStr, 0, 10);                  
                     string value = EF02.substr(index + len, iLen);
                     index += iLen + len;
-                    if (i == 3) { item8205.value.InsertItem(item8205.dgi, value); cpsItem.AddDgiItem(item8205); }
-                    if (i == 4) { item8204.value.InsertItem(item8204.dgi, value); cpsItem.AddDgiItem(item8204); }
-                    if (i == 5) { item8203.value.InsertItem(item8203.dgi, value); cpsItem.AddDgiItem(item8203); }
-                    if (i == 6) { item8202.value.InsertItem(item8202.dgi, value); cpsItem.AddDgiItem(item8202); }
-                    if (i == 7) { item8201.value.InsertItem(item8201.dgi, value); cpsItem.AddDgiItem(item8201); }
+                    if (i == 3) { item8205.value.AddItem(item8205.dgi, value); cpsItem.AddDGI(item8205); }
+                    if (i == 4) { item8204.value.AddItem(item8204.dgi, value); cpsItem.AddDGI(item8204); }
+                    if (i == 5) { item8203.value.AddItem(item8203.dgi, value); cpsItem.AddDGI(item8203); }
+                    if (i == 6) { item8202.value.AddItem(item8202.dgi, value); cpsItem.AddDGI(item8202); }
+                    if (i == 7) { item8201.value.AddItem(item8201.dgi, value); cpsItem.AddDGI(item8201); }
                 }
                 break;  //避免多余的循环
             }
@@ -742,12 +757,12 @@ void IRule::SpliteEF02(CPS_ITEM& cpsItem)
     }
 }
 
-void IRule::AddKcv(CPS_ITEM& cpsItem)
+void IRule::AddKcv(CPS& cpsItem)
 {
     for (auto item : m_vecAddKcv)
     {
         string keys;
-        for (auto& dgiItem : cpsItem.items)
+        for (auto& dgiItem : cpsItem.dgis)
         {
             if (dgiItem.dgi == item.dstDgi) {
                 keys = dgiItem.value.GetItem(dgiItem.dgi);
@@ -769,21 +784,23 @@ void IRule::AddKcv(CPS_ITEM& cpsItem)
             }
             kcv += singleKcv;
         }
-        DGI_ITEM newDgiItem;
+        DGI newDgiItem;
         newDgiItem.dgi = item.srcDgi;
-        newDgiItem.value.InsertItem(item.srcDgi, kcv);
-        cpsItem.AddDgiItem(newDgiItem);
+        newDgiItem.value.AddItem(item.srcDgi, kcv);
+        cpsItem.AddDGI(newDgiItem);
     }
 }
 
 /****************************************************************
-* 功能：更换DGI分组，例如将DGI8020映射为DGI9307
+* 功能：更换DGI分组，例如将DGI8020映射为DGI9307,也就是将DGI更换下
+* DGI号，注意，新的DGI号必须是CPS中没有的，否则会造成CPS中存在两个
+* 相同的DGI分组
 *****************************************************************/
-void IRule::HandleDGIMap(CPS_ITEM& cpsItem)
+void IRule::HandleDGIMap(CPS& cpsItem)
 {
 	for (auto item : m_vecDGIMap)
 	{
-		for (auto& dgiItem : cpsItem.items)
+		for (auto& dgiItem : cpsItem.dgis)
 		{
 			if (item.srcDgi == dgiItem.dgi)
 			{
@@ -796,35 +813,43 @@ void IRule::HandleDGIMap(CPS_ITEM& cpsItem)
 }
 
 /**************************************************************
-* 功能：交换DGI分组的值
+* 功能：交换DGI分组的值，两个DGI分组必须是已经存在于CPS中。
 ***************************************************************/
-void IRule::HandleDGIExchange(CPS_ITEM& cpsItem)
+void IRule::HandleDGIExchange(CPS& cpsItem)
 {
 	for (auto item : m_vecDGIExchange)
 	{
 		int firstIndex = 0;
 		int secondIndex = 0;
-		while (item.srcDgi != cpsItem.items[firstIndex].dgi)
+		while (item.srcDgi != cpsItem.dgis[firstIndex].dgi)
 			firstIndex++;
-		while (item.exchangedDgi != cpsItem.items[secondIndex].dgi)
+		while (item.exchangedDgi != cpsItem.dgis[secondIndex].dgi)
 			secondIndex++;
-        cpsItem.items[firstIndex].dgi = item.exchangedDgi;
-        cpsItem.items[firstIndex].value.ReplaceKey(item.srcDgi, item.exchangedDgi);
-        cpsItem.items[secondIndex].dgi = item.srcDgi;
-        cpsItem.items[secondIndex].value.ReplaceKey(item.exchangedDgi, item.srcDgi);
+        cpsItem.dgis[firstIndex].dgi = item.exchangedDgi;
+        cpsItem.dgis[firstIndex].value.ReplaceKey(item.srcDgi, item.exchangedDgi);
+        cpsItem.dgis[secondIndex].dgi = item.srcDgi;
+        cpsItem.dgis[secondIndex].value.ReplaceKey(item.exchangedDgi, item.srcDgi);
 	}
 }
 
-void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
+void IRule::HandleTagDecrypt(CPS& cpsItem)
 {
     for (auto& encryptedItem : m_vecTagEncrypt)
     {
-        for (auto& item : cpsItem.items) {
-            if (item.value.TagExisted(encryptedItem.tag)) {
-                string decryptedData;
-                //string tagValue = item.value.GetItem(encryptedItem.tag);
-                //string encryptData = tagValue.substr(encryptedItem.tag.length() + 2);
-                string encryptData = item.value.GetItem(encryptedItem.tag);
+        for (auto& item : cpsItem.dgis) {
+            if (item.value.IsExisted(encryptedItem.tag))
+            {
+                string decryptedData, encryptData;
+                string tagValue = item.value.GetItem(encryptedItem.tag);
+                if (encryptedItem.isWholeDecrypted || encryptedItem.type == "BASE64" || encryptedItem.type == "BCD")
+                {
+                    encryptData = tagValue;
+                }
+                else {
+                    encryptData = tagValue.substr(encryptedItem.tag.length() + 2);
+                }
+                
+                //string encryptData = item.value.GetItem(encryptedItem.tag);
                 if (encryptedItem.type == "SM") {
                     decryptedData = SMDecryptDGI(encryptedItem.key, encryptData);
                 }
@@ -854,30 +879,24 @@ void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
                             decryptedData = decryptedData.substr(0, index);
                         }
                     }
-                    if (decryptedData.length() > encryptedItem.len && encryptedItem.len >= 0) {
-                        if (encryptedItem.len == 0 && encryptedItem.tag == "57") { //单独处理57
-                            int indexD = decryptedData.find_first_of('D');
-                            if (indexD == string::npos)
-                                return;
-                            int indexF = decryptedData.find_first_of('F', indexD);
-                            if (indexF == string::npos)
-                                return;
-                            decryptedData = decryptedData.substr(encryptedItem.startPos, indexF + 1);
-                        }
-                        else {
-                            if (encryptedItem.startPos != 0 || encryptedItem.len != 0)
-                            {
-                                decryptedData = decryptedData.substr(encryptedItem.startPos, encryptedItem.len);
-                            }                               
-                        }
-                            
+                    if (decryptedData.length() > encryptedItem.len && encryptedItem.len >= 0) 
+                    {
+                        if (encryptedItem.startPos != 0 || encryptedItem.len != 0)
+                        {
+                            decryptedData = decryptedData.substr(encryptedItem.startPos, encryptedItem.len);
+                        }                               
                     }
                 }
-                item.value.ReplaceItem(encryptedItem.tag, decryptedData); //将数据替换为临时解密数据
-                //char decryptedDataLen[3];
-                //Tool::GetBcdDataLen(decryptedData.c_str(), decryptedDataLen, 3);
-                //decryptedData = encryptedItem.tag + decryptedDataLen + decryptedData;
-                //item.value.ReplaceItem(encryptedItem.tag, decryptedData);
+                if (encryptedItem.isWholeDecrypted)
+                {
+                    item.value.ReplaceValue(encryptedItem.tag, decryptedData); //将数据替换为临时解密数据
+                }
+                else {                   
+                    string len = Tool::GetBcdStrLen(decryptedData);
+                    decryptedData = encryptedItem.tag + len + decryptedData;
+                    item.value.ReplaceValue(encryptedItem.tag, decryptedData); //将数据替换为临时解密数据
+                }
+               
             }
         }
     }
@@ -886,11 +905,11 @@ void IRule::HandleTagDecrypt(CPS_ITEM& cpsItem)
 /***************************************************************
 * 解密DGI数据，注意该DGI只应只有一个tag=encryptData, 并且tag==DGI
 ****************************************************************/
-void IRule::HandleDGIDecrypt(CPS_ITEM& cpsItem)
+void IRule::HandleDGIDecrypt(CPS& cpsItem)
 { 
     for (auto& encryptedItem : m_vecDGIEncrypt)
     {
-        for(auto& item : cpsItem.items)
+        for(auto& item : cpsItem.dgis)
         {
             if (item.dgi == encryptedItem.dgi) {
                 string decryptedData;
@@ -906,7 +925,7 @@ void IRule::HandleDGIDecrypt(CPS_ITEM& cpsItem)
                     if(found != string::npos)
                         decryptedData = decryptedData.substr(0, found);
                 }
-                item.value.ReplaceItem(item.dgi, decryptedData);
+                item.value.ReplaceValue(item.dgi, decryptedData);
             }            
         }
     }
@@ -915,15 +934,15 @@ void IRule::HandleDGIDecrypt(CPS_ITEM& cpsItem)
 /*****************************************************************
 * 功能：删除DGI分组
 ******************************************************************/
-void IRule::HandleDGIDelete(CPS_ITEM& cpsItem)
+void IRule::HandleDGIDelete(CPS& cpsItem)
 {
 	for (auto item : m_vecDGIDelete)
 	{
-		for (auto iter = cpsItem.items.begin(); iter != cpsItem.items.end(); iter++)
+		for (auto iter = cpsItem.dgis.begin(); iter != cpsItem.dgis.end(); iter++)
 		{
 			if (item == iter->dgi)
 			{
-				iter = cpsItem.items.erase(iter);
+				iter = cpsItem.dgis.erase(iter);
                 break;
 			}
 		}
@@ -933,11 +952,11 @@ void IRule::HandleDGIDelete(CPS_ITEM& cpsItem)
 /***************************************************
 * 功能：删除某个DGI分组中的tag
 ****************************************************/
-void IRule::HandleTagDelete(CPS_ITEM& cpsItem)
+void IRule::HandleTagDelete(CPS& cpsItem)
 {
 	for (auto item : m_vecTagDelete)
 	{
-		for (auto &dgiItem : cpsItem.items)
+		for (auto &dgiItem : cpsItem.dgis)
 		{
 			if (item.srcDgi == dgiItem.dgi)
 			{
@@ -948,19 +967,19 @@ void IRule::HandleTagDelete(CPS_ITEM& cpsItem)
 	}
 }
 
-void IRule::HandleTagInsertValue(CPS_ITEM& cpsItem)
+void IRule::HandleTagInsertValue(CPS& cpsItem)
 {
     for (auto item : m_vecTagInsert)
     {
-        for (auto &dgiItem : cpsItem.items)
+        for (auto &dgiItem : cpsItem.dgis)
         {
-            if (item.dgi == dgiItem.dgi && dgiItem.value.TagExisted(item.tag))
+            if (item.dgi == dgiItem.dgi && dgiItem.value.IsExisted(item.tag))
             {
                 string oldTagValue = dgiItem.value.GetItem(item.tag).substr(item.tag.length() + 2); //默认tag值长度不超过7F,且更改后的新值也捕超过7F
                 string newTagValue = oldTagValue.substr(0, item.pos) + item.insertedValue + oldTagValue.substr(item.pos);
                 string strLen = Tool::GetBcdStrLen(newTagValue);
                 newTagValue = item.tag + strLen + newTagValue;
-                dgiItem.value.ReplaceItem(item.tag, newTagValue);
+                dgiItem.value.ReplaceValue(item.tag, newTagValue);
                 
                 break;
             }
@@ -971,35 +990,34 @@ void IRule::HandleTagInsertValue(CPS_ITEM& cpsItem)
 /********************************************************
 * 功能：给某个DGI分组添加固定的tag值
 *********************************************************/
-void IRule::HandleDGIAddFixedTag(CPS_ITEM& cpsItem)
+void IRule::HandleDGIAddFixedTagValue(CPS& cpsItem)
 {
     for (auto item : m_vecFixedTagAdd) 
     {
         bool hasExisted = false;
-        for (auto& dgiItem : cpsItem.items){
+        for (auto& dgiItem : cpsItem.dgis){
             if (dgiItem.dgi == item.srcDgi) {
                 hasExisted = true;
                 char tagValueLen[3] = { 0 };
                 Tool::GetBcdDataLen(item.tagValue.c_str(), tagValueLen, 3);
-                //string value = item.tag + tagValueLen + item.tagValue;
                 string value = item.tagValue;
-                dgiItem.value.InsertItem(item.tag, value);
+                dgiItem.value.AddItem(item.tag, value);
             }
         }
         if (!hasExisted) {
-            DGI_ITEM newItem;
+            DGI newItem;
             newItem.dgi = item.srcDgi;
-            newItem.value.InsertItem(item.tag, item.tagValue);
-            cpsItem.AddDgiItem(newItem);
+            newItem.value.AddItem(item.tag, item.tagValue);
+            cpsItem.AddDGI(newItem);
         }
     }
 }
 
-void IRule::HandleTagsMerge(CPS_ITEM& cpsItem)
+void IRule::HandleTagMergeTagFromOtherTag(CPS& cpsItem)
 {
     for (auto &item : m_vecTagMerge) {
         string tagMergedValue;
-        for (auto &dstItem : cpsItem.items) {
+        for (auto &dstItem : cpsItem.dgis) {
             if (dstItem.dgi == item.dstDgi) {
                 tagMergedValue = dstItem.value.GetItem(item.dstTag);
                 break;
@@ -1007,20 +1025,19 @@ void IRule::HandleTagsMerge(CPS_ITEM& cpsItem)
         }
         if (!ExistedInDGIs(item.srcDgi, cpsItem))
         {
-            DGI_ITEM newDgiItem;
+            DGI newDgiItem;
             newDgiItem.dgi = item.srcDgi;
-            cpsItem.AddDgiItem(newDgiItem);
+            cpsItem.AddDGI(newDgiItem);
         }
-        for (auto &dgiItem : cpsItem.items) {
+        for (auto &dgiItem : cpsItem.dgis) {
             if (dgiItem.dgi == item.srcDgi) {
-                if (!dgiItem.value.TagExisted(item.srcTag))
+                if (!dgiItem.value.IsExisted(item.srcTag))
                 {
-                    dgiItem.value.InsertItem(item.srcTag, "");  //如果tag不存在，添加一个空的tag
+                    dgiItem.value.AddItem(item.srcTag, "");  //如果tag不存在，添加一个空的tag
                 }
                 string oldValue = dgiItem.value.GetItem(item.srcTag);
                 string mergedValue =  oldValue + tagMergedValue;
-                //string mergedValue = tagMergedValue + oldValue;
-                dgiItem.value.ReplaceItem(item.srcTag, mergedValue);
+                dgiItem.value.ReplaceValue(item.srcTag, mergedValue);
                 break;
             }
         }
@@ -1031,11 +1048,11 @@ void IRule::HandleTagsMerge(CPS_ITEM& cpsItem)
 /********************************************************
 * 功能： 将某个DGI分组的tag值添加到指定的DGI分组中
 *********************************************************/
-void IRule::HandleDGIAddTag(CPS_ITEM& cpsItem)
+void IRule::HandleDGIAddTagFromOtherDGI(CPS& cpsItem)
 {  
     for (auto &item : m_vecAddTagFromDGI) {
         string tagValue;
-        for (auto &dstItem : cpsItem.items) {
+        for (auto &dstItem : cpsItem.dgis) {
             if (dstItem.dgi == item.dstDgi) {
                 tagValue = dstItem.value.GetItem(item.dstTag);
                 break;
@@ -1043,13 +1060,13 @@ void IRule::HandleDGIAddTag(CPS_ITEM& cpsItem)
         }
         if (!ExistedInDGIs(item.srcDgi, cpsItem))
         {
-            DGI_ITEM newDgiItem;
+            DGI newDgiItem;
             newDgiItem.dgi = item.srcDgi;
-            cpsItem.AddDgiItem(newDgiItem);
+            cpsItem.AddDGI(newDgiItem);
         }
-        for (auto &dgiItem : cpsItem.items) {
+        for (auto &dgiItem : cpsItem.dgis) {
             if (dgiItem.dgi == item.srcDgi) {
-                dgiItem.value.InsertItem(item.srcTag, tagValue);
+                dgiItem.value.AddItem(item.srcTag, tagValue);
                 break;
             }
         }
