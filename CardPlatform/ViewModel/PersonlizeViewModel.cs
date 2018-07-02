@@ -242,12 +242,19 @@ namespace CardPlatform.ViewModel
             return string.Empty;
         }
 
-        private bool DoCps(DpGenCpsModel cpsFile)
+        private void DoCps()
         {
             ICPS cps = new CPS();
-            string fileName = Path.GetFileNameWithoutExtension(cpsFile.CpsFilePath);
             cps.SetPersonlizationConfig(Config.ISD, Config.KMC, Config.DivMethod, Config.SecureLevel);
-            return cps.DoPersonlization(cpsFile.CpsFilePath, Config.InstallParamsFilePath);
+            foreach (var cpsFile in DpGenCpsResults)
+            {
+                if (cpsFile.IsSelected)
+                {
+                    string fileName = Path.GetFileNameWithoutExtension(cpsFile.CpsFilePath);
+                    bool sucess = cps.DoPersonlization(cpsFile.CpsFilePath, Config.InstallParamsFilePath);
+                }
+            }
+
         }
 
         private async void DoPersonlize()
@@ -262,33 +269,8 @@ namespace CardPlatform.ViewModel
             }
             if (SCReader.OpenReader(locator.Main.SelectedReader))
             {
-                ICPS cps = new CPS();
-                cps.SetPersonlizationConfig(Config.ISD, Config.KMC, Config.DivMethod, Config.SecureLevel);
-                foreach (var cpsFile in DpGenCpsResults)
-                {
-                    if (cpsFile.IsSelected)
-                    {
-                        Thread thread = new Thread(() => { DoCps(cpsFile); });
-                        thread.Start();
-                        //Task<bool> task = new Task<bool>(()=> { return DoCps(cpsFile); });
-                        //string fileName = Path.GetFileNameWithoutExtension(cpsFile.CpsFilePath);
-                        //MessageDialogResult result = await _dialog.ShowMessageAsync("Message", string.Format("Please Input card : {0}", fileName), MessageDialogStyle.AffirmativeAndNegative);
-                        //if (result == MessageDialogResult.Affirmative)
-                        //{
-                        //    bool sucess = cps.DoPersonlization(cpsFile.CpsFilePath, Config.InstallParamsFilePath);
-                        //    if (!sucess)
-                        //    {                               
-                        //        await _dialog.ShowMessageAsync("Failed", string.Format("Personlize card: {0} failed.", fileName));
-                        //        return;
-                        //    }
-                        //}
-                        //else
-                        //{
-                        //    return;
-                        //}
-
-                    }
-                }
+                Thread thread = new Thread(DoCps);
+                thread.Start();
             }
             else
             {

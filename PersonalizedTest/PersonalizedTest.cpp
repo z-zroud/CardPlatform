@@ -47,13 +47,13 @@ int main()
 	{
 		printf("%s\n", readers[i]);
 	}
-    string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
-    string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "华腾";
-    string dpPath = dpDir + dpFormat + "\\高青汇金村镇银行.dp";
-    rulePath += "高青汇金村镇银行_华腾_华大_G81140034.xml";
+    string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";  
+    string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
+    string dpFormat = "银联";
+    string dpPath = dpDir + dpFormat + "\\0305-MCHIPY4001133120E-100529-26-1.DP";
+    rulePath += "澳门立桥借记_银联_英飞凌.xml";
     string installParamCfg = "高青汇金_华大_G81140034.xml";
-    GenCpsFile("DpParse_HT.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    GenCpsFile("DpParse_YL_MC.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
