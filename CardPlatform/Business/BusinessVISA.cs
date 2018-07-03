@@ -90,7 +90,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseTLVAndSave(response.Response))
+                if (ParseTLVAndSave(TransactionStep.SelectAid,response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAppCase();
                     excuteCase.ExcuteCase(response);
@@ -128,8 +128,8 @@ namespace CardPlatform.Business
             if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
             {
 
-                tagDict.SetTag("82", tlvs[0].Value.Substring(0, 4));
-                tagDict.SetTag("94", tlvs[0].Value.Substring(4));
+                tagDict.SetTag(TransactionStep.GPO,"82", tlvs[0].Value.Substring(0, 4));
+                tagDict.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             }
 
             var AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
@@ -157,7 +157,7 @@ namespace CardPlatform.Business
                     baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!ParseTLVAndSave(resp.Response))
+                if (!ParseTLVAndSave(TransactionStep.ReadRecord,resp.Response))
                 {
                     return false;
                 }
@@ -262,10 +262,10 @@ namespace CardPlatform.Business
                     string tag9F26 = result.Substring(6, 16);
                     string tag9F10 = result.Substring(22);
 
-                    tagDict.SetTag("9F27", tag9F27);
-                    tagDict.SetTag("9F36", tag9F36);
-                    tagDict.SetTag("9F26", tag9F26);
-                    tagDict.SetTag("9F10", tag9F10);    //更新后的电子余额在此处返回
+                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
+                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
+                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
+                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);    //更新后的电子余额在此处返回
                     CheckAC(tag9F26);
                 }
             }

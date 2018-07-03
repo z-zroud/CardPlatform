@@ -128,7 +128,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if(response.SW == 0x9000)
             {
-                if(ParseTLVAndSave(response.Response))
+                if(ParseTLVAndSave(TransactionStep.SelectAid,response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAppCase();
                     excuteCase.ExcuteCase(response);
@@ -189,7 +189,7 @@ namespace CardPlatform.Business
                 baseCase.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
                 return AFLs;
             }
-            if(ParseTLVAndSave(response.Response))
+            if(ParseTLVAndSave(TransactionStep.GPO,response.Response))
             {               
                 string tag9F26 = tagDict.GetTag("9F26");
                 string tag9F27 = tagDict.GetTag("9F27");
@@ -227,7 +227,7 @@ namespace CardPlatform.Business
                     baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if(!ParseTLVAndSave(resp.Response))
+                if(!ParseTLVAndSave(TransactionStep.ReadRecord,resp.Response))
                 {
                     return false;
                 }               
@@ -292,7 +292,7 @@ namespace CardPlatform.Business
                             caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
-                    tagDict.SetTag(tlv.First().Tag, tlv.First().Value); //保存
+                    tagDict.SetTag(TransactionStep.GetData,tlv.First().Tag, tlv.First().Value); //保存
                 }
             }
         }

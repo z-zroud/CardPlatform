@@ -146,7 +146,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseTLVAndSave(response.Response))
+                if (ParseTLVAndSave(TransactionStep.SelectAid,response.Response))
                 {
                     IExcuteCase stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_SELECT_APP };
                     stepCase.ExcuteCase(response);
@@ -170,7 +170,7 @@ namespace CardPlatform.Business
         {
             var AFLs = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string tag9F38 = tagDic.GetTag("9F38");
+            string tag9F38 = tagDic.GetTag(TransactionStep.SelectAid,"9F38");
             if(string.IsNullOrEmpty(tag9F38))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag9F38");
@@ -192,8 +192,8 @@ namespace CardPlatform.Business
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
             {
-                tagDic.SetTag("82", tlvs[0].Value.Substring(0, 4));
-                tagDic.SetTag("94", tlvs[0].Value.Substring(4));
+                tagDic.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
+                tagDic.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             }
             else
             {
@@ -201,7 +201,7 @@ namespace CardPlatform.Business
                 return AFLs;
             }
 
-            AFLs = DataParse.ParseAFL(tagDic.GetTag("94"));
+            AFLs = DataParse.ParseAFL(tagDic.GetTag(TransactionStep.GPO, "94"));
 
             IExcuteCase stepCase = new GPOCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_GPO };
             stepCase.ExcuteCase(response);
@@ -226,7 +226,7 @@ namespace CardPlatform.Business
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!ParseTLVAndSave(resp.Response))
+                if (!ParseTLVAndSave(TransactionStep.ReadPSEDir,resp.Response))
                 {
                     return false;
                 }
@@ -289,7 +289,7 @@ namespace CardPlatform.Business
                             caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
-                    tagDic.SetTag(tlv.First().Tag, tlv.First().Value); //保存
+                    tagDic.SetTag(TransactionStep.GetData,tlv.First().Tag, tlv.First().Value); //保存
                 }
             }
         }
@@ -301,7 +301,7 @@ namespace CardPlatform.Business
         protected int OfflineAuthcation()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string AIP = tagDic.GetTag("82");
+            string AIP = tagDic.GetTag(TransactionStep.GPO,"82");
             if (IsSupportSDA(AIP))
             {
                 if (!SDA())
@@ -312,7 +312,7 @@ namespace CardPlatform.Business
             }
             if (IsSupportDDA(AIP))
             {
-                string ddol = tagDic.GetTag("9F49");
+                string ddol = tagDic.GetTag(TransactionStep.ReadRecord,"9F49");
                 string ddolData = "12345678";
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
@@ -339,8 +339,8 @@ namespace CardPlatform.Business
             int expiryDate;
             int effectiveDate;
             int currentDate;
-            int.TryParse(tagDic.GetTag("5F24"), out expiryDate);
-            int.TryParse(tagDic.GetTag("5F25"), out effectiveDate);
+            int.TryParse(tagDic.GetTag(TransactionStep.ReadRecord,"5F24"), out expiryDate);
+            int.TryParse(tagDic.GetTag(TransactionStep.ReadRecord, "5F25"), out effectiveDate);
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
 
             var caseBase = new CaseBase();
@@ -364,7 +364,7 @@ namespace CardPlatform.Business
 
         protected int CardHolderVerify()
         {
-            string CVM = tagDic.GetTag("8E");
+            string CVM = tagDic.GetTag(TransactionStep.ReadRecord, "8E");
             return 0;
         }
 
@@ -375,7 +375,7 @@ namespace CardPlatform.Business
 
         protected int TerminalActionAnalyze()
         {
-            string CDOL1 = tagDic.GetTag("8C");
+            string CDOL1 = tagDic.GetTag(TransactionStep.ReadRecord, "8C");
             ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
             if(resp.SW == 0x9000)
             {
@@ -388,10 +388,10 @@ namespace CardPlatform.Business
                     string tag9F26 = result.Substring(6, 16);
                     string tag9F10 = result.Substring(22);
 
-                    tagDic.SetTag("9F27", tag9F27);
-                    tagDic.SetTag("9F36", tag9F36);
-                    tagDic.SetTag("9F26", tag9F26);
-                    tagDic.SetTag("9F10", tag9F10);
+                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
+                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
+                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
+                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
                 }
             }
 
@@ -401,7 +401,7 @@ namespace CardPlatform.Business
         protected int IssuerAuthencation()
         {
             string acSessionKey;
-            string ATC = tagDic.GetTag("9F36");
+            string ATC = tagDic.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             
             if (curTransAlgorithmCategory == AlgorithmCategory.DES)
@@ -422,7 +422,7 @@ namespace CardPlatform.Business
                 }
                 acSessionKey = GenSessionKey(TransSMACKey, KeyType, curTransAlgorithmCategory);
             }
-            string AC = tagDic.GetTag("9F26");
+            string AC = tagDic.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
             string ARPC;
             if(doDesTrans)
                 ARPC = Authencation.GenArpc(acSessionKey, AC, "3030", (int)AlgorithmCategory.DES);
@@ -440,7 +440,7 @@ namespace CardPlatform.Business
 
         protected int TransactionEnd()
         {
-            string CDOL2 = tagDic.GetTag("8D");
+            string CDOL2 = tagDic.GetTag(TransactionStep.ReadRecord, "8D");
             ApduResponse resp = SecondGAC(Constant.TC, CDOL2);
 
             return 0;
@@ -450,11 +450,11 @@ namespace CardPlatform.Business
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string macSessionKey = string.Empty;
-            string ATC = tagDic.GetTag("9F36");
+            string ATC = tagDic.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
             if (KeyType == TransKeyType.MDK)
             {
-                string cardAcct = tagDic.GetTag("5A");
-                string cardSeq = tagDic.GetTag("5F34");
+                string cardAcct = tagDic.GetTag(TransactionStep.ReadRecord, "5A");
+                string cardSeq = tagDic.GetTag(TransactionStep.ReadRecord, "5F34");
                 if(TransDesMACKey != null)
                 {
                     string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
@@ -475,7 +475,7 @@ namespace CardPlatform.Business
             {
                 tag = "00" + tag;
             }
-            var macData = "04DA" + tag + "0A" + tagDic.GetTag("9F36") + tagDic.GetTag("9F26") + value;
+            var macData = "04DA" + tag + "0A" + tagDic.GetTag(TransactionStep.TerminalActionAnalyze,"9F36") + tagDic.GetTag(TransactionStep.TerminalActionAnalyze,"9F26") + value;
             string mac = Authencation.GenIssuerScriptMac(macSessionKey, macData);
             var resp = APDU.PutDataCmd(tag, value, mac);
             if(resp.SW == 0x9000)

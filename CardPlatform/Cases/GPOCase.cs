@@ -60,7 +60,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var tag94 = TransactionTag.GetInstance().GetTag("94");
+            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO,"94");
             if(tag94.Length % 4 != 0)
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -80,7 +80,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             bool hasDuplex = false;
-            var tag94 = TransactionTag.GetInstance().GetTag("94");
+            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
             var tls = DataParse.ParseAFL(tag94);
             for(int i = 0; i < tls.Count; i++)
             {

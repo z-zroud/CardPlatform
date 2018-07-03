@@ -9,9 +9,14 @@ namespace CardPlatform.Business
 {
     public enum TransactionStep
     {
+        SelectPSE,
+        SelectPPSE,
+        ReadPSEDir,
         SelectAid,
         GPO,
-        ReadRecord
+        ReadRecord,
+        GetData,
+        TerminalActionAnalyze
     }
 
     /// <summary>
@@ -107,6 +112,19 @@ namespace CardPlatform.Business
             }
 
             return value;
+        }
+
+        public string GetTag(string tag)
+        {
+            foreach(var dict in transTags)
+            {
+                foreach(var transTag in dict.Value)
+                {
+                    if (transTag.Key == tag)
+                        return transTag.Value;
+                }
+            }
+            return string.Empty;
         }
     }
 }

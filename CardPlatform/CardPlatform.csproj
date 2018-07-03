@@ -92,7 +92,7 @@
     <Compile Include="Business\BusinessQPBOC.cs" />
     <Compile Include="Business\BusinessUICS.cs" />
     <Compile Include="Business\Constant.cs" />
-    <Compile Include="Business\TagDict.cs" />
+    <Compile Include="Business\TransactionTag.cs" />
     <Compile Include="Cases\CaseBase.cs" />
     <Compile Include="Cases\CaseUtil.cs" />
     <Compile Include="Cases\FirstGACCase.cs" />

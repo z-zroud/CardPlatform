@@ -177,14 +177,14 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="response"></param>
         /// <returns></returns>
-        protected bool ParseTLVAndSave(string response)
+        protected bool ParseTLVAndSave(TransactionStep step,string response)
         {
             bool result = false;
             if (DataParse.IsTLV(response))
             {
                 var arrTLV = DataParse.ParseTLV(response);
                 TransactionTag tagDict = TransactionTag.GetInstance();
-                tagDict.SetTags(arrTLV);
+                tagDict.SetTags(step,arrTLV);
                 result = true;
             }
             else
