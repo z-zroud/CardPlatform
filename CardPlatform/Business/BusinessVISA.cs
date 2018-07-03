@@ -154,7 +154,7 @@ namespace CardPlatform.Business
             {
                 if (resp.SW != 0x9000)
                 {
-                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
+                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW); 
                     return false;
                 }
                 if (!ParseTLVAndSave(TransactionStep.ReadRecord,resp.Response))
