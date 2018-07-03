@@ -17,7 +17,7 @@ namespace CardPlatform.Business
      *************************************************************/
     public class BusinessQPBOC : BusinessBase
     {
-        private TagDict tagDict = TagDict.GetInstance();
+        private TransactionTag tagDict = TransactionTag.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         private bool isQPBOCTranction = false;

@@ -16,7 +16,7 @@ namespace CardPlatform.Business
 {
     public class BusinessUICS : BusinessBase
     {
-        private TagDict tagDic = TagDict.GetInstance();
+        private TransactionTag tagDic = TransactionTag.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
 
         /// <summary>

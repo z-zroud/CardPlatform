@@ -47,8 +47,8 @@ int main()
 	{
 		printf("%s\n", readers[i]);
 	}
-    string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";  
-    string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
+    string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
+    string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
     string dpFormat = "银联";
     string dpPath = dpDir + dpFormat + "\\0305-MCHIPY4001133120E-100529-26-1.DP";
     rulePath += "澳门立桥借记_银联_英飞凌.xml";

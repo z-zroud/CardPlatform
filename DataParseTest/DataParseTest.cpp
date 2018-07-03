@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "../DataParse/IDataParse.h"
 #include "../Util/ParseTLV.h"
+#include <cstring>
 int main()
 {
 

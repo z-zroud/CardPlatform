@@ -7,26 +7,33 @@ using System.Threading.Tasks;
 
 namespace CardPlatform.Business
 {
+    public enum TransactionStep
+    {
+        SelectAid,
+        GPO,
+        ReadRecord
+    }
+
     /// <summary>
     /// 存储交易流程中卡片返回的所有tag
     /// </summary>
-    public class TagDict
+    public class TransactionTag
     {
-        private static TagDict TagDictObj;
-        private Dictionary<string, string> tagDict;
+        private static TransactionTag TransTagsObj;
+        private Dictionary<TransactionStep, Dictionary<string,string>> transTags;
 
-        private TagDict()
+        private TransactionTag()
         {
-            tagDict = new Dictionary<string, string>();
+            transTags = new Dictionary<TransactionStep, Dictionary<string,string>>();
         }
 
-        public static TagDict GetInstance()
+        public static TransactionTag GetInstance()
         {
-            if(TagDictObj == null)
+            if(TransTagsObj == null)
             {
-                TagDictObj = new TagDict();
+                TransTagsObj = new TransactionTag();
             }
-            return TagDictObj;
+            return TransTagsObj;
         }
 
         /// <summary>
@@ -34,25 +41,31 @@ namespace CardPlatform.Business
         /// </summary>
         public void Clear()
         {
-            tagDict.Clear();
+            transTags.Clear();
         }
+
         /// <summary>
         /// 保存TLV格式的list集合
         /// </summary>
         /// <param name="arrTLV"></param>
-        public void SetTags(List<TLV> arrTLV)
+        public void SetTags(TransactionStep step, List<TLV> arrTLV)
         {
             foreach(var item in arrTLV)
             {
                 if(!item.IsTemplate)
                 {
-                    if(tagDict.ContainsKey(item.Tag))
+                    if(transTags.ContainsKey(step))
                     {
-                        tagDict[item.Tag] = item.Value;
+                        if (transTags[step].ContainsKey(item.Tag))
+                            transTags[step][item.Tag] = item.Value;
+                        else
+                            transTags[step].Add(item.Tag, item.Value);
                     }
                     else
                     {
+                        var tagDict = new Dictionary<string, string>();
                         tagDict.Add(item.Tag, item.Value);
+                        transTags.Add(step, tagDict);
                     }                    
                 }
             }
@@ -63,15 +76,20 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="tag"></param>
         /// <param name="value"></param>
-        public void SetTag(string tag,string value)
+        public void SetTag(TransactionStep step, string tag,string value)
         {
-            if (tagDict.ContainsKey(tag))
+            if (transTags.ContainsKey(step))
             {
-                tagDict[tag] = value;
+                if (transTags[step].ContainsKey(tag))
+                    transTags[step][tag] = value;
+                else
+                    transTags[step].Add(tag, value);
             }
             else
             {
+                var tagDict = new Dictionary<string, string>();
                 tagDict.Add(tag, value);
+                transTags.Add(step, tagDict);
             }
         }
 
@@ -80,12 +98,14 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public string GetTag(string tag)
+        public string GetTag(TransactionStep step, string tag)
         {
-            string value;
-            bool hasExisted = tagDict.TryGetValue(tag, out value);
-            if (!hasExisted)
-                return string.Empty;
+            string value = string.Empty;
+            if(transTags.ContainsKey(step))
+            {
+                transTags[step].TryGetValue(tag, out value);
+            }
+
             return value;
         }
     }

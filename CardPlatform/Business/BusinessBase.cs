@@ -183,7 +183,7 @@ namespace CardPlatform.Business
             if (DataParse.IsTLV(response))
             {
                 var arrTLV = DataParse.ParseTLV(response);
-                TagDict tagDict = TagDict.GetInstance();
+                TransactionTag tagDict = TransactionTag.GetInstance();
                 tagDict.SetTags(arrTLV);
                 result = true;
             }
@@ -264,7 +264,7 @@ namespace CardPlatform.Business
             }
 
             //获取CA公钥
-            TagDict tagDict = TagDict.GetInstance();
+            TransactionTag tagDict = TransactionTag.GetInstance();
             string rid = aid.Substring(0, 10);
             string CAIndex = tagDict.GetTag("8F");
             if (CAIndex.Length != 2)
@@ -316,7 +316,7 @@ namespace CardPlatform.Business
         protected string GetIccPublicKey(string issuerPublicKey)
         {
             string iccPublicKey = string.Empty;
-            TagDict tagDict = TagDict.GetInstance();
+            TransactionTag tagDict = TransactionTag.GetInstance();
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string iccPublicCert = tagDict.GetTag("9F46");
@@ -354,7 +354,7 @@ namespace CardPlatform.Business
             int result;
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            TagDict tagDict = TagDict.GetInstance();
+            TransactionTag tagDict = TransactionTag.GetInstance();
             string signedStaticAppData = tagDict.GetTag("93");
             string AIP = tagDict.GetTag("82");
             string issuerPublicKey = GetIssuerPublicKey();
@@ -391,7 +391,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected virtual bool DDA(string issuerPublicKey, string tag9F4B, string ddolData)
         {
-            TagDict tagDict = TagDict.GetInstance();
+            TransactionTag tagDict = TransactionTag.GetInstance();
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var iccPublicKey = GetIccPublicKey(issuerPublicKey);
@@ -464,7 +464,7 @@ namespace CardPlatform.Business
         protected string GenSessionKey(string key, TransKeyType transKeyType, AlgorithmCategory algorithmCategory)
         {
             string acSessionKey = string.Empty;
-            var tagDict = TagDict.GetInstance();
+            var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
             if (transKeyType == TransKeyType.MDK)
             {
@@ -487,7 +487,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected bool CheckTag9F10Mac()
         {
-            var tagDict = TagDict.GetInstance();
+            var tagDict = TransactionTag.GetInstance();
             string tag9F10 = tagDict.GetTag("9F10");
             string tag9F10Mac = tag9F10.Substring(tag9F10.Length - 8);
             string ATC = tagDict.GetTag("9F36");
@@ -528,7 +528,7 @@ namespace CardPlatform.Business
         protected string GenAC()
         {
             string udkACKey = string.Empty;
-            var tagDict = TagDict.GetInstance();
+            var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
             if (KeyType == TransKeyType.MDK)
             {
@@ -549,9 +549,9 @@ namespace CardPlatform.Business
             string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
             string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
             string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
-            string tag82 = TagDict.GetInstance().GetTag("82");
-            string tag9F36 = TagDict.GetInstance().GetTag("9F36");
-            string tag9F10 = TagDict.GetInstance().GetTag("9F10");
+            string tag82 = TransactionTag.GetInstance().GetTag("82");
+            string tag9F36 = TransactionTag.GetInstance().GetTag("9F36");
+            string tag9F10 = TransactionTag.GetInstance().GetTag("9F10");
             var customData = tag9F10.Substring(6);
 
             string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + customData;
@@ -573,7 +573,7 @@ namespace CardPlatform.Business
         protected bool CheckAC(string AC)
         {
             string udkACKey = string.Empty;
-            var tagDict = TagDict.GetInstance();
+            var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
             if (KeyType == TransKeyType.MDK)
             {
@@ -594,9 +594,9 @@ namespace CardPlatform.Business
             string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
             string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
             string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
-            string tag82 = TagDict.GetInstance().GetTag("82");
-            string tag9F36 = TagDict.GetInstance().GetTag("9F36");
-            string tag9F10 = TagDict.GetInstance().GetTag("9F10");
+            string tag82 = TransactionTag.GetInstance().GetTag("82");
+            string tag9F36 = TransactionTag.GetInstance().GetTag("9F36");
+            string tag9F10 = TransactionTag.GetInstance().GetTag("9F10");
             var customData = tag9F10.Substring(6);
 
             string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + customData;

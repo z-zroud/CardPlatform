@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "../PCSC/PCSC.h"
 #include "../CPS/ICPS.h"
+#include "../ApduCmd/IApdu.h"
+#include "../DataParse/IDataParse.h"
 #include <Windows.h>
 
 
@@ -38,10 +40,29 @@ int main()
 	GetCardStatus();
 	GetTransProtocol();
 
-	char output[1024] = { 0 };
-	//int sw = SendApdu("00A40400 08 A000000003000000", output, sizeof(output));
-	int sw = SendApdu("00A40000 02 3F00", output, sizeof(output));
-	printf("sw: %04X\n%s\n", sw, output);
+	char resp[1024] = { 0 };
+
+    int sw = SelectAppCmd("A000000333010101", resp);
+    if (sw == 0x9000)
+    {
+        memset(resp, 0, 1024);
+        sw = ReadRecordCmd(2, 1, resp);
+        if (sw == 0x9000)
+        {
+            TLV tlvs[20] = { 0 };
+            unsigned int count = 20;
+            if (ParseTLV(resp, tlvs, count))
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    if (tlvs[i].tag == "5A")
+                    {
+
+                    }
+                }
+            }
+        }
+    }
 
 	//file<> fDoc("F:\\CardPlatform\\Debug\\test.xml");
 	//xml_document<> doc;

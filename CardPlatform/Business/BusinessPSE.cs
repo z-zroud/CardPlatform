@@ -37,7 +37,7 @@ namespace CardPlatform.Business
             //获取AID列表
             List<string> Aids = new List<string>();
             int SFI;
-            if(int.TryParse(TagDict.GetInstance().GetTag("88"),out SFI))
+            if(int.TryParse(TransactionTag.GetInstance().GetTag("88"),out SFI))
             {
                 string aid = string.Empty;
                 int recordNo = 1;

@@ -227,7 +227,7 @@ namespace CardPlatform.Cases
         /// </summary>
         public void PBOC_sPSE_GLX_001()
         {
-            var tag9F11 = TagDict.GetInstance().GetTag("9F11");
+            var tag9F11 = TransactionTag.GetInstance().GetTag("9F11");
             if(tag9F11.Length >0)
             {
 

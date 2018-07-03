@@ -268,7 +268,7 @@ namespace CardPlatform.Helper
             {
                 return false;
             }
-            var tagDict = TagDict.GetInstance();
+            var tagDict = TransactionTag.GetInstance();
             switch(type)
             {
                 case TagType.ContactDC_DES:
