@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using CardPlatform.Business;
+using CardPlatform.Common;
 using CplusplusDll;
 
 namespace CardPlatform.Cases
@@ -18,11 +16,10 @@ namespace CardPlatform.Cases
         {
             TLVs = new List<TLV>();
             readRecordTags = new Dictionary<string, TLV>();
-            Step = "ReadRecord";
             base.Load();
         }
 
-        public override void ExcuteCase(object srcData)
+        public override void ExcuteCase(TransactionStep step, object srcData)
         {
             resps = (List<ApduResponse>)srcData;
             List<string> tags = new List<string> { "9F12", "9F79", "9F51", "9F52" };
@@ -54,7 +51,7 @@ namespace CardPlatform.Cases
                 CheckTemplateTag(TLVs);
             }
 
-            base.ExcuteCase(srcData);
+            base.ExcuteCase(step, srcData);
         }
 
 

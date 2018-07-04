@@ -10,7 +10,6 @@ namespace CardPlatform.Cases
     {
         protected override void Load()
         {
-            Step = "FirstGAC";
             base.Load();
         }
     }

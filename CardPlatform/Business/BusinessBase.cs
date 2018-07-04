@@ -1,6 +1,6 @@
 ﻿using CardPlatform.Cases;
 using CardPlatform.Config;
-using CardPlatform.Models;
+using CardPlatform.Common;
 using CardPlatform.ViewModel;
 using CplusplusDll;
 using System;

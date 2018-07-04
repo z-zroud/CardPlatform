@@ -57,4 +57,7 @@
 	      <Attribute name="tag" comment="±»É¾³ýµÄtag"/>
 	</DeletedTag>
 </Rule>
+<Step>
+	<Base,SelectPSE,SelectPPSE,ReadPSEDir,SelectAid,GPO,ReadRecord,GetData,TerminalActionAnalyze/>
+</Step>
 	

@@ -7,6 +7,7 @@ using System.Reflection;
 using CplusplusDll;
 using CardPlatform.Config;
 using CardPlatform.Models;
+using CardPlatform.Common;
 
 namespace CardPlatform.Business
 {
@@ -90,10 +91,10 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseTLVAndSave(TransactionStep.SelectAid,response.Response))
+                if (ParseTLVAndSave(TransactionStep.SelectApp, response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAppCase();
-                    excuteCase.ExcuteCase(response);
+                    excuteCase.ExcuteCase(TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -135,7 +136,7 @@ namespace CardPlatform.Business
             var AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
 
             IExcuteCase excuteCase = new GPOCase();
-            excuteCase.ExcuteCase(response);
+            excuteCase.ExcuteCase(TransactionStep.GPO, response);
 
             return AFLs;
         }

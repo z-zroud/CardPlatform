@@ -1,16 +1,12 @@
 ﻿using CplusplusDll;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CardPlatform.Business;
+using CardPlatform.Common;
 
 namespace CardPlatform.Cases
 {
     public class PPSECases : CaseBase
     {
-        public override void ExcuteCase(Object srcData)
+        public override void ExcuteCase(TransactionStep step,Object srcData)
         {
             return;
         }

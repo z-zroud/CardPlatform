@@ -1,11 +1,7 @@
 ﻿using CardPlatform.Config;
 using GalaSoft.MvvmLight;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+using CardPlatform.Common;
+
 
 namespace CardPlatform.Models
 {
@@ -32,8 +28,8 @@ namespace CardPlatform.Models
         /// <summary>
         /// 当前模板值所在的交易步骤
         /// </summary>
-        private string _step;
-        public string Step
+        private TransactionStep _step;
+        public TransactionStep Step
         {
             get { return _step; }
             set

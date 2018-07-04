@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UtilLib;
+using CardPlatform.Common;
 
 namespace CardPlatform.Cases
 {
@@ -21,16 +22,15 @@ namespace CardPlatform.Cases
 
         protected override void Load()
         {
-            Step = "ReadPSEDir";
             base.Load();
         }
 
-        public override void ExcuteCase(object srcData)
+        public override void ExcuteCase(TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
             TLVs = DataParse.ParseTLV(response.Response);
             CheckTemplateTag(TLVs);
-            base.ExcuteCase(srcData);
+            base.ExcuteCase(step, srcData);
         }
 
         /// <summary>

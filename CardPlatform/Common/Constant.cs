@@ -4,8 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CardPlatform.Business
+namespace CardPlatform.Common
 {
+    public enum TransactionStep
+    {
+        Base,
+        SelectPSE,      //选择PSE
+        SelectPPSE,     //选择PPSE
+        ReadPSEDir,     //读取PSE DIR
+        SelectApp,      //选择应用
+        GPO,            //应用初始化
+        ReadRecord,     //读应用记录
+        GetData,        //取必要数据(不是标准交易步骤，但需要检查这些数据是否存在于卡片)
+        TerminalActionAnalyze   //终端风险管理
+    }
+
     public class Constant
     {
         public static readonly string PSE = "315041592E5359532E4444463031";
@@ -18,12 +31,6 @@ namespace CardPlatform.Business
         public static readonly string APP_QUICS = "QUICS";
         public static readonly string APP_PSE = "PSE";
         public static readonly string APP_PPSE = "PPSE";
-
-        public const string STEP_SELECT_PSE = "SelectPSE";
-        public const string STEP_READ_PSE_DIR = "ReadPSEDir";
-        public const string STEP_SELECT_APP = "SelectApp";
-        public const string STEP_GPO = "GPO";
-        public const string STEP_READ_RECORD = "ReadRecord";
 
         public static readonly int ARQC = 0x80;
         public static readonly int TC = 0x40;

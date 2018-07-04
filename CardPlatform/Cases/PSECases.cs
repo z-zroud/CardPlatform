@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using CardPlatform.Business;
+using CardPlatform.Common;
 using CardPlatform.Config;
 
 namespace CardPlatform.Cases
@@ -23,16 +23,15 @@ namespace CardPlatform.Cases
 
         protected override void Load()
         {
-            Step = "SelectPSE";
             base.Load();           
         }
 
-        public override void ExcuteCase(object srcData)
+        public override void ExcuteCase(TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
             TLVs = DataParse.ParseTLV(response.Response);
             CheckTemplateTag(TLVs);
-            base.ExcuteCase(srcData);
+            base.ExcuteCase(step, srcData);
         }
 
         /// <summary>

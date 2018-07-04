@@ -2,8 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CardPlatform.Common;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -27,7 +26,7 @@ namespace CardPlatform.Config
     public class CaseInfo
     {
         public string CaseApp { get; set; }
-        public string CaseStep { get; set; }
+        public TransactionStep CaseStep { get; set; }
         public string CaseNo { get; set; }
         public string Description { get; set; }
         public string Result { get; set; }
@@ -44,7 +43,7 @@ namespace CardPlatform.Config
             Cases = new List<CaseInfo>();
         }
 
-        public string Step { get; set; }
+        public TransactionStep Step { get; set; }
         public List<CaseInfo> Cases { get; set; }
     }
 
@@ -105,7 +104,7 @@ namespace CardPlatform.Config
                     {
                         var caseItems = stepCase.Elements("CaseItem");
                         var transStepCase = new TransStepCase();
-                        transStepCase.Step = stepCase.Attribute("name").Value;
+                        transStepCase.Step = (TransactionStep)Enum.Parse(typeof(TransactionStep), stepCase.Attribute("name").Value, true);
                         foreach (var item in caseItems)
                         {
                             CaseInfo caseInfo = new CaseInfo();

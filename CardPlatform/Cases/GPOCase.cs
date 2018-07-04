@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using CardPlatform.Business;
+using CardPlatform.Common;
 using CardPlatform.Config;
 using CplusplusDll;
 
@@ -26,12 +27,12 @@ namespace CardPlatform.Cases
             base.Load();
         }
 
-        public override void ExcuteCase(object srcData)
+        public override void ExcuteCase(TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
             TLVs = DataParse.ParseTLV(response.Response);
             CheckTemplateTag(TLVs);
-            base.ExcuteCase(srcData);
+            base.ExcuteCase(step, srcData);
         }
 
         /// <summary>

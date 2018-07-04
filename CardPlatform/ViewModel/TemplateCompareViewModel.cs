@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Windows.Media;
+using CardPlatform.Common;
 
 namespace CardPlatform.ViewModel
 {
@@ -102,7 +102,7 @@ namespace CardPlatform.ViewModel
                         comparedItem.TemplateValue = item.Value;
                         comparedItem.Tag = item.Name;
                         comparedItem.CurrentApp = app;
-                        comparedItem.Step = stepTags.Step;
+                        comparedItem.Step = (TransactionStep)Enum.Parse(typeof(TransactionStep),stepTags.Step,true);
                         comparedItem.HasCheck = false;
                         comparedItem.ConfigLevel = item.Level;
                         comparedItem.ActualLevel = TipLevel.Unknown;

@@ -10,13 +10,14 @@ using System.Reflection;
 using CardPlatform.Config;
 using CardPlatform.Models;
 using CardPlatform.Helper;
+using CardPlatform.Common;
 using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.Business
 {
     public class BusinessUICS : BusinessBase
     {
-        private TransactionTag tagDic = TransactionTag.GetInstance();
+        private TransactionTag transTag = TransactionTag.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
 
         /// <summary>
@@ -27,20 +28,29 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public override void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
         {
-            tagDic.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            transTag.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTrans(aid, doDesTrans, doSMTrans);
             locator.Terminal.TermianlSettings.Tag9F7A = "00";   //电子现金支持指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型
             locator.Terminal.TermianlSettings.Tag9F66 = "46000000"; //终端交易属性
-            var tagFileHelper = new TagFileHelper(PersoFile);
+            var songJianHelper = new SongJianHelper(PersoFile);
 
             // 做国际算法交易
             if (doDesTrans)  
             {
-
-
                 locator.Terminal.TermianlSettings.TagDF69 = "00";
                 bool isSucess = DoTransEx();
+                if (!string.IsNullOrEmpty(PersoFile))
+                {
+                    if (IsContactTrans)
+                    {
+                        songJianHelper.WriteToFile(TagType.ContactDC_DES);
+                    }
+                    else
+                    {
+                        songJianHelper.WriteToFile(TagType.ContactlessDC_DES);
+                    }
+                }
                 DispatcherHelper.CheckBeginInvokeOnUI(() =>
                 {
                     TransResultModel TransactionResult = new TransResultModel(TransType.UICS_DES, TransResult.Unknown);
@@ -56,21 +66,6 @@ namespace CardPlatform.Business
 
                     locator.Transaction.TransResult.Add(TransactionResult);
                 });
-                
-
-
-                if(!string.IsNullOrEmpty(PersoFile))
-                {
-                    if (IsContactTrans)
-                    {
-                        tagFileHelper.WriteToFile(TagType.ContactDC_DES);
-                    }
-                    else
-                    {
-                        tagFileHelper.WriteToFile(TagType.ContactlessDC_DES);
-                    }
-                }
-
             }
             //做国密算法交易
             if (doSMTrans)
@@ -78,6 +73,10 @@ namespace CardPlatform.Business
                 curTransAlgorithmCategory = AlgorithmCategory.SM;
                 locator.Terminal.TermianlSettings.TagDF69 = "01";
                 bool isSuccess = DoTransEx();
+                if (IsContactTrans && !string.IsNullOrEmpty(PersoFile))
+                {
+                    songJianHelper.WriteToFile(TagType.ContactDC_SM);
+                }
                 DispatcherHelper.CheckBeginInvokeOnUI(() => 
                 {
                     TransResultModel TransactionResult = new TransResultModel(TransType.UICS_SM, TransResult.Unknown);
@@ -93,11 +92,6 @@ namespace CardPlatform.Business
 
                     locator.Transaction.TransResult.Add(TransactionResult);
                 });
-
-                if (IsContactTrans && !string.IsNullOrEmpty(PersoFile))
-                {
-                    tagFileHelper.WriteToFile(TagType.ContactDC_SM);
-                }
             }
         }
 
@@ -146,10 +140,10 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseTLVAndSave(TransactionStep.SelectAid,response.Response))
+                if (ParseTLVAndSave(TransactionStep.SelectApp, response.Response))
                 {
-                    IExcuteCase stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_SELECT_APP };
-                    stepCase.ExcuteCase(response);
+                    IExcuteCase stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS};
+                    stepCase.ExcuteCase(TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -170,7 +164,7 @@ namespace CardPlatform.Business
         {
             var AFLs = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string tag9F38 = tagDic.GetTag(TransactionStep.SelectAid,"9F38");
+            string tag9F38 = transTag.GetTag(TransactionStep.SelectApp, "9F38");
             if(string.IsNullOrEmpty(tag9F38))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag9F38");
@@ -192,8 +186,8 @@ namespace CardPlatform.Business
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
             {
-                tagDic.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
-                tagDic.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
+                transTag.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
+                transTag.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             }
             else
             {
@@ -201,10 +195,10 @@ namespace CardPlatform.Business
                 return AFLs;
             }
 
-            AFLs = DataParse.ParseAFL(tagDic.GetTag(TransactionStep.GPO, "94"));
+            AFLs = DataParse.ParseAFL(transTag.GetTag(TransactionStep.GPO, "94"));
 
-            IExcuteCase stepCase = new GPOCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_GPO };
-            stepCase.ExcuteCase(response);
+            IExcuteCase stepCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
+            stepCase.ExcuteCase(TransactionStep.GPO, response);
 
             return AFLs;
         }
@@ -226,13 +220,13 @@ namespace CardPlatform.Business
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!ParseTLVAndSave(TransactionStep.ReadPSEDir,resp.Response))
+                if (!ParseTLVAndSave(TransactionStep.ReadRecord,resp.Response))
                 {
                     return false;
                 }
             }
-            IExcuteCase stepCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS, Step = Constant.STEP_READ_RECORD };
-            stepCase.ExcuteCase(resps);
+            IExcuteCase stepCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS };
+            stepCase.ExcuteCase(TransactionStep.ReadRecord, resps);
             return true;
         }
 
@@ -289,7 +283,7 @@ namespace CardPlatform.Business
                             caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
-                    tagDic.SetTag(TransactionStep.GetData,tlv.First().Tag, tlv.First().Value); //保存
+                    transTag.SetTag(TransactionStep.GetData,tlv.First().Tag, tlv.First().Value); //保存
                 }
             }
         }
@@ -301,7 +295,7 @@ namespace CardPlatform.Business
         protected int OfflineAuthcation()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string AIP = tagDic.GetTag(TransactionStep.GPO,"82");
+            string AIP = transTag.GetTag(TransactionStep.GPO,"82");
             if (IsSupportSDA(AIP))
             {
                 if (!SDA())
@@ -312,7 +306,7 @@ namespace CardPlatform.Business
             }
             if (IsSupportDDA(AIP))
             {
-                string ddol = tagDic.GetTag(TransactionStep.ReadRecord,"9F49");
+                string ddol = transTag.GetTag(TransactionStep.ReadRecord,"9F49");
                 string ddolData = "12345678";
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
@@ -339,8 +333,8 @@ namespace CardPlatform.Business
             int expiryDate;
             int effectiveDate;
             int currentDate;
-            int.TryParse(tagDic.GetTag(TransactionStep.ReadRecord,"5F24"), out expiryDate);
-            int.TryParse(tagDic.GetTag(TransactionStep.ReadRecord, "5F25"), out effectiveDate);
+            int.TryParse(transTag.GetTag(TransactionStep.ReadRecord,"5F24"), out expiryDate);
+            int.TryParse(transTag.GetTag(TransactionStep.ReadRecord, "5F25"), out effectiveDate);
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
 
             var caseBase = new CaseBase();
@@ -364,7 +358,7 @@ namespace CardPlatform.Business
 
         protected int CardHolderVerify()
         {
-            string CVM = tagDic.GetTag(TransactionStep.ReadRecord, "8E");
+            string CVM = transTag.GetTag(TransactionStep.ReadRecord, "8E");
             return 0;
         }
 
@@ -375,7 +369,7 @@ namespace CardPlatform.Business
 
         protected int TerminalActionAnalyze()
         {
-            string CDOL1 = tagDic.GetTag(TransactionStep.ReadRecord, "8C");
+            string CDOL1 = transTag.GetTag(TransactionStep.ReadRecord, "8C");
             ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
             if(resp.SW == 0x9000)
             {
@@ -388,10 +382,10 @@ namespace CardPlatform.Business
                     string tag9F26 = result.Substring(6, 16);
                     string tag9F10 = result.Substring(22);
 
-                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
-                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
-                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
-                    tagDic.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
                 }
             }
 
@@ -401,7 +395,7 @@ namespace CardPlatform.Business
         protected int IssuerAuthencation()
         {
             string acSessionKey;
-            string ATC = tagDic.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
+            string ATC = transTag.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             
             if (curTransAlgorithmCategory == AlgorithmCategory.DES)
@@ -422,7 +416,7 @@ namespace CardPlatform.Business
                 }
                 acSessionKey = GenSessionKey(TransSMACKey, KeyType, curTransAlgorithmCategory);
             }
-            string AC = tagDic.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
+            string AC = transTag.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
             string ARPC;
             if(doDesTrans)
                 ARPC = Authencation.GenArpc(acSessionKey, AC, "3030", (int)AlgorithmCategory.DES);
@@ -440,7 +434,7 @@ namespace CardPlatform.Business
 
         protected int TransactionEnd()
         {
-            string CDOL2 = tagDic.GetTag(TransactionStep.ReadRecord, "8D");
+            string CDOL2 = transTag.GetTag(TransactionStep.ReadRecord, "8D");
             ApduResponse resp = SecondGAC(Constant.TC, CDOL2);
 
             return 0;
@@ -450,11 +444,11 @@ namespace CardPlatform.Business
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string macSessionKey = string.Empty;
-            string ATC = tagDic.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
+            string ATC = transTag.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
             if (KeyType == TransKeyType.MDK)
             {
-                string cardAcct = tagDic.GetTag(TransactionStep.ReadRecord, "5A");
-                string cardSeq = tagDic.GetTag(TransactionStep.ReadRecord, "5F34");
+                string cardAcct = transTag.GetTag(TransactionStep.ReadRecord, "5A");
+                string cardSeq = transTag.GetTag(TransactionStep.ReadRecord, "5F34");
                 if(TransDesMACKey != null)
                 {
                     string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
@@ -475,7 +469,7 @@ namespace CardPlatform.Business
             {
                 tag = "00" + tag;
             }
-            var macData = "04DA" + tag + "0A" + tagDic.GetTag(TransactionStep.TerminalActionAnalyze,"9F36") + tagDic.GetTag(TransactionStep.TerminalActionAnalyze,"9F26") + value;
+            var macData = "04DA" + tag + "0A" + transTag.GetTag(TransactionStep.TerminalActionAnalyze,"9F36") + transTag.GetTag(TransactionStep.TerminalActionAnalyze,"9F26") + value;
             string mac = Authencation.GenIssuerScriptMac(macSessionKey, macData);
             var resp = APDU.PutDataCmd(tag, value, mac);
             if(resp.SW == 0x9000)

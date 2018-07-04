@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using CardPlatform.Business;
+using CardPlatform.Common;
 
 namespace CardPlatform.Config
 {

@@ -4,11 +4,10 @@ using CardPlatform.ViewModel;
 using CardPlatform.Models;
 using UtilLib;
 using System.Reflection;
-using System.Windows.Media;
 using CardPlatform.Config;
 using CplusplusDll;
 using System.Linq;
-using CardPlatform.Business;
+using CardPlatform.Common;
 using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.Cases
@@ -22,12 +21,11 @@ namespace CardPlatform.Cases
         private static Dictionary<string, List<TransStepCase>> caseDict = new Dictionary<string, List<TransStepCase>>();
         private static List<CaseInfo> caseInfos = new List<CaseInfo>();
         public string CurrentApp { get; set; }
-        public string Step { get; set; }
+        protected TransactionStep Step = TransactionStep.Base;
 
 
         public CaseBase()
         {
-            Step = "BaseStep";
             Load();           
         }
 
@@ -35,9 +33,10 @@ namespace CardPlatform.Cases
         /// 基类中不执行任何case,由子类执行
         /// </summary>
         /// <param name="srcData"></param>
-        public virtual void ExcuteCase(object srcData)
+        public virtual void ExcuteCase(TransactionStep step,object srcData)
         {
-            if (Step != Constant.STEP_READ_RECORD)
+            Step = step;
+            if (step != TransactionStep.ReadRecord)
             {
                 var response = (ApduResponse)srcData;
                 var TLVs = DataParse.ParseTLV(response.Response);

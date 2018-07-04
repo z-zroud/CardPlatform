@@ -91,7 +91,7 @@
     <Compile Include="Business\BusinessPSE.cs" />
     <Compile Include="Business\BusinessQPBOC.cs" />
     <Compile Include="Business\BusinessUICS.cs" />
-    <Compile Include="Business\Constant.cs" />
+    <Compile Include="Common\Constant.cs" />
     <Compile Include="Business\TransactionTag.cs" />
     <Compile Include="Cases\CaseBase.cs" />
     <Compile Include="Cases\CaseUtil.cs" />
@@ -114,7 +114,7 @@
     <Compile Include="Helper\ListScrollHelper.cs" />
     <Compile Include="Helper\Tag57Helper.cs" />
     <Compile Include="Helper\Tag5AHelper.cs" />
-    <Compile Include="Helper\TagFileHelper.cs" />
+    <Compile Include="Helper\SongJianHelper.cs" />
     <Compile Include="Models\AlgorithmConfig.cs" />
     <Compile Include="Models\AlgorithmModel.cs" />
     <Compile Include="Models\DpParseModel.cs" />

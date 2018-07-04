@@ -2,9 +2,7 @@
 using CplusplusDll;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CardPlatform.Common;
 
 namespace CardPlatform.Business
 {
@@ -23,7 +21,7 @@ namespace CardPlatform.Business
             //tagDict.SetTags(arrTLV);
 
             IExcuteCase cases = new PPSECases();
-            cases.ExcuteCase(arrTLV);
+            cases.ExcuteCase(TransactionStep.SelectPPSE,arrTLV);
 
             List<string> Aids = new List<string>();
             foreach(var tlv in arrTLV)

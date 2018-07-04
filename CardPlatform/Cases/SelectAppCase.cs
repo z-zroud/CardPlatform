@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using CardPlatform.Common;
 using CardPlatform.Business;
 using CardPlatform.Config;
 using CplusplusDll;
@@ -23,15 +22,14 @@ namespace CardPlatform.Cases
 
         protected override void Load()
         {
-            Step = "SelectAID";
             base.Load();
         }
 
-        public override void ExcuteCase(object srcData)
+        public override void ExcuteCase(TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
             TLVs = DataParse.ParseTLV(response.Response);
-            base.ExcuteCase(srcData);
+            base.ExcuteCase(step,srcData);
         }
 
         /// <summary>

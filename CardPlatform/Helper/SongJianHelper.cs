@@ -37,7 +37,7 @@ namespace CardPlatform.Helper
     /// <summary>
     /// 该类用于填写个人化信息表
     /// </summary>
-    public class TagFileHelper
+    public class SongJianHelper
     {
         private string shettNmae = "PBOC&UICS";
 
@@ -52,12 +52,12 @@ namespace CardPlatform.Helper
         private static Dictionary<string, TagLocaton> sm_qpbocTable;
 
         private string tagFile;
-        public TagFileHelper(string tagFile)
+        public SongJianHelper(string tagFile)
         {
             this.tagFile = tagFile;
         }
 
-        static TagFileHelper()
+        static SongJianHelper()
         {
             //密钥相关信息
             keyTable = new Dictionary<string, TagLocaton>();

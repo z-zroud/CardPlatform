@@ -1,5 +1,6 @@
 ﻿using System;
 using CardPlatform.Config;
+using CardPlatform.Common;
 
 namespace CardPlatform.Cases
 {
@@ -9,7 +10,7 @@ namespace CardPlatform.Cases
         /// 根据APDU返回指令执行case
         /// </summary>
         /// <param name="srcData">case传入的数据,一般为ApduRespone对象</param>
-        void ExcuteCase(Object srcData);
+        void ExcuteCase(TransactionStep step,Object srcData);
 
         /// <summary>
         /// 输出当前case执行情况

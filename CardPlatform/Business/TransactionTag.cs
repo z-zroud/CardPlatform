@@ -1,23 +1,11 @@
 ﻿using CplusplusDll;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CardPlatform.Common;
 
 namespace CardPlatform.Business
 {
-    public enum TransactionStep
-    {
-        SelectPSE,
-        SelectPPSE,
-        ReadPSEDir,
-        SelectAid,
-        GPO,
-        ReadRecord,
-        GetData,
-        TerminalActionAnalyze
-    }
+
 
     /// <summary>
     /// 存储交易流程中卡片返回的所有tag
