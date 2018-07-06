@@ -28,9 +28,9 @@ namespace CardPlatform.Cases
         public override void ExcuteCase(TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
+            base.ExcuteCase(step, srcData);
             TLVs = DataParse.ParseTLV(response.Response);
             CheckTemplateTag(TLVs);
-            base.ExcuteCase(step, srcData);
         }
 
         /// <summary>
@@ -82,22 +82,31 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            var item = from tlv in TLVs where tlv.Tag == "4F" select tlv;
-            var item1 = from tlv in TLVs where tlv.Level == 2 select tlv;
-
-            var result = item.Union(item1);
-
-            if(result.FirstOrDefault() == null ||
-                result.Count() != 1 || 
-                result.First().Len < 5 ||
-                result.First().Len > 16)
+            bool hasTag4F = false;
+            bool isCorrectLen = false;
+            foreach(var item in TLVs)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                if(item.Tag == "4F")
+                {
+                    hasTag4F = true;
+                    if(item.Len >= 5 && item.Len <= 16)
+                    {
+                        isCorrectLen = true;
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+            }
+            if(hasTag4F && isCorrectLen)
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 
@@ -108,22 +117,31 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            var item = from tlv in TLVs where tlv.Tag == "50" select tlv;
-            var item1 = from tlv in TLVs where tlv.Level == 3 select tlv;
-
-            var result = item.Union(item1);
-
-            if (result.FirstOrDefault() == null ||
-                result.Count() != 1 ||
-                result.First().Len < 1 ||
-                result.First().Len > 16)
+            bool hasTag50 = false;
+            bool isCorrectLen = false;
+            foreach (var item in TLVs)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                if (item.Tag == "50")
+                {
+                    hasTag50 = true;
+                    if (item.Len >= 1 && item.Len <= 16)
+                    {
+                        isCorrectLen = true;
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+            }
+            if (hasTag50 && isCorrectLen)
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 
@@ -135,22 +153,16 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var tag61SubItems = new List<string>() { "50", "9F12", "87", "73" };
-            var items = from tlv in TLVs where tlv.Level == 3 select tlv;
-
-            bool hasOtherTag = false;
-            foreach(var item in items)
+            List<string> tags = new List<string>() { "50", "9F12", "87", "73" };
+            foreach (var item in TLVs)
             {
-                if(!tag61SubItems.Contains(item.Tag))
+                if (!tags.Contains(item.Tag))
                 {
-                    hasOtherTag = true;
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    return;
                 }
             }
-            if(!hasOtherTag)
-            {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -161,46 +173,128 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var item = from tlv in TLVs where tlv.Tag == "9F12" select tlv;
-            if(item.FirstOrDefault() != null )
+            foreach (var item in TLVs)
             {
-                var tag9F12 = item.First();
-                var str9F12 = Utils.BcdToStr(tag9F12.Value);
-                if(tag9F12.Len < 1 ||
-                    tag9F12.Len > 16 ||
-                    !CaseUtil.IsAlpha(str9F12))
+                if (item.Tag == "9F12")
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                }
-                else
-                {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    string value = UtilLib.Utils.BcdToStr(item.Value);
+                    if (item.Len >= 1 &&
+                        item.Len <= 16 &&
+                        CaseUtil.IsAlpha(value))
+                    {
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                    break;
                 }
             }
         }
 
         /// <summary>
-        /// 87的长度是否为1字节
+        /// 87的长度是否为1字节,值的合规性检测
         /// </summary>
         public void PBOC_rPSEDIR_SJHGX_010()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var item = from tlv in TLVs where tlv.Tag == "87" select tlv;
-            if (item.FirstOrDefault() != null)
+            foreach(var item in TLVs)
             {
-                if (item.First().Len != 1)
+                if(item.Tag == "87")
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                }
-                else
-                {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    var tag87Value = Convert.ToInt16(item.Tag);
+                    if (item.Len == 1 &&
+                        ((tag87Value >= 0 && tag87Value <= 0xF) ||
+                        (tag87Value > 0x80 && tag87Value <= 0x8F))
+                        )
+                    {
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);                       
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// PSE的FCI中有9F11的话在PSE的DIR文件中是否存在9F12
+        /// </summary>
+        public void PBOC_rPSEDIR_SJHGX_011()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            foreach(var item in TLVs)
+            {
+                if(item.Tag == "9F11")
+                {
+                    string tag9F12 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F12");
+                    if (string.IsNullOrEmpty(tag9F12))
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测4F和50的一致性
+        /// </summary>
+        public void PBOC_sPSEDIR_GLX_001()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            List<Tuple<string, string>> tuples = new List<Tuple<string, string>>()
+             {
+                 new Tuple<string, string>("A000000333010101","556E696F6E506179204465626974"),
+                 new Tuple<string, string>("A000000333010102","556E696F6E50617920437265646974"),
+             };
+
+            var tag4F = CaseUtil.GetTag("4F", TLVs);
+            var tag50 = CaseUtil.GetTag("50", TLVs);
+
+            foreach(var item in tuples)
+            {
+                if(item.Item1 == tag4F)
+                {
+                    if(item.Item2 == tag50)
+                    {
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// PSE DIR tag重复性检测
+        /// </summary>
+        public void PBOC_rPSEDIR_CFX_001()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            List<string> duplexTags = new List<string>();
+            if(CaseUtil.IsUniqTag(response.Response,out duplexTags))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+            else
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            }
+        }
 
     }
 }

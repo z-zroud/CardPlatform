@@ -72,7 +72,12 @@ namespace CardPlatform.Config
             if (doc != null)
             {
                 var root = doc.Root;
-                var apps = new List<string> { Constant.APP_UICS, Constant.APP_ECC, Constant.APP_QUICS };
+                var apps = new List<string> {
+                    Constant.APP_PSE,
+                    Constant.APP_PPSE,
+                    Constant.APP_UICS,
+                    Constant.APP_ECC,
+                    Constant.APP_QUICS };
                 foreach(var app in apps)
                 {
                     var appNode = root.Element(app);

@@ -13,6 +13,66 @@ namespace CardPlatform.Cases
 
     public static class CaseUtil
     {
+        //public static List<List<TLV>> GetMultSubTags(string parentTag, List<TLV> tags)
+        //{
+        //    int level = 0;
+        //    bool start = false; //用于什么时候保存tag
+        //    foreach(var item in tags)
+        //    {
+        //        if(item.Tag == parentTag)
+        //        {
+        //            level = item.Level; //level保存父模板的层次，则子tag为父模板的下一级，直到遍历结束或者遇到和父模板层级一样的模板
+        //            start = true;
+        //        }
+        //        if(start && item.Level == level + 1)
+        //        {
+
+        //        }
+        //    }
+        //}
+        public static List<TLV> GetSubTags(string parentTag,List<TLV> tags)
+        {
+            int level = 0;
+            bool start = false; //用于什么时候保存tag
+            var subTags = new List<TLV>();
+            foreach (var item in tags)
+            {
+                if (item.Tag == parentTag)
+                {
+                    level = item.Level; //level保存父模板的层次，则子tag为父模板的下一级，直到遍历结束或者遇到和父模板层级一样的模板
+                    start = true;
+                }
+                if (start && item.Level == level + 1)
+                {
+                    subTags.Add(item);
+                }
+                if(start && item.Level == level)
+                {
+                    start = false;
+                }
+            }
+            return subTags;
+        }
+
+        /// <summary>
+        /// 从tags集合中获取指定的tag
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="tags"></param>
+        /// <returns></returns>
+        public static string GetTag(string tag, List<TLV> tags)
+        {
+            foreach(var item in tags)
+            {
+                if (item.Tag == tag)
+                    return item.Value;
+            }
+            return string.Empty;
+        }
+
+        
+
+
         /// <summary>
         /// 比较数据是否以startBuffer开头
         /// </summary>
@@ -165,6 +225,51 @@ namespace CardPlatform.Cases
             return result;
         } 
 
+        /// <summary>
+        /// 判断某个模板下是否有tag重复
+        /// </summary>
+        /// <param name="parentTemplate"></param>
+        /// <param name="tags"></param>
+        /// <returns></returns>
+        public static bool HasDuplexTag(string parentTemplate, List<TLV> tags)
+        {
+            var subTags = GetSubTags(parentTemplate, tags);
+            bool result = false;
+            Dictionary<string, TLV> tagsDict = new Dictionary<string, TLV>();
+            foreach (var item in subTags)
+            {
+                if (tagsDict.ContainsKey(item.Tag))
+                {
+                    result = true;
+                    break;
+                }
+                else
+                {
+                    tagsDict.Add(item.Tag, item);
+                }
+            }
+            return result;
+        }
+
+        public static bool HasDuplexTag(List<TLV> tags)
+        {
+            bool result = false;
+            Dictionary<string, TLV> tagsDict = new Dictionary<string, TLV>();
+            foreach (var item in tags)
+            {
+                if (tagsDict.ContainsKey(item.Tag))
+                {
+                    result = true;
+                    break;
+                }
+                else
+                {
+                    tagsDict.Add(item.Tag, item);
+                }
+            }
+            return result;
+        }
+
         /// 判断字符串是否为数字字母组合
         /// </summary>
         /// <param name="str"></param>
@@ -200,6 +305,23 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
+        /// 判断是否为数字字母
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsAplhaDigit(string str)
+        {
+            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            foreach (var c in str)
+            {
+                if (!alphaNum.Contains(c))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 判断tag57格式是否正确
         /// </summary>
         /// <param name="tag57"></param>
@@ -210,6 +332,10 @@ namespace CardPlatform.Cases
             string format2 = "0123456789DF";
             string format3 = "0123456789";
             int len = tag57.Length;
+            if(len < 16 || len > 19)
+            {
+                return false;   //卡号长度检测
+            }
             if(len % 2 != 0)
             {
                 if(tag57[len - 1] != 'F')

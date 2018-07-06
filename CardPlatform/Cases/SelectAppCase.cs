@@ -51,32 +51,30 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 6F模板下只能包含Tag84和A5模板，顺序不能颠倒,84的长度是否正确且在5～16字节之间
+        /// 6F模板下只能并且包含Tag84和A5模板，顺序不能颠倒
         /// </summary>
         public void PBOC_sAID_SJHGX_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var items = from tlv in TLVs where tlv.Level == 1 select tlv;
-            if(items.Count() != 2)
+            var template6F = new List<TLV>();
+            foreach (var item in TLVs)
+            {
+                if (item.Level == 1)
+                {
+                    template6F.Add(item);
+                }
+            }
+            if (template6F.Count != 2 ||
+                template6F[0].Tag != "84" ||
+                template6F[1].Tag != "A5")
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
             else
             {
-                var itemList = items.ToList();
-                if(itemList[0].Tag != "84" ||
-                    itemList[0].Len < 5 ||
-                    itemList[0].Len > 16 ||
-                    itemList[1].Tag != "A5")
-                {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                }
-                else
-                {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                }
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
@@ -109,15 +107,31 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            var item = from tlv in TLVs where tlv.Tag == "50" select tlv;
-            if(item == null || item.Count() != 1)
+            bool hasTag50 = false;
+            bool isCorrectLen = false;
+            foreach (var item in TLVs)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                if (item.Tag == "50")
+                {
+                    hasTag50 = true;
+                    if (item.Len >= 1 && item.Len <= 16)
+                    {
+                        isCorrectLen = true;
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+            }
+            if (hasTag50 && isCorrectLen)
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 
@@ -172,26 +186,30 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 5F2D的长度必须是2字节的倍数，2～8字节之间,5F2D转换后的语言是否合规
+        /// 检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读字符串)
         /// </summary>
         public void PBOC_sAID_SJHGX_010()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var tag5F2D = from tlv in TLVs where tlv.Tag == "5F2D" select tlv;
-            if (tag5F2D.First() != null)
+            foreach (var item in TLVs)
             {
-                string value = UtilLib.Utils.BcdToStr(tag5F2D.First().Value);
-                if (tag5F2D.First().Value.Length % 2 != 0 &&
-                    CaseUtil.IsExpectedLen(tag5F2D.First().Value,2,8) &&
-                    CaseUtil.IsAlpha(value))
+                if (item.Tag == "5F2D")
                 {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                }
-                else
-                {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    string value = UtilLib.Utils.BcdToStr(item.Value);
+                    if (item.Len % 2 == 0 &&
+                        item.Len >= 2 &&
+                        item.Len <= 8 &&
+                        CaseUtil.IsAlpha(value))
+                    {
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                    break;
                 }
             }
         }
@@ -201,7 +219,31 @@ namespace CardPlatform.Cases
         /// </summary>
         public void PBOC_sAID_SJHGX_012()
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
 
+            foreach (var item in TLVs)
+            {
+                if (item.Tag == "9F11")
+                {
+                    var tag9F11Value = Convert.ToInt16(item.Value);
+                    if (item.Len == 1 &&
+                        tag9F11Value >= 1 &&
+                        tag9F11Value <= 10)
+                    {
+                        var pse9F11 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F11");
+                        if(pse9F11 == item.Value)
+                            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        else
+                            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -209,7 +251,27 @@ namespace CardPlatform.Cases
         /// </summary>
         public void PBOC_sAID_SJHGX_013()
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
 
+            foreach (var item in TLVs)
+            {
+                if (item.Tag == "9F12")
+                {
+                    string value = UtilLib.Utils.BcdToStr(item.Value);
+                    if (item.Len >= 1 &&
+                        item.Len <= 16 &&
+                        CaseUtil.IsAlpha(value))
+                    {
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    }
+                    else
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                    break;
+                }
+            }
         }
 
         /// <summary>
@@ -217,7 +279,26 @@ namespace CardPlatform.Cases
         /// </summary>
         public void PBOC_sAID_SJHGX_015()
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
 
+            foreach (var item in TLVs)
+            {
+                if (item.Tag == "9F4D")
+                {
+                    if(item.Len == 2)
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    else
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+                if (item.Tag == "DF4D")
+                {
+                    if (item.Len == 2)
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    else
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+            }
         }
 
         /// <summary>

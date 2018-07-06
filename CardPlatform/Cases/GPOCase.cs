@@ -53,6 +53,7 @@ namespace CardPlatform.Cases
             }
         }
 
+
         /// <summary>
         /// 去除AIP后检查AFL是否为4字节的倍数
         /// </summary>
@@ -99,6 +100,29 @@ namespace CardPlatform.Cases
             {
                 TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
+        }
+
+        /// <summary>
+        /// 按4字节分组后的AFL，第2个字节应该小于第3个字节
+        /// </summary>
+        public void PBOC_GPO_ZQX_002()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
+            int count = tag94.Length / 8;
+            for(int i = 0; i < count; i++)
+            {
+                var firstRecord = Convert.ToInt16(tag94.Substring(2 + i * 8, 2));
+                var secondRecord = Convert.ToInt16(tag94.Substring(4 + i * 8, 2));
+
+                if (firstRecord > secondRecord)
+                {
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CardPlatform.Business;
+using CardPlatform.Common;
 using UtilLib;
 
 namespace CardPlatform.Helper

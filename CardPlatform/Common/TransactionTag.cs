@@ -1,9 +1,8 @@
 ﻿using CplusplusDll;
 using System;
 using System.Collections.Generic;
-using CardPlatform.Common;
 
-namespace CardPlatform.Business
+namespace CardPlatform.Common
 {
 
 

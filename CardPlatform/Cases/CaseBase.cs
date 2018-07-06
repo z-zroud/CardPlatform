@@ -74,7 +74,7 @@ namespace CardPlatform.Cases
             ViewModelLocator locator = new ViewModelLocator();
             var compareObj = DataTemplateConfig.GetInstance();
             foreach (var tlv in TLVs)
-            {
+            {                               
                 foreach (var item in locator.TemplateCompare.TemplateComparedInfos)
                 {
                     if(CurrentApp == item.CurrentApp && Step == item.Step)
@@ -91,6 +91,7 @@ namespace CardPlatform.Cases
                             {
                                 item.ActualLevel = item.ConfigLevel;
                             }
+                            break;
                         }
                     }
                 }
