@@ -177,7 +177,7 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="response"></param>
         /// <returns></returns>
-        protected bool ParseTLVAndSave(TransactionStep step,string response)
+        protected bool SaveTags(TransactionStep step,string response)
         {
             bool result = false;
             if (DataParse.IsTLV(response))

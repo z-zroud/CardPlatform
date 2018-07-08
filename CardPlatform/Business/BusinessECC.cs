@@ -127,7 +127,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseTLVAndSave(TransactionStep.SelectApp, response.Response))
+                if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAppCase();
                     excuteCase.ExcuteCase(TransactionStep.SelectApp, response);
@@ -190,7 +190,7 @@ namespace CardPlatform.Business
                     baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!ParseTLVAndSave(TransactionStep.ReadRecord,resp.Response))
+                if (!SaveTags(TransactionStep.ReadRecord,resp.Response))
                 {
                     return false;
                 }
@@ -200,9 +200,9 @@ namespace CardPlatform.Business
             if(tag9F74.Length == 12)
             {
                 var resp = APDU.GetDataCmd("9F79");
-                ParseTLVAndSave(TransactionStep.GetData,resp.Response);
+                SaveTags(TransactionStep.GetData,resp.Response);
                 resp = APDU.GetDataCmd("9F6D");
-                ParseTLVAndSave(TransactionStep.GetData,resp.Response);
+                SaveTags(TransactionStep.GetData,resp.Response);
                 var tag9F79 = tagDict.GetTag("9F79");
                 if(int.Parse(tag9F79) > 0)
                 {
@@ -377,7 +377,7 @@ namespace CardPlatform.Business
                 }
                 response = APDU.GACCmd(Constant.TC_CDA, CDOL1Data);
 
-                if (ParseTLVAndSave(TransactionStep.TerminalActionAnalyze,response.Response))
+                if (SaveTags(TransactionStep.TerminalActionAnalyze,response.Response))
                 {
                     if(curTransAlgorithmCategory == AlgorithmCategory.DES)
                     {

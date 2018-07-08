@@ -30,9 +30,10 @@ namespace CardPlatform.Business
         {
             transTag.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTrans(aid, doDesTrans, doSMTrans);
-            locator.Terminal.TermianlSettings.Tag9F7A = "00";   //电子现金支持指示器
+            locator.Terminal.TermianlSettings.Tag9F7A = "00";   //电子现金支持指示器(这里走借贷记交易流程)
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型
             locator.Terminal.TermianlSettings.Tag9F66 = "46000000"; //终端交易属性
+
             var songJianHelper = new SongJianHelper(PersoFile);
 
             // 做国际算法交易
@@ -115,9 +116,27 @@ namespace CardPlatform.Business
                 return false;
             }
             GetRequirementData();   //在脱机之前先进行必要数据的获取
-            OfflineAuthcation();
+
+            string AIP = transTag.GetTag(TransactionStep.GPO, "82");
+            if(IsSupportSDA(AIP) || IsSupportDDA(AIP) || IsSupportCDA(AIP))
+            {
+                OfflineAuthcation();
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "脱机数据认证不支持");
+            }
+            
             HandleLimitation();
-            CardHolderVerify();
+            if(IsSupportCardHolderVerify(AIP))
+            {
+                CardHolderVerify();
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "持卡人验证不支持");
+            }
+            
             TerminalRiskManagement();
             TerminalActionAnalyze();
 
@@ -140,7 +159,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if (response.SW == 0x9000)
             {
-                if (ParseTLVAndSave(TransactionStep.SelectApp, response.Response))
+                if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     IExcuteCase stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS};
                     stepCase.ExcuteCase(TransactionStep.SelectApp, response);
@@ -162,26 +181,32 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected List<AFL> GPOEx()
         {
-            var AFLs = new List<AFL>();
+            var afls = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string tag9F38 = transTag.GetTag(TransactionStep.SelectApp, "9F38");
             if(string.IsNullOrEmpty(tag9F38))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag9F38");
-                return AFLs;
+                return afls;
             }
             var tls = DataParse.ParseTL(tag9F38);
             string pdolData = string.Empty;
             foreach (var tl in tls)
             {
-                pdolData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                if(string.IsNullOrEmpty(terminalData))
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端数据tag{0}不存在", tl.Tag);
+                    return afls;
+                }
+                pdolData += terminalData;
             }
 
             ApduResponse response = base.GPO(pdolData);
             if(response.SW != 0x9000)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令失败，SW={0}", response.SW);
-                return AFLs;
+                return afls;
             }
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
@@ -192,15 +217,15 @@ namespace CardPlatform.Business
             else
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO响应数据格式解析不正确");
-                return AFLs;
+                return afls;
             }
 
-            AFLs = DataParse.ParseAFL(transTag.GetTag(TransactionStep.GPO, "94"));
+            afls = DataParse.ParseAFL(transTag.GetTag(TransactionStep.GPO, "94"));
 
             IExcuteCase stepCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
             stepCase.ExcuteCase(TransactionStep.GPO, response);
 
-            return AFLs;
+            return afls;
         }
 
         /// <summary>
@@ -220,7 +245,7 @@ namespace CardPlatform.Business
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!ParseTLVAndSave(TransactionStep.ReadRecord,resp.Response))
+                if (!SaveTags(TransactionStep.ReadRecord,resp.Response))
                 {
                     return false;
                 }
@@ -237,31 +262,31 @@ namespace CardPlatform.Business
 
             TagStandard[] tagStandards =
             {
-                new TagStandard("9F51",2,TipLevel.Failed),
-                new TagStandard("9F52",2,TipLevel.Failed),
-                new TagStandard("9F53",1,TipLevel.Failed),
-                new TagStandard("9F54",6,TipLevel.Failed),
-                new TagStandard("9F55",0,TipLevel.Failed),
-                new TagStandard("9F56",1,TipLevel.Failed),
-                new TagStandard("9F57",2,TipLevel.Failed),
-                new TagStandard("9F58",1,TipLevel.Failed),
-                new TagStandard("9F59",1,TipLevel.Failed),
-                new TagStandard("9F5C",6,TipLevel.Failed),
-                new TagStandard("9F5D",0,TipLevel.Failed),
-                new TagStandard("9F72",1,TipLevel.Failed),
-                new TagStandard("9F75",1,TipLevel.Failed),
-                new TagStandard("9F76",0,TipLevel.Failed),
+                new TagStandard("9F51",2,TipLevel.Failed),  //如果执行频度检查，需要此应用货币代码
+                new TagStandard("9F52",2,TipLevel.Failed),  //如果支持发卡行认证，需要ADA应用缺省行为
+                new TagStandard("9F53",1,TipLevel.Failed),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
+                new TagStandard("9F54",6,TipLevel.Failed),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
+                new TagStandard("9F55",0,TipLevel.Warn),
+                new TagStandard("9F56",1,TipLevel.Failed),  //如果支持发卡行认证，需要此发卡行认证指示位
+                new TagStandard("9F57",2,TipLevel.Warn),  //如果支持卡片频度检查，需要此发卡行国家代码
+                new TagStandard("9F58",1,TipLevel.Failed),  //如果执行卡片频度检查，需要此连续脱机交易下限
+                new TagStandard("9F59",1,TipLevel.Failed),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
+                new TagStandard("9F5C",6,TipLevel.Failed),  //累计脱机交易金额上限
+                new TagStandard("9F5D",0,TipLevel.Warn),
+                new TagStandard("9F72",1,TipLevel.Warn),  //连续脱机交易限制数
+                new TagStandard("9F75",1,TipLevel.Warn),  //累计脱机交易金额(双货币)
+                new TagStandard("9F76",0,TipLevel.Failed),  //第二应用货币代码
                 new TagStandard("9F77",0,TipLevel.Failed),
                 new TagStandard("9F78",0,TipLevel.Failed),
                 new TagStandard("9F79",0,TipLevel.Failed),
-                new TagStandard("9F4F",0,TipLevel.Failed),
+                new TagStandard("9F4F",0,TipLevel.Failed),  //交易日志格式
                 new TagStandard("9F68",0,TipLevel.Failed),
-                new TagStandard("9F6B",0,TipLevel.Failed),
+                new TagStandard("9F6B",0,TipLevel.Warn),
                 new TagStandard("9F6D",0,TipLevel.Failed),
-                new TagStandard("9F36",2,TipLevel.Failed),
-                new TagStandard("9F13",0,TipLevel.Failed),
-                new TagStandard("9F17",0,TipLevel.Failed),
-                new TagStandard("DF4F",0,TipLevel.Failed),
+                new TagStandard("9F36",2,TipLevel.Failed),  //应用交易计数器
+                new TagStandard("9F13",0,TipLevel.Failed),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
+                new TagStandard("9F17",0,TipLevel.Failed),  //如果支持脱机PIN,需要此PIN尝试计数器
+                new TagStandard("DF4F",0,TipLevel.Warn),
                 new TagStandard("DF62",0,TipLevel.Failed),
             };
             for(int i = 0; i < tagStandards.Length; i++)
@@ -296,6 +321,10 @@ namespace CardPlatform.Business
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string AIP = transTag.GetTag(TransactionStep.GPO,"82");
+            if(AIP != "7C00")   //标准默认值
+            {
+                caseObj.TraceInfo(TipLevel.Warn, caseNo, "借贷记AIP不为7C00");
+            }
             if (IsSupportSDA(AIP))
             {
                 if (!SDA())
@@ -359,11 +388,20 @@ namespace CardPlatform.Business
         protected int CardHolderVerify()
         {
             string CVM = transTag.GetTag(TransactionStep.ReadRecord, "8E");
+            //分析8E结构，并枚举CVM方法
             return 0;
         }
 
         protected int TerminalRiskManagement()
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            string AIP = transTag.GetTag(TransactionStep.GPO, "82");
+
+            if(!IsSupportTerminalRiskManagement(AIP))
+            {
+                caseObj.TraceInfo(TipLevel.Warn, caseNo, "卡片不支持终端风险管理");
+                return -1;
+            }
             return 0;
         }
 

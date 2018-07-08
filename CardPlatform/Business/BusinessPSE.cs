@@ -28,7 +28,7 @@ namespace CardPlatform.Business
             {
                 return new List<string>();
             }
-            ParseTLVAndSave(TransactionStep.SelectPSE,response.Response);
+            SaveTags(TransactionStep.SelectPSE,response.Response);
 
             IExcuteCase stepCase = new PSECases() { CurrentApp = Constant.APP_PSE};
             stepCase.ExcuteCase(TransactionStep.SelectPSE, response);

@@ -129,7 +129,7 @@ namespace CardPlatform.Business
             ApduResponse response = base.SelectAid(aid);
             if(response.SW == 0x9000)
             {
-                if(ParseTLVAndSave(TransactionStep.SelectApp, response.Response))
+                if(SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAppCase();
                     excuteCase.ExcuteCase(TransactionStep.SelectApp, response);
@@ -190,7 +190,7 @@ namespace CardPlatform.Business
                 baseCase.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
                 return AFLs;
             }
-            if(ParseTLVAndSave(TransactionStep.GPO,response.Response))
+            if(SaveTags(TransactionStep.GPO,response.Response))
             {               
                 string tag9F26 = tagDict.GetTag("9F26");
                 string tag9F27 = tagDict.GetTag("9F27");
@@ -228,7 +228,7 @@ namespace CardPlatform.Business
                     baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if(!ParseTLVAndSave(TransactionStep.ReadRecord,resp.Response))
+                if(!SaveTags(TransactionStep.ReadRecord,resp.Response))
                 {
                     return false;
                 }               
