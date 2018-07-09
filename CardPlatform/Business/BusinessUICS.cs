@@ -387,7 +387,39 @@ namespace CardPlatform.Business
 
         protected int CardHolderVerify()
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
             string CVM = transTag.GetTag(TransactionStep.ReadRecord, "8E");
+            if(CVM.Length < 10)
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "CVM格式不正确，长度过小");
+                return -1;
+            }
+            string moneyX = CVM.Substring(0, 8);
+            string moneyY = CVM.Substring(8, 8);
+            if(moneyX != "00000000" || moneyY != "00000000")
+            {
+                caseObj.TraceInfo(TipLevel.Warn, caseNo, "金额X或金额Y不为零");
+                return -2;
+            }
+            if(CVM.Substring(16) != "42031E031F00")
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "银联要求CVM为联机PIN+签名+NoCVM");
+            }
+            for(int i = CVM.Length - 16; i < CVM.Length - 2; i += 4)
+            {
+
+                int method = Convert.ToInt32(CVM.Substring(i, 2), 16);
+                int condition = Convert.ToInt32(CVM.Substring(i + 2, 2), 16);
+                if((method & 0x80) == 0)
+                {
+                    caseObj.TraceInfo(TipLevel.Warn, caseNo, "如果CVM{}失败，则持卡人验证失败。推荐如果此CVM失败，应用后续的", CVM.Substring(i, 4));
+                }
+                int methodSixBit = method & 0xC0;
+                if(methodSixBit == 1)   //存在脱机PIN入口，需要判断是否有脱机PIN相关tag
+                {
+                    caseObj.TraceInfo(TipLevel.Warn, caseNo, "存在脱机PIN入口，请注意是否存在脱机PIN相关信息");
+                }
+            }
             //分析8E结构，并枚举CVM方法
             return 0;
         }
