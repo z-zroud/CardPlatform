@@ -514,6 +514,10 @@ namespace CardPlatform.Business
                 }
                 acSessionKey = GenSessionKey(TransSMACKey, KeyType, curTransAlgorithmCategory);
             }
+            if(!CheckTag9F10Mac())
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "9F10后面的MAC必须与工具计算不一致");
+            }
             string AC = transTag.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
             string ARPC;
             if(doDesTrans)
@@ -526,6 +530,10 @@ namespace CardPlatform.Business
             {
                 locator.Terminal.TermianlSettings.Tag8A = "3030";
                 return 0;
+            }
+            else
+            {
+
             }
             return -1;
         }

@@ -47,13 +47,13 @@ int main()
 	{
 		printf("%s\n", readers[i]);
 	}
-    string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
-    string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
+    string dpDir = "F:\\CardPlatform\\bin\\Debug\\DPTest\\";  
+    string rulePath = "F:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
     string dpFormat = "银联";
-    string dpPath = dpDir + dpFormat + "\\0305-MCHIPY4001133120E-100529-26-1.DP";
-    rulePath += "澳门立桥借记_银联_英飞凌.xml";
-    string installParamCfg = "高青汇金_华大_G81140034.xml";
-    GenCpsFile("DpParse_YL_MC.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string dpPath = dpDir + dpFormat + "\\湖南农信社贷记.DP";
+    rulePath += "湖南农信社贷记_银联_英飞凌_05006063.xml";
+    string installParamCfg = "湖南农信社贷记_英飞凌_非扩展_0500605.xml";
+    GenCpsFile("DpParse_YL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
@@ -73,7 +73,7 @@ int main()
     string path = dpDir + dpFormat + "\\conv";
     vector<string> files;
     getFiles(path, files);
-    string installParamDir = "D:\\CardPlatform\\bin\\Debug\\Configuration\\InstallParams\\";
+    string installParamDir = "F:\\CardPlatform\\bin\\Debug\\Configuration\\InstallParams\\";
     string installParamPath = installParamDir + installParamCfg;
 
 

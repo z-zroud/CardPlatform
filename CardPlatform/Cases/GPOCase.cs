@@ -31,8 +31,9 @@ namespace CardPlatform.Cases
         {
             response = (ApduResponse)srcData;
             TLVs = DataParse.ParseTLV(response.Response);
-            CheckTemplateTag(TLVs);
             base.ExcuteCase(step, srcData);
+            CheckTemplateTag(TLVs);
+            
         }
 
         /// <summary>
