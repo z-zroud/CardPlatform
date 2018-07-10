@@ -9,18 +9,20 @@ using System.Reflection;
 
 namespace CardPlatform.Business
 {
-    public class TagStandard
+    public class RequirementData
     {
-        public TagStandard(string tag, int len, TipLevel level)
+        public RequirementData(string tag, int len, TipLevel level,string desc)
         {
             Tag = tag;
             Len = len;
             Level = level;
+            Desc = desc;
         }
 
         public string Tag { get; set; }
         public int Len { get; set; }
         public TipLevel Level { get; set; }
+        public string Desc { get; set; }
     }
 
     /// <summary>

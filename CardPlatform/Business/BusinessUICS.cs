@@ -255,46 +255,47 @@ namespace CardPlatform.Business
             return true;
         }
 
+
         public override void GetRequirementData()
         {
             base.GetRequirementData();
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
-            TagStandard[] tagStandards =
+            RequirementData[] tagStandards =
             {
-                new TagStandard("9F51",2,TipLevel.Failed),  //如果执行频度检查，需要此应用货币代码
-                new TagStandard("9F52",2,TipLevel.Failed),  //如果支持发卡行认证，需要ADA应用缺省行为
-                new TagStandard("9F53",1,TipLevel.Failed),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
-                new TagStandard("9F54",6,TipLevel.Failed),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
-                new TagStandard("9F55",0,TipLevel.Warn),
-                new TagStandard("9F56",1,TipLevel.Failed),  //如果支持发卡行认证，需要此发卡行认证指示位
-                new TagStandard("9F57",2,TipLevel.Warn),  //如果支持卡片频度检查，需要此发卡行国家代码
-                new TagStandard("9F58",1,TipLevel.Failed),  //如果执行卡片频度检查，需要此连续脱机交易下限
-                new TagStandard("9F59",1,TipLevel.Failed),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
-                new TagStandard("9F5C",6,TipLevel.Failed),  //累计脱机交易金额上限
-                new TagStandard("9F5D",0,TipLevel.Warn),
-                new TagStandard("9F72",1,TipLevel.Warn),  //连续脱机交易限制数
-                new TagStandard("9F75",1,TipLevel.Warn),  //累计脱机交易金额(双货币)
-                new TagStandard("9F76",0,TipLevel.Failed),  //第二应用货币代码
-                new TagStandard("9F77",0,TipLevel.Failed),
-                new TagStandard("9F78",0,TipLevel.Failed),
-                new TagStandard("9F79",0,TipLevel.Failed),
-                new TagStandard("9F4F",0,TipLevel.Failed),  //交易日志格式
-                new TagStandard("9F68",0,TipLevel.Failed),
-                new TagStandard("9F6B",0,TipLevel.Warn),
-                new TagStandard("9F6D",0,TipLevel.Failed),
-                new TagStandard("9F36",2,TipLevel.Failed),  //应用交易计数器
-                new TagStandard("9F13",0,TipLevel.Failed),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
-                new TagStandard("9F17",0,TipLevel.Failed),  //如果支持脱机PIN,需要此PIN尝试计数器
-                new TagStandard("DF4F",0,TipLevel.Warn),
-                new TagStandard("DF62",0,TipLevel.Failed),
+                new RequirementData("9F51",2,TipLevel.Failed,""),  //如果执行频度检查，需要此应用货币代码
+                new RequirementData("9F52",2,TipLevel.Failed,""),  //如果支持发卡行认证，需要ADA应用缺省行为
+                new RequirementData("9F53",1,TipLevel.Failed,""),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
+                new RequirementData("9F54",6,TipLevel.Failed,""),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
+                new RequirementData("9F55",0,TipLevel.Warn,""),
+                new RequirementData("9F56",1,TipLevel.Failed,""),  //如果支持发卡行认证，需要此发卡行认证指示位
+                new RequirementData("9F57",2,TipLevel.Warn,""),  //如果支持卡片频度检查，需要此发卡行国家代码
+                new RequirementData("9F58",1,TipLevel.Failed,""),  //如果执行卡片频度检查，需要此连续脱机交易下限
+                new RequirementData("9F59",1,TipLevel.Failed,""),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
+                new RequirementData("9F5C",6,TipLevel.Failed,""),  //累计脱机交易金额上限
+                new RequirementData("9F5D",0,TipLevel.Warn,""),
+                new RequirementData("9F72",1,TipLevel.Warn,""),  //连续脱机交易限制数
+                new RequirementData("9F75",1,TipLevel.Warn,""),  //累计脱机交易金额(双货币)
+                new RequirementData("9F76",0,TipLevel.Failed,""),  //第二应用货币代码
+                new RequirementData("9F77",0,TipLevel.Failed,""),
+                new RequirementData("9F78",0,TipLevel.Failed,""),
+                new RequirementData("9F79",0,TipLevel.Failed,""),
+                new RequirementData("9F4F",0,TipLevel.Failed,""),  //交易日志格式
+                new RequirementData("9F68",0,TipLevel.Failed,""),
+                new RequirementData("9F6B",0,TipLevel.Warn,""),
+                new RequirementData("9F6D",0,TipLevel.Failed,""),
+                new RequirementData("9F36",2,TipLevel.Failed,""),  //应用交易计数器
+                new RequirementData("9F13",0,TipLevel.Failed,"终端风险管理阶段需要此数据用于新卡检查，发卡行认证通过后，需要设置该值"),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
+                new RequirementData("9F17",0,TipLevel.Failed,""),  //如果支持脱机PIN,需要此PIN尝试计数器
+                new RequirementData("DF4F",0,TipLevel.Warn,""),
+                new RequirementData("DF62",0,TipLevel.Failed,""),
             };
             for(int i = 0; i < tagStandards.Length; i++)
             {
                 var resp = APDU.GetDataCmd(tagStandards[i].Tag);
                 if(resp.SW != 0x9000)
                 {
-                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, "无法获取tag[{0}],返回码:[{1:X}]", tagStandards[i].Tag, resp.SW);
+                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, tagStandards[i].Desc, tagStandards[i].Tag, resp.SW);
                 }
                 else
                 {
@@ -424,6 +425,11 @@ namespace CardPlatform.Business
             return 0;
         }
 
+        /// <summary>
+        /// 终端风险管理为大额交易提供了发卡行授权，确保卡片交易可以周期性的
+        /// 进行联机处理。
+        /// </summary>
+        /// <returns></returns>
         protected int TerminalRiskManagement()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
@@ -431,33 +437,55 @@ namespace CardPlatform.Business
 
             if(!IsSupportTerminalRiskManagement(AIP))
             {
-                caseObj.TraceInfo(TipLevel.Warn, caseNo, "卡片不支持终端风险管理");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "卡片不支持终端风险管理");
                 return -1;
+            }
+            var tag9F14 = transTag.GetTag(TransactionStep.ReadRecord, "9F14");
+            var tag9F23 = transTag.GetTag(TransactionStep.ReadRecord, "9F23");
+            if(string.IsNullOrEmpty(tag9F14) || string.IsNullOrEmpty(tag9F23))
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "发卡行若支持终端频度检查，则需要此数据");
             }
             return 0;
         }
 
+        /// <summary>
+        /// 终端行为分析，1，终端检查脱机处理结果，决定交易是拒绝/接受/联机(默认联机)
+        /// 2. 终端请求卡片生成密文
+        /// </summary>
+        /// <returns></returns>
         protected int TerminalActionAnalyze()
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
             string CDOL1 = transTag.GetTag(TransactionStep.ReadRecord, "8C");
             ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
-            if(resp.SW == 0x9000)
+            if(resp.SW != 0x9000)
             {
-                var tlvs = DataParse.ParseTLV(resp.Response);
-                if(tlvs.Count > 0 && tlvs[0].Tag == "80")
-                {
-                    string result = tlvs[0].Value;  //第一次GAC返回的数据
-                    string tag9F27 = result.Substring(0, 2);
-                    string tag9F36 = result.Substring(2, 4);
-                    string tag9F26 = result.Substring(6, 16);
-                    string tag9F10 = result.Substring(22);
-
-                    transTag.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
-                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
-                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
-                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
-                }
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "第一次发送GAC命令失败,返回{04X}",resp.SW);
+                return - 1;
             }
+            //需要对IAC tag进行分析
+
+            var tlvs = DataParse.ParseTLV(resp.Response);
+            if(tlvs.Count > 0 && tlvs[0].Tag == "80")
+            {
+                string result = tlvs[0].Value;  //第一次GAC返回的数据
+
+                string tag9F27 = result.Substring(0, 2);
+                string tag9F36 = result.Substring(2, 4);
+                string tag9F26 = result.Substring(6, 16);
+                string tag9F10 = result.Substring(22);
+
+                transTag.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
+                transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
+                transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
+                transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo,"第一次GAC返回数据有误，请检查是否以80开头");
+            }
+
 
             return 0;
         }
