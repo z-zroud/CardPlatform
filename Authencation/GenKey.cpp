@@ -321,8 +321,10 @@ int GenDesIssuerPublicKey(
 	const char* issuerPublicCert,
 	const char* ipkRemainder,
 	const char* issuerExponent,
+    const char* pin,
 	char* issuerPublicKey)
 {
+    int result = 0;
 	char recoveryData[2046] = { 0 };
 
 	//从发卡行证书中获取恢复数据
@@ -332,7 +334,7 @@ int GenDesIssuerPublicKey(
 
 	if (strRecoveryData.substr(0, 4) != "6A02" || strRecoveryData.substr(recoveryDataLen - 2, 2) != "BC")
 	{
-		return 1;	//如果恢复数据的开头不是"6A02"并且结尾不是"BC",认证失败
+		result += 1;	//如果恢复数据的开头不是"6A02"并且结尾不是"BC",认证失败
 	}
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
 	string hashDataInput;
@@ -349,19 +351,41 @@ int GenDesIssuerPublicKey(
 	hashResult = sha1.GetBCDHash(hashDataInput);
 	if (hashResult != hashData)
 	{
-		return 2;
+		result += 2;   //恢复数据中的hash值与工具计算得到的hash值不一致
 	}
+    string bin = strRecoveryData.substr(4, 8);
+    int index = bin.find('F');
+    if (index != string::npos)
+    {
+        bin = bin.substr(0, index); //发卡行标识不匹配主账号最左边的3-8个数字
+    }
+    if (bin != string(pin).substr(0, bin.length()))
+    {
+        result += 4;   
+    }
+    string expiryDate = strRecoveryData.substr(14, 2) + strRecoveryData.substr(12, 2);
+    int iExpiryDate = atoi(expiryDate.c_str());
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    char dateBuf[5] = { 0 };
+    sprintf_s(dateBuf, 5, "%.2d%.2d", st.wYear, st.wMonth);
+    int today = atoi(dateBuf);
+    if (iExpiryDate <= today)
+    {
+        result += 8;    //证书已失效
+    }
+
 	//printf("%s", strRecoveryData.c_str());
 	int caLen = strlen(caPublicKey);
 	int issuerLen = stoi(strRecoveryData.substr(26, 2), 0, 16) * 2;
 	if (issuerLen <= caLen - 72)    //说明strRecoveryData包含了caLen - 72 - issuserLen 长度的"BB"
 	{
 		strcpy(issuerPublicKey, strRecoveryData.substr(30, issuerLen).c_str());
-		return 0;
+		return result;
 	}
 	strcpy(issuerPublicKey, (strRecoveryData.substr(30, recoveryDataLen - 72) + ipkRemainder).c_str());
 
-	return 0;
+	return result;
 }
 
 int GenDesICCPublicKey(

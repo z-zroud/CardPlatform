@@ -41,6 +41,7 @@ extern "C" GENKEY_API  int GenDesIssuerPublicKey(
 	const char* issuerPublicCert, 
 	const char* ipkRemainder, 
 	const char* issuerExponent,
+    const char* pin,
 	char* issuerPublicKey);
 
 /********************************************************************************
