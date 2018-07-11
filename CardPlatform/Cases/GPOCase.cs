@@ -90,7 +90,7 @@ namespace CardPlatform.Cases
                 for(int j = i + 1; j < tls.Count; j++)
                 {
                     if(tls[i].SFI == tls[j].SFI &&
-                        tls[i].RecordNo == tls[j].SFI)
+                        tls[i].RecordNo == tls[j].RecordNo)
                     {
                         TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                         hasDuplex = true;

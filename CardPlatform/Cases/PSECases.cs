@@ -142,10 +142,11 @@ namespace CardPlatform.Cases
                 {
                     if (item.Tag == "88" && item.Len == 1)
                     {
-                        var tag88Value = Convert.ToInt16(item.Value);
-                        if (tag88Value > 1 && tag88Value < 1F)
+                        var tag88Value = Convert.ToInt16(item.Value, 16);
+                        if (tag88Value >= 1 && tag88Value <= 1F)
                         {
                             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                            return;
                         }
                     }
                 }

@@ -152,9 +152,9 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            List<string> tags = new List<string>() { "50", "9F12", "87", "73" };
-            foreach (var item in TLVs)
+            var tag61SubTags = CaseUtil.GetSubTags("61", TLVs);
+            List<string> tags = new List<string>() { "4F","50", "9F12", "87", "73" };
+            foreach (var item in tag61SubTags)
             {
                 if (!tags.Contains(item.Tag))
                 {
@@ -205,7 +205,7 @@ namespace CardPlatform.Cases
             {
                 if(item.Tag == "87")
                 {
-                    var tag87Value = Convert.ToInt16(item.Tag);
+                    var tag87Value = Convert.ToInt16(item.Value, 16);
                     if (item.Len == 1 &&
                         ((tag87Value >= 0 && tag87Value <= 0xF) ||
                         (tag87Value > 0x80 && tag87Value <= 0x8F))

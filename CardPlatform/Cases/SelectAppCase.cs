@@ -89,7 +89,7 @@ namespace CardPlatform.Cases
             var tag84 = from tlv in TLVs where tlv.Tag == "84" select tlv;
             if (tag84.First() != null)
             {
-                if (CaseUtil.IsExpectedLen(tag84.First().Value, 5, 16))
+                if (CaseUtil.IsExpectedLen(tag84.First().Value, 10, 32))
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
@@ -144,7 +144,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             var items = new List<string>() { "50", "87", "9F38", "5F2D", "9F11", "9F12", "BF0C" };
-            var tlvs = from tlv in TLVs where tlv.Level == 1 select tlv;
+            var tlvs = CaseUtil.GetSubTags("A5", TLVs);
 
             bool hasOtherTag = false;
             foreach(var tlv in tlvs)
@@ -153,6 +153,7 @@ namespace CardPlatform.Cases
                 {
                     hasOtherTag = true;
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    break;
                 }
             }
             if (!hasOtherTag)
@@ -174,7 +175,7 @@ namespace CardPlatform.Cases
             var tag87 = from tlv in TLVs where tlv.Tag == "87" select tlv;
             if (tag87.First() != null)
             {
-                if (tag87.First().Value.Length == 1)
+                if (tag87.First().Value.Length == 2)
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
@@ -226,16 +227,19 @@ namespace CardPlatform.Cases
             {
                 if (item.Tag == "9F11")
                 {
-                    var tag9F11Value = Convert.ToInt16(item.Value);
+                    var tag9F11Value = Convert.ToInt16(item.Value, 16);
                     if (item.Len == 1 &&
                         tag9F11Value >= 1 &&
                         tag9F11Value <= 10)
                     {
                         var pse9F11 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F11");
-                        if(pse9F11 == item.Value)
-                            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                        else
-                            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        if(!string.IsNullOrEmpty(pse9F11))
+                        {
+                            if (pse9F11 == item.Value)
+                                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                            else
+                                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        }
                     }
                     else
                     {

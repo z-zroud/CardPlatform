@@ -28,8 +28,15 @@ namespace CardPlatform.Helper
         public string GetServiceCode()
         {
             int indexD = tag57.IndexOf('D');
-            string sc = "0" + tag57.Substring(indexD + 4, 3);
+            string sc = "0" + tag57.Substring(indexD + 5, 3);
             return sc;
+        }
+
+        public string GetExpiredDate()
+        {
+            int indexD = tag57.IndexOf('D');
+            string date = tag57.Substring(indexD + 1, 4);
+            return date;
         }
     }
 }

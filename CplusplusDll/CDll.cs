@@ -143,6 +143,7 @@ namespace CplusplusDll
         public extern static void DES_GenRecovery(string publicKey, string publicKeyExp, string encryptionData, StringBuilder recoveryData, int len);
 
         #endregion
+
         #region import DataParse.dll
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public struct TLVStruct

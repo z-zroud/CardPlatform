@@ -127,6 +127,11 @@ namespace CardPlatform.Business
         }
         #endregion
 
+        public TipLevel GetTipLevel(bool result, TipLevel level = TipLevel.Failed)
+        {
+            return result == true ? TipLevel.Sucess : level;
+        }
+
         /// <summary>
         /// 设置DES应用秘钥
         /// </summary>

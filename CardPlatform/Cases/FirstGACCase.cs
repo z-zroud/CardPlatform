@@ -27,8 +27,7 @@ namespace CardPlatform.Cases
             response = (ApduResponse)srcData;
             TLVs = DataParse.ParseTLV(response.Response);
             base.ExcuteCase(step, srcData);
-            CheckTemplateTag(TLVs);
-            
+            CheckTemplateTag(TLVs);           
         }
     }
 }
