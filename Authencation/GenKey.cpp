@@ -322,6 +322,7 @@ int GenDesIssuerPublicKey(
 	const char* ipkRemainder,
 	const char* issuerExponent,
     const char* pin,
+    const char* tag5F24,
 	char* issuerPublicKey)
 {
     int result = 0;
@@ -330,11 +331,15 @@ int GenDesIssuerPublicKey(
 	//从发卡行证书中获取恢复数据
 	RSA_STD((char*)caPublicKey, (char*)issuerExponent, (char*)issuerPublicCert, recoveryData);
 	int recoveryDataLen = strlen(recoveryData);
+    if (recoveryData == 0)
+    {
+        return result + 0x1 + 0x80;
+    }
 	string strRecoveryData(recoveryData);
 
 	if (strRecoveryData.substr(0, 4) != "6A02" || strRecoveryData.substr(recoveryDataLen - 2, 2) != "BC")
 	{
-		result += 1;	//如果恢复数据的开头不是"6A02"并且结尾不是"BC",认证失败
+		result += 0x2;	//如果恢复数据的开头不是"6A02"并且结尾不是"BC",认证失败
 	}
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
 	string hashDataInput;
@@ -351,7 +356,7 @@ int GenDesIssuerPublicKey(
 	hashResult = sha1.GetBCDHash(hashDataInput);
 	if (hashResult != hashData)
 	{
-		result += 2;   //恢复数据中的hash值与工具计算得到的hash值不一致
+		return result += 0x4 + 0x80;   //恢复数据中的hash值与工具计算得到的hash值不一致
 	}
     string bin = strRecoveryData.substr(4, 8);
     int index = bin.find('F');
@@ -361,20 +366,25 @@ int GenDesIssuerPublicKey(
     }
     if (bin != string(pin).substr(0, bin.length()))
     {
-        result += 4;   
+        result += 0x08; //恢复数据主账号不匹配   
     }
     string expiryDate = strRecoveryData.substr(14, 2) + strRecoveryData.substr(12, 2);
     int iExpiryDate = atoi(expiryDate.c_str());
     SYSTEMTIME st;
     GetLocalTime(&st);
-    char dateBuf[5] = { 0 };
-    sprintf_s(dateBuf, 5, "%.2d%.2d", st.wYear, st.wMonth);
-    int today = atoi(dateBuf);
+    char dateBuf[12] = { 0 };
+    sprintf_s(dateBuf, 8, "%.2d%.2d", st.wYear, st.wMonth);
+    string todayYYMM = string(dateBuf).substr(2);
+    int today = atoi(todayYYMM.c_str());
     if (iExpiryDate <= today)
     {
-        result += 8;    //证书已失效
+        result += 0x10;    //证书已失效
     }
-
+    int expirydate = atoi(tag5F24);
+    if (iExpiryDate > expirydate)
+    {
+        result += 0x100;    //应用有效期比证书有效期晚
+    }
 	//printf("%s", strRecoveryData.c_str());
 	int caLen = strlen(caPublicKey);
 	int issuerLen = stoi(strRecoveryData.substr(26, 2), 0, 16) * 2;
@@ -395,18 +405,26 @@ int GenDesICCPublicKey(
 	const char* sigStaticData,
 	const char* iccExponent,
 	const char* tag82,
+    const char* pin,
+    const char* tag5F24,
 	char* iccPublicKey)
 {
+    int result = 0;
 	char recoveryData[2046] = { 0 };
 
 	//从发卡行证书中获取恢复数据
 	RSA_STD((char*)issuerPublicKey, (char*)iccExponent, (char*)iccPublicCert, recoveryData);
 	int recoveryDataLen = strlen(recoveryData);
+
+    if (recoveryDataLen == 0)
+    {
+        return result += 0x01 + 0x80;   //无法解出恢复数据
+    }
 	string strRecoveryData(recoveryData);
 
 	if (strRecoveryData.substr(0, 4) != "6A04" || strRecoveryData.substr(recoveryDataLen - 2, 2) != "BC")
 	{//如果恢复数据的开头不是"6A02"并且结尾不是"BC",认证失败
-		return 1;
+		result += 0x02;
 	}
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
 	//Log->Info("Recovery Data:[%s]", strRecoveryData.c_str());
@@ -417,30 +435,59 @@ int GenDesICCPublicKey(
 	string hashResult = sha1.GetBCDHash(hashDataInput);
 	if (hashResult != hashData)
 	{
-		return 2;
+		return result += 0x04 + 0x80;
 	}
+    string account = strRecoveryData.substr(4, 20);
+    int index = account.find('F');
+    if (index != string::npos)
+    {
+        account = account.substr(0, index); //发卡行标识不匹配主账号最左边的3-8个数字
+    }
+    if (account != string(pin))
+    {
+        result += 0x08;
+    }
+    string expiryDate = strRecoveryData.substr(26, 2) + strRecoveryData.substr(24, 2);
+    int iExpiryDate = atoi(expiryDate.c_str());
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    char dateBuf[12] = { 0 };
+    sprintf_s(dateBuf, 8, "%.2d%.2d", st.wYear, st.wMonth);
+    string todayYYMM = string(dateBuf).substr(2);
+    int today = atoi(todayYYMM.c_str());
+    if (iExpiryDate <= today)
+    {
+        result += 0x10;    //证书已失效
+    }
+    int expirydate = atoi(tag5F24);
+    if (iExpiryDate > expirydate)
+    {
+        result += 0x100;    //应用有效期比证书有效期晚
+    }
 	int issuerLen = strlen(issuerPublicKey);
 	int iccLen = stoi(strRecoveryData.substr(38, 2), 0, 16) * 2;
 	if (iccLen <= issuerLen - 84)
 	{
 		strcpy(iccPublicKey, strRecoveryData.substr(42, iccLen).c_str());
-		return 0;
+		return result;
 	}
 
 	strcpy(iccPublicKey, (strRecoveryData.substr(42, recoveryDataLen - 84) + iccRemainder).c_str());
 
-	return 0;
+	return result;
 }
 
 int GenSMIssuerPublicKey(
 	const char* caPublicKey,
 	const char* issuerPublicCert,
     const char* PAN,
+    const char* tag5F24,
 	char* issuerPublicKey)
 {
+    int result = 0;
     if (strlen(issuerPublicCert) < 28 || (issuerPublicCert[0] != '1' || issuerPublicCert[1] != '2'))
     {
-        return 1;   //format error
+        return result += 0x01 + 0x80;   //证书格式错误
     }
     string issuerFlag = string(issuerPublicCert).substr(2, 8);
     int index = issuerFlag.find('F');
@@ -451,12 +498,29 @@ int GenSMIssuerPublicKey(
     string leftPAN = issuerFlag.substr(0, index);
     if (string(PAN).substr(0, index) != leftPAN)
     {
-        return 2;   //issuer mark error
+        result += 0x02;   //issuer mark error
     }
     string issuerPublicKeySignAlogrithmFlag = string(issuerPublicCert).substr(20, 2);
     if (issuerPublicKeySignAlogrithmFlag != "04")
     {
-        return 3;   //issuer public key signed alogrithm falg error
+        result += 0x04;   //issuer public key signed alogrithm falg error
+    }
+    string expiryDate = string(issuerPublicCert).substr(12, 2) + string(issuerPublicCert).substr(10, 2);
+    int iExpiryDate = atoi(expiryDate.c_str());
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    char dateBuf[12] = { 0 };
+    sprintf_s(dateBuf, 8, "%.2d%.2d", st.wYear, st.wMonth);
+    string todayYYMM = string(dateBuf).substr(2);
+    int today = atoi(todayYYMM.c_str());
+    if (iExpiryDate <= today)
+    {
+        result += 0x08;    //证书已失效
+    }
+    int expirydate = atoi(tag5F24);
+    if (iExpiryDate > expirydate)
+    {
+        result += 0x10;    //应用有效期比证书有效期晚
     }
 	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
 	if (DllPBOC_SM2_Verify)
@@ -479,14 +543,14 @@ int GenSMIssuerPublicKey(
 			int ipkLen2 = toBeSignDataLen - 28;
 			if (ipkLen != ipkLen2) //再次校验发卡行公钥长度是否一致
 			{
-				return 4;
+				return result += 0x20;
 			}
 			Tool::SubStr(issuerPublicCert, 28, ipkLen, issuerPublicKey);
-            return 0;
+            
 		}
 	}
 
-	return 5;
+	return result;
 }
 
 int GenSMICCPublicKey(
@@ -495,23 +559,41 @@ int GenSMICCPublicKey(
 	const char* signStaticAppData,
     const char* tag82,
     const char* PAN,
+    const char* tag5F24,
 	char* iccPublicKey)
 {
-
-    if (strlen(iccPublicCert) < 40)
+    int result = 0;
+    if (strlen(iccPublicCert) < 40 || iccPublicCert[0] != '1' || iccPublicCert[1] != '4')
     {
-        return 1;   //length error
-    }
-
-    if (iccPublicCert[0] != '1' || iccPublicCert[1] != '4')
-    {
-        return 2;   //format error
+        return result += 0x01 + 0x80;
     }
 
     string iccPAN = string(iccPublicCert).substr(2, 20);
     if (iccPAN.substr(0, strlen(PAN)) != string(PAN))
     {
-        return 3;   //pan invalid
+        result += 0x02;
+    }
+    string issuerPublicKeySignAlogrithmFlag = string(iccPublicCert).substr(32, 2);
+    if (issuerPublicKeySignAlogrithmFlag != "04")
+    {
+        result += 0x04;   //issuer public key signed alogrithm falg error
+    }
+    string expiryDate = string(iccPublicCert).substr(24, 2) + string(iccPublicCert).substr(22, 2);
+    int iExpiryDate = atoi(expiryDate.c_str());
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    char dateBuf[12] = { 0 };
+    sprintf_s(dateBuf, 8, "%.2d%.2d", st.wYear, st.wMonth);
+    string todayYYMM = string(dateBuf).substr(2);
+    int today = atoi(todayYYMM.c_str());
+    if (iExpiryDate <= today)
+    {
+        result += 0x08;    //证书已失效
+    }
+    int expirydate = atoi(tag5F24);
+    if (iExpiryDate > expirydate)
+    {
+        result += 0x10;    //应用有效期比证书有效期晚
     }
     PDllPBOC_SM2_Verify SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
 	if (SM2_Verify)
@@ -537,51 +619,57 @@ int GenSMICCPublicKey(
 			int iccLen2 = toBeSignDataLen - 40;
 			if (iccLen != iccLen2) //再次核实长度的正确性
 			{
-				return 4;
+                return result += 0x20 + 0x80;
 			}
 			Tool::SubStr(iccPublicCert, 40, iccLen, iccPublicKey);
-            return 0;
-        }
-        else {
-            return 6;
         }
 	}
 
-	return 5;
+    return result;
 }
 
-int DES_SDA(const char* issuerPublicKey, const char*ipkExponent, const char* tag93, const char* sigStaticData, const char* tag82)
+int DES_SDA(const char* issuerPublicKey, 
+    const char*ipkExponent, 
+    const char* tag93, 
+    const char* SAD, 
+    const char* tag82)
 {
+    int result = 0;
 	//解密签名的静态应用数据
 	char recoveryData[2048] = { 0 };
 	RSA_STD((char*)issuerPublicKey, (char*)ipkExponent, (char*)tag93, recoveryData);
 	int recoveryDataLen = strlen(recoveryData);
+    if (recoveryDataLen == 0)
+    {
+        return result += 0x01 + 0x80;   //无法解出恢复数据
+    }
 	string strRecoveryData(recoveryData);
 
 	if (strRecoveryData.substr(0, 4) != "6A03" || strRecoveryData.substr(recoveryDataLen - 2, 2) != "BC")
 	{
-		return 2; //如果恢复数据的开头不是"6A03"并且结尾不是"BC",认证失败
+        result += 0x2; //如果恢复数据的开头不是"6A03"并且结尾不是"BC",认证失败
 	}
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
-
-
-	string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + sigStaticData + tag82;
-
+	string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + SAD + tag82;
 	CSHA1 sha1;
 	string hashResult = sha1.GetBCDHash(hashDataInput);
-	if (hashResult == hashData)
+	if (hashResult != hashData)
 	{
-		return 0;
+		return result += 0x4 + 0x80;
 	}
 
-	return 5;
+	return result;
 }
 
-int SM_SDA(const char* issuerPublicKey, const char* toBeSignedStaticAppData, const char* tag93, const char* tag82)
+int SM_SDA(const char* issuerPublicKey, 
+    const char* toBeSignedStaticAppData, 
+    const char* tag93, 
+    const char* tag82)
 {
+    int result = 0;
     if (tag93[0] != '1' || tag93[1] != '3')
     {
-        return 1;   //format error
+        return result += 0x01 + 0x80;
     }
 
 	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
@@ -593,13 +681,13 @@ int SM_SDA(const char* issuerPublicKey, const char* toBeSignedStaticAppData, con
 		Tool::SubStr(tag93, 0, 6, sigHeader);
 		string toBeSignData = string(sigHeader) + toBeSignedStaticAppData + tag82;
 		int ret = DllPBOC_SM2_Verify((char*)issuerPublicKey, (char*)toBeSignData.c_str(), (char*)signedData);
-		if (ret == SM_OK)
+		if (ret != SM_OK)
 		{
-			return 0;
+            return result += 0x80;
 		}
 	}
 
-	return 2;   //校验不成功
+    return result;
 }
 
 int DES_GenRecovery(const char* publicKey, const char* publicKeyExp, const char* encryptionData, char* recoveryData, int len)
@@ -657,32 +745,39 @@ int SM2Verify(const char *pPublicKey, const char *pMSG, const char *pSignData)
 
 int DES_DDA(const char* iccPublicKey, const char*iccExponent, const char* tag9F4B, const char* dynamicData)
 {
+    int result = 0;
 	//从动态签名数据中获取恢复数据
 	char recoveryData[2048] = { 0 };
 	RSA_STD((char*)iccPublicKey, (char*)iccExponent, (char*)tag9F4B, recoveryData);
 	string strRecoveryData = recoveryData;
 	int recoveryDataLen = strlen(recoveryData);
-	if (recoveryDataLen == 0)
-	{
-		return 3;
-	}
+    if (recoveryDataLen == 0)
+    {
+        return result += 0x01 + 0x80;
+    }
+    if (strRecoveryData.substr(0, 4) != "6A05" || strRecoveryData.substr(recoveryDataLen - 2, 2) != "BC")
+    {
+        result += 0x02; //如果恢复数据的开头不是"6A03"并且结尾不是"BC",认证失败
+    }
+
 	string hashData = strRecoveryData.substr(recoveryDataLen - 42, 40);
 	string hashDataInput = strRecoveryData.substr(2, recoveryDataLen - 44) + dynamicData;
-    printf("hash input: %s", hashDataInput.c_str());
+    //printf("hash input: %s", hashDataInput.c_str());
 	CSHA1 sha1;
 	string hashResult = sha1.GetBCDHash(hashDataInput);
-	if (hashResult == hashData)
+	if (hashResult != hashData)
 	{
-		return 0;
+        return result += 0x04 + 0x80;
 	}
-	return 2;
+	return result;
 }
 
 int SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicData)
 {
+    int result = 0;
     if (tag9F4B[0] != '1' || tag9F4B[1] != '5')
     {
-        return 1;
+        return result += 0x01 + 0x80;
     }
 	PDllPBOC_SM2_Verify DllPBOC_SM2_Verify = GetSMFunc<PDllPBOC_SM2_Verify>("dllPBOC_SM2_Verify");
 	if (DllPBOC_SM2_Verify)
@@ -691,7 +786,7 @@ int SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicDat
 		int iccDynamicAppDataLen = stoi(daynamicAppData.substr(2, 2), 0, 16) * 2;
         if (daynamicAppData.length() < 4 + iccDynamicAppDataLen)
         {
-            return 3;   //数据长度有误
+            return result += 0x02 + 0x80;
         }
 
         //需签名的数据
@@ -704,10 +799,10 @@ int SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicDat
 		int ret = DllPBOC_SM2_Verify((char*)iccPublicKey,(char*)toBeSignedData.c_str(), (char*)signedResult.c_str());
 		if (ret == SM_OK)
 		{
-			return 0;
+            return result;
 		}
 	}
-	return 2;
+    return result += 0x80;
 }
 
 /***************************************************************************/

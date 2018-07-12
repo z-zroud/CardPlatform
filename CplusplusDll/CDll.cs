@@ -92,16 +92,16 @@ namespace CplusplusDll
         public extern static int GenCAPublicKey(string caIndex, string rid, StringBuilder caPublicKey);
 
         [DllImport(@"Authencation.dll", EntryPoint = "GenDesIssuerPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int GenDesIssuerPublicKey( string caPublicKey,string issuerPublicCert,string ipkRemainder,string issuerExponent,StringBuilder issuerPublicKey);
+        public extern static int GenDesIssuerPublicKey( string caPublicKey,string issuerPublicCert,string ipkRemainder,string issuerExponent,string pin, string tag5F24, StringBuilder issuerPublicKey);
 
         [DllImport(@"Authencation.dll", EntryPoint = "GenDesICCPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int GenDesICCPublicKey(string issuerPublicKey,string iccPublicCert,string iccRemainder,string sigStaticData,string iccExponent,string tag82,StringBuilder iccPublicKey);
+        public extern static int GenDesICCPublicKey(string issuerPublicKey,string iccPublicCert,string iccRemainder,string sigStaticData,string iccExponent,string tag82, string pin, string tag5F24, StringBuilder iccPublicKey);
 
         [DllImport(@"Authencation.dll", EntryPoint = "GenSMIssuerPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int GenSMIssuerPublicKey(  string caPublicKey,string issuerPublicCert,string PAN, StringBuilder issuerPublicKey);
+        public extern static int GenSMIssuerPublicKey(  string caPublicKey,string issuerPublicCert,string PAN, string tag5F24, StringBuilder issuerPublicKey);
 
         [DllImport(@"Authencation.dll", EntryPoint = "GenSMICCPublicKey", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int GenSMICCPublicKey( string issuerPublicKey,string iccPublicCert,string needAuthStaticData, string tag82, string PAN, StringBuilder iccPublicKey);
+        public extern static int GenSMICCPublicKey( string issuerPublicKey,string iccPublicCert,string needAuthStaticData, string tag82, string PAN, string tag5F24, StringBuilder iccPublicKey);
 
         [DllImport(@"Authencation.dll", EntryPoint = "DES_SDA", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static int DES_SDA(string issuerPublicKey,string ipkExponent,string tag93,string sigStaticData,string tag82);

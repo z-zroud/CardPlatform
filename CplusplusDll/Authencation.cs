@@ -59,36 +59,64 @@ namespace CplusplusDll
             return CAPublicKey.ToString();
         }
 
-        public static string GenDesIssuerPublicKey(string caPublicKey, string issuerPublicCert, string ipkRemainder, string issuerExponent)
+        public static int GenDesIssuerPublicKey(string caPublicKey, 
+            string issuerPublicCert, 
+            string ipkRemainder, 
+            string issuerExponent, 
+            string pan,
+            string tag5F24,
+            out string publicKey)
         {
             StringBuilder issuerPublicKey = new StringBuilder(1024 * 4);
-            CDll.GenDesIssuerPublicKey(caPublicKey, issuerPublicCert, ipkRemainder, issuerExponent, issuerPublicKey);
-
-            return issuerPublicKey.ToString();
+            var result = CDll.GenDesIssuerPublicKey(caPublicKey, issuerPublicCert, ipkRemainder, issuerExponent, pan, tag5F24, issuerPublicKey);
+            publicKey = issuerPublicKey.ToString();
+            return result;
         }
 
-        public static string GenDesICCPublicKey(string issuerPublicKey, string iccPublicCert, string iccRemainder, string sigStaticData, string iccExponent, string tag82)
+        public static int GenDesICCPublicKey(string issuerPublicKey, 
+            string iccPublicCert, 
+            string iccRemainder, 
+            string sigStaticData, 
+            string iccExponent, 
+            string tag82, 
+            string pan,
+            string tag5F24,
+            out string publicKey)
         {
             StringBuilder iccPublicKey = new StringBuilder(1024 * 4);
-            CDll.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccRemainder, sigStaticData, iccExponent, tag82, iccPublicKey);
+            var result = CDll.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccRemainder, sigStaticData, iccExponent, tag82, pan, tag5F24, iccPublicKey);
 
-            return iccPublicKey.ToString();
+            publicKey = iccPublicKey.ToString();
+            return result;
         }
 
-        public static string GenSMIssuerPublicKey(string caPublicKey, string issuerPublicCert, string PAN)
+        public static int GenSMIssuerPublicKey(string caPublicKey, 
+            string issuerPublicCert, 
+            string PAN,
+            string tag5F24,
+            out string publicKey)
         {
             StringBuilder issuerPublicKey = new StringBuilder(1024 * 4);
-            CDll.GenSMIssuerPublicKey(caPublicKey, issuerPublicCert,  PAN, issuerPublicKey);
+            var result = CDll.GenSMIssuerPublicKey(caPublicKey, issuerPublicCert,  PAN, tag5F24, issuerPublicKey);
 
-            return issuerPublicKey.ToString();
+            publicKey = issuerPublicKey.ToString();
+
+            return result;
         }
 
-        public static string GenSMICCPublicKey(string issuerPublicKey, string iccPublicCert, string needAuthStaticData, string tag82, string PAN)
+        public static int GenSMICCPublicKey(string issuerPublicKey, 
+            string iccPublicCert, 
+            string needAuthStaticData, 
+            string tag82, 
+            string PAN,
+            string tag5F24,
+            out string publicKey)
         {
             StringBuilder iccPublicKey = new StringBuilder(1024 * 2);
-            var result = CDll.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needAuthStaticData, tag82, PAN, iccPublicKey);
+            var result = CDll.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needAuthStaticData, tag82, PAN, tag5F24,iccPublicKey);
 
-            return iccPublicKey.ToString();
+            publicKey = iccPublicKey.ToString();
+            return result;
         }
 
         public static int DES_SDA(string issuerPublicKey, string ipkExponent, string tag93, string sigStaticData, string tag82)

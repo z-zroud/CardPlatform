@@ -42,6 +42,7 @@ extern "C" GENKEY_API  int GenDesIssuerPublicKey(
 	const char* ipkRemainder, 
 	const char* issuerExponent,
     const char* pin,
+    const char* tag5F24,
 	char* issuerPublicKey);
 
 /********************************************************************************
@@ -60,6 +61,8 @@ extern "C" GENKEY_API  int GenDesICCPublicKey(
 	const char* sigStaticData,
 	const char* iccExponent,
 	const char* tag82,
+    const char* pin,
+    const char* tag5F24,
 	char* iccPublicKey);
 
 /********************************************************************************
@@ -73,6 +76,7 @@ extern "C" GENKEY_API  int GenSMIssuerPublicKey(
 	const char* caPublicKey, 
 	const char* issuerPublicCert,
     const char* PAN,
+    const char* tag5F24,
 	char* issuerPublicKey);
 
 /********************************************************************************
@@ -87,6 +91,7 @@ extern "C" GENKEY_API  int GenSMICCPublicKey(
 	const char* needAuthStaticData,
     const char* tag82,
     const char* PAN,
+    const char* tag5F24,
 	char* iccPublicKey);
 
 /********************************************************************************

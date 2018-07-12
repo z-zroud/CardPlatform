@@ -290,13 +290,15 @@ namespace CardPlatform.Business
             string PAN = tagDict.GetTag("5A");
             string signedStaticAppData = tagDict.GetTag("93");
             string AIP = tagDict.GetTag("82");
+            string expiryDate = tagDict.GetTag(TransactionStep.ReadRecord, "5F24");
 
             if (curTransAlgorithmCategory == AlgorithmCategory.DES) //DES算法
             {
                 //获取发卡行公钥
                 string issuerPublicKeyRemainder = tagDict.GetTag("92");
                 string issuerExp = tagDict.GetTag("9F32");
-                issuerPublicKey = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp);
+                var result = Authencation.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp, PAN, expiryDate, out issuerPublicKey);
+                CheckPublicKeyResult(result, "发卡行公钥");
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,92,9F32是否存在");
@@ -305,7 +307,8 @@ namespace CardPlatform.Business
             }
             else //SM算法
             {
-                issuerPublicKey = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN);
+                var result = Authencation.GenSMIssuerPublicKey(CAPublicKey, issuerPublicCert, PAN, expiryDate,out issuerPublicKey);
+                CheckSMPublicKeyResult(result, "发卡行公钥");
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取发卡行公钥，请检查tag90,5A是否存在");
@@ -329,12 +332,14 @@ namespace CardPlatform.Business
             string iccPublicCert = tagDict.GetTag("9F46");
             string PAN = tagDict.GetTag("5A");
             string AIP = tagDict.GetTag("82");
+            string expiryDate = tagDict.GetTag(TransactionStep.ReadRecord, "5F24");
             if (curTransAlgorithmCategory == AlgorithmCategory.DES)
             {
                 //获取IC卡公钥
                 string iccPublicKeyRemainder = tagDict.GetTag("9F48");
                 string iccPublicKeyExp = tagDict.GetTag("9F47");
-                iccPublicKey = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP);
+                var result = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP,PAN, expiryDate, out iccPublicKey);
+                CheckPublicKeyResult(result, "IC卡公钥");
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取IC卡公钥，请确保tag9F46,9F48,9F47是否存在");
@@ -343,7 +348,8 @@ namespace CardPlatform.Business
             }
             else
             {
-                iccPublicKey = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN);
+                var result = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN, expiryDate,out iccPublicKey);
+                CheckSMPublicKeyResult(result, "IC卡公钥");
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "无法获取IC卡公钥");
@@ -371,7 +377,7 @@ namespace CardPlatform.Business
                 string issuerExp = tagDict.GetTag("9F32");
                 //验证hash签名
                 result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
-                if (result != 0)
+                if (!CheckOfflineResult(result,"SDA") )
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "静态数据认证失败! 返回码: {0}", result);
                     return false;
@@ -380,7 +386,7 @@ namespace CardPlatform.Business
             else //SM算法
             {
                 result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
-                if (result != 0)
+                if (!CheckSMOfflineResult(result, "SDA"))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "SM算法 静态数据认证失败! 返回码: {0}", result);
                     return false;
@@ -410,7 +416,7 @@ namespace CardPlatform.Business
 
                 //校验动态签名的hash值
                 var result = Authencation.DES_DDA(iccPublicKey, iccPublicKeyExp, tag9F4B, ddolData);
-                if (result != 0)
+                if (!CheckOfflineResult(result,"DDA"))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "动态数据认证失败! 返回码: {0}", result);
                     return false;
@@ -419,7 +425,7 @@ namespace CardPlatform.Business
             else
             {
                 var result = Authencation.SM_DDA(iccPublicKey, tag9F4B, ddolData);
-                if (result != 0)
+                if (!CheckSMOfflineResult(result,"DDA"))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "SM算法 动态数据认证失败! 返回码: {0}", result);
                     return false;
@@ -615,6 +621,87 @@ namespace CardPlatform.Business
             var mac = Authencation.GenEMVAC(udkACKey, input);
             //Authencation.
             return true;
+        }
+
+        protected void CheckPublicKeyResult(int result, string publicKeyName)
+        {
+            bool check01 = true;
+            bool check02 = true;
+            bool check04 = true;
+            bool check08 = true;
+            bool check10 = true;
+            bool check100 = true;
+            if ((result & 0x01) == 0x01) check01 = false;
+            if ((result & 0x02) == 0x02) check02 = false;
+            if ((result & 0x04) == 0x04) check04 = false;
+            if ((result & 0x08) == 0x08) check08 = false;
+            if ((result & 0x10) == 0x10) check10 = false;
+            if ((result & 0x100) == 0x100) check100 = false;
+
+            caseObj.TraceInfo(GetTipLevel(check01), "OfflineDataAuthencation", "检测({0})恢复数据是否解密成功",publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check02), "OfflineDataAuthencation", "检测({0})恢复数据收尾格式是否正确", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check04), "OfflineDataAuthencation", "检测({0})恢复数据hash值是否正确", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check08), "OfflineDataAuthencation", "检测({0})证书是否失效", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check10), "OfflineDataAuthencation", "检测({0})恢复数据中主账号是否与卡片主账号匹配", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check100), "OfflineDataAuthencation", "检测({0})证书有效期是否晚于或等于应用有效期", publicKeyName);
+        }
+
+        protected bool CheckOfflineResult(int result, string offlineType)
+        {
+            bool check01 = true;
+            bool check02 = true;
+            bool check04 = true;
+            bool check80 = true;
+            if ((result & 0x01) == 0x01) check01 = false;
+            if ((result & 0x02) == 0x02) check02 = false;
+            if ((result & 0x04) == 0x04) check04 = false;
+            if ((result & 0x80) == 0x80) check80 = false;
+
+            caseObj.TraceInfo(GetTipLevel(check01), "OfflineDataAuthencation", "检测({0})恢复数据是否解密成功", offlineType);
+            caseObj.TraceInfo(GetTipLevel(check02), "OfflineDataAuthencation", "检测({0})恢复数据收尾格式是否正确", offlineType);
+            caseObj.TraceInfo(GetTipLevel(check04), "OfflineDataAuthencation", "检测({0})签名Hash是否正确", offlineType);
+            caseObj.TraceInfo(GetTipLevel(check80), "OfflineDataAuthencation", "检测({0})脱机认证是否成功", offlineType);
+
+            return check80;
+        }
+
+        protected void CheckSMPublicKeyResult(int result, string publicKeyName)
+        {
+            bool check01 = true;
+            bool check02 = true;
+            bool check04 = true;
+            bool check08 = true;
+            bool check10 = true;
+            bool check20 = true;
+            if ((result & 0x01) == 0x01) check01 = false;
+            if ((result & 0x02) == 0x02) check02 = false;
+            if ((result & 0x04) == 0x04) check04 = false;
+            if ((result & 0x08) == 0x08) check08 = false;
+            if ((result & 0x10) == 0x10) check10 = false;
+            if ((result & 0x20) == 0x20) check20 = false;
+
+            caseObj.TraceInfo(GetTipLevel(check01), "OfflineDataAuthencation", "检测({0})证书格式是否正确", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check02), "OfflineDataAuthencation", "检测({0})恢复数据中主账号是否与卡片主账号匹配", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check04), "OfflineDataAuthencation", "检测({0})证书中算法标识是否正确", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check08), "OfflineDataAuthencation", "检测({0})证书是否失效", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check10), "OfflineDataAuthencation", "检测({0})证书有效期是否晚于或等于应用有效期", publicKeyName);
+            caseObj.TraceInfo(GetTipLevel(check20), "OfflineDataAuthencation", "检测({0})公钥长度是否正确", publicKeyName);
+        }
+
+        protected bool CheckSMOfflineResult(int result, string offlineType)
+        {
+            bool check01 = true;
+            bool check02 = true;
+            bool check80 = true;
+            if ((result & 0x01) == 0x01) check01 = false;
+            if ((result & 0x02) == 0x02) check02 = false;
+            if ((result & 0x80) == 0x80) check80 = false;
+
+            caseObj.TraceInfo(GetTipLevel(check01), "OfflineDataAuthencation", "检测({0})签名数据格式是否正确", offlineType);
+            caseObj.TraceInfo(GetTipLevel(check02), "OfflineDataAuthencation", "检测({0})签名数据长度是否正确", offlineType);
+            caseObj.TraceInfo(GetTipLevel(check80), "OfflineDataAuthencation", "检测({0})脱机认证是否成功", offlineType);
+
+            return check80;
         }
     }
 }
