@@ -138,12 +138,24 @@ namespace CardPlatform.Business
             }
             
             TerminalRiskManagement();
-            TerminalActionAnalyze();
+            if( 0 == TerminalActionAnalyze())
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
+                return false;
+            }
 
-            IssuerAuthencation();
+            if(0 == IssuerAuthencation())
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
+                return false;
+            }
 
             
-            TransactionEnd();
+            if(0 == TransactionEnd())
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "交易结束处理失败，交易终止");
+                return false;
+            }
             //LoadBalance("9F79", "000000010000");
             return true;
         }
@@ -273,30 +285,30 @@ namespace CardPlatform.Business
 
             RequirementData[] tagStandards =
             {
-                new RequirementData("9F51",2,TipLevel.Failed,""),  //如果执行频度检查，需要此应用货币代码
-                new RequirementData("9F52",2,TipLevel.Failed,""),  //如果支持发卡行认证，需要ADA应用缺省行为
-                new RequirementData("9F53",1,TipLevel.Failed,""),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
-                new RequirementData("9F54",6,TipLevel.Failed,""),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
+                new RequirementData("9F51",2,TipLevel.Failed,"如果执行频度检查，需要此应用货币代码"),  //如果执行频度检查，需要此应用货币代码
+                new RequirementData("9F52",2,TipLevel.Failed,"如果支持发卡行认证，需要ADA应用缺省行为"),  //如果支持发卡行认证，需要ADA应用缺省行为
+                new RequirementData("9F53",1,TipLevel.Failed,"如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)"),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
+                new RequirementData("9F54",6,TipLevel.Failed,"如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)"),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
                 new RequirementData("9F55",0,TipLevel.Warn,""),
-                new RequirementData("9F56",1,TipLevel.Failed,""),  //如果支持发卡行认证，需要此发卡行认证指示位
-                new RequirementData("9F57",2,TipLevel.Warn,""),  //如果支持卡片频度检查，需要此发卡行国家代码
-                new RequirementData("9F58",1,TipLevel.Failed,""),  //如果执行卡片频度检查，需要此连续脱机交易下限
-                new RequirementData("9F59",1,TipLevel.Failed,""),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
-                new RequirementData("9F5C",6,TipLevel.Failed,""),  //累计脱机交易金额上限
+                new RequirementData("9F56",1,TipLevel.Failed,"如果支持发卡行认证，需要此发卡行认证指示位"),  //如果支持发卡行认证，需要此发卡行认证指示位
+                new RequirementData("9F57",2,TipLevel.Warn,"如果支持卡片频度检查，需要此发卡行国家代码"),  //如果支持卡片频度检查，需要此发卡行国家代码
+                new RequirementData("9F58",1,TipLevel.Failed,"如果执行卡片频度检查，需要此连续脱机交易下限"),  //如果执行卡片频度检查，需要此连续脱机交易下限
+                new RequirementData("9F59",1,TipLevel.Failed,"如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易"),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
+                new RequirementData("9F5C",6,TipLevel.Failed,"累计脱机交易金额上限"),  //累计脱机交易金额上限
                 new RequirementData("9F5D",0,TipLevel.Warn,""),
-                new RequirementData("9F72",1,TipLevel.Warn,""),  //连续脱机交易限制数
-                new RequirementData("9F75",1,TipLevel.Warn,""),  //累计脱机交易金额(双货币)
-                new RequirementData("9F76",0,TipLevel.Failed,""),  //第二应用货币代码
+                new RequirementData("9F72",1,TipLevel.Warn,"连续脱机交易限制数"),  //连续脱机交易限制数
+                new RequirementData("9F75",1,TipLevel.Warn,"累计脱机交易金额(双货币)"),  //累计脱机交易金额(双货币)
+                new RequirementData("9F76",0,TipLevel.Failed,"第二应用货币代码"),  //第二应用货币代码
                 new RequirementData("9F77",0,TipLevel.Failed,""),
                 new RequirementData("9F78",0,TipLevel.Failed,""),
                 new RequirementData("9F79",0,TipLevel.Failed,""),
-                new RequirementData("9F4F",0,TipLevel.Failed,""),  //交易日志格式
+                new RequirementData("9F4F",0,TipLevel.Failed,"交易日志格式"),  //交易日志格式
                 new RequirementData("9F68",0,TipLevel.Failed,""),
                 new RequirementData("9F6B",0,TipLevel.Warn,""),
                 new RequirementData("9F6D",0,TipLevel.Failed,""),
-                new RequirementData("9F36",2,TipLevel.Failed,""),  //应用交易计数器
+                new RequirementData("9F36",2,TipLevel.Failed,"应用交易计数器"),  //应用交易计数器
                 new RequirementData("9F13",0,TipLevel.Failed,"终端风险管理阶段需要此数据用于新卡检查，发卡行认证通过后，需要设置该值"),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
-                new RequirementData("9F17",0,TipLevel.Failed,""),  //如果支持脱机PIN,需要此PIN尝试计数器
+                new RequirementData("9F17",0,TipLevel.Failed,"如果支持脱机PIN,需要此PIN尝试计数器"),  //如果支持脱机PIN,需要此PIN尝试计数器
                 new RequirementData("DF4F",0,TipLevel.Warn,""),
                 new RequirementData("DF62",0,TipLevel.Failed,""),
             };

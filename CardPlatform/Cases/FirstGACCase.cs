@@ -25,7 +25,7 @@ namespace CardPlatform.Cases
         public override void ExcuteCase(TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
-            TLVs = DataParse.ParseTLV(response.Response);
+            //TLVs = DataParse.ParseTLV(response.Response);
             base.ExcuteCase(step, srcData);
             CheckTemplateTag(TLVs);           
         }

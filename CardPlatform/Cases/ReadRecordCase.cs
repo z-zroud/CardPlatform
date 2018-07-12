@@ -764,13 +764,13 @@ namespace CardPlatform.Cases
 
             if (!readRecordTags.ContainsKey("5F28"))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem + "读数据中缺少tag5F28");
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "读数据中缺少tag5F28");
                 return;
             }
             var tag9F57 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F57");
             if(string.IsNullOrEmpty(tag9F57))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem + "卡片缺少tag9F57");
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "卡片缺少tag9F57");
                 return;
             }
             if (readRecordTags["5F28"].Value != tag9F57)
