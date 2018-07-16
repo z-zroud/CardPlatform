@@ -91,6 +91,9 @@
     <Compile Include="Business\BusinessPSE.cs" />
     <Compile Include="Business\BusinessQPBOC.cs" />
     <Compile Include="Business\BusinessUICS.cs" />
+    <Compile Include="Cases\CardHolderVerfiyCase.cs" />
+    <Compile Include="Cases\HandleLimitationCase.cs" />
+    <Compile Include="Common\AipHelper.cs" />
     <Compile Include="Common\Constant.cs" />
     <Compile Include="Common\TransactionTag.cs" />
     <Compile Include="Cases\CaseBase.cs" />

@@ -244,7 +244,7 @@ void IDpParse::Save(CPS cpsItem)
 		return;
     string privousDGI = "";
 
-    //sort(cpsItem.dgis.begin(), cpsItem.dgis.end(), GreaterSort);
+    sort(cpsItem.dgis.begin(), cpsItem.dgis.end(), GreaterSort);
 	for (auto iter : cpsItem.dgis)
 	{
         if (iter.dgi != privousDGI) {

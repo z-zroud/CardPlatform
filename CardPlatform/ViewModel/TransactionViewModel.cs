@@ -367,7 +367,7 @@ namespace CardPlatform.ViewModel
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
                 trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
                 trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+                trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
 
             }
             if (TransType.IsCheckECC)
@@ -377,7 +377,7 @@ namespace CardPlatform.ViewModel
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
                 trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
                 trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+                trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
             }
             if (TransType.IsCheckQPBOC)
             {
@@ -386,7 +386,7 @@ namespace CardPlatform.ViewModel
                 trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
                 trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
                 trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+                trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
             }
             //if (TransType.IsCheckVISA)
             //{
@@ -394,7 +394,7 @@ namespace CardPlatform.ViewModel
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
             //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
+            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
             //if (TransType.IsCheckAMEX)
             //{
@@ -402,7 +402,7 @@ namespace CardPlatform.ViewModel
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
             //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
+            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
             //if (TransType.IsCheckMC)
             //{
@@ -410,7 +410,7 @@ namespace CardPlatform.ViewModel
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
             //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
+            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
             //if (TransType.IsCheckJETCO)
             //{
@@ -418,7 +418,7 @@ namespace CardPlatform.ViewModel
             //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
             //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
             //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTrans(SelectedAid, AlgorithmType.IsCheckDES, false);
+            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
             //}
         }
 

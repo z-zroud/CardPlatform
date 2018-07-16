@@ -6,7 +6,7 @@ namespace CardPlatform.Models
 {
     public class TransResultModel : ObservableObject
     {
-        public TransResultModel(TransType type, TransResult result)
+        public TransResultModel(TransType type, TransResult result = TransResult.Unknown)
         {
             Result = result;
             TransType = type;

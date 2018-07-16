@@ -9,17 +9,18 @@ using CardPlatform.Config;
 using CardPlatform.Models;
 using CardPlatform.Helper;
 using CardPlatform.Common;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.Business
 {
     public class BusinessECC : BusinessBase
     {
-        private TransactionTag tagDict = TransactionTag.GetInstance();
-        private ViewModelLocator locator = new ViewModelLocator();
-        private IExcuteCase baseCase = new CaseBase();
-        private bool isEccTranction = false;
-        private bool isSupportCDA = false;
-        private string pdolData = string.Empty;
+        private TransactionTag transTags    = TransactionTag.GetInstance();
+        private ViewModelLocator locator    = new ViewModelLocator();
+        private IExcuteCase baseCase        = new CaseBase();
+        private bool isEccTranction         = false;
+        private bool isSupportCDA           = false;
+        private string pdolData             = string.Empty;
         
         /// <summary>
         /// 开始交易流程，该交易流程仅包含国际/国密电子现金的消费交易，暂不包含圈存
@@ -27,61 +28,26 @@ namespace CardPlatform.Business
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
         /// <param name="doSMTrans"></param>
-        public override void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
+        public override void DoTransaction(string aid, bool doDesTrans, bool doSmTrans)
         {
-            base.DoTrans(aid, doDesTrans, doSMTrans);
-
+            transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            base.DoTransaction(aid, doDesTrans, doSmTrans);
             locator.Terminal.TermianlSettings.Tag9F7A = "01";   //电子现金交易指示器
-            locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)
-            var tagFileHelper = new SongJianHelper(PersoFile);
-            // 做国际交易
-            if (doDesTrans)
+            locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)          
+
+            if (doDesTrans)  // 做国际算法交易
             {
-                TransResultModel TransactionResult = new TransResultModel(TransType.ECC_DES, TransResult.Unknown);
-                TransactionResult.TransType = TransType.ECC_DES;
-                curTransAlgorithmCategory = AlgorithmCategory.DES;
-                locator.Terminal.TermianlSettings.TagDF69 = "00";
-               
-                if(DoTransEx())
-                {
-                    TransactionResult.Result = TransResult.Sucess;
-                }
-                else
-                {
-                    TransactionResult.Result = TransResult.Failed;
-                }
-                locator.Transaction.TransResult.Add(TransactionResult);
-                if (!string.IsNullOrEmpty(PersoFile))
-                {
-                    tagFileHelper.WriteToFile(TagType.ECC_DES);
-                }
+                DoTransaction(TransType.ECC_DES, DoTransactionEx);
             }
-            // 做国密交易
-            if (doSMTrans)
+            if (doSMTrans)  //做国密算法交易
             {
-                TransResultModel TransactionResult = new TransResultModel(TransType.ECC_SM, TransResult.Unknown);
-                TransactionResult.TransType = TransType.ECC_SM;
-                curTransAlgorithmCategory = AlgorithmCategory.SM;
-                locator.Terminal.TermianlSettings.TagDF69 = "01";
-                if (DoTransEx())
-                {
-                    TransactionResult.Result = TransResult.Sucess;
-                }
-                else
-                {
-                    TransactionResult.Result = TransResult.Failed;
-                }
-                locator.Transaction.TransResult.Add(TransactionResult);
-                if (!string.IsNullOrEmpty(PersoFile))
-                {
-                    tagFileHelper.WriteToFile(TagType.ECC_SM);
-                }
+                DoTransaction(TransType.ECC_SM, DoTransactionEx);
             }
         }
 
-        protected bool DoTransEx()
+        protected bool DoTransactionEx()
         {
-            tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             pdolData = string.Empty;    //PDOL Data也需要清空，防止做CDA时，出现重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
@@ -101,13 +67,41 @@ namespace CardPlatform.Business
                 return false;
             }
             GetRequirementData();
+           
+            var tag9F74 = transTags.GetTag("9F74");
+            if (tag9F74.Length == 12)
+            {
+                var resp = APDU.GetDataCmd("9F79");
+                SaveTags(TransactionStep.GetData, resp.Response);
+                resp = APDU.GetDataCmd("9F6D");
+                SaveTags(TransactionStep.GetData, resp.Response);
+                var tag9F79 = transTags.GetTag("9F79");
+                if (int.Parse(tag9F79) > 0)
+                {
+                    isEccTranction = true;  //说明是电子现金交易
+                }
+            }
             if (isEccTranction)
             {
-                OfflineAuthcation();
+                string aip = transTags.GetTag(TransactionStep.GPO, "82");
+                var aipHelper = new AipHelper(aip);
+                if (aipHelper.IsSupportSDA() || aipHelper.IsSupportDDA() || aipHelper.IsSupportCDA())
+                {
+                    OfflineAuthcation();    //脱机数据认证
+                }
+
                 HandleLimitation();
-                CardHolderVerify();
+                if (aipHelper.IsSupportCardHolderVerify())
+                {
+                    CardHolderVerify();     //持卡人验证
+                }
+
                 TerminalRiskManagement();
-                TerminalActionAnalyze();
+                if (0 == TerminalActionAnalyze())
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
+                    return false;
+                }
             }
             else
             {
@@ -129,15 +123,15 @@ namespace CardPlatform.Business
             {
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
-                    IExcuteCase excuteCase = new SelectAppCase();
-                    excuteCase.ExcuteCase(TransactionStep.SelectApp, response);
+                    var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
+                    stepCase.Excute(BatchNo, CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
             else
             {
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                baseCase.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
             }
             return result;
         }
@@ -149,28 +143,41 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected List<AFL> GPOEx()
         {
-            string tag9F38 = tagDict.GetTag("9F38");
+            var afls = new List<AFL>();
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+
+            string tag9F38 = transTags.GetTag(TransactionStep.SelectApp, "9F38");
+            if (string.IsNullOrEmpty(tag9F38))
+            {
+                return afls;
+            }
             var tls = DataParse.ParseTL(tag9F38);
+            string pdolData = string.Empty;
             foreach (var tl in tls)
             {
-                pdolData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                if (terminalData.Length != tl.Len * 2) return afls;
+                if (string.IsNullOrEmpty(terminalData)) return afls;
+                pdolData += terminalData;
             }
-
-            ApduResponse response = base.GPO(pdolData);
-            var tlvs = DataParse.ParseTLV(response.Response);
-            if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
+            var response = base.GPO(pdolData);
+            if (response.SW != 0x9000)
             {
-
-                tagDict.SetTag(TransactionStep.GPO,"82", tlvs[0].Value.Substring(0, 4));
-                tagDict.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令失败，SW={0}", response.SW);
+                return afls;
             }
+            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
+            gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
 
-            var AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
-
-            IExcuteCase excuteCase = new GPOCase();
-            excuteCase.ExcuteCase(TransactionStep.GPO, response);
-
-            return AFLs;
+            var tlvs = DataParse.ParseTLV(response.Response);
+            if (tlvs.Count != 1 || tlvs[0].Value.Length <= 4)
+            {
+                return afls;
+            }
+            transTags.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
+            transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
+            afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
+            return afls;
         }
 
         /// <summary>
@@ -187,29 +194,16 @@ namespace CardPlatform.Business
             {
                 if (resp.SW != 0x9000)
                 {
-                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!SaveTags(TransactionStep.ReadRecord,resp.Response))
+                if (!SaveTags(TransactionStep.ReadRecord, resp.Response))
                 {
                     return false;
                 }
             }
-
-            var tag9F74 = tagDict.GetTag("9F74");
-            if(tag9F74.Length == 12)
-            {
-                var resp = APDU.GetDataCmd("9F79");
-                SaveTags(TransactionStep.GetData,resp.Response);
-                resp = APDU.GetDataCmd("9F6D");
-                SaveTags(TransactionStep.GetData,resp.Response);
-                var tag9F79 = tagDict.GetTag("9F79");
-                if(int.Parse(tag9F79) > 0)
-                {
-                    isEccTranction = true;  //说明是电子现金交易
-                }
-            }
-
+            IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS };
+            readRecordCase.Excute(BatchNo, CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
 
@@ -220,30 +214,30 @@ namespace CardPlatform.Business
 
             RequirementData[] tagStandards =
             {
-                new RequirementData("9F51",2,TipLevel.Failed,""),  //如果执行频度检查，需要此应用货币代码
-                new RequirementData("9F52",2,TipLevel.Failed,""),  //如果支持发卡行认证，需要ADA应用缺省行为
-                new RequirementData("9F53",1,TipLevel.Failed,""),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
-                new RequirementData("9F54",6,TipLevel.Failed,""),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
+                new RequirementData("9F51",2,TipLevel.Failed,"如果执行频度检查，需要此应用货币代码"),  //如果执行频度检查，需要此应用货币代码
+                new RequirementData("9F52",2,TipLevel.Failed,"如果支持发卡行认证，需要ADA应用缺省行为"),  //如果支持发卡行认证，需要ADA应用缺省行为
+                new RequirementData("9F53",1,TipLevel.Failed,"如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)"),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
+                new RequirementData("9F54",6,TipLevel.Failed,"如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)"),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
                 new RequirementData("9F55",0,TipLevel.Warn,""),
-                new RequirementData("9F56",1,TipLevel.Failed,""),  //如果支持发卡行认证，需要此发卡行认证指示位
-                new RequirementData("9F57",2,TipLevel.Warn,""),  //如果支持卡片频度检查，需要此发卡行国家代码
-                new RequirementData("9F58",1,TipLevel.Failed,""),  //如果执行卡片频度检查，需要此连续脱机交易下限
-                new RequirementData("9F59",1,TipLevel.Failed,""),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
-                new RequirementData("9F5C",6,TipLevel.Failed,""),  //累计脱机交易金额上限
+                new RequirementData("9F56",1,TipLevel.Failed,"如果支持发卡行认证，需要此发卡行认证指示位"),  //如果支持发卡行认证，需要此发卡行认证指示位
+                new RequirementData("9F57",2,TipLevel.Warn,"如果支持卡片频度检查，需要此发卡行国家代码"),  //如果支持卡片频度检查，需要此发卡行国家代码
+                new RequirementData("9F58",1,TipLevel.Failed,"如果执行卡片频度检查，需要此连续脱机交易下限"),  //如果执行卡片频度检查，需要此连续脱机交易下限
+                new RequirementData("9F59",1,TipLevel.Failed,"如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易"),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
+                new RequirementData("9F5C",6,TipLevel.Failed,"累计脱机交易金额上限"),  //累计脱机交易金额上限
                 new RequirementData("9F5D",0,TipLevel.Warn,""),
-                new RequirementData("9F72",1,TipLevel.Warn,""),  //连续脱机交易限制数
-                new RequirementData("9F75",1,TipLevel.Warn,""),  //累计脱机交易金额(双货币)
-                new RequirementData("9F76",0,TipLevel.Failed,""),  //第二应用货币代码
+                new RequirementData("9F72",1,TipLevel.Warn,"连续脱机交易限制数"),  //连续脱机交易限制数
+                new RequirementData("9F75",1,TipLevel.Warn,"累计脱机交易金额(双货币)"),  //累计脱机交易金额(双货币)
+                new RequirementData("9F76",0,TipLevel.Failed,"第二应用货币代码"),  //第二应用货币代码
                 new RequirementData("9F77",0,TipLevel.Failed,""),
                 new RequirementData("9F78",0,TipLevel.Failed,""),
                 new RequirementData("9F79",0,TipLevel.Failed,""),
-                new RequirementData("9F4F",0,TipLevel.Failed,""),  //交易日志格式
+                new RequirementData("9F4F",0,TipLevel.Failed,"交易日志格式"),  //交易日志格式
                 new RequirementData("9F68",0,TipLevel.Failed,""),
                 new RequirementData("9F6B",0,TipLevel.Warn,""),
                 new RequirementData("9F6D",0,TipLevel.Failed,""),
-                new RequirementData("9F36",2,TipLevel.Failed,""),  //应用交易计数器
+                new RequirementData("9F36",2,TipLevel.Failed,"应用交易计数器"),  //应用交易计数器
                 new RequirementData("9F13",0,TipLevel.Failed,"终端风险管理阶段需要此数据用于新卡检查，发卡行认证通过后，需要设置该值"),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
-                new RequirementData("9F17",0,TipLevel.Failed,""),  //如果支持脱机PIN,需要此PIN尝试计数器
+                new RequirementData("9F17",0,TipLevel.Failed,"如果支持脱机PIN,需要此PIN尝试计数器"),  //如果支持脱机PIN,需要此PIN尝试计数器
                 new RequirementData("DF4F",0,TipLevel.Warn,""),
                 new RequirementData("DF62",0,TipLevel.Failed,""),
             };
@@ -266,7 +260,7 @@ namespace CardPlatform.Business
                             caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
                         }
                     }
-                    tagDict.SetTag(TransactionStep.GetData,tlv.First().Tag, tlv.First().Value); //保存
+                    transTags.SetTag(TransactionStep.GetData,tlv.First().Tag, tlv.First().Value); //保存
                 }
             }
         }
@@ -276,40 +270,38 @@ namespace CardPlatform.Business
         /// </summary>
         /// <returns></returns>
         protected int OfflineAuthcation()
-        {           
-            var caseNo = MethodBase.GetCurrentMethod().Name;         
-            string AIP = tagDict.GetTag("82");
-            if(IsSupportSDA(AIP))
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            string aip = transTags.GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if (!aipHelper.IsSupportSDA())
             {
-                if (!SDA())
-                {
-                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
-                    return -3;
-                }
+                return 1;
             }
-            if(IsSupportDDA(AIP))
+            if (!SDA())
             {
-                string ddolData = string.Empty;
-                string ddol = tagDict.GetTag("9F49");
-                var tls = DataParse.ParseTL(ddol);
-                foreach(var tl in tls)
-                {
-                    ddolData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
-                }
-                var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
-                if (string.IsNullOrWhiteSpace(tag9F4B))
-                {
-                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
-                    return -7;
-                }
-                string issuerPublicKey = GetIssuerPublicKey();
-                if (!DDA(issuerPublicKey, tag9F4B, ddolData))
-                {
-                    baseCase.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
-                    return -3;
-                }
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                return 1;
             }
-            isSupportCDA = IsSupportCDA(AIP);
+            if (!aipHelper.IsSupportDDA())
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                return 1;
+            }
+            string ddol = transTags.GetTag(TransactionStep.ReadRecord, "9F49");
+            string ddolData = "12345678";
+            var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
+            if (string.IsNullOrWhiteSpace(tag9F4B))
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
+                return 1;
+            }
+            string issuerPublicKey = GetIssuerPublicKey();
+            if (!DDA(issuerPublicKey, tag9F4B, ddolData))
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                return 1;
+            }
             return 0;
         }
 
@@ -319,29 +311,8 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int HandleLimitation()
         {
-            int expiryDate;
-            int effectiveDate;
-            int currentDate;
-            int.TryParse(tagDict.GetTag("5F24"), out expiryDate);
-            int.TryParse(tagDict.GetTag("5F25"), out effectiveDate);
-            int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
-
-            var caseBase = new CaseBase();
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (expiryDate < currentDate)    //应用已失效
-            {
-                caseBase.TraceInfo(TipLevel.Warn, caseNo, "应用失效日期大于当前日期，应用已失效");
-            }
-
-            if (effectiveDate < currentDate) // 应用未生效
-            {
-                caseBase.TraceInfo(TipLevel.Warn, caseNo, "应用生效日期大于当前日期，应用未生效");
-            }
-
-            if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
-            {
-                caseBase.TraceInfo(TipLevel.Failed, caseNo, "应用失效日期大于生效日期，应用不合法");
-            }
+            var handleLimitationCase = new HandleLimitationCase() { CurrentApp = Constant.APP_UICS };
+            handleLimitationCase.Excute(BatchNo, CurrentApp, TransactionStep.HandleLimitation, null);
             return 0;
         }
 
@@ -349,7 +320,7 @@ namespace CardPlatform.Business
         {
             //电子现金不包括持卡人认证，这里仅判断数据是否为1E031F00
             //联机PIN不能设为首选CVM
-            string CVM = tagDict.GetTag("8E");
+            string CVM = transTags.GetTag("8E");
             return 0;
         }
 
@@ -367,7 +338,7 @@ namespace CardPlatform.Business
                 string issuerPublicKey = GetIssuerPublicKey();
                 iccPulicKey = GetIccPublicKey(issuerPublicKey);
             }
-            string CDOL1 = tagDict.GetTag("8C");
+            string CDOL1 = transTags.GetTag("8C");
             var response = new ApduResponse();
             if(isSupportCDA)
             {
@@ -383,8 +354,8 @@ namespace CardPlatform.Business
                 {
                     if(curTransAlgorithmCategory == AlgorithmCategory.DES)
                     {
-                        string tag9F4B = tagDict.GetTag("9F4B");
-                        string exp = tagDict.GetTag("9F47");
+                        string tag9F4B = transTags.GetTag("9F4B");
+                        string exp = transTags.GetTag("9F47");
                         string recoveryData = Authencation.GenRecoveryData(iccPulicKey, exp, tag9F4B);
                         if (recoveryData.Length == 0 || !recoveryData.StartsWith("6A05"))
                         {
@@ -406,7 +377,7 @@ namespace CardPlatform.Business
                         string[] tags = { "9F27", "9F36", "9F10" };
                         foreach (var tag in tags)
                         {
-                            string tagValue = tagDict.GetTag(tag);
+                            string tagValue = transTags.GetTag(tag);
                             string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
                             hashInput2 += tag + len + tagValue;
                         }
@@ -418,7 +389,7 @@ namespace CardPlatform.Business
                     }
                     else
                     {
-                        var tag9F4B = tagDict.GetTag("9F4B");
+                        var tag9F4B = transTags.GetTag("9F4B");
                         if(string.IsNullOrEmpty(tag9F4B))
                         {
                             return -1;
@@ -441,7 +412,7 @@ namespace CardPlatform.Business
                         string[] tags = { "9F27", "9F36", "9F10" };
                         foreach (var tag in tags)
                         {
-                            string tagValue = tagDict.GetTag(tag);
+                            string tagValue = transTags.GetTag(tag);
                             string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
                             hashInput += tag + len + tagValue;
                         }
@@ -479,15 +450,15 @@ namespace CardPlatform.Business
                         string tag9F26 = result.Substring(6, 16);
                         string tag9F10 = result.Substring(22);
 
-                        tagDict.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
-                        tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
-                        tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
-                        tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);    //更新后的电子余额在此处返回
+                        transTags.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
+                        transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
+                        transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
+                        transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);    //更新后的电子余额在此处返回
                     }
                 }
                 CheckTag9F10Mac();
                 TransType type = curTransAlgorithmCategory == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
-                int cardAction = Convert.ToInt32(tagDict.GetTag("9F27"), 16);
+                int cardAction = Convert.ToInt32(transTags.GetTag("9F27"), 16);
                 if(cardAction != Constant.TC)
                 {
                     var caseNo = MethodBase.GetCurrentMethod().Name;

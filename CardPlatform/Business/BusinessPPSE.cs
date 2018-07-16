@@ -6,7 +6,7 @@ using CardPlatform.Common;
 
 namespace CardPlatform.Business
 {
-    public class BusinessPPSE
+    public class BusinessPPSE : BusinessBase
     {
         public List<string> SelectPPSE()
         {
@@ -20,8 +20,8 @@ namespace CardPlatform.Business
             //TagDict tagDict = TagDict.GetInstance();
             //tagDict.SetTags(arrTLV);
 
-            IExcuteCase cases = new PPSECases();
-            cases.ExcuteCase(TransactionStep.SelectPPSE,arrTLV);
+            IExcuteCase ppseCase = new PPSECases();
+            ppseCase.Excute(BatchNo, CurrentApp,TransactionStep.SelectPPSE,arrTLV);
 
             List<string> Aids = new List<string>();
             foreach(var tlv in arrTLV)

@@ -6,6 +6,7 @@ using CardPlatform.Common;
 using CardPlatform.Business;
 using CardPlatform.Config;
 using CplusplusDll;
+using CardPlatform.ViewModel;
 
 namespace CardPlatform.Cases
 {
@@ -25,17 +26,17 @@ namespace CardPlatform.Cases
             base.Load();
         }
 
-        public override void ExcuteCase(TransactionStep step, object srcData)
+        public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
             TLVs = DataParse.ParseTLV(response.Response);
-            base.ExcuteCase(step,srcData);
+            base.Excute(batchNo, app, step,srcData);
         }
 
         /// <summary>
         /// 是否以6F开头
         /// </summary>
-        public void PBOC_sAID_SJHGX_001()
+        public void SelectAid_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -53,7 +54,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 6F模板下只能并且包含Tag84和A5模板，顺序不能颠倒
         /// </summary>
-        public void PBOC_sAID_SJHGX_003()
+        public void SelectAid_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -81,7 +82,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 84的长度是否正确且在5～16字节之间
         /// </summary>
-        public void PBOC_sAID_SJHGX_005()
+        public void SelectAid_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -103,7 +104,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// A5模板下必须包含tag50
         /// </summary>
-        public void PBOC_sAID_SJHGX_006()
+        public void SelectAid_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -138,7 +139,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// A5模板下可包含的tag包括87，9F38,5F2D,9F11，9F12，BF0C
         /// </summary>
-        public void PBOC_sAID_SJHGX_007()
+        public void SelectAid_005()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -167,7 +168,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 87的长度是否为1字节
         /// </summary>
-        public void PBOC_sAID_SJHGX_008()
+        public void SelectAid_006()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -189,7 +190,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读字符串)
         /// </summary>
-        public void PBOC_sAID_SJHGX_010()
+        public void SelectAid_007()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -218,7 +219,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 9F11的长度必须是1字节，值在01～10之间
         /// </summary>
-        public void PBOC_sAID_SJHGX_012()
+        public void SelectAid_008()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -253,7 +254,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 9F12的长度必须在1～16之间,Tag9F12转成BCD显示
         /// </summary>
-        public void PBOC_sAID_SJHGX_013()
+        public void SelectAid_009()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -281,7 +282,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 9F4D和DF4D的长度是否为2字节
         /// </summary>
-        public void PBOC_sAID_SJHGX_015()
+        public void SelectAid_010()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -308,7 +309,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// PSE的FCI中有9F11的话在PSE的DIR文件中是否存在9F12
         /// </summary>
-        public void PBOC_sPSE_GLX_001()
+        public void SelectAid_011()
         {
             var tag9F11 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE,"9F11");
             if(tag9F11.Length >0)
@@ -320,7 +321,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 每个Tag只能存在一个，包括6F，A5，BF0C模板
         /// </summary>
-        public void PBOC_sPSE_CFX_001()
+        public void SelectAid_012()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -334,6 +335,59 @@ namespace CardPlatform.Cases
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
+        }
+
+        /// <summary>
+        /// 检测tag9F38是否存在,是否能正常分解
+        /// </summary>
+        public void SelectAid_013()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
+            if (string.IsNullOrEmpty(tag9F38))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            var tls = DataParse.ParseTL(tag9F38);
+            if (tls.Count == 0)  //分解不正确
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测tag9F38每个tag长度是否符合规范
+        /// </summary>
+        public void SelectAid_014()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
+            var locator = new ViewModelLocator();
+            if (string.IsNullOrEmpty(tag9F38))
+            {
+                return;
+            }
+            var tls = DataParse.ParseTL(tag9F38);
+            foreach (var tl in tls)
+            {
+                var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                if (string.IsNullOrEmpty(terminalData))
+                {
+                    TraceInfo(TipLevel.Failed, caseNo, "终端数据[tag{0}]不存在，请联系开发人员添加该tag", tl.Tag);
+                    return;
+                }
+                if (tl.Len * 2 != terminalData.Length)
+                {
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

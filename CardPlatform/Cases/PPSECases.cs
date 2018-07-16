@@ -6,7 +6,7 @@ namespace CardPlatform.Cases
 {
     public class PPSECases : CaseBase
     {
-        public override void ExcuteCase(TransactionStep step,Object srcData)
+        public override void Excute(int batchNo, TransactionApp app, TransactionStep step,Object srcData)
         {
             return;
         }

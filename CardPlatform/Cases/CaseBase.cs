@@ -33,7 +33,7 @@ namespace CardPlatform.Cases
         /// 基类中不执行任何case,由子类执行
         /// </summary>
         /// <param name="srcData"></param>
-        public virtual void ExcuteCase(TransactionStep step,object srcData)
+        public virtual void Excute(int batchNo, TransactionApp app, TransactionStep step,object srcData)
         {
             Step = step;
             if (step != TransactionStep.ReadRecord)

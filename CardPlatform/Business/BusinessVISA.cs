@@ -13,7 +13,7 @@ namespace CardPlatform.Business
 {
     public class BusinessVISA : BusinessBase
     {
-        private TransactionTag tagDict = TransactionTag.GetInstance();
+        private TransactionTag transTag = TransactionTag.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
         private IExcuteCase baseCase = new CaseBase();
         //private bool isEccTranction = false;
@@ -24,9 +24,9 @@ namespace CardPlatform.Business
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
         /// <param name="doSMTrans"></param>
-        public override void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
+        public override void DoTransaction(string aid, bool doDesTrans, bool doSMTrans)
         {
-            base.DoTrans(aid, doDesTrans, doSMTrans);
+            base.DoTransaction(aid, doDesTrans, doSMTrans);
 
             locator.Terminal.TermianlSettings.Tag9F7A = "01";   //电子现金交易指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)
@@ -52,7 +52,7 @@ namespace CardPlatform.Business
 
         protected bool DoTransEx()
         {
-            tagDict.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            transTag.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
@@ -94,7 +94,7 @@ namespace CardPlatform.Business
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     IExcuteCase excuteCase = new SelectAppCase();
-                    excuteCase.ExcuteCase(TransactionStep.SelectApp, response);
+                    excuteCase.Excute(BatchNo,CurrentApp,TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -116,7 +116,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected List<AFL> GPOEx()
         {
-            string tag9F38 = tagDict.GetTag("9F38");
+            string tag9F38 = transTag.GetTag("9F38");
             var tls = DataParse.ParseTL(tag9F38);
             string pdolData = string.Empty;
             foreach (var tl in tls)
@@ -129,14 +129,14 @@ namespace CardPlatform.Business
             if (tlvs.Count == 1 && tlvs[0].Value.Length > 4)
             {
 
-                tagDict.SetTag(TransactionStep.GPO,"82", tlvs[0].Value.Substring(0, 4));
-                tagDict.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
+                transTag.SetTag(TransactionStep.GPO,"82", tlvs[0].Value.Substring(0, 4));
+                transTag.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             }
 
-            var AFLs = DataParse.ParseAFL(tagDict.GetTag("94"));
+            var AFLs = DataParse.ParseAFL(transTag.GetTag("94"));
 
             IExcuteCase excuteCase = new GPOCase();
-            excuteCase.ExcuteCase(TransactionStep.GPO, response);
+            excuteCase.Excute(BatchNo,CurrentApp,TransactionStep.GPO, response);
 
             return AFLs;
         }
@@ -174,8 +174,9 @@ namespace CardPlatform.Business
         protected int OfflineAuthcation()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            string AIP = tagDict.GetTag("82");
-            if (IsSupportSDA(AIP))
+            string aip = transTag.GetTag("82");
+            var aipHelper = new AipHelper(aip);
+            if (aipHelper.IsSupportSDA())
             {
                 if (!SDA())
                 {
@@ -183,9 +184,9 @@ namespace CardPlatform.Business
                     return -3;
                 }
             }
-            if (IsSupportDDA(AIP))
+            if (aipHelper.IsSupportDDA())
             {
-                string ddol = tagDict.GetTag("9F49");
+                string ddol = transTag.GetTag("9F49");
                 string ddolData = "12345678";
                 var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
                 if (string.IsNullOrWhiteSpace(tag9F4B))
@@ -212,8 +213,8 @@ namespace CardPlatform.Business
             int expiryDate;
             int effectiveDate;
             int currentDate;
-            int.TryParse(tagDict.GetTag("5F24"), out expiryDate);
-            int.TryParse(tagDict.GetTag("5F25"), out effectiveDate);
+            int.TryParse(transTag.GetTag("5F24"), out expiryDate);
+            int.TryParse(transTag.GetTag("5F25"), out effectiveDate);
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
 
             var caseBase = new CaseBase();
@@ -239,7 +240,7 @@ namespace CardPlatform.Business
         {
             //电子现金不包括持卡人认证，这里仅判断数据是否为1E031F00
             //联机PIN不能设为首选CVM
-            string CVM = tagDict.GetTag("8E");
+            string CVM = transTag.GetTag("8E");
             return 0;
         }
 
@@ -250,7 +251,7 @@ namespace CardPlatform.Business
 
         protected int TerminalActionAnalyze()
         {
-            string CDOL1 = tagDict.GetTag("8C");
+            string CDOL1 = transTag.GetTag("8C");
             ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
             if (resp.SW == 0x9000)
             {
@@ -263,10 +264,10 @@ namespace CardPlatform.Business
                     string tag9F26 = result.Substring(6, 16);
                     string tag9F10 = result.Substring(22);
 
-                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
-                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
-                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
-                    tagDict.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);    //更新后的电子余额在此处返回
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze,"9F27", tag9F27);
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
+                    transTag.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);    //更新后的电子余额在此处返回
                     CheckAC(tag9F26);
                 }
             }

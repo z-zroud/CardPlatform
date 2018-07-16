@@ -16,7 +16,24 @@ namespace CardPlatform.Common
         GPO,            //应用初始化
         ReadRecord,     //读应用记录
         GetData,        //取必要数据(不是标准交易步骤，但需要检查这些数据是否存在于卡片)
+        HandleLimitation,   //处理限制
         TerminalActionAnalyze   //终端风险管理
+    }
+
+    public enum TransactionApp
+    {
+        PSE,
+        PPSE,
+        PBOC_DES,
+        PBOC_SM,
+        UICS_DES,
+        UICS_SM,
+        ECC_DES,
+        ECC_SM,
+        QUICS_DES,
+        QUICS_SM,
+        QPBOC_DES,
+        QPBOC_SM
     }
 
     public class Constant

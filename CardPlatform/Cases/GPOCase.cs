@@ -14,12 +14,12 @@ namespace CardPlatform.Cases
     public class GPOCase : CaseBase
     {
         private ApduResponse response;
-        private List<TLV> TLVs;
+        private List<TLV> tlvs;
 
         public GPOCase()
         {
-            response = new ApduResponse();
-            TLVs = new List<TLV>();
+            response    = new ApduResponse();
+            tlvs        = new List<TLV>();
         }
 
         protected override void Load()
@@ -27,19 +27,18 @@ namespace CardPlatform.Cases
             base.Load();
         }
 
-        public override void ExcuteCase(TransactionStep step, object srcData)
+        public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
-            TLVs = DataParse.ParseTLV(response.Response);
-            base.ExcuteCase(step, srcData);
-            CheckTemplateTag(TLVs);
-            
+            tlvs = DataParse.ParseTLV(response.Response);
+            base.Excute(batchNo, app, step, srcData);
+            CheckTemplateTag(tlvs);            
         }
 
         /// <summary>
-        /// 响应数据是否以80开头
+        /// 检测GPO响应数据是否以80开头,格式是否正确
         /// </summary>
-        public void PBOC_GPO_SJHGX_001()
+        public void GPO_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -47,18 +46,22 @@ namespace CardPlatform.Cases
             if (!CaseUtil.RespStartWith(response.Response, "80"))
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            else
+                return;
+            }   
+            var tlvs = DataParse.ParseTLV(response.Response);
+            if (tlvs.Count != 1 || tlvs[0].Value.Length <= 4)
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
             }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
 
         /// <summary>
-        /// 去除AIP后检查AFL是否为4字节的倍数
+        /// 检测tag94是否为4字节的倍数
         /// </summary>
-        public void PBOC_GPO_SJHGX_003()
+        public void GPO_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -75,9 +78,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// AFL中记录没有重复/AIP重复
+        /// 检测GPO相应数据中没有重复的AFL记录
         /// </summary>
-        public void PBOC_GPO_SJHGX_004()
+        public void GPO_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -104,9 +107,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 按4字节分组后的AFL，第2个字节应该小于第3个字节
+        /// 检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于第3个字节)
         /// </summary>
-        public void PBOC_GPO_ZQX_002()
+        public void GPO_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -123,7 +126,111 @@ namespace CardPlatform.Cases
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            
         }
+
+
+        /// <summary>
+        /// 检测卡片是否支持SDA功能
+        /// </summary>
+        public void GPO_005()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if(aipHelper.IsSupportSDA())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测卡片是否支持DDA功能
+        /// </summary>
+        public void GPO_006()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if (aipHelper.IsSupportDDA())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测卡片是否支持持卡人认证功能
+        /// </summary>
+        public void GPO_007()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if (aipHelper.IsSupportCardHolderVerify())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测卡片是否支持执行终端风险管理功能
+        /// </summary>
+        public void GPO_008()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if (aipHelper.IsSupportTerminalRiskManagement())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测卡片是否支持发卡行认证功能
+        /// </summary>
+        public void GPO_009()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if (aipHelper.IsSupportIssuerAuth())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测卡片是否支持CDA功能
+        /// </summary>
+        public void GPO_010()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if (aipHelper.IsSupportCDA())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
     }
 }

@@ -6,6 +6,9 @@ using CplusplusDll;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using CardPlatform.Helper;
+using GalaSoft.MvvmLight.Threading;
+using CardPlatform.Models;
 
 namespace CardPlatform.Business
 {
@@ -37,7 +40,8 @@ namespace CardPlatform.Business
             locator = new ViewModelLocator();
             caseObj = new CaseBase();
         }
-
+        public int BatchNo { get; set; }                //一次检测中重复跑该交易的序号
+        public TransactionApp CurrentApp { get; set; }  //此次交易的应用类型
         public TransKeyType KeyType { get; set; }       //定义界面中输入的是MDK/UDK类型
         public string TransDesACKey { get; set; }       //DES_AC (MDK/UDK) 由KeyType决定
         public string TransDesMACKey { get; set; }      //DES_MAC
@@ -56,76 +60,7 @@ namespace CardPlatform.Business
         public static string PersoFile; //个人化信息表Excel文件
         
 
-        //检查AIP支持的功能
-        #region Check AIP support functions
-        private int GetFirstByteOfAIP(string AIP)
-        {
-            if (AIP.Length != 4)
-            {
-                return 0;
-            }
-            return Convert.ToInt32(AIP.Substring(0, 2), 16);
-        }
-        public bool IsSupportSDA(string AIP)
-        {
-            var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x40) == 0x40)
-            {
-                return true;
-            }
-            return false;
-        }
 
-        public bool IsSupportDDA(string AIP)
-        {
-            var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x20) == 0x20)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool IsSupportCardHolderVerify(string AIP)
-        {
-            var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x10) == 0x10)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool IsSupportTerminalRiskManagement(string AIP)
-        {
-            var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x08) == 0x08)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool IsSupportIssuerAuth(string AIP)
-        {
-            var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x04) == 0x04)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool IsSupportCDA(string AIP)
-        {
-            var firstByte = GetFirstByteOfAIP(AIP);
-            if ((firstByte & 0x01) == 0x01)
-            {
-                return true;
-            }
-            return false;
-        }
-        #endregion
 
         public TipLevel GetTipLevel(bool result, TipLevel level = TipLevel.Failed)
         {
@@ -164,11 +99,53 @@ namespace CardPlatform.Business
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
         /// <param name="doSMTrans"></param>
-        public virtual void DoTrans(string aid, bool doDesTrans, bool doSMTrans)
+        public virtual void DoTransaction(string aid, bool doDesTrans, bool doSMTrans)
         {
             this.doDesTrans = doDesTrans;
             this.doSMTrans = doSMTrans;
             this.aid = aid;
+        }
+
+        public void WriteTagToSongJianFile()
+        {
+            var songJianFile = new SongJianHelper(PersoFile);
+            if (!string.IsNullOrEmpty(PersoFile))
+            {
+                //不需要对非接国密交易填写送检表，和非接DES一致
+                if (IsContactTrans && curTransAlgorithmCategory == AlgorithmCategory.DES) songJianFile.WriteToFile(TagType.ContactDC_DES);
+                if (IsContactTrans && curTransAlgorithmCategory == AlgorithmCategory.SM) songJianFile.WriteToFile(TagType.ContactDC_SM);
+                if (!IsContactTrans && curTransAlgorithmCategory == AlgorithmCategory.DES) songJianFile.WriteToFile(TagType.ContactlessDC_DES);
+            }
+        }
+
+        public void DoTransaction(TransType type, Func<bool> DoActualTransaction)
+        {
+            switch (type)
+            {
+                case TransType.UICS_DES:
+                    locator.Terminal.TermianlSettings.TagDF69 = "00";
+                    curTransAlgorithmCategory = AlgorithmCategory.DES;
+                    break;
+                case TransType.UICS_SM:
+                    locator.Terminal.TermianlSettings.TagDF69 = "01";
+                    curTransAlgorithmCategory = AlgorithmCategory.SM;
+                    break;
+            }
+            bool isSucess = DoActualTransaction();
+            WriteTagToSongJianFile();
+            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            {
+                TransResultModel TransactionResult = new TransResultModel(type);
+                if (isSucess)
+                {
+                    TransactionResult.Result = TransResult.Sucess;
+                }
+                else
+                {
+                    TransactionResult.Result = TransResult.Failed;
+                }
+                locator.Transaction.TransResult.Add(TransactionResult);
+            });
         }
 
         /// <summary>

@@ -26,11 +26,11 @@ namespace CardPlatform.Cases
             base.Load();           
         }
 
-        public override void ExcuteCase(TransactionStep step, object srcData)
+        public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;          
             TLVs = DataParse.ParseTLV(response.Response);
-            base.ExcuteCase(step, srcData);
+            Excute(batchNo,app,step, srcData);
             CheckTemplateTag(TLVs);
         }
 

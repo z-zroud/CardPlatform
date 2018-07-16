@@ -21,7 +21,7 @@ namespace CardPlatform.Cases
             base.Load();
         }
 
-        public override void ExcuteCase(TransactionStep step, object srcData)
+        public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
         {
             resps = (List<ApduResponse>)srcData;
             List<string> tags = new List<string> { "9F12", "9F79", "9F51", "9F52" };
@@ -53,7 +53,7 @@ namespace CardPlatform.Cases
                 CheckTemplateTag(TLVs);
             }
 
-            base.ExcuteCase(step, srcData);
+            Excute(batchNo,app,step, srcData);
         }
 
 

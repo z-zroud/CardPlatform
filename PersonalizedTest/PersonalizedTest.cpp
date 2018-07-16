@@ -49,11 +49,11 @@ int main()
 	}
     string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
     string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "银联";
-    string dpPath = dpDir + dpFormat + "\\澳门立桥20180710.DP";
-    rulePath += "澳门立桥借记_银联_英飞凌.xml";
-    string installParamCfg = "湖南农信社贷记_英飞凌_非扩展_0500605.xml";
-    GenCpsFile("DpParse_YL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string dpFormat = "神舟数码";
+    string dpPath = dpDir + dpFormat + "\\稷山河东村镇银行.txt";
+    rulePath += "河东村镇银行_神码_华大_G81140042.xml";
+    string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
+    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
     //char* cpsFile[30] = { 0 };
     //int cpsCount = 0;
     //GetCpsFiles(cpsFile, cpsCount);
