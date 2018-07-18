@@ -22,7 +22,8 @@ namespace CardPlatform.Cases
         private static List<CaseInfo> caseInfos = new List<CaseInfo>();
         public string CurrentApp { get; set; }
         protected TransactionStep Step = TransactionStep.Base;
-
+        private ViewModelLocator locator = new ViewModelLocator();
+        private TransactionConfig TransConfig = TransactionConfig.GetInstance();
 
         public CaseBase()
         {
@@ -36,22 +37,6 @@ namespace CardPlatform.Cases
         public virtual void Excute(int batchNo, TransactionApp app, TransactionStep step,object srcData)
         {
             Step = step;
-            if (step != TransactionStep.ReadRecord)
-            {
-                var response = (ApduResponse)srcData;
-                var TLVs = DataParse.ParseTLV(response.Response);
-                CheckTemplateTag(TLVs);
-            }
-            else
-            {
-                var resps = (List<ApduResponse>)srcData;
-                foreach (var resp in resps)
-                {
-                    var TLVs = DataParse.ParseTLV(resp.Response);
-                    CheckTemplateTag(TLVs);
-                }
-            }
-
             Load();
             if(caseInfos.Count > 0)
             {
@@ -168,5 +153,108 @@ namespace CardPlatform.Cases
                 }
             }
         }
+
+        #region 一些复杂通用的case在基类中实现
+        /// <summary>
+        /// 根据MDK/UDK生成过程密钥
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        protected string GenSessionKey(string key, TransKeyType transKeyType, AlgorithmCategory algorithmFlag)
+        {
+            string acSessionKey = string.Empty;
+            string atc = TransactionTag.GetInstance().GetTag("9F36");
+            if (transKeyType == TransKeyType.MDK)
+            {
+                string cardAcct = TransactionTag.GetInstance().GetTag("5A");
+                string cardSeq = TransactionTag.GetInstance().GetTag("5F34");
+                string UdkAcKey = Authencation.GenUdk(key, cardAcct, cardSeq, (int)algorithmFlag);
+                acSessionKey = Authencation.GenUdkSessionKey(UdkAcKey, atc, (int)algorithmFlag);
+            }
+            else
+            {
+                acSessionKey = Authencation.GenUdkSessionKey(key, atc, (int)algorithmFlag);
+            }
+            return acSessionKey;
+        }
+
+        public bool Check9F10Mac()
+        {
+            var tagDict = TransactionTag.GetInstance();
+            string tag9F10 = tagDict.GetTag("9F10");
+            string tag9F10Mac = tag9F10.Substring(tag9F10.Length - 8);
+            string atc = tagDict.GetTag("9F36");
+            string data = string.Empty;
+
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            if (tag9F10.Substring(18, 2) == "01") //暂时只支持IDD为01类型
+            {
+                var tag9F79 = tag9F10.Substring(20, 10);
+                data = atc + tag9F79 + "00";
+            }
+            string macSessionKey = string.Empty;
+            string cardAcct = tagDict.GetTag("5A");
+            string cardSeq = tagDict.GetTag("5F34");
+            string mac = string.Empty;           
+            if (TransConfig.AlgorithmFlag == AlgorithmCategory.DES)
+            {
+                if (string.IsNullOrEmpty(TransConfig.TransDesMacKey) || TransConfig.TransDesMacKey.Length != 32)
+                    return false;
+                macSessionKey = GenSessionKey(TransConfig.TransDesMacKey, TransConfig.KeyType, TransConfig.AlgorithmFlag);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(TransConfig.TransSmMacKey) || TransConfig.TransSmMacKey.Length != 32)
+                    return false;
+                macSessionKey = GenSessionKey(TransConfig.TransSmMacKey, TransConfig.KeyType, TransConfig.AlgorithmFlag);
+            }
+            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)TransConfig.AlgorithmFlag);
+            if (mac == tag9F10Mac)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool CheckAc()
+        {
+            string udkACKey = string.Empty;
+            var tagDict = TransactionTag.GetInstance();
+            string ATC = tagDict.GetTag("9F36");
+            if (TransConfig.KeyType == TransKeyType.MDK)
+            {
+                string cardAcct = tagDict.GetTag("5A");
+                string cardSeq = tagDict.GetTag("5F34");
+                udkACKey = Authencation.GenUdk(TransConfig.TransDesAcKey, cardAcct, cardSeq);
+            }
+            else
+            {
+                udkACKey = TransConfig.TransDesAcKey;
+            }
+
+            string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");  //授权金额
+            string tag9F03 = locator.Terminal.TermianlSettings.GetTag("9F03");  //其他金额
+            string tag9F1A = locator.Terminal.TermianlSettings.GetTag("9F1A");  //终端国家代码
+            string tag95 = locator.Terminal.TermianlSettings.GetTag("95");      //终端验证结果           
+            string tag5A = locator.Terminal.TermianlSettings.GetTag("5F2A");  //交易货币代码
+            string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
+            string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
+            string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
+            string tag82 = TransactionTag.GetInstance().GetTag("82");
+            string tag9F36 = TransactionTag.GetInstance().GetTag("9F36");
+            string tag9F10 = TransactionTag.GetInstance().GetTag("9F10");
+            var customData = tag9F10.Substring(6);
+
+            string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + customData;
+            int zeroCount = input.Length % 16;
+            if (zeroCount != 0)
+            {
+                input.PadRight(zeroCount, '0');
+            }
+            var mac = Authencation.GenEMVAC(udkACKey, input);
+            //Authencation.
+            return true;
+        }
+        #endregion
     }
 }

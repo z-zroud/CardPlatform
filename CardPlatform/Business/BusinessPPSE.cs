@@ -17,11 +17,10 @@ namespace CardPlatform.Business
                 return new List<string>();
             }
             List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
-            //TagDict tagDict = TagDict.GetInstance();
-            //tagDict.SetTags(arrTLV);
+            TransactionTag.GetInstance().SetTags(TransactionStep.SelectPPSE, arrTLV);
 
-            IExcuteCase ppseCase = new PPSECases();
-            ppseCase.Excute(BatchNo, CurrentApp,TransactionStep.SelectPPSE,arrTLV);
+            IExcuteCase ppseCase = new PPSECases() { CurrentApp = Constant.APP_PPSE };
+            ppseCase.Excute(BatchNo, CurrentApp,TransactionStep.SelectPPSE, response);
 
             List<string> Aids = new List<string>();
             foreach(var tlv in arrTLV)

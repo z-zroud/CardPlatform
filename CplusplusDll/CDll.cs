@@ -127,7 +127,7 @@ namespace CplusplusDll
         [DllImport(@"Authencation.dll", EntryPoint = "GenPBOCMac", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void GenPBOCMac(string udkMacSessionKey, string data, StringBuilder mac, int keyType);
 
-        [DllImport(@"Authencation.dll", EntryPoint = "GenEMVAC", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"Authencation.dll", EntryPoint = "GenEMVMac", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void GenEMVAC(string udkAC, string data, StringBuilder mac);
 
         [DllImport(@"Authencation.dll", EntryPoint = "GenHash", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]

@@ -80,13 +80,12 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 84的长度是否正确且在5～16字节之间
+        /// 84是否存在且长度是否正确且在5～16字节之间
         /// </summary>
         public void SelectAid_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
             var tag84 = from tlv in TLVs where tlv.Tag == "84" select tlv;
             if (tag84.First() != null)
             {
@@ -98,6 +97,10 @@ namespace CardPlatform.Cases
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
+            }
+            else
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 
@@ -386,6 +389,107 @@ namespace CardPlatform.Cases
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     return;
                 }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测国密交易下，tag9F38需包含DF69算法支持指示器，且长度为01
+        /// </summary>
+        public void SelectAid_015()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
+            var tls = DataParse.ParseTL(tag9F38);
+            foreach(var tl in tls)
+            {
+                if(tl.Tag == "DF69" && tl.Len == 1)
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测采用密文版本01的QPBOC最基本的PDOL包含的标签是否存在(tag9F66/9F02/9F03/9F1A/95/5F2A/9A/9C/9F37)
+        /// </summary>
+        public void SelectAid_016()
+        {
+            List<Tuple<string, int>> tags = new List<Tuple<string, int>>
+            {
+                new Tuple<string, int>("9F66",4),
+                new Tuple<string, int>("9F02",6),
+                new Tuple<string, int>("9F03",6),
+                new Tuple<string, int>("9F1A",2),
+                new Tuple<string, int>("5F2A",2),
+                new Tuple<string, int>("9A",3),
+                new Tuple<string, int>("9C",1),
+                new Tuple<string, int>("9F37",4),
+                new Tuple<string, int>("95",5)
+            };
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
+            var tls = DataParse.ParseTL(tag9F38);
+            bool bFind = false;
+            foreach(var tag in tags)
+            {
+                bFind = false;
+                foreach(var tl in tls)
+                {
+                    if(tl.Tag == tag.Item1 && tl.Len == tag.Item2)
+                    {
+                        bFind = true;
+                        break;
+                    }
+                }
+                if (!bFind)
+                {
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测PPSE返回的tag50和tag87是否和选择AID应用时的FCI模板中的tag50和tag87一致
+        /// </summary>
+        public void SelectAid_017()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var ppseTag50 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPPSE, "50");
+            var ppseTag87 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPPSE, "87");
+            var tag50 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "50");
+            var tag87 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "87");
+            if(ppseTag50 != tag50 ||
+                ppseTag87 != tag87)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测AID返回的FCI模板中tag84的值和PPSE FCI中的4F是否一致
+        /// </summary>
+        public void SelectAid_018()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var ppseTag4F = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPPSE, "4F");
+            var tag84 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "84");
+            if (ppseTag4F != tag84)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }

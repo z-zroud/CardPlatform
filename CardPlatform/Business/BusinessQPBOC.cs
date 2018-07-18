@@ -118,28 +118,7 @@ namespace CardPlatform.Business
         {
             var afls = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            var tls = DataParse.ParseTL(transTags.GetTag("9F38"));
-
-            var tlTags = from tl in tls select tl.Tag;
-            if (curTransAlgorithmCategory == AlgorithmCategory.SM)
-            {   //国密算法判断PDOL是否包含tagDF69 SM算法指示器
-
-                if(!tlTags.Contains("DF69"))
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "国密算法，PDOL中缺少tagDF69");
-                    return afls;
-                }
-            }
-            string[] terminalTags = { "9F66", "9F37","9F02","5F2A" }; //QPBOC交易中，PDOL需包含关键tag值
-            foreach(var tag in terminalTags)
-            {
-                if(!tlTags.Contains(tag))
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "PDOL中缺少tag{0}", tag);
-                    return afls;
-                }
-            }
-            
+            var tls = DataParse.ParseTL(transTags.GetTag("9F38"));         
             string PDOLData = string.Empty;
             foreach (var tl in tls)
             {
@@ -159,12 +138,6 @@ namespace CardPlatform.Business
                 if (!string.IsNullOrEmpty(tag9F26))
                 {
                     isQPBOCTranction = true;    //表明卡片支持QPBOC交易
-                }
-                int cardAction = Convert.ToInt32(tag9F27, 16);
-                if(cardAction != Constant.TC)
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "卡片拒绝此次交易，卡片代码[{0}]", tag9F27);
-                    return afls;
                 }
                 afls = DataParse.ParseAFL(transTags.GetTag("94"));
                 IExcuteCase excuteCase = new GPOCase();
@@ -285,18 +258,32 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
                 return 1;
             }
-            string ddol = transTags.GetTag(TransactionStep.ReadRecord, "9F49");
-            string ddolData = "12345678";
-            var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
+
+            var tag9F4B = transTags.GetTag("9F4B");
             if (string.IsNullOrWhiteSpace(tag9F4B))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
                 return 1;
             }
             string issuerPublicKey = GetIssuerPublicKey();
-            if (!DDA(issuerPublicKey, tag9F4B, ddolData))
+            string tag9F37 = locator.Terminal.TermianlSettings.Tag9F37;
+            string tag9F02 = locator.Terminal.TermianlSettings.Tag9F02;
+            string tag5F2A = locator.Terminal.TermianlSettings.Tag5F2A;
+            string tag9F69 = transTags.GetTag("9F69");
+            if (string.IsNullOrEmpty(tag9F69))
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "Tag9F69不存在");
+                return 1;
+            }
+            if (string.IsNullOrEmpty(issuerPublicKey))
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取发卡行公钥");
+                return 1;
+            }
+            string dynamicData = tag9F37 + tag9F02 + tag5F2A + tag9F69;
+            if (!DDA(issuerPublicKey, tag9F4B, dynamicData))
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "fDDA脱机数据认证失败");
                 return 1;
             }
             return 0;

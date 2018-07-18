@@ -13,24 +13,65 @@ namespace CardPlatform.Cases
 
     public static class CaseUtil
     {
-        //public static List<List<TLV>> GetMultSubTags(string parentTag, List<TLV> tags)
-        //{
-        //    int level = 0;
-        //    bool start = false; //用于什么时候保存tag
-        //    foreach(var item in tags)
-        //    {
-        //        if(item.Tag == parentTag)
-        //        {
-        //            level = item.Level; //level保存父模板的层次，则子tag为父模板的下一级，直到遍历结束或者遇到和父模板层级一样的模板
-        //            start = true;
-        //        }
-        //        if(start && item.Level == level + 1)
-        //        {
-
-        //        }
-        //    }
-        //}
-
+        public static int GetDuplexTemplate(string parentTag, string template, List<TLV> tags)
+        {
+            int level = 0;
+            bool start = false; //用于什么时候保存tag
+            var subTags = new List<TLV>();
+            int count = 0;
+            foreach (var item in tags)
+            {
+                if (item.Tag == parentTag)
+                {
+                    level = item.Level; //level保存父模板的层次，则子tag为父模板的下一级，直到遍历结束或者遇到和父模板层级一样的模板
+                    start = true;
+                    continue;
+                }
+                if (start && 
+                    item.Level == level + 1 && 
+                    item.IsTemplate && 
+                    item.Tag == template)
+                {
+                    subTags.Add(item);
+                    count++;
+                    continue;
+                }
+                if (start && item.Level == level)
+                {
+                    start = false;
+                }
+            }
+            return count;
+        }
+        public static List<TLV> GetSubTags(string parentTag, int count, List<TLV> tags)
+        {
+            int level = 0;
+            bool start = false; //用于什么时候保存tag
+            var subTags = new List<TLV>();
+            int whichOne = 0;
+            foreach (var item in tags)
+            {
+                if (item.Tag == parentTag)
+                {
+                    level = item.Level; //level保存父模板的层次，则子tag为父模板的下一级，直到遍历结束或者遇到和父模板层级一样的模板
+                    start = true;
+                    whichOne++;
+                    continue;
+                }
+                if (start && 
+                    item.Level == level + 1 && 
+                    whichOne == count)
+                {
+                    subTags.Add(item);
+                    continue;
+                }
+                if (start && item.Level == level)
+                {
+                    start = false;
+                }
+            }
+            return subTags;
+        }
         /// <summary>
         /// 此函数只查找第一个父节点，并收集该父节点的子节点
         /// 若存在多个相同的父节点，只返回第一个父节点的子节点

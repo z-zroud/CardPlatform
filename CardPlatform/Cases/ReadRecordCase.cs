@@ -53,14 +53,14 @@ namespace CardPlatform.Cases
                 CheckTemplateTag(TLVs);
             }
 
-            Excute(batchNo,app,step, srcData);
+            base.Excute(batchNo,app,step, srcData);
         }
 
 
         /// <summary>
-        /// 是否每条记录都以70开始
+        /// 检测读记录是否以70模板开头
         /// </summary>
-        public void POBC_rDATA_GFFHX_001()
+        public void ReadRecord_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -77,7 +77,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// Tag57的合规性检查（卡号不以62开头则警告）
         /// </summary>
-        public void POBC_rDATA_GFFHX_007()
+        public void ReadRecord_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -102,9 +102,9 @@ namespace CardPlatform.Cases
 
 
         /// <summary>
-        /// 长度检查，至少10字节，2字节的倍数
+        /// 检测tag8E的合规性(格式、长度等)
         /// </summary>
-        public void POBC_rDATA_GFFHX_015()
+        public void ReadRecord_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -128,9 +128,9 @@ namespace CardPlatform.Cases
 
 
         /// <summary>
-        /// Tag5F20和tag9F0B只能存在一个
+        /// 检测tag5F20和tag9F0B的互斥性(不能同时存在，只能存在一个)
         /// </summary>
-        public void POBC_rDATA_GFFHX_019()
+        public void ReadRecord_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -148,9 +148,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测5F20的规范性
+        /// 检测tag5F20的规范性(英文字符、包含/,建议值、长度等)
         /// </summary>
-        public void POBC_rDATA_GFFHX_020()
+        public void ReadRecord_005()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -175,24 +175,11 @@ namespace CardPlatform.Cases
             }
         }
 
-        /// <summary>
-        /// 转码后不能为乱码,中文
-        /// </summary>
-        public void POBC_rDATA_GFFHX_021()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            if (readRecordTags.ContainsKey("5F20"))
-            {
-                var tag5F20 = readRecordTags["5F20"];
-
-            }
-        }
 
         /// <summary>
-        /// 转码后不能为乱码,中文
+        /// 检测tag9F0B的规范性(英文字符、长度等)
         /// </summary>
-        public void POBC_rDATA_GFFHX_022()
+        public void ReadRecord_006()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -212,9 +199,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 服务码检测
+        /// 检测tag5F30的规范性(借记/贷记使用的服务码需在规范范围内)
         /// </summary>
-        public void POBC_rDATA_GFFHX_024()
+        public void ReadRecord_007()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -266,9 +253,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 值只能是00～05，显示出对应的证件类型
+        /// 检测tag9F62证件类型的规范性(取值范围、长度等)
         /// </summary>
-        public void POBC_rDATA_GFFHX_028()
+        public void ReadRecord_008()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -291,9 +278,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag9F61的合规性
+        /// 检测tag9F61证件号的规范性(转字符串、证件类型对应的证件长度、规范长度等)
         /// </summary>
-        public void POBC_rDATA_GFFHX_030()
+        public void ReadRecord_009()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -325,9 +312,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// Tag9F63（长度必须是16字节）
+        /// 检测tag9F63长度是否等于16字节
         /// </summary>
-        public void POBC_rDATA_GFFHX_033()
+        public void ReadRecord_010()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -342,9 +329,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// Tag9F0D/9F0E/9F0F（长度必须是5个字节)
+        /// 检测Tag9F0D/9F0E/9F0F（长度必须是5个字节)
         /// </summary>
-        public void POBC_rDATA_GFFHX_034()
+        public void ReadRecord_011()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -368,9 +355,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// Tag8C/8D能否分解
+        /// 检测Tag8C/8D能否分解
         /// </summary>
-        public void POBC_rDATA_GFFHX_035()
+        public void ReadRecord_012()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -395,9 +382,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测5A的规范性
+        /// 检测Tag5A的规范性(格式、长度等)
         /// </summary>
-        public void POBC_rDATA_GFFHX_036()
+        public void ReadRecord_013()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -417,9 +404,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag5F24/tag5F25的规范性
+        /// 检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)
         /// </summary>
-        public void PBOC_rDATA_GFFHX_037()
+        public void ReadRecord_014()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -466,11 +453,11 @@ namespace CardPlatform.Cases
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
-
+        
         /// <summary>
-        /// tag5F34序列号检测
+        /// 检测Tag5F34的长度
         /// </summary>
-        public void POBC_rDATA_GFFHX_043()
+        public void ReadRecord_015()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -488,9 +475,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测9F4A
+        /// 检测Tag9F4A值是否为82
         /// </summary>
-        public void POBC_rDATA_GFFHX_044()
+        public void ReadRecord_016()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -508,9 +495,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag9F49的值
+        /// 检测Tag9F49值是否为9F3704
         /// </summary>
-        public void POBC_rDATA_GFFHX_046()
+        public void ReadRecord_017()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -528,9 +515,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测Tag9F47/Tag9F32值
+        /// 检测Tag9F47/9F32值是否为03或010001
         /// </summary>
-        public void POBC_rDATA_GFFHX_047()
+        public void ReadRecord_018()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -550,9 +537,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag9F1F
+        /// 检测Tag9F1F(转换为字符串)
         /// </summary>
-        public void POBC_rDATA_GFFHX_049()
+        public void ReadRecord_019()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -570,9 +557,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag8F的长度
+        /// 检测Tag8F长度等于1
         /// </summary>
-        public void POBC_rDATA_GFFHX_050()
+        public void ReadRecord_020()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -591,9 +578,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag5F28
+        /// 检测Tag9F28长度等于3
         /// </summary>
-        public void POBC_rDATA_GFFHX_051()
+        public void ReadRecord_021()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -612,9 +599,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag9F14
+        /// 检测Tag14长度等于2
         /// </summary>
-        public void POBC_rDATA_GFFHX_052()
+        public void ReadRecord_022()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -633,9 +620,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag9F23
+        /// 检测Tag23长度等于2
         /// </summary>
-        public void POBC_rDATA_GFFHX_053()
+        public void ReadRecord_023()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -654,9 +641,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag9F08
+        /// 检测Tag9F08的值是否为0030
         /// </summary>
-        public void POBC_rDATA_GFFHX_054()
+        public void ReadRecord_024()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -674,9 +661,9 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 读记录中不能存在tag9F69,9F79
+        /// 检测Tag9F69,9F79，不能出现在读记录中
         /// </summary>
-        public void POBC_rDATA_GFFHX_058()
+        public void ReadRecord_025()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -691,7 +678,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5F30中的服务码与57中的一致性
         /// </summary>
-        public void POBC_rDATA_GLX_018()
+        public void ReadRecord_026()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -713,7 +700,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5F24与57中的失效期的一致性
         /// </summary>
-        public void POBC_rDATA_GLX_019()
+        public void ReadRecord_027()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -735,7 +722,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5A与57中卡号的一致性
         /// </summary>
-        public void POBC_rDATA_GLX_020()
+        public void ReadRecord_028()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -757,7 +744,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5F28与9F57发卡行国家代码的一致性
         /// </summary>
-        public void POBC_rDATA_GLX_021()
+        public void ReadRecord_029()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -784,7 +771,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag9F42与9F51应用货币代码的一致性
         /// </summary>
-        public void POBC_rDATA_GLX_022()
+        public void ReadRecord_030()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -807,5 +794,29 @@ namespace CardPlatform.Cases
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
+
+
+        /// <summary>
+        /// 检测QPBOC/QUICS交易中，tag9F74是否正确，且作为最后一个读记录命令中返回
+        /// </summary>
+        public void ReadRecord_031()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            int count = resps.Count;
+            var tlvs = DataParse.ParseTLV(resps[count - 1].Response);
+            foreach(var tl in tlvs)
+            {
+                if (tl.Tag == "9F74" && tl.Value == "454343303031")
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
     }
 }
