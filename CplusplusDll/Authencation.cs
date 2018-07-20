@@ -183,10 +183,23 @@ namespace CplusplusDll
             return mac.ToString().Substring(0, 8);
         }
 
-        public static string GenEMVAC(string udkAC,string data)
+        public static string GenEMVAC(string udkAc,string data)
         {
             StringBuilder mac = new StringBuilder(17);
-            CDll.GenEMVAC(udkAC, data, mac);
+            CDll.GenEMVAC(udkAc, data, mac);
+
+            return mac.ToString().Substring(0, 16);
+        }
+
+        public static string GenAc(string udkMacSessionKey, string data, int keyType = 0)
+        {
+            if (udkMacSessionKey.Length != 32 ||
+                string.IsNullOrEmpty(data))
+            {
+                return string.Empty;
+            }
+            StringBuilder mac = new StringBuilder(17);
+            CDll.GenPBOCMac(udkMacSessionKey, data, mac, keyType);
 
             return mac.ToString().Substring(0, 16);
         }

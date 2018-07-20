@@ -592,16 +592,16 @@ void IRule::HandleRule(CPS& cpsItem)
     HandleDGIMap(cpsItem);
     HandleDGIExchange(cpsItem);   
 
-
+    SpliteEF02(cpsItem);
 
     HandleDGIAddTagFromOtherDGI(cpsItem);
     HandleTagMergeTagFromOtherTag(cpsItem);
-
+    
     HandleDGIDecrypt(cpsItem);
     HandleTagDecrypt(cpsItem);
 
     HandleDGIAddFixedTagValue(cpsItem);
-    SpliteEF02(cpsItem);
+    
 
 
     //HandleTagInsertValue(cpsItem);

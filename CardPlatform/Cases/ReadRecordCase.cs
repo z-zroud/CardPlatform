@@ -6,6 +6,7 @@ using CardPlatform.Common;
 using CardPlatform.Config;
 using CplusplusDll;
 using CardPlatform.Helper;
+using CardPlatform.ViewModel;
 
 namespace CardPlatform.Cases
 {
@@ -14,6 +15,7 @@ namespace CardPlatform.Cases
         private List<ApduResponse> resps;
         private List<TLV> TLVs;
         private Dictionary<string, TLV> readRecordTags = new Dictionary<string, TLV>();
+        private ViewModelLocator locator = new ViewModelLocator();
 
         protected override void Load()
         {
@@ -70,8 +72,10 @@ namespace CardPlatform.Cases
                 if (!CaseUtil.RespStartWith(resp.Response, "70"))
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    return;
                 }
             }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -120,10 +124,11 @@ namespace CardPlatform.Cases
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 return;
             }
-            if (tag8E.Value.Substring(0, 8) != "00000000")
+            if (tag8E.Value.Substring(0, 16) != "0000000000000000")
             {
                 TraceInfo(TipLevel.Warn, caseNo, "8E前8字节一般为0");
             }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
 
@@ -162,6 +167,11 @@ namespace CardPlatform.Cases
                 {
                     TraceInfo(TipLevel.Warn, caseNo, "5F20一般建议值为202F");
                 }
+                else
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
+                }
                 string value = UtilLib.Utils.BcdToStr(tag5F20.Value);
                 if (!CaseUtil.IsAlpha(value) || value.Contains("/"))
                 {
@@ -170,7 +180,7 @@ namespace CardPlatform.Cases
                 }
                 if (tag5F20.Len < 2 || tag5F20.Len > 26)
                 {
-                    TraceInfo(Config.TipLevel.Warn, caseNo, "tag5F20长度需要在2-26字节之间");
+                    TraceInfo(TipLevel.Warn, caseNo, "tag5F20长度需要在2-26字节之间");
                 }
             }
         }
@@ -339,7 +349,7 @@ namespace CardPlatform.Cases
                 !readRecordTags.ContainsKey("9F0E") ||
                 !readRecordTags.ContainsKey("9F0F"))
             {
-                TraceInfo(Config.TipLevel.Failed, caseNo, "读记录中缺少tag9F0D/tag9F0E/tag9F0F");
+                TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F0D/tag9F0E/tag9F0F");
             }
             else
             {
@@ -352,6 +362,7 @@ namespace CardPlatform.Cases
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -704,13 +715,22 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            if (!readRecordTags.ContainsKey("5F24") || !readRecordTags.ContainsKey("57"))
+            string tag57 = string.Empty;
+            if(TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_DES ||
+                TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_SM)
+            {
+                tag57 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "57");
+            }
+            else
+            {
+                tag57 = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "57");
+            }
+            if (!readRecordTags.ContainsKey("5F24") || string.IsNullOrEmpty(tag57))
             {
                 TraceInfo(caseItem.Level, caseNo, "读数据中缺少tag5F24或者tag57");
                 return;
             }
-            Tag57Helper tag57Helper = new Tag57Helper(readRecordTags["57"].Value);
+            Tag57Helper tag57Helper = new Tag57Helper(tag57);
             if (readRecordTags["5F24"].Value.Substring(0,4) != tag57Helper.GetExpiredDate())
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -727,13 +747,24 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            if (!readRecordTags.ContainsKey("5A") || !readRecordTags.ContainsKey("57"))
+            string tag57 = string.Empty;
+            if (TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_DES ||
+                TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_SM)
+            {
+                tag57 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "57");
+            }
+            else
+            {
+                tag57 = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "57");
+            }
+            if (!readRecordTags.ContainsKey("5A") || string.IsNullOrEmpty(tag57))
             {
                 TraceInfo(caseItem.Level, caseNo, "读数据中缺少tag5A或者tag57");
                 return;
             }
-            Tag57Helper tag57Helper = new Tag57Helper(readRecordTags["57"].Value);
-            if (readRecordTags["5A"].Value != tag57Helper.GetAccount())
+            Tag57Helper tag57Helper = new Tag57Helper(tag57);
+            Tag5AHelper tag5AHelper = new Tag5AHelper(readRecordTags["5A"].Value);
+            if (tag5AHelper.GetAccount() != tag57Helper.GetAccount())
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 return;
@@ -804,9 +835,28 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
+            var tag9F66 = locator.Terminal.TermianlSettings.GetTag("9F66");
+            if (tag9F66.Length != 8)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "结果: tag9F66为空或长度不对");
+                return;
+            }
+            int lastByte = Convert.ToInt16(tag9F66.Substring(6), 16);
+
             int count = resps.Count;
             var tlvs = DataParse.ParseTLV(resps[count - 1].Response);
-            foreach(var tl in tlvs)
+            if ((lastByte & 0x80) == 0x80 && tlvs.Count != 3)   //支持fDDA01
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "结果:fDDA01版本，卡片最后一条记录只能返回tag9F69和9F74");
+                return;
+            }
+            if ((lastByte & 0x80) != 0x80 && tlvs.Count != 2)   //支持fDDA00
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "结果:fDDA00版本，卡片最后一条记录只能返回tag9F74");
+                return;
+            }
+
+            foreach (var tl in tlvs)
             {
                 if (tl.Tag == "9F74" && tl.Value == "454343303031")
                 {
@@ -816,6 +866,112 @@ namespace CardPlatform.Cases
             }
 
             TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测fDDA01版本，卡片最后一个读记录应返回tag9F69
+        /// </summary>
+        public void ReadRecord_032()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag9F66 = locator.Terminal.TermianlSettings.GetTag("9F66");
+            if(tag9F66.Length != 8)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "结果: tag9F66为空或长度不对");
+                return;
+            }
+            int lastByte = Convert.ToInt16(tag9F66.Substring(6), 16);
+            if((lastByte & 0x80) == 0x80)   //支持fDDA01
+            {
+                int count = resps.Count;
+                var tlvs = DataParse.ParseTLV(resps[count - 1].Response);
+                foreach (var tl in tlvs)
+                {
+                    if (tl.Tag == "9F69" &&
+                        tl.Len >= 8 &&
+                        tl.Len <= 16)
+                    {
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// 检测fDDA01下tag9F69与DF61和9F6C的一致性
+        /// </summary>
+        public void ReadRecord_033()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag9F66 = locator.Terminal.TermianlSettings.GetTag("9F66");
+            if (tag9F66.Length != 8)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "结果: tag9F66为空或长度不对");
+                return;
+            }
+            int lastByte = Convert.ToInt16(tag9F66.Substring(6), 16);
+            if ((lastByte & 0x80) == 0x80)   //支持fDDA01
+            {
+                int count = resps.Count;
+                var tlvs = DataParse.ParseTLV(resps[count - 1].Response);
+                foreach (var tl in tlvs)
+                {
+                    if (tl.Tag == "9F69" && tl.Len >= 8 && tl.Len <= 16)
+                    {
+                        var tagDF61 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp,"DF61");
+                        var tag9F6C = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "9F6C");
+                        if(tl.Value.Substring(tl.Value.Length - 2, 2) != tagDF61 ||
+                            tl.Value.Substring(10,4) != tag9F6C)
+                        {   
+                            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                            return;
+                        }
+                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+        }
+
+        /// <summary>
+        /// 检测fDDA00版本下，卡片不应该返回tag9F69
+        /// </summary>
+        public void ReadRecord_034()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag9F66 = locator.Terminal.TermianlSettings.GetTag("9F66");
+            if (tag9F66.Length != 8)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "结果: tag9F66为空或长度不对");
+                return;
+            }
+            int lastByte = Convert.ToInt16(tag9F66.Substring(6), 16);
+            if ((lastByte & 0x80) != 0x80)   //支持fDDA01
+            {
+                int count = resps.Count;
+                var tlvs = DataParse.ParseTLV(resps[count - 1].Response);
+                foreach (var tl in tlvs)
+                {
+                    if (tl.Tag == "9F69")
+                    {                       
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
         }
 
     }

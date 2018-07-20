@@ -124,9 +124,10 @@ namespace CardPlatform.Cases
                 if (firstRecord > secondRecord)
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    return;
                 }
             }
-            
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
 
@@ -340,7 +341,7 @@ namespace CardPlatform.Cases
             }
             if(tag9F10.Length > 16)
             {
-                string idd = tag9F10.Substring(16, 2);
+                string idd = tag9F10.Substring(18, 2);
                 int nIDD = Convert.ToInt32(idd, 16);
                 if(nIDD < 1 || nIDD > 6)
                 {
@@ -356,7 +357,90 @@ namespace CardPlatform.Cases
         /// </summary>
         public void GPO_014()
         {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            if(Check9F10Mac())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
 
+        /// <summary>
+        /// 检测tag9F26的值与终端计算的mac一致性
+        /// </summary>
+        public void GPO_015()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            if (CheckAc())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// Tag57的合规性检查（卡号不以62开头则警告）
+        /// </summary>
+        public void GPO_016()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            string tag57Value = string.Empty;
+            foreach(var tlv in tlvs)
+            {
+                if(tlv.Tag == "57")
+                {
+                    tag57Value = tlv.Value;
+                }
+            }
+            if (string.IsNullOrEmpty(tag57Value))
+            {
+                TraceInfo(TipLevel.Failed, caseNo, "读记录缺少tag57");
+                return;
+            }
+            if (!CaseUtil.RespStartWith(tag57Value, "62"))
+            {
+                TraceInfo(TipLevel.Warn, caseNo, "银联卡号一般以62开头");
+            }
+            if (!CaseUtil.IsCorrectTag57Format(tag57Value))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测Tag5F34的长度是否为1字节
+        /// </summary>
+        public void GPO_017()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            bool bExisted = false;
+            foreach(var tlv in tlvs)
+            {
+                if(tlv.Tag == "5F34")
+                {
+                    bExisted = true;
+                    if(tlv.Len != 1)
+                    {
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return;
+                    }
+                }
+            }
+            if(!bExisted)
+            {
+                TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag5F34");
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
     }

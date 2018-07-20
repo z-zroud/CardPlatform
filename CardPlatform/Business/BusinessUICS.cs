@@ -19,6 +19,7 @@ namespace CardPlatform.Business
     {
         private TransactionTag transTags = TransactionTag.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
+        private TransactionConfig transCfg = TransactionConfig.GetInstance();
 
         /// <summary>
         /// 开始UICS交易流程
@@ -36,11 +37,13 @@ namespace CardPlatform.Business
             
             if (doDesTrans)  // 做国际算法交易
             {
+                transCfg.CurrentApp = TransactionApp.UICS_DES;
                 DoTransaction(TransType.UICS_DES, DoTransactionEx);
             }
             
             if (doSMTrans)  //做国密算法交易
             {
+                transCfg.CurrentApp = TransactionApp.UICS_SM;
                 DoTransaction(TransType.UICS_SM, DoTransactionEx);
             }
         }
@@ -77,17 +80,17 @@ namespace CardPlatform.Business
                 CardHolderVerify();     //持卡人验证
             }            
             TerminalRiskManagement();   //终端风险管理
-            if( 0 == TerminalActionAnalyze())   //终端行为分析
+            if( 0 != TerminalActionAnalyze())   //终端行为分析
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
                 return false;
             }
-            if(0 == IssuerAuthencation())   //发卡行认证
+            if(0 != IssuerAuthencation())   //发卡行认证
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
                 return false;
             }            
-            if(0 == TransactionEnd())   //交易结束处理
+            if(0 != TransactionEnd())   //交易结束处理
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "交易结束处理失败，交易终止");
                 return false;
@@ -152,9 +155,6 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令失败，SW={0}", response.SW);
                 return afls;
             }
-            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
-            gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
-
             var tlvs = DataParse.ParseTLV(response.Response);
             if(tlvs.Count != 1 || tlvs[0].Value.Length <= 4)
             {
@@ -163,6 +163,8 @@ namespace CardPlatform.Business
             transTags.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
+            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
+            gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
             return afls;
         }
 
@@ -371,23 +373,23 @@ namespace CardPlatform.Business
             string ATC = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             
-            if (curTransAlgorithmCategory == AlgorithmCategory.DES)
+            if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
             {
-                if(string.IsNullOrEmpty(TransDesACKey))
+                if(string.IsNullOrEmpty(TransCfg.TransDesAcKey))
                 {
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "国际算法UDK/MDK不存在");
                     return -1;
                 }
-                acSessionKey = GenSessionKey(TransDesACKey, KeyType, curTransAlgorithmCategory);
+                acSessionKey = GenSessionKey(TransCfg.TransDesAcKey, TransCfg.KeyType, TransCfg.AlgorithmFlag);
             }
             else
             {
-                if (string.IsNullOrEmpty(TransSMACKey))
+                if (string.IsNullOrEmpty(TransCfg.TransSmAcKey))
                 {
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "国密算法UDK/MDK不存在");
                     return -1;
                 }
-                acSessionKey = GenSessionKey(TransSMACKey, KeyType, curTransAlgorithmCategory);
+                acSessionKey = GenSessionKey(TransCfg.TransSmAcKey, TransCfg.KeyType, TransCfg.AlgorithmFlag);
             }
 
             checkMac = CheckTag9F10Mac() ? true : false;
@@ -424,20 +426,20 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string macSessionKey = string.Empty;
             string ATC = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
-            if (KeyType == TransKeyType.MDK)
+            if (TransCfg.KeyType == TransKeyType.MDK)
             {
                 string cardAcct = transTags.GetTag(TransactionStep.ReadRecord, "5A");
                 string cardSeq = transTags.GetTag(TransactionStep.ReadRecord, "5F34");
-                if(TransDesMACKey != null)
+                if(TransCfg.TransDesMacKey != null)
                 {
-                    string UDKMACKey = Authencation.GenUdk(TransDesMACKey, cardAcct, cardSeq);
+                    string UDKMACKey = Authencation.GenUdk(TransCfg.TransDesMacKey, cardAcct, cardSeq);
                     macSessionKey = Authencation.GenUdkSessionKey(UDKMACKey, ATC);
                 }
             }
             else
             {
-                if(TransDesACKey != null)
-                    macSessionKey = Authencation.GenUdkSessionKey(TransDesACKey, ATC);
+                if(TransCfg.TransDesMacKey != null)
+                    macSessionKey = Authencation.GenUdkSessionKey(TransCfg.TransDesMacKey, ATC);
             }
             if(macSessionKey.Length != 32)
             {

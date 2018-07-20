@@ -39,10 +39,12 @@ namespace CardPlatform.Business
 
             if (doDesTrans)  // 做国际算法交易
             {
+                TransCfg.CurrentApp = TransactionApp.QUICS_DES;
                 DoTransaction(TransType.QPBOC_DES, DoTransactionEx);
             }
             if (doSMTrans)  //做国密算法交易
             {
+                TransCfg.CurrentApp = TransactionApp.QUICS_SM;
                 DoTransaction(TransType.QPBOC_SM, DoTransactionEx);
             }
         }
@@ -140,8 +142,8 @@ namespace CardPlatform.Business
                     isQPBOCTranction = true;    //表明卡片支持QPBOC交易
                 }
                 afls = DataParse.ParseAFL(transTags.GetTag("94"));
-                IExcuteCase excuteCase = new GPOCase();
-                excuteCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
+                var gpoCase = new GPOCase() { CurrentApp = Constant.APP_QUICS };
+                gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
             }
             return afls;
         }
@@ -169,10 +171,8 @@ namespace CardPlatform.Business
                 }               
             }
 
-            CheckTag9F10Mac();  //校验MAC值
-
-            //IExcuteCase excuteCase = new ReadRecordCase();
-            //excuteCaseExcute(resps);
+            var readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_QUICS };
+            readRecordCase.Excute(BatchNo, CurrentApp, TransactionStep.ReadRecord, resps);
 
             return true;
         }

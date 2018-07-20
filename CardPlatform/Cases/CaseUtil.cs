@@ -259,7 +259,7 @@ namespace CardPlatform.Cases
         public static bool IsUniqTag(string buffer, out List<string> tags)
         {
             tags = new List<string>();
-            bool result = false;
+            bool result = true;
             var tlvItems = DataParse.ParseTLV(buffer);
             Dictionary<string, TLV> tagsDict = new Dictionary<string, TLV>();
             foreach (var item in tlvItems)
@@ -267,7 +267,7 @@ namespace CardPlatform.Cases
                 if (tagsDict.ContainsKey(item.Tag))
                 {
                     tags.Add(item.Tag);
-                    result = true;
+                    result = false;
                 }
                 else
                 {
@@ -322,6 +322,29 @@ namespace CardPlatform.Cases
             return result;
         }
 
+        /// <summary>
+        /// 检查srcTags中是否包含重复的dstTags,若存在，保存到返回的列表中
+        /// </summary>
+        /// <param name="srcTags"></param>
+        /// <param name="dstTags"></param>
+        /// <returns></returns>
+        public static List<string> HasDuplexTag(List<TLV> srcTags, List<string> dstTags)
+        {
+            var results = new List<string>();
+            foreach(var dstTag in dstTags)
+            {
+                int count = 0;
+                foreach(var srcTag in srcTags)
+                {
+                    if (srcTag.Tag == dstTag)
+                        count++;
+                }
+                if (count > 1)
+                    results.Add(dstTag);
+            }
+            return results;
+        }
+
         /// 判断字符串是否为数字字母组合
         /// </summary>
         /// <param name="str"></param>
@@ -329,7 +352,7 @@ namespace CardPlatform.Cases
         public static bool IsAlpha(string ascii)
         {
             //var ascii = UtilLib.Utils.BcdToStr(str);
-            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ /";
             foreach (var c in ascii)
             {
                 if (!alphaNum.Contains(c))

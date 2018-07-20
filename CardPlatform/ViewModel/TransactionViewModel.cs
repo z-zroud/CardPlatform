@@ -355,6 +355,7 @@ namespace CardPlatform.ViewModel
         {
             BusinessBase trans;
             BusinessBase.PersoFile = TagInfoFile;
+            
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
                 TransResult.Clear();
@@ -363,9 +364,7 @@ namespace CardPlatform.ViewModel
             if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
             {
                 trans = new BusinessUICS();
-                trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-                trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+                trans.TransCfg.SaveConfig();
                 trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
                 trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
 
@@ -373,18 +372,14 @@ namespace CardPlatform.ViewModel
             if (TransType.IsCheckECC)
             {
                 trans = new BusinessECC();
-                trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-                trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+                trans.TransCfg.SaveConfig();
                 trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
                 trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
             }
             if (TransType.IsCheckQPBOC)
             {
                 trans = new BusinessQPBOC();
-                trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-                trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-                trans.SetTransSMKeys(TransKeyList.SM_AC, TransKeyList.SM_MAC, TransKeyList.SM_ENC);
+                trans.TransCfg.SaveConfig();
                 trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
                 trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
             }

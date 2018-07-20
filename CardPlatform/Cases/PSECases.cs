@@ -37,7 +37,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 数据是否以6F开头
         /// </summary>
-        public void PBOC_sPSE_SJHGX_001()
+        public void PSE_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -55,7 +55,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 6F模板下只能并且包含Tag84和A5模板，顺序不能颠倒
         /// </summary>
-        public void PBOC_sPSE_SJHGX_003()
+        public void PSE_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -83,7 +83,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 84是否为银联规范规定的值
         /// </summary>
-        public void PBOC_sPSE_SJHGX_005()
+        public void PSE_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -108,7 +108,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// A5模板下只能包含必选数据tag88和可选数据5F2D、9F11和BF0C，其他Tag不能存在。
         /// </summary>
-        public void PBOC_sPSE_SJHGX_006()
+        public void PSE_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -131,7 +131,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测A5模板下tag88是否符合规范(必须存在，长度01，值1-1F)
         /// </summary>
-        public void PBOC_sPSE_SJHGX_007()
+        public void PSE_005()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -157,7 +157,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读字符串)
         /// </summary>
-        public void PBOC_sPSE_SJHGX_009()
+        public void PSE_006()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -187,7 +187,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 9F11的长度必须是1字节，值在01～10之间
         /// </summary>
-        public void PBOC_sPSE_SJHGX_011()
+        public void PSE_007()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -215,27 +215,18 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 每个Tag只能存在一个，包括6F，A5，BF0C模板
         /// </summary>
-        public void PBOC_sPSE_CFX_001()
+        public void PSE_008()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
             Dictionary<string, TLV> tags = new Dictionary<string, TLV>();
             var templates = new List<string>() { "6F", "A5", "BF0C" };
-            foreach(var item in TLVs)
+            var results = CaseUtil.HasDuplexTag(TLVs, templates);
+            if(results.Count != 0)
             {
-                if(templates.Contains(item.Tag))
-                {
-                    if (tags.ContainsKey(item.Tag))
-                    {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                        return;
-                    }
-                    else
-                    {
-                        tags.Add(item.Tag, item);
-                    }
-                }
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }

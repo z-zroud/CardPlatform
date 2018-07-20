@@ -36,7 +36,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 是否以70开头
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_001()
+        public void PSEDIR_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -54,7 +54,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 70后是否仅包含61模板
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_003()
+        public void PSEDIR_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -78,7 +78,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 61中是否包含4F（必选包含）4F的长度是否在5～16字节之间
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_005()
+        public void PSEDIR_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -113,7 +113,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 50必须包含在61模板内，50的长度是否在1～16字节之间
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_007()
+        public void PSEDIR_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -148,7 +148,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 61中可包含的其他Tag有 50.9F12、87、73，其他Tag不能出现
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_008()
+        public void PSEDIR_005()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -168,7 +168,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 9F12的长度应在1～16字节之间,BCD码显示
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_009()
+        public void PSEDIR_006()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -196,7 +196,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 87的长度是否为1字节,值的合规性检测
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_010()
+        public void PSEDIR_007()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -224,7 +224,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// PSE的FCI中有9F11的话在PSE的DIR文件中是否存在9F12
         /// </summary>
-        public void PBOC_rPSEDIR_SJHGX_011()
+        public void PSEDIR_008()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -247,7 +247,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测4F和50的一致性
         /// </summary>
-        public void PBOC_sPSEDIR_GLX_001()
+        public void PSEDIR_009()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -280,7 +280,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// PSE DIR tag重复性检测
         /// </summary>
-        public void PBOC_rPSEDIR_CFX_001()
+        public void PSEDIR_010()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -288,11 +288,11 @@ namespace CardPlatform.Cases
             List<string> duplexTags = new List<string>();
             if(CaseUtil.IsUniqTag(response.Response,out duplexTags))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
-            {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            {               
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 

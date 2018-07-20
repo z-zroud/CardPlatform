@@ -104,17 +104,11 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            List<string> tags = new List<string>() { "BF0C" };
-            foreach (var item in tlvs)
+            var tags = CaseUtil.GetSubTags("A5", tlvs);
+            if(tags.Count != 1 && tags[0].Tag != "BF0C")
             {
-                if (item.Level == 2) //A5模板的数据
-                {
-                    if (!tags.Contains(item.Tag))
-                    {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                        return;
-                    }
-                }
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
@@ -162,9 +156,9 @@ namespace CardPlatform.Cases
             {
                 if (item.Tag == "4F")
                 {
-                    if (item.Len % 2 != 0 ||
-                        item.Len >32 ||
-                        item.Len < 10)
+                    if (item.Value.Length % 2 != 0 ||
+                        item.Value.Length > 32 ||
+                        item.Value.Length < 10)
                     {
                         TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                         return;
@@ -186,9 +180,9 @@ namespace CardPlatform.Cases
             {
                 if (item.Tag == "50")
                 {
-                    if (item.Len % 2 != 0 ||
-                        item.Len < 2 ||
-                        item.Len > 32)
+                    if (item.Value.Length % 2 != 0 ||
+                        item.Value.Length < 2 ||
+                        item.Value.Length > 32)
                     {
                         
                         TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -261,11 +255,34 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 
+        /// 检测PPSEtag的重复性，6F,A5，BF0C模板只能存在一个，同一个61模板下Tag不能重复
         /// </summary>
         public void PPSE_010()
         {
-
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var dstTags = new List<string> { "6F", "A5", "BF0C" };
+            var results = CaseUtil.HasDuplexTag(tlvs, dstTags);
+            if(results.Count != 0)
+            {
+                string duplexTag = string.Empty;
+                foreach(var result in results)
+                {
+                    duplexTag += "[" + result + "]";
+                }
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "重复的tag列表" + duplexTag);
+            }
+            int tag61Count = CaseUtil.GetDuplexTemplate("BF0C", "61", tlvs);
+            for(int i = 0; i < tag61Count; i++)
+            {
+                var tags = CaseUtil.GetSubTags("61", i + 1, tlvs);
+                if(CaseUtil.HasDuplexTag(tags))
+                {
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
     }

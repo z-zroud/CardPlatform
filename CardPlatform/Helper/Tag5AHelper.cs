@@ -17,20 +17,22 @@ namespace CardPlatform.Helper
         public bool IsCorrectFormat()
         {
             int len = tag5A.Length;
-            if(len < 16 || len > 19 || len == 17)
+            if (len % 2 != 0)
+            {
+                return false;   //奇数需补F
+            }
+            string account = string.Empty;
+            if(tag5A.Contains("F"))
+            {
+                account = tag5A.Substring(0, tag5A.Length - 1);
+                len = account.Length;
+            }
+            if (len < 16 || len > 19 || len == 17)
             {
                 return false;   //长度有误
             }
             string format = "0123456789";
-            if(len % 2 != 0)
-            {
-                if(tag5A[len - 1] != 'F')
-                {
-                    return false;   //奇数需补F
-                }
-            }
-            var acct = tag5A.Substring(0, len - 1);
-            foreach(var c in acct)
+            foreach(var c in account)
             {
                 if(!format.Contains(c))
                 {
@@ -43,9 +45,9 @@ namespace CardPlatform.Helper
 
         public string GetAccount()
         {
-            if(tag5A.Length % 2 != 0)
+            if (tag5A.Contains("F"))
             {
-                return tag5A.Substring(0, tag5A.Length - 1);
+                tag5A = tag5A.Substring(0, tag5A.Length - 1);
             }
             return tag5A;
         }

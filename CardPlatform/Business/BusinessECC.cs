@@ -17,7 +17,6 @@ namespace CardPlatform.Business
     {
         private TransactionTag transTags    = TransactionTag.GetInstance();
         private ViewModelLocator locator    = new ViewModelLocator();
-        private IExcuteCase baseCase        = new CaseBase();
         private bool isEccTranction         = false;
         private bool isSupportCDA           = false;
         private string pdolData             = string.Empty;
@@ -37,10 +36,12 @@ namespace CardPlatform.Business
 
             if (doDesTrans)  // 做国际算法交易
             {
+                TransCfg.CurrentApp = TransactionApp.ECC_DES;
                 DoTransaction(TransType.ECC_DES, DoTransactionEx);
             }
             if (doSMTrans)  //做国密算法交易
             {
+                TransCfg.CurrentApp = TransactionApp.ECC_SM;
                 DoTransaction(TransType.ECC_SM, DoTransactionEx);
             }
         }
@@ -52,18 +53,18 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(aid))
             {
-                baseCase.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
             }
             var AFLs = GPOEx();
             if (AFLs.Count == 0)
             {
-                baseCase.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                 return false;
             }
             if (!ReadAppRecords(AFLs))
             {
-                baseCase.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                 return false;
             }
             GetRequirementData();
@@ -97,7 +98,7 @@ namespace CardPlatform.Business
                 }
 
                 TerminalRiskManagement();
-                if (0 == TerminalActionAnalyze())
+                if (0 != TerminalActionAnalyze())
                 {
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
                     return false;
@@ -105,7 +106,7 @@ namespace CardPlatform.Business
             }
             else
             {
-                baseCase.TraceInfo(TipLevel.Failed, caseNo, "此交易不是脱机电子现金交易");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "此交易不是脱机电子现金交易");
             }
             return true;
         }
@@ -166,17 +167,19 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令失败，SW={0}", response.SW);
                 return afls;
             }
-            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
-            gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
-
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count != 1 || tlvs[0].Value.Length <= 4)
             {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令返回数据格式不正确[{0}]",response.Response);
                 return afls;
             }
             transTags.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
+
+            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
+            gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
+
             return afls;
         }
 
@@ -318,14 +321,15 @@ namespace CardPlatform.Business
 
         protected int CardHolderVerify()
         {
-            //电子现金不包括持卡人认证，这里仅判断数据是否为1E031F00
-            //联机PIN不能设为首选CVM
-            string CVM = transTags.GetTag("8E");
+            var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_UICS };
+            cardHolderVerifyCase.Excute(BatchNo, CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
 
         protected int TerminalRiskManagement()
         {
+            var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_UICS };
+            terminalRishManagementCase.Excute(BatchNo, CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }
 
@@ -352,7 +356,7 @@ namespace CardPlatform.Business
 
                 if (SaveTags(TransactionStep.TerminalActionAnalyze,response.Response))
                 {
-                    if(curTransAlgorithmCategory == AlgorithmCategory.DES)
+                    if(TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
                     {
                         string tag9F4B = transTags.GetTag("9F4B");
                         string exp = transTags.GetTag("9F47");
@@ -457,12 +461,12 @@ namespace CardPlatform.Business
                     }
                 }
                 CheckTag9F10Mac();
-                TransType type = curTransAlgorithmCategory == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
+                TransType type = TransCfg.AlgorithmFlag == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
                 int cardAction = Convert.ToInt32(transTags.GetTag("9F27"), 16);
                 if(cardAction != Constant.TC)
                 {
                     var caseNo = MethodBase.GetCurrentMethod().Name;
-                    baseCase.TraceInfo(TipLevel.Failed,caseNo, "脱机电子现金交易失败");
+                    caseObj.TraceInfo(TipLevel.Failed,caseNo, "脱机电子现金交易失败");
                         
                 }                                       
             }

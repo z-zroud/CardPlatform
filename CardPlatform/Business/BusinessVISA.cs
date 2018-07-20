@@ -35,8 +35,7 @@ namespace CardPlatform.Business
             if (doDesTrans)
             {
                 TransResultModel TransactionResult = new TransResultModel(TransType.ECC_DES, TransResult.Unknown);
-                TransactionResult.TransType = TransType.ECC_DES;
-                curTransAlgorithmCategory = AlgorithmCategory.DES;
+                TransCfg.AlgorithmFlag = AlgorithmCategory.DES;
                 locator.Terminal.TermianlSettings.TagDF69 = "00";
                 if (DoTransEx())
                 {

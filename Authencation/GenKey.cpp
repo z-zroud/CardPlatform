@@ -405,7 +405,7 @@ int GenDesICCPublicKey(
 	const char* sigStaticData,
 	const char* iccExponent,
 	const char* tag82,
-    const char* pin,
+    const char* tag5A,
     const char* tag5F24,
 	char* iccPublicKey)
 {
@@ -443,7 +443,13 @@ int GenDesICCPublicKey(
     {
         account = account.substr(0, index); //发卡行标识不匹配主账号最左边的3-8个数字
     }
-    if (account != string(pin))
+    string strTag5A = string(tag5A);
+    index = strTag5A.find('F');
+    if (index != string::npos)
+    {
+        strTag5A = strTag5A.substr(0, index);
+    }
+    if (account != string(strTag5A))
     {
         result += 0x08;
     }

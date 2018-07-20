@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AlgorithmConfig>
+  <Algorithm>
+    <Type>DES3 加密</Type>
+    <Type>DES3 解密</Type>
+    <Type>DES3ECB 加密</Type>
+    <Type>DES3CBC 加密</Type>
+    <Type>DES3 MAC</Type>
+    <Type>DES3 FullMac</Type>
+    <Type>ASCII转BCD</Type>
+    <Type>BCD转ASCII</Type>
+  </Algorithm>
+  <FileDecryptAlgorithm>
+    <Type>DES3 解密</Type>
+  </FileDecryptAlgorithm>
+  <KMCs>
+      <KMC>404142434445464748494A4B4C4D4E4F</KMC>
+      <KMC>47454D5850524553534F53414D504C45</KMC>
+  </KMCs>
+      <DivType>
+      <Type>No Div</Type>
+      <Type>CPG 202</Type>
+      <Type>CPG 212</Type>
+  </DivType>
+  <Secure>
+      <SecureLevel>No Secure</SecureLevel>
+      <SecureLevel>Mac Secure</SecureLevel>
+  </Secure>
+</AlgorithmConfig>

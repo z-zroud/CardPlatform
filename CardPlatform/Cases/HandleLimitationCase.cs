@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using CardPlatform.Config;
 
 namespace CardPlatform.Cases
 {
@@ -32,7 +33,7 @@ namespace CardPlatform.Cases
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 return;
             }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -47,12 +48,12 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            if (effectiveDate < currentDate) // 应用未生效
+            if (effectiveDate >= currentDate) // 应用未生效
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 return;
             }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
 
         }
 
@@ -75,7 +76,7 @@ namespace CardPlatform.Cases
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 return;
             }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

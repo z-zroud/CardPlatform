@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TransConfig>
+      <TransCategory>
+            <Category>接触式交易</Category>
+            <Category>非接触式交易</Category>
+      </TransCategory>
+      <KeyTypeList>
+            <KeyType>MDK</KeyType>
+            <KeyType>UDK</KeyType>
+      </KeyTypeList>
+</TransConfig>

@@ -203,9 +203,9 @@ namespace CardPlatform.Cases
                 if (item.Tag == "5F2D")
                 {
                     string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if (item.Len % 2 == 0 &&
-                        item.Len >= 2 &&
-                        item.Len <= 8 &&
+                    if (item.Value.Length % 2 == 0 &&
+                        item.Value.Length >= 4 &&
+                        item.Value.Length <= 16 &&
                         CaseUtil.IsAlpha(value))
                     {
                         TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
@@ -267,8 +267,8 @@ namespace CardPlatform.Cases
                 if (item.Tag == "9F12")
                 {
                     string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if (item.Len >= 1 &&
-                        item.Len <= 16 &&
+                    if (item.Value.Length >= 2 &&
+                        item.Value.Length <= 32 &&
                         CaseUtil.IsAlpha(value))
                     {
                         TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
@@ -283,17 +283,20 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 9F4D和DF4D的长度是否为2字节
+        /// 9F4D和DF4D的长度是否为2字节,是否存在
         /// </summary>
         public void SelectAid_010()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            foreach (var item in TLVs)
+            var tags = CaseUtil.GetSubTags("BF0C", TLVs);
+            bool hasTag9F4D = false;
+            bool hasTagDF4D = false;
+            foreach (var item in tags)
             {
                 if (item.Tag == "9F4D")
                 {
+                    hasTag9F4D = true;
                     if(item.Len == 2)
                         TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     else
@@ -301,24 +304,17 @@ namespace CardPlatform.Cases
                 }
                 if (item.Tag == "DF4D")
                 {
+                    hasTagDF4D = true;
                     if (item.Len == 2)
                         TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     else
                         TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
-        }
-
-        /// <summary>
-        /// PSE的FCI中有9F11的话在PSE的DIR文件中是否存在9F12
-        /// </summary>
-        public void SelectAid_011()
-        {
-            var tag9F11 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE,"9F11");
-            if(tag9F11.Length >0)
-            {
-
-            }
+            if (!hasTag9F4D)
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[缺少tag9F4D, 没有记录交易日志入口]");
+            if(!hasTagDF4D)
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[缺少tagDF4D, 没有记录ECC/QPBOC交易日志入口]");
         }
 
         /// <summary>
