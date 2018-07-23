@@ -203,39 +203,30 @@ namespace CardPlatform.Business
 
             RequirementData[] tagStandards =
             {
-                new RequirementData("9F51",2,TipLevel.Failed,"如果执行频度检查，需要此应用货币代码"),  //如果执行频度检查，需要此应用货币代码
+                new RequirementData("9F51",2,TipLevel.Warn,"如果卡片执行连续脱机交易-国际货币频度检查或累计金额(包括双币)频度检测，需要此应用货币代码"),  //如果执行频度检查，需要此应用货币代码
                 new RequirementData("9F52",2,TipLevel.Failed,"如果支持发卡行认证，需要ADA应用缺省行为"),  //如果支持发卡行认证，需要ADA应用缺省行为
                 new RequirementData("9F53",1,TipLevel.Failed,"如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)"),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
                 new RequirementData("9F54",6,TipLevel.Failed,"如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)"),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
-                new RequirementData("9F55",0,TipLevel.Warn,""),
                 new RequirementData("9F56",1,TipLevel.Failed,"如果支持发卡行认证，需要此发卡行认证指示位"),  //如果支持发卡行认证，需要此发卡行认证指示位
                 new RequirementData("9F57",2,TipLevel.Warn,"如果支持卡片频度检查，需要此发卡行国家代码"),  //如果支持卡片频度检查，需要此发卡行国家代码
                 new RequirementData("9F58",1,TipLevel.Failed,"如果执行卡片频度检查，需要此连续脱机交易下限"),  //如果执行卡片频度检查，需要此连续脱机交易下限
                 new RequirementData("9F59",1,TipLevel.Failed,"如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易"),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
                 new RequirementData("9F5C",6,TipLevel.Failed,"累计脱机交易金额上限"),  //累计脱机交易金额上限
-                new RequirementData("9F5D",0,TipLevel.Warn,""),
-                new RequirementData("9F72",1,TipLevel.Warn,"连续脱机交易限制数"),  //连续脱机交易限制数
+                new RequirementData("9F72",1,TipLevel.Warn,"连续脱机交易限制数,如果执行国际-国家频度检查,该数据必须存在"),  //连续脱机交易限制数
                 new RequirementData("9F75",1,TipLevel.Warn,"累计脱机交易金额(双货币)"),  //累计脱机交易金额(双货币)
-                new RequirementData("9F76",0,TipLevel.Failed,"第二应用货币代码"),  //第二应用货币代码
-                new RequirementData("9F77",0,TipLevel.Failed,""),
-                new RequirementData("9F78",0,TipLevel.Failed,""),
-                new RequirementData("9F79",0,TipLevel.Failed,""),
+                new RequirementData("9F76",0,TipLevel.Warn,"第二应用货币代码"),  //第二应用货币代码
                 new RequirementData("9F4F",0,TipLevel.Failed,"交易日志格式"),  //交易日志格式
-                new RequirementData("9F68",0,TipLevel.Failed,""),
-                new RequirementData("9F6B",0,TipLevel.Warn,""),
-                new RequirementData("9F6D",0,TipLevel.Failed,""),
+                new RequirementData("9F68",0,TipLevel.Warn,"缺少卡片附加处理选项"),
                 new RequirementData("9F36",2,TipLevel.Failed,"应用交易计数器"),  //应用交易计数器
                 new RequirementData("9F13",0,TipLevel.Failed,"终端风险管理阶段需要此数据用于新卡检查，发卡行认证通过后，需要设置该值"),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
-                new RequirementData("9F17",0,TipLevel.Failed,"如果支持脱机PIN,需要此PIN尝试计数器"),  //如果支持脱机PIN,需要此PIN尝试计数器
-                new RequirementData("DF4F",0,TipLevel.Warn,""),
-                new RequirementData("DF62",0,TipLevel.Failed,""),
+                new RequirementData("9F17",0,TipLevel.Warn,"如果支持脱机PIN,需要此PIN尝试计数器"),  //如果支持脱机PIN,需要此PIN尝试计数器
             };
             for(int i = 0; i < tagStandards.Length; i++)
             {
                 var resp = APDU.GetDataCmd(tagStandards[i].Tag);
                 if(resp.SW != 0x9000)
                 {
-                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, tagStandards[i].Desc, tagStandards[i].Tag, resp.SW);
+                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, "{0},缺少Tag{1},",tagStandards[i].Desc , tagStandards[i].Tag);
                 }
                 else
                 {
@@ -343,9 +334,6 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "第一次发送GAC命令失败,返回{0:4X}",resp.SW);
                 return - 1;
             }
-            var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase() { CurrentApp = Constant.APP_UICS };
-            terminalActionAnalyzeCase.Excute(BatchNo, CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
-
             var tlvs = DataParse.ParseTLV(resp.Response);
             if(tlvs.Count > 0 && tlvs[0].Tag == "80")
             {
@@ -361,16 +349,14 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
+            var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase() { CurrentApp = Constant.APP_UICS };
+            terminalActionAnalyzeCase.Excute(BatchNo, CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
             return 0;
         }
 
         protected int IssuerAuthencation()
         {
-            bool checkMac = false;
-            bool checkTag9F26 = false;
-
             string acSessionKey;
-            string ATC = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F36");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             
             if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
@@ -378,7 +364,7 @@ namespace CardPlatform.Business
                 if(string.IsNullOrEmpty(TransCfg.TransDesAcKey))
                 {
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "国际算法UDK/MDK不存在");
-                    return -1;
+                    return 1;
                 }
                 acSessionKey = GenSessionKey(TransCfg.TransDesAcKey, TransCfg.KeyType, TransCfg.AlgorithmFlag);
             }
@@ -387,29 +373,24 @@ namespace CardPlatform.Business
                 if (string.IsNullOrEmpty(TransCfg.TransSmAcKey))
                 {
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "国密算法UDK/MDK不存在");
-                    return -1;
+                    return 1;
                 }
                 acSessionKey = GenSessionKey(TransCfg.TransSmAcKey, TransCfg.KeyType, TransCfg.AlgorithmFlag);
             }
-
-            checkMac = CheckTag9F10Mac() ? true : false;
-            caseObj.TraceInfo(GetTipLevel(checkMac), caseNo, "9F10后面的MAC必须与工具计算不一致");
-
-            string AC = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
-            string ARPC;
-            if(doDesTrans)
-                ARPC = Authencation.GenArpc(acSessionKey, AC, "3030", (int)AlgorithmCategory.DES);
+            string ac = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
+            string arpc;
+            if(TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
+                arpc = Authencation.GenArpc(acSessionKey, ac, "3030", (int)AlgorithmCategory.DES);
             else
-                ARPC = Authencation.GenArpc(acSessionKey, AC, "3030", (int)AlgorithmCategory.SM);
-
-            var resp = APDU.ExtAuthCmd(ARPC, "3030");
-            if (resp.SW == 0x9000)
+                arpc = Authencation.GenArpc(acSessionKey, ac, "3030", (int)AlgorithmCategory.SM);
+            var resp = APDU.ExtAuthCmd(arpc, "3030");
+            if (resp.SW != 0x9000)
             {
-                locator.Terminal.TermianlSettings.Tag8A = "3030";
-                checkTag9F26 = true;
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "ARPC校验不正确");
+                return 1;
             }
-            caseObj.TraceInfo(GetTipLevel(checkTag9F26), caseNo, "卡片返回密文（9F26）必须与终端计算一致");
-
+            caseObj.TraceInfo(TipLevel.Sucess, caseNo, "发卡行认证成功");
+            locator.Terminal.TermianlSettings.Tag8A = "3030";
             return 0;
         }
 
@@ -417,6 +398,23 @@ namespace CardPlatform.Business
         {
             string CDOL2 = transTags.GetTag(TransactionStep.ReadRecord, "8D");
             ApduResponse resp = SecondGAC(Constant.TC, CDOL2);
+            var tlvs = DataParse.ParseTLV(resp.Response);
+            if (tlvs.Count > 0 && tlvs[0].Tag == "80")
+            {
+                string result = tlvs[0].Value;  //第一次GAC返回的数据
+
+                string tag9F27 = result.Substring(0, 2);
+                string tag9F36 = result.Substring(2, 4);
+                string tag9F26 = result.Substring(6, 16);
+                string tag9F10 = result.Substring(22);
+
+                transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F27", tag9F27);
+                transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F36", tag9F36);
+                transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
+                transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
+            }
+            var transactionEndCase = new TransactionEndCase() { CurrentApp = Constant.APP_UICS };
+            transactionEndCase.Excute(BatchNo, CurrentApp, TransactionStep.TransactionEnd, resp);
 
             return 0;
         }

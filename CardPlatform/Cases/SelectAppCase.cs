@@ -112,31 +112,30 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             bool hasTag50 = false;
-            bool isCorrectLen = false;
             foreach (var item in TLVs)
             {
                 if (item.Tag == "50")
                 {
                     hasTag50 = true;
-                    if (item.Len >= 1 && item.Len <= 16)
+                    if (item.Len < 1 || item.Len > 16)
                     {
-                        isCorrectLen = true;
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50长度要求在1-16字节之间]");
+                        return;
                     }
-                    else
+                    string value = UtilLib.Utils.BcdToStr(item.Value);
+                    if(!CaseUtil.IsAlpha(value))
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50无法转换为合法的ANSII字符]");
                         return;
                     }
                 }
             }
-            if (hasTag50 && isCorrectLen)
+            if (!hasTag50)
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50应用标签不存在]");
+                return;               
             }
-            else
-            {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>

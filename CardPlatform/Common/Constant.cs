@@ -19,7 +19,8 @@ namespace CardPlatform.Common
         HandleLimitation,   //处理限制
         CardHolderVerify,   //持卡人验证
         TerminalRiskManagement, //终端风险管理
-        TerminalActionAnalyze   //终端行为分析
+        TerminalActionAnalyze,   //终端行为分析
+        TransactionEnd
     }
 
     public enum TransactionApp

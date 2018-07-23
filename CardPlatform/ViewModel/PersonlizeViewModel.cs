@@ -28,16 +28,16 @@ namespace CardPlatform.ViewModel
         private MetroWindow _dialog;
         public PersonlizeViewModel()
         {
-            DpParseParams = new DpParseModel();
-            DpParseResult = new DpParseResultModel();
-            DpGenCpsResults = new ObservableCollection<DpGenCpsModel>();
-            SecureChannelParams = new SecureChannelModel();
-            DivMethodCollection = new List<string>();
-            DelInstCollection = new List<string>();
-            SecureLevelCollection = new List<string>();
-            Config = new PersonlizeConfig();
-            ConfigCollection = new List<PersonlizeConfig>();
-            _dialog = (MetroWindow)Application.Current.MainWindow;
+            DpParseParams           = new DpParseModel();
+            DpParseResult           = new DpParseResultModel();
+            DpGenCpsResults         = new ObservableCollection<DpGenCpsModel>();
+            SecureChannelParams     = new SecureChannelModel();
+            DivMethodCollection     = new List<string>();
+            DelInstCollection       = new List<string>();
+            SecureLevelCollection   = new List<string>();
+            Config                  = new PersonlizeConfig();
+            ConfigCollection        = new List<PersonlizeConfig>();
+            _dialog                 = (MetroWindow)Application.Current.MainWindow;
             Load();            
         }
 

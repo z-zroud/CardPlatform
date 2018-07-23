@@ -274,13 +274,13 @@ namespace CardPlatform.Cases
                 var tag9F62 = readRecordTags["9F62"];
                 if (tag9F62.Len != 1)
                 {
-                    TraceInfo(TipLevel.Failed, caseNo, "tag9F62证件类型长度错误,长度需为1");
+                    TraceInfo(TipLevel.Failed, caseNo, "tag9F62证件类型长度错误,长度必须为固定1字节");
                     return;
                 }
                 var standardTag = new List<string> { "00", "01", "02", "03", "04", "05" };
                 if (!standardTag.Contains(tag9F62.Value))
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[取值范围不符合规范]");
                     return;
                 }
                 TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
@@ -374,7 +374,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if (!readRecordTags.ContainsKey("8C") || !readRecordTags.ContainsKey("8D"))
             {
-                TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag8C/tag8D");
+                TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag8C/tag8D。借贷记交易，卡片风险管理数据对象列表必须存在");
                 return;
             }
             else
@@ -782,13 +782,13 @@ namespace CardPlatform.Cases
 
             if (!readRecordTags.ContainsKey("5F28"))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "读数据中缺少tag5F28");
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "读数据中缺少tag5F28，如果有应用用途控制，该数据必须存在");
                 return;
             }
             var tag9F57 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F57");
             if(string.IsNullOrEmpty(tag9F57))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "卡片缺少tag9F57");
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "卡片缺少tag9F57，如果支持卡片频度检测，该数据必须存在");
                 return;
             }
             if (readRecordTags["5F28"].Value != tag9F57)
@@ -809,13 +809,13 @@ namespace CardPlatform.Cases
 
             if (!readRecordTags.ContainsKey("9F42"))
             {
-                TraceInfo(caseItem.Level, caseNo, "读数据中缺少tag9F42");
+                TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少tag9F42,如果8E中X,Y金额不为0，该数据必须存在");
                 return;
             }
             var tag9F51 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F51");
             if (string.IsNullOrEmpty(tag9F51))
             {
-                TraceInfo(caseItem.Level, caseNo, "卡片缺少tag9F51");
+                TraceInfo(caseItem.Level, caseNo, "卡片缺少tag9F51,如果只选频度检测，该数据必须存在");
                 return;
             }
             if (readRecordTags["9F42"].Value != tag9F51)
@@ -974,5 +974,26 @@ namespace CardPlatform.Cases
             }
         }
 
+        /// <summary>
+        /// 检测Tag9F42应用货币代码，如果CVM中要求金额检查(X,Y金额不为零)，该数据必须存在
+        /// </summary>
+        public void ReadRecord_035()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F42 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F42");
+            if(!string.IsNullOrEmpty(tag9F42))
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
+            if(!string.IsNullOrEmpty(tag8E) && tag8E.Substring(0,16) == "0000000000000000")
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
     }
 }

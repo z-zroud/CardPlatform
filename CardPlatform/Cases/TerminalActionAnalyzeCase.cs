@@ -47,5 +47,35 @@ namespace CardPlatform.Cases
 
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
+
+        /// <summary>
+        /// 检测tag9F10中MAC的正确性
+        /// </summary>
+        public void TerminalActionAnalyze_002()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            if (Check9F10Mac())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测tag9F26的值与终端计算的mac一致性
+        /// </summary>
+        public void TerminalActionAnalyze_003()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            if (CheckAc())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
     }
 }

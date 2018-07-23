@@ -118,8 +118,8 @@ namespace CardPlatform.Cases
             int count = tag94.Length / 8;
             for(int i = 0; i < count; i++)
             {
-                var firstRecord = Convert.ToInt16(tag94.Substring(2 + i * 8, 2));
-                var secondRecord = Convert.ToInt16(tag94.Substring(4 + i * 8, 2));
+                var firstRecord = Convert.ToInt16(tag94.Substring(2 + i * 8, 2), 16);
+                var secondRecord = Convert.ToInt16(tag94.Substring(4 + i * 8, 2), 16);
 
                 if (firstRecord > secondRecord)
                 {
