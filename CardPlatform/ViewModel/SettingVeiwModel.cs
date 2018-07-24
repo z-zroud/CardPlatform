@@ -1,5 +1,7 @@
-﻿using GalaSoft.MvvmLight;
+﻿using CardPlatform.Config;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,11 +18,26 @@ namespace CardPlatform.ViewModel
 
         public SettingVeiwModel()
         {
+            Load();
+        }
+
+        public void Load()
+        {
             ConfigCollection = new ObservableCollection<string>();
             ViewModelLocator locator = new ViewModelLocator();
-            foreach(var item in locator.Personlize.ConfigCollection)
+            if (ConfigHelper.CurrentPage == nameof(PersonlizeViewModel))
             {
-                ConfigCollection.Add(item.ConfigName);
+                foreach (var item in locator.Personlize.ConfigCollection)
+                {
+                    ConfigCollection.Add(item.ConfigName);
+                }
+            }
+            else if (ConfigHelper.CurrentPage == nameof(CardCheckViewModel))
+            {
+                foreach (var item in locator.CardCheck.ConfigCollection)
+                {
+                    ConfigCollection.Add(item.ConfigName);
+                }
             }
         }
 
@@ -63,15 +80,7 @@ namespace CardPlatform.ViewModel
                 if (_loadCmd == null)
                     _loadCmd = new RelayCommand(()=> 
                     {
-                        ViewModelLocator locator = new ViewModelLocator();
-                        foreach(var item in locator.Personlize.ConfigCollection)
-                        {
-                            if(item.ConfigName == SelectedConfig)
-                            {
-                                locator.Personlize.Config = item;          
-                                break;
-                            }
-                        }
+                        Messenger.Default.Send(SelectedConfig, ConfigHelper.CurrentPage + "_Load");
                         Close();
                     });
                 return _loadCmd;
@@ -97,18 +106,8 @@ namespace CardPlatform.ViewModel
                 if (_deleteCmd == null)
                     _deleteCmd = new RelayCommand(()=> 
                     {
-                        ViewModelLocator locator = new ViewModelLocator();
-                        for(int i = 0; i < locator.Personlize.ConfigCollection.Count; i++)
-                        {
-                            if(locator.Personlize.ConfigCollection[i].ConfigName == SelectedConfig)
-                            {
-                                locator.Personlize.ConfigCollection.RemoveAt(i);
-                                ConfigCollection.RemoveAt(i);
-                                ISerialize serialize = new XmlSerialize();
-                                serialize.Serialize(locator.Personlize.ConfigCollection, ".\\Configuration\\AppConfig\\PersonlizeSettings.xml");
-                                break;
-                            }
-                        }
+                        Messenger.Default.Send(SelectedConfig, ConfigHelper.CurrentPage + "_Delete");
+                        Load();
                     });
                 return _deleteCmd;
             }

@@ -28,7 +28,7 @@
         <StackPanel Grid.Column="1" Margin="20">
             <DockPanel  MaxHeight="30">
                 <TextBlock Text="交易类型 " MinWidth="50" VerticalAlignment="Center"/>
-                <ComboBox  Margin="2" 
+                <ComboBox  Margin="2,2,65,2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding TransCategorys}"
                             SelectedIndex="{Binding SelectedCategory}"
@@ -67,7 +67,7 @@
         <StackPanel Grid.Column="2" Margin="20">
             <DockPanel>
                 <TextBlock Text="MDK/UDK"  VerticalAlignment="Center"/>
-                <ComboBox  Margin="2"
+                <ComboBox  Margin="8,2,2,2"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding KeyTypeList}"
                             SelectedIndex="{Binding SelectedKeyType}"
@@ -79,24 +79,24 @@
             </StackPanel>
             <StackPanel>
                 <DockPanel LastChildFill="True">
-                    <TextBlock Text="AC" MinWidth="30" VerticalAlignment="Center"/>
+                    <TextBlock Text="AC" MinWidth="65" VerticalAlignment="Center"/>
                     <StackPanel>
-                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeyList.DES_AC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeyList.SM_AC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeys.DES_AC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeys.SM_AC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     </StackPanel>
                 </DockPanel>
                 <DockPanel LastChildFill="True">
-                    <TextBlock Text="MAC" MinWidth="30" VerticalAlignment="Center"/>
+                    <TextBlock Text="MAC" MinWidth="65" VerticalAlignment="Center"/>
                     <StackPanel>
-                        <TextBox  Margin="2" Text="{Binding TransKeyList.DES_MAC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <TextBox  Margin="2" Text="{Binding TransKeyList.SM_MAC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" Text="{Binding TransKeys.DES_MAC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" Text="{Binding TransKeys.SM_MAC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     </StackPanel>
                 </DockPanel>
                 <DockPanel LastChildFill="True">
-                    <TextBlock Text="ENC" MinWidth="30" VerticalAlignment="Center"/>
+                    <TextBlock Text="ENC" MinWidth="65" VerticalAlignment="Center"/>
                     <StackPanel>
-                        <TextBox  Margin="2" Text="{Binding TransKeyList.DES_ENC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <TextBox  Margin="2" Text="{Binding TransKeyList.SM_ENC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" Text="{Binding TransKeys.DES_ENC, Mode=TwoWay, NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBox  Margin="2" Text="{Binding TransKeys.SM_ENC,  Mode=TwoWay,NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     </StackPanel>
                 </DockPanel>
             </StackPanel>
@@ -122,6 +122,7 @@
                                 BorderThickness="1"
                             AutoGenerateColumns="False"
                             MinHeight="130"
+                          MinWidth="315"
                                 HorizontalAlignment="Left"
                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                             ScrollViewer.HorizontalScrollBarVisibility="Auto">
@@ -133,7 +134,7 @@
                     </DataGrid.ColumnHeaderStyle>
                     <DataGrid.Columns>
                         <DataGridTextColumn IsReadOnly="True" Header="交易类型"  Width="190" Binding="{Binding TransTypeDescription}"/>
-                        <DataGridTemplateColumn Header="结果" Width="100">
+                        <DataGridTemplateColumn Header="结果" Width="120">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding ResultDescripton}" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -167,7 +168,7 @@
                             <GridView>
                                 <GridViewColumn Header="编号" DisplayMemberBinding="{Binding CaseNo}" Width="{Binding ElementName=col1,Path=ActualWidth}"/>
                                 <GridViewColumn Header="描述" DisplayMemberBinding="{Binding CaseInfo}" Width="{Binding ElementName=col2, Path=ActualWidth}" />
-                                <GridViewColumn Header="等级" Width="{Binding ElementName=col3,Path=ActualWidth}">
+                                <GridViewColumn Header="结果" Width="{Binding ElementName=col3,Path=ActualWidth}">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Level,Converter={StaticResource CaseLevelToStringConverter}}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{Binding Level,Converter={StaticResource CaseLevelToColorConverter}}"/>

@@ -19,22 +19,18 @@ namespace CardPlatform.ViewModel
     {
         public TransactionViewModel()
         {
-            TransType = new TransTypeModel();
-
-
-            AlgorithmType = new AlgorithmModel();
-            AlgorithmType.IsCheckDES = true;
-            AlgorithmType.IsCheckSM = true;
-
-            HasSelectedSMKey = false;
-            HasSelectedDESKey = true;
-
-            Aids = new ObservableCollection<string>();
-            CaseInfos = new ObservableCollection<TransInfoModel>();
-            TransCategorys = new List<string>();
-            KeyTypeList = new List<string>();
-            TransKeyList = new TransKeyModel();
-            TransResult = new ObservableCollection<TransResultModel>();
+            TransType                   = new TransTypeModel();
+            AlgorithmType               = new AlgorithmModel();
+            AlgorithmType.IsCheckDES    = true;
+            AlgorithmType.IsCheckSM     = true;
+            HasSelectedSMKey            = false;
+            HasSelectedDESKey           = true;
+            Aids                        = new ObservableCollection<string>();
+            CaseInfos                   = new ObservableCollection<TransInfoModel>();
+            TransCategorys              = new List<string>();
+            KeyTypeList                 = new List<string>();
+            TransKeys                   = new TransKeyModel();
+            TransResult                 = new ObservableCollection<TransResultModel>();
             Load();
         }
 
@@ -219,7 +215,7 @@ namespace CardPlatform.ViewModel
         /// <summary>
         /// 应用密钥信息
         /// </summary>
-        public TransKeyModel TransKeyList { get; set; }
+        public TransKeyModel TransKeys { get; set; }
 
         #endregion
 

@@ -20,6 +20,7 @@ using CardPlatform.Config;
 using CardPlatform.View;
 using GalaSoft.MvvmLight.Threading;
 using System.Threading;
+using GalaSoft.MvvmLight.Messaging;
 
 namespace CardPlatform.ViewModel
 {
@@ -38,8 +39,57 @@ namespace CardPlatform.ViewModel
             Config                  = new PersonlizeConfig();
             ConfigCollection        = new List<PersonlizeConfig>();
             _dialog                 = (MetroWindow)Application.Current.MainWindow;
-            Load();            
+            Load();
+            Messenger.Default.Register<string>(this, nameof(PersonlizeViewModel), SaveConfiguration);
+            Messenger.Default.Register<string>(this, nameof(PersonlizeViewModel) + "_Load", LoadConfiguration);
+            Messenger.Default.Register<string>(this, nameof(PersonlizeViewModel) + "_Delete", DeleteConfiguration);
         }
+
+
+        public void SaveConfiguration(string msg)
+        {
+            var config          = new PersonlizeConfig();
+            config.ConfigName   = msg;
+            config.DelInst      = Config.DelInst;
+            config.DivMethod    = Config.DivMethod;
+            config.DpFilePath   = Config.DpFilePath;
+            config.DpRulePath   = Config.DpRulePath;
+            config.DpType       = Config.DpType;
+            config.InstallParamsFilePath = Config.InstallParamsFilePath;
+            config.ISD          = Config.ISD;
+            config.KMC          = Config.KMC;
+            config.SecureLevel  = Config.SecureLevel;
+            ConfigCollection.Add(config);
+            ISerialize serialize = new XmlSerialize();
+            serialize.Serialize(ConfigCollection, ".\\Configuration\\AppConfig\\PersonlizeSettings.xml");
+        }
+
+        public void LoadConfiguration(string msg)
+        {
+            foreach (var item in ConfigCollection)
+            {
+                if (item.ConfigName == msg)
+                {
+                    Config = item;
+                    break;
+                }
+            }
+        }
+
+        public void DeleteConfiguration(string msg)
+        {
+            for (int i = 0; i < ConfigCollection.Count; i++)
+            {
+                if (ConfigCollection[i].ConfigName == msg)
+                {
+                    ConfigCollection.RemoveAt(i);
+                    ISerialize serialize = new XmlSerialize();
+                    serialize.Serialize(ConfigCollection, ".\\Configuration\\AppConfig\\PersonlizeSettings.xml");
+                    break;
+                }
+            }
+        }
+
 
         #region data binding
 
@@ -204,6 +254,7 @@ namespace CardPlatform.ViewModel
                 if (_loadConfigCmd == null)
                     _loadConfigCmd = new RelayCommand(()=> 
                     {
+                        ConfigHelper.CurrentPage = nameof(PersonlizeViewModel);
                         SaveSettingDialog dialog = new SaveSettingDialog();
                         dialog.ShowDialog();
                     });
@@ -219,6 +270,7 @@ namespace CardPlatform.ViewModel
                 if (_saveConfigCmd == null)
                     _saveConfigCmd = new RelayCommand(()=>
                     {
+                        ConfigHelper.CurrentPage = nameof(PersonlizeViewModel);
                         SettingDialog dialog = new SettingDialog();
                         dialog.ShowDialog();
                     });

@@ -35,12 +35,12 @@ namespace CardPlatform.Common
         public void SaveConfig()
         {
             KeyType         = ui.Transaction.SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-            TransDesAcKey   = ui.Transaction.TransKeyList.DES_AC;
-            TransDesMacKey  = ui.Transaction.TransKeyList.DES_MAC;
-            TransDesEncKey  = ui.Transaction.TransKeyList.DES_ENC;
-            TransSmAcKey    = ui.Transaction.TransKeyList.SM_AC;
-            TransSmMacKey   = ui.Transaction.TransKeyList.SM_MAC;
-            TransSmEncKey   = ui.Transaction.TransKeyList.SM_ENC;
+            TransDesAcKey   = ui.Transaction.TransKeys.DES_AC;
+            TransDesMacKey  = ui.Transaction.TransKeys.DES_MAC;
+            TransDesEncKey  = ui.Transaction.TransKeys.DES_ENC;
+            TransSmAcKey    = ui.Transaction.TransKeys.SM_AC;
+            TransSmMacKey   = ui.Transaction.TransKeys.SM_MAC;
+            TransSmEncKey   = ui.Transaction.TransKeys.SM_ENC;
         }
     }
 }

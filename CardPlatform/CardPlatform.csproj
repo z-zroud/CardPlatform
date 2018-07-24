@@ -111,7 +111,9 @@
     <Compile Include="Cases\PSEDirCase.cs" />
     <Compile Include="Cases\ReadRecordCase.cs" />
     <Compile Include="Cases\SelectAppCase.cs" />
+    <Compile Include="Config\CardCheckConfig.cs" />
     <Compile Include="Config\CaseConfig.cs" />
+    <Compile Include="Config\ConfigHelper.cs" />
     <Compile Include="Config\DataTemplateConfig.cs" />
     <Compile Include="Config\PersonlizeConfig.cs" />
     <Compile Include="Helper\CaseLevelToColorConverter.cs" />

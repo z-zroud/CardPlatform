@@ -1,5 +1,7 @@
-﻿using GalaSoft.MvvmLight;
+﻿using CardPlatform.Config;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,12 +65,10 @@ namespace CardPlatform.ViewModel
 
         private void Save()
         {
-            ViewModelLocator locator = new ViewModelLocator();
-            locator.Personlize.Config.ConfigName = ConfigName;
-            locator.Personlize.ConfigCollection.Add(locator.Personlize.Config);
-            ISerialize serialize = new XmlSerialize();
-            serialize.Serialize(locator.Personlize.ConfigCollection, ".\\Configuration\\AppConfig\\PersonlizeSettings.xml");           
-            ConfigName = string.Empty;
+            if(ConfigHelper.CurrentPage == nameof(PersonlizeViewModel))
+                Messenger.Default.Send<string>(ConfigName, nameof(PersonlizeViewModel));
+            else if(ConfigHelper.CurrentPage == nameof(CardCheckViewModel))
+                Messenger.Default.Send<string>(ConfigName, nameof(CardCheckViewModel));
             Close();
         }
     }
