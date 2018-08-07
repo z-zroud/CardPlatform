@@ -49,11 +49,11 @@ int main()
 	}
     string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
     string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "神舟数码";
-    string dpPath = dpDir + dpFormat + "\\稷山河东村镇银行.txt";
-    rulePath += "河东村镇银行_神码_华大_G81140042.xml";
-    string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
-    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string dpFormat = "other";
+    string dpPath = dpDir + dpFormat + "\\EXPORT_0000004008_20180803054413.dat";
+    rulePath += "澳门立桥借记_银联_同方.xml";
+    string installParamCfg = "澳门立桥银行_同方_G8C140049.xml";
+    GenCpsFile("DpParse_AC.dll", "HandleDp", dpPath.c_str(), NULL);
 
     SetPersonlizationConfig("A000000003000000", "404142434445464748494A4B4C4D4E4F", DIV_NONE, SECURE_NONE);
     
@@ -64,7 +64,7 @@ int main()
     string installParamPath = installParamDir + installParamCfg;
 
 
-    bool isSongJan = true;
+    bool isSongJan = false;
     cout << "Put card into selected reader to do personlization(1 or 2): ";
     int readerIndex;
     cin >> readerIndex;

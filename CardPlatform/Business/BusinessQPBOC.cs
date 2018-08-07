@@ -39,12 +39,14 @@ namespace CardPlatform.Business
 
             if (doDesTrans)  // 做国际算法交易
             {
-                TransCfg.CurrentApp = TransactionApp.QUICS_DES;
+                //TransCfg.CurrentApp = TransactionApp.QUICS_DES;
+                SetCurrentApp(TransactionApp.QPBOC_DES);
                 DoTransaction(TransType.QPBOC_DES, DoTransactionEx);
             }
             if (doSMTrans)  //做国密算法交易
             {
-                TransCfg.CurrentApp = TransactionApp.QUICS_SM;
+                //TransCfg.CurrentApp = TransactionApp.QUICS_SM;
+                SetCurrentApp(TransactionApp.QPBOC_SM);
                 DoTransaction(TransType.QPBOC_SM, DoTransactionEx);
             }
         }

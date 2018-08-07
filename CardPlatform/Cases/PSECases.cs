@@ -13,12 +13,12 @@ namespace CardPlatform.Cases
     public class PSECases : CaseBase
     {
         private ApduResponse response;
-        private List<TLV> TLVs;
+        private List<TLV> tlvs;
 
         public PSECases()
         {
             response = new ApduResponse();
-            TLVs = new List<TLV>();
+            tlvs = new List<TLV>();
         }
 
         protected override void Load()
@@ -28,10 +28,10 @@ namespace CardPlatform.Cases
 
         public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
         {
-            response = (ApduResponse)srcData;          
-            TLVs = DataParse.ParseTLV(response.Response);
+            response = (ApduResponse)srcData;
+            tlvs = DataParse.ParseTLV(response.Response);
             base.Excute(batchNo,app,step, srcData);
-            CheckTemplateTag(TLVs);
+            CheckTemplateTag(tlvs);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             var template6F = new List<TLV>();
-            foreach(var item in TLVs)
+            foreach(var item in tlvs)
             {
                 if(item.Level == 1)
                 {
@@ -88,7 +88,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in TLVs)
+            foreach(var item in tlvs)
             {
                 if(item.Tag == "84")
                 {
@@ -114,7 +114,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             List<string> tags = new List<string>() { "88", "5F2D", "9F11", "BF0C" };
-            foreach(var item in TLVs)
+            foreach(var item in tlvs)
             {
                 if(item.Level == 2) //A5模板的数据
                 {
@@ -136,7 +136,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if (item.Level == 2) //A5模板的数据
                 {
@@ -162,7 +162,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if(item.Tag == "5F2D")
                 {
@@ -192,7 +192,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if (item.Tag == "9F11")
                 {
@@ -222,7 +222,7 @@ namespace CardPlatform.Cases
 
             Dictionary<string, TLV> tags = new Dictionary<string, TLV>();
             var templates = new List<string>() { "6F", "A5", "BF0C" };
-            var results = CaseUtil.HasDuplexTag(TLVs, templates);
+            var results = CaseUtil.HasDuplexTag(tlvs, templates);
             if(results.Count != 0)
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);

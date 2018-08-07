@@ -13,13 +13,13 @@ namespace CardPlatform.Cases
     public class ReadRecordCase : CaseBase
     {
         private List<ApduResponse> resps;
-        private List<TLV> TLVs;
+        private List<TLV> tlvs;
         private Dictionary<string, TLV> readRecordTags = new Dictionary<string, TLV>();
         private ViewModelLocator locator = new ViewModelLocator();
 
         protected override void Load()
         {
-            TLVs = new List<TLV>();
+            tlvs = new List<TLV>();
             base.Load();
         }
 
@@ -29,8 +29,8 @@ namespace CardPlatform.Cases
             List<string> tags = new List<string> { "9F12", "9F79", "9F51", "9F52" };
             foreach (var resp in resps)
             {
-                TLVs = DataParse.ParseTLV(resp.Response);
-                foreach (var tlv in TLVs)
+                tlvs = DataParse.ParseTLV(resp.Response);
+                foreach (var tlv in tlvs)
                 {
                     if (tlv.Len == 0)
                     {
@@ -52,7 +52,7 @@ namespace CardPlatform.Cases
                         }
                     }
                 }
-                CheckTemplateTag(TLVs);
+                CheckTemplateTag(tlvs);
             }
 
             base.Excute(batchNo,app,step, srcData);

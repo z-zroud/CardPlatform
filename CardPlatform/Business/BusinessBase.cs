@@ -77,10 +77,30 @@ namespace CardPlatform.Business
             if (!string.IsNullOrEmpty(PersoFile))
             {
                 //不需要对非接国密交易填写送检表，和非接DES一致
-                if (IsContactTrans && TransCfg.AlgorithmFlag == AlgorithmCategory.DES) songJianFile.WriteToFile(TagType.ContactDC_DES);
-                if (IsContactTrans && TransCfg.AlgorithmFlag == AlgorithmCategory.SM) songJianFile.WriteToFile(TagType.ContactDC_SM);
-                if (!IsContactTrans && TransCfg.AlgorithmFlag == AlgorithmCategory.DES) songJianFile.WriteToFile(TagType.ContactlessDC_DES);
+                if(IsContactTrans)
+                {
+                    if (CurrentApp == TransactionApp.PBOC_DES ||
+                        CurrentApp == TransactionApp.UICS_DES) songJianFile.WriteToFile(TagType.UICS_Contact_DES);
+                    else if (CurrentApp == TransactionApp.PBOC_SM ||
+                        CurrentApp == TransactionApp.UICS_SM) songJianFile.WriteToFile(TagType.UICS_Contact_SM);
+                    else if (CurrentApp == TransactionApp.ECC_DES) songJianFile.WriteToFile(TagType.ECC_DES);
+                    else if (CurrentApp == TransactionApp.ECC_SM) songJianFile.WriteToFile(TagType.ECC_SM);
+                }
+                else
+                {
+                    if (CurrentApp == TransactionApp.PBOC_DES) songJianFile.WriteToFile(TagType.UICS_Contactless_DES);
+                    else if (CurrentApp == TransactionApp.QUICS_DES ||
+                        CurrentApp == TransactionApp.QPBOC_DES) songJianFile.WriteToFile(TagType.QPBOC_DES);
+                    else if (CurrentApp == TransactionApp.QUICS_SM ||
+                        CurrentApp == TransactionApp.QPBOC_SM) songJianFile.WriteToFile(TagType.QPBOC_SM);
+                }
             }
+        }
+
+        public void SetCurrentApp(TransactionApp app)
+        {
+            TransCfg.CurrentApp = app;
+            CurrentApp = app;
         }
 
         public void DoTransaction(TransType type, Func<bool> DoActualTransaction)

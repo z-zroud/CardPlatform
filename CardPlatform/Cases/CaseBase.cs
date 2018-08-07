@@ -103,6 +103,11 @@ namespace CardPlatform.Cases
                 caseInfo.Level = level;
                 ViewModelLocator locator = new ViewModelLocator();
                 locator.Transaction.CaseInfos.Add(caseInfo);
+
+                if(level == TipLevel.Failed || level == TipLevel.Warn)
+                {
+                    locator.Transaction.ErrorCaseInfos.Add(caseInfo);
+                }
             });
 
         }

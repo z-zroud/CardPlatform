@@ -179,6 +179,23 @@
                         </ListView.View>
                     </ListView>
                 </TabItem>
+                <TabItem Header="错误" Controls:ControlsHelper.HeaderFontSize="15">
+                    <ListView ItemsSource="{Binding ErrorCaseInfos}" helper:ListScrollHelper.IsEnabled="True">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="编号" DisplayMemberBinding="{Binding CaseNo}" Width="{Binding ElementName=col1,Path=ActualWidth}"/>
+                                <GridViewColumn Header="描述" DisplayMemberBinding="{Binding CaseInfo}" Width="{Binding ElementName=col2, Path=ActualWidth}" />
+                                <GridViewColumn Header="结果" Width="{Binding ElementName=col3,Path=ActualWidth}">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Level,Converter={StaticResource CaseLevelToStringConverter}}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{Binding Level,Converter={StaticResource CaseLevelToColorConverter}}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </TabItem>
             </TabControl>
         </Grid>
     </Grid>

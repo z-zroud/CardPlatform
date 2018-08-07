@@ -91,7 +91,11 @@ namespace CardPlatform.Config
                     Constant.APP_PPSE,
                     Constant.APP_UICS,
                     Constant.APP_ECC,
-                    Constant.APP_QUICS
+                    Constant.APP_QUICS,
+                    Constant.APP_VISA,
+                    Constant.APP_PAYWAVE,
+                    Constant.APP_MC,
+                    Constant.APP_JETCO
                 };
                 foreach (var app in apps)
                 {

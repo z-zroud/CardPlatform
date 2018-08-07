@@ -24,9 +24,9 @@ namespace CardPlatform.Helper
     /// </summary>
     public enum TagType
     {
-        ContactDC_DES = 1,
-        ContactDC_SM = 2,
-        ContactlessDC_DES = 3,
+        UICS_Contact_DES = 1,
+        UICS_Contact_SM = 2,
+        UICS_Contactless_DES = 3,
         //ContactlessDC_SM = 4, //非接国际、国密填写的tag一致。
         ECC_DES = 5,
         ECC_SM = 6,
@@ -271,7 +271,7 @@ namespace CardPlatform.Helper
             var tagDict = TransactionTag.GetInstance();
             switch(type)
             {
-                case TagType.ContactDC_DES:
+                case TagType.UICS_Contact_DES:
                     foreach(var item in contactTable)
                     {
                         var tag = tagDict.GetTag(item.Key);
@@ -282,7 +282,7 @@ namespace CardPlatform.Helper
                         op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
                     }
                     break;
-                case TagType.ContactDC_SM:
+                case TagType.UICS_Contact_SM:
                     foreach (var item in sm_contactTable)
                     {
                         var tag = tagDict.GetTag(item.Key);
@@ -293,7 +293,7 @@ namespace CardPlatform.Helper
                         op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
                     }
                     break;
-                case TagType.ContactlessDC_DES:
+                case TagType.UICS_Contactless_DES:
                     foreach (var item in contactlessTable)
                     {
                         var tag = tagDict.GetTag(item.Key);

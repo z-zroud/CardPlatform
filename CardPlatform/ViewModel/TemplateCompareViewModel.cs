@@ -28,7 +28,7 @@ namespace CardPlatform.ViewModel
             {
                 var fileName = Path.GetFileName(file);
                 TemplatePath.Add(fileName);
-                if(fileName == "DataTemplate.xml")
+                if(fileName == "UICSTemplate.xml")  //默认的模板
                 {
                     SelectedTemplatePath = fileName;
                 }

@@ -12,12 +12,12 @@ namespace CardPlatform.Cases
     public class PSEDirCase : CaseBase
     {
         private ApduResponse response;
-        private List<TLV> TLVs;
+        private List<TLV> tlvs;
 
         public PSEDirCase()
         {
             response = new ApduResponse();
-            TLVs = new List<TLV>();
+            tlvs = new List<TLV>();
         }
 
         protected override void Load()
@@ -28,9 +28,9 @@ namespace CardPlatform.Cases
         public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
-            TLVs = DataParse.ParseTLV(response.Response);
+            tlvs = DataParse.ParseTLV(response.Response);
             base.Excute(batchNo,app,step, srcData);           
-            CheckTemplateTag(TLVs);
+            CheckTemplateTag(tlvs);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in TLVs)
+            foreach(var item in tlvs)
             {
                 if(item.Level == 1)
                 {
@@ -84,7 +84,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             bool hasTag4F = false;
             bool isCorrectLen = false;
-            foreach(var item in TLVs)
+            foreach(var item in tlvs)
             {
                 if(item.Tag == "4F")
                 {
@@ -119,7 +119,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             bool hasTag50 = false;
             bool isCorrectLen = false;
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if (item.Tag == "50")
                 {
@@ -152,7 +152,7 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            var tag61SubTags = CaseUtil.GetSubTags("61", TLVs);
+            var tag61SubTags = CaseUtil.GetSubTags("61", tlvs);
             List<string> tags = new List<string>() { "4F","50", "9F12", "87", "73" };
             foreach (var item in tag61SubTags)
             {
@@ -173,7 +173,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if (item.Tag == "9F12")
                 {
@@ -201,7 +201,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in TLVs)
+            foreach(var item in tlvs)
             {
                 if(item.Tag == "87")
                 {
@@ -229,7 +229,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in TLVs)
+            foreach(var item in tlvs)
             {
                 if(item.Tag == "9F11")
                 {
@@ -257,8 +257,8 @@ namespace CardPlatform.Cases
                  new Tuple<string, string>("A000000333010102","556E696F6E50617920437265646974"),
              };
 
-            var tag4F = CaseUtil.GetTag("4F", TLVs);
-            var tag50 = CaseUtil.GetTag("50", TLVs);
+            var tag4F = CaseUtil.GetTag("4F", tlvs);
+            var tag50 = CaseUtil.GetTag("50", tlvs);
 
             foreach(var item in tuples)
             {

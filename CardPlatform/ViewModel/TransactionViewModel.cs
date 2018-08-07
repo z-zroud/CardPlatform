@@ -27,6 +27,7 @@ namespace CardPlatform.ViewModel
             HasSelectedDESKey           = true;
             Aids                        = new ObservableCollection<string>();
             CaseInfos                   = new ObservableCollection<TransInfoModel>();
+            ErrorCaseInfos              = new ObservableCollection<TransInfoModel>();
             TransCategorys              = new List<string>();
             KeyTypeList                 = new List<string>();
             TransKeys                   = new TransKeyModel();
@@ -196,6 +197,16 @@ namespace CardPlatform.ViewModel
             set
             {
                 Set(ref _caseInfos, value);
+            }
+        }
+
+        private ObservableCollection<TransInfoModel> _errCaseInfos;
+        public ObservableCollection<TransInfoModel> ErrorCaseInfos
+        {
+            get { return _errCaseInfos; }
+            set
+            {
+                Set(ref _errCaseInfos, value);
             }
         }
 
@@ -379,38 +390,34 @@ namespace CardPlatform.ViewModel
                 trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
                 trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
             }
-            //if (TransType.IsCheckVISA)
-            //{
-            //    trans = new BusinessVISA();
-            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
-            //}
-            //if (TransType.IsCheckAMEX)
-            //{
-            //    trans = new BusinessAMEX();
-            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
-            //}
-            //if (TransType.IsCheckMC)
-            //{
-            //    trans = new BusinessMC();
-            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
-            //}
-            //if (TransType.IsCheckJETCO)
-            //{
-            //    trans = new BusinessJETCO();
-            //    trans.KeyType = SelectedKeyType == 0 ? TransKeyType.MDK : TransKeyType.UDK;
-            //    trans.SetTransDESKeys(TransKeyList.DES_AC, TransKeyList.DES_MAC, TransKeyList.DES_ENC);
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, false);
-            //}
+            if (TransType.IsCheckVISA)
+            {
+                trans = new BusinessVISA();
+                trans.TransCfg.SaveConfig();
+                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+                trans.DoTransaction(SelectedAid, true, false);
+            }
+            if (TransType.IsCheckAMEX)
+            {
+                trans = new BusinessAMEX();
+                trans.TransCfg.SaveConfig();
+                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+                trans.DoTransaction(SelectedAid, true, false);
+            }
+            if (TransType.IsCheckMC)
+            {
+                trans = new BusinessMC();
+                trans.TransCfg.SaveConfig();
+                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+                trans.DoTransaction(SelectedAid, true, false);
+            }
+            if (TransType.IsCheckJETCO)
+            {
+                trans = new BusinessJETCO();
+                trans.TransCfg.SaveConfig();
+                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+                trans.DoTransaction(SelectedAid, true, false);
+            }
         }
 
     }

@@ -36,12 +36,14 @@ namespace CardPlatform.Business
 
             if (doDesTrans)  // 做国际算法交易
             {
-                TransCfg.CurrentApp = TransactionApp.ECC_DES;
+                //TransCfg.CurrentApp = TransactionApp.ECC_DES;
+                SetCurrentApp(TransactionApp.ECC_DES);
                 DoTransaction(TransType.ECC_DES, DoTransactionEx);
             }
             if (doSMTrans)  //做国密算法交易
             {
-                TransCfg.CurrentApp = TransactionApp.ECC_SM;
+                //TransCfg.CurrentApp = TransactionApp.ECC_SM;
+                SetCurrentApp(TransactionApp.ECC_SM);
                 DoTransaction(TransType.ECC_SM, DoTransactionEx);
             }
         }

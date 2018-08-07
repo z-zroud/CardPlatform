@@ -77,8 +77,14 @@ namespace CardPlatform.Config
                     Constant.APP_PPSE,
                     Constant.APP_UICS,
                     Constant.APP_ECC,
-                    Constant.APP_QUICS };
-                foreach(var app in apps)
+                    Constant.APP_QUICS,
+                    Constant.APP_VISA,
+                    Constant.APP_PAYWAVE,
+                    Constant.APP_MC,
+                    Constant.APP_JETCO
+                };
+                TemplateTags.Clear();   //加载之前，清除之前的模板
+                foreach (var app in apps)
                 {
                     var appNode = root.Element(app);
                     if (appNode == null)

@@ -12,6 +12,8 @@
 
 #ifdef _DEBUG
 #pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Des0.lib")
+#pragma comment(lib,"..\\lib\\Debug\\PCSC.lib")
 #else
 #pragma comment(lib,"..\\lib\\Release\\Util.lib")
 #endif
