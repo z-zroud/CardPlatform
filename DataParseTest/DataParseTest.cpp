@@ -17,7 +17,7 @@ int main()
     TLV pTlvs[32];
     for (int i = 0; i < 1000; i++) {
         memset(pTlvs, 0, sizeof(TLV) * 32);
-        IsBcdTlvStruct(tlvBuffer, strlen(tlvBuffer));
+        IsBcdTlvStruct(tlvBuffer2, strlen(tlvBuffer2));
         ParseTLV(tlvBuffer2, pTlvs, tlvCount);
     }
 

@@ -362,6 +362,18 @@ namespace CardPlatform.Cases
             return true;
         }
 
+        public static bool IsLowerCaseAlpha(string ascii)
+        {
+            string alphaNum = "abcdefghijklmnopqrstuvwxyz";
+            foreach (var c in ascii)
+            {
+                if (!alphaNum.Contains(c))
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// 判断是否为数字
         /// </summary>

@@ -40,7 +40,7 @@ namespace CardPlatform.Common
         VISA,
         MC,
         JETCO,
-        PAYWAVE
+        qVSDC
     }
 
     public class Constant

@@ -5,11 +5,11 @@
 
 bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
 {
-    unsigned int	currentIndex = 0;				//用于标记buffer
-    unsigned long	dataSize = 0;					//数据长度
-    int				currentTLVIndex = 0;			//当前TLV结构标记
-    int				currentStatus = 'T';			//状态字符
-    unsigned int bufferLen = strlen(buffer);
+    unsigned int	currentIndex    = 0;                //用于标记buffer
+    unsigned long	dataSize        = 0;                //数据长度
+    int				currentTLVIndex = 0;                //当前TLV结构标记
+    int				currentStatus   = 'T';              //状态字符
+    unsigned int bufferLen          = strlen(buffer);
 
     while (currentIndex < bufferLen)
     {
@@ -85,9 +85,9 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                     pTlvs[currentTLVIndex].lenSize = 2;
 
                 }
-                if (subTlvLength + currentIndex + lenOffset + pTlvs[currentTLVIndex].lenSize != bufferLen) {
-                    return false;
-                }
+                //if (subTlvLength + currentIndex + lenOffset + pTlvs[currentTLVIndex].lenSize != bufferLen) {
+                //    return false;
+                //}
                 temp[subTlvLength] = 0;
 
                 unsigned int oSize;//输出有多少个同等级的子TLV，解析时也应该用到
@@ -179,11 +179,11 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
             if (dataSize + currentIndex > bufferLen) {  //正确的TLV格式，不应该出现dataSize 大于 bufferLen
                 return false;
             }
-            if (pTlvs[currentTLVIndex].isTemplate) {    //不存在同级模板，如果有模板，不存在模板以外的数据
-                if (currentIndex + dataSize != bufferLen) {
-                    return false;
-                }
-            }
+            //if (pTlvs[currentTLVIndex].isTemplate) {    //不存在同级模板，如果有模板，不存在模板以外的数据
+            //    if (currentIndex + dataSize != bufferLen) {
+            //        return false;
+            //    }
+            //}
             currentStatus = 'V';
             break;
         case 'V':

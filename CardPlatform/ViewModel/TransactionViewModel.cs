@@ -12,6 +12,7 @@ using CardPlatform.Models;
 using CardPlatform.Business;
 using System.Threading;
 using GalaSoft.MvvmLight.Threading;
+using CardPlatform.Helper.EnumToListHelper;
 
 namespace CardPlatform.ViewModel
 {
@@ -19,7 +20,6 @@ namespace CardPlatform.ViewModel
     {
         public TransactionViewModel()
         {
-            TransType                   = new TransTypeModel();
             AlgorithmType               = new AlgorithmModel();
             AlgorithmType.IsCheckDES    = true;
             AlgorithmType.IsCheckSM     = true;
@@ -83,12 +83,10 @@ namespace CardPlatform.ViewModel
                 {
                     ContactEnable = true;
                     ContactlessEnable = false;
-                    TransType.IsCheckQPBOC = false;
                 }
                 else
                 {
                     ContactEnable = false;
-                    TransType.IsCheckECC = false;
                     ContactlessEnable = true;
                 }
             }
@@ -138,10 +136,21 @@ namespace CardPlatform.ViewModel
         }
 
         /// <summary>
-        /// 交易类型 PBOC/UICS/ECC/QPBOC
+        /// 应用类型 PBOC/UICS/ECC/QPBOC
         /// </summary>
-        public TransTypeModel TransType { get; set; }
-
+        public EnumListItemCollection<AppType> Apps { get; } = new EnumListItemCollection<AppType>();
+        public AppType _currentApp;
+        public AppType CurrentApp
+        {
+            get
+            {
+                return _currentApp;
+            }
+            set
+            {
+                Set(ref _currentApp, value);
+            }
+        }
         /// <summary>
         /// 交易使用的算法
         /// </summary>
@@ -368,56 +377,63 @@ namespace CardPlatform.ViewModel
                 TransResult.Clear();
             });
             
-            if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
-            {
-                trans = new BusinessUICS();
-                trans.TransCfg.SaveConfig();
-                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
+            //{
+            //    trans = new BusinessUICS();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
 
-            }
-            if (TransType.IsCheckECC)
-            {
-                trans = new BusinessECC();
-                trans.TransCfg.SaveConfig();
-                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
-            }
-            if (TransType.IsCheckQPBOC)
-            {
-                trans = new BusinessQPBOC();
-                trans.TransCfg.SaveConfig();
-                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
-            }
-            if (TransType.IsCheckVISA)
-            {
-                trans = new BusinessVISA();
-                trans.TransCfg.SaveConfig();
-                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTransaction(SelectedAid, true, false);
-            }
-            if (TransType.IsCheckAMEX)
-            {
-                trans = new BusinessAMEX();
-                trans.TransCfg.SaveConfig();
-                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTransaction(SelectedAid, true, false);
-            }
-            if (TransType.IsCheckMC)
-            {
-                trans = new BusinessMC();
-                trans.TransCfg.SaveConfig();
-                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTransaction(SelectedAid, true, false);
-            }
-            if (TransType.IsCheckJETCO)
-            {
-                trans = new BusinessJETCO();
-                trans.TransCfg.SaveConfig();
-                trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-                trans.DoTransaction(SelectedAid, true, false);
-            }
+            //}
+            //if (TransType.IsCheckECC)
+            //{
+            //    trans = new BusinessECC();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //}
+            //if (TransType.IsCheckQPBOC)
+            //{
+            //    trans = new BusinessQPBOC();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
+            //}
+            //if (TransType.IsCheckVISA)
+            //{
+            //    trans = new BusinessVISA();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, true, false);
+            //}
+            //if (TransType.IsCheckqVSDC)
+            //{
+            //    trans = new BusinessqVSDC();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, true, false);
+            //}
+            //if (TransType.IsCheckAMEX)
+            //{
+            //    trans = new BusinessAMEX();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, true, false);
+            //}
+            //if (TransType.IsCheckMC)
+            //{
+            //    trans = new BusinessMC();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, true, false);
+            //}
+            //if (TransType.IsCheckJETCO)
+            //{
+            //    trans = new BusinessJETCO();
+            //    trans.TransCfg.SaveConfig();
+            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
+            //    trans.DoTransaction(SelectedAid, true, false);
+            //}
         }
 
     }

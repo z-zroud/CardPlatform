@@ -219,7 +219,39 @@ namespace CardPlatform.Cases
             return false;
         }
 
-        public bool CheckAc()
+        public bool CheckEmvAc()
+        {
+            string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");  //授权金额
+            string tag9F03 = locator.Terminal.TermianlSettings.GetTag("9F03");  //其他金额
+            string tag9F1A = locator.Terminal.TermianlSettings.GetTag("9F1A");  //终端国家代码
+            string tag95 = locator.Terminal.TermianlSettings.GetTag("95");      //终端验证结果           
+            string tag5A = locator.Terminal.TermianlSettings.GetTag("5F2A");  //交易货币代码
+            string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
+            string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
+            string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
+            string tag82 = TransactionTag.GetInstance().GetTag("82");
+            string tag9F36 = TransactionTag.GetInstance().GetTag("9F36");
+            string tag9F10 = TransactionTag.GetInstance().GetTag("9F10");
+            var cvr = tag9F10.Substring(6, 8);   //卡片验证结果
+
+            string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + cvr;
+            int zeroCount = input.Length % 16;
+            if (zeroCount != 0)
+            {
+                input.PadRight(zeroCount, '0');
+            }
+            if (string.IsNullOrEmpty(TransConfig.TransDesAcKey))
+                return false;
+            var mac = Authencation.GenEMVAC(TransConfig.TransDesAcKey, input);
+            string tag9F26 = TransactionTag.GetInstance().GetTag("9F26");
+            if (mac == tag9F26)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool CheckPbocAc()
         {      
             string tag9F02  = locator.Terminal.TermianlSettings.GetTag("9F02");  //授权金额
             string tag9F03  = locator.Terminal.TermianlSettings.GetTag("9F03");  //其他金额

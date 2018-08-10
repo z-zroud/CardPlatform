@@ -16,6 +16,8 @@
 #pragma comment(lib,"..\\lib\\Debug\\PCSC.lib")
 #else
 #pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#pragma comment(lib,"..\\lib\\Release\\Des0.lib")
+#pragma comment(lib,"..\\lib\\Release\\PCSC.lib")
 #endif
 
 

@@ -25,37 +25,54 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="1" Margin="20">
-            <DockPanel  MaxHeight="30">
+        <StackPanel Grid.Column="1" Margin="20,0,20,20">
+            <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="交易类型 " MinWidth="50" VerticalAlignment="Center"/>
                 <ComboBox  Margin="2,2,65,2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding TransCategorys}"
                             SelectedIndex="{Binding SelectedCategory}"
                             MaxDropDownHeight="125" />
-            </DockPanel>
-            <DockPanel MaxHeight="30" LastChildFill="True">
+            </StackPanel>
+            <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="AID" MinWidth="50" VerticalAlignment="Center"/>
-                <Button DockPanel.Dock="Right" MinWidth="60" Content="加载" Margin="2"  Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding LoadAppCmd}"/>
-                <ComboBox Margin="2" 
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" MinWidth="60" Content="加载" Margin="2"  Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding LoadAppCmd}"/>
+                    <ComboBox Margin="2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding Aids}"
                             SelectedItem="{Binding SelectedAid}"
                             MaxDropDownHeight="125" />
-            </DockPanel>
+                </DockPanel>
+
+            </StackPanel>
             <StackPanel Margin="0,10,0,0">
-                <TextBlock Text="交易方式" VerticalAlignment="Bottom" Margin="0,0,0,5" />
-                <UniformGrid  Rows="2">
+                <TextBlock Text="应用类型 " MinWidth="50" VerticalAlignment="Center"/>
+                <ComboBox  Margin="2,2,65,2" 
+                            Style="{DynamicResource VirtualisedMetroComboBox}"
+                            ItemsSource="{Binding Apps}"
+                            DisplayMemberPath="DisplayValue"
+                            SelectedValuePath="Value"
+                            SelectedValue="{Binding CurrentApp}"
+                            MaxDropDownHeight="125" />
+            </StackPanel>
+            <!--StackPanel Margin="0,10,0,0">
+                <TextBlock Text="应用类型" VerticalAlignment="Bottom" Margin="0,0,0,5" />
+                <ComboBox>
+                    
+                </ComboBox>
+                <UniformGrid  Rows="3">
                     <CheckBox Content="PBOC" Margin="0,5,10,0"  IsChecked="{Binding TransType.IsCheckPBOC}" />
                     <CheckBox Content="UICS" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckUICS}"/>
                     <CheckBox Content="ECC" Margin="0,5,10,0" IsEnabled="{Binding ContactEnable }" IsChecked="{Binding TransType.IsCheckECC}"/>
                     <CheckBox Content="QPBOC" Margin="0,5,10,0" IsEnabled="{Binding ContactlessEnable }" IsChecked="{Binding TransType.IsCheckQPBOC}"/>
                     <CheckBox Content="VISA" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckVISA}"/>
+                    <CheckBox Content="qVSDC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckqVSDC}"/>
                     <CheckBox Content="MC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckMC}"/>
                     <CheckBox Content="JETCO" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckJETCO}"/>
                     <CheckBox Content="AMEX" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckAMEX}"/>
                 </UniformGrid>
-            </StackPanel>
+            </-->
             <StackPanel Margin="0,10,0,0">
                 <TextBlock Text="算法类型"  VerticalAlignment="Bottom" Margin="0,0,0,5"/>
                 <UniformGrid Columns="4">
@@ -66,7 +83,7 @@
         </StackPanel>
         <StackPanel Grid.Column="2" Margin="20">
             <DockPanel>
-                <TextBlock Text="MDK/UDK"  VerticalAlignment="Center"/>
+                <TextBlock Text="秘钥类型   "  VerticalAlignment="Center"/>
                 <ComboBox  Margin="8,2,2,2"
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding KeyTypeList}"
@@ -101,7 +118,7 @@
                 </DockPanel>
             </StackPanel>
             <DockPanel>
-                <Button Content="信息表" Margin="2" MinWidth="60" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenTagInfoFileCmd}"/>
+                <Button Content="送检表" Margin="2" MinWidth="60" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenTagInfoFileCmd}"/>
                 <TextBox Margin="2" Text="{Binding TagInfoFile}"/>
             </DockPanel>
         </StackPanel>

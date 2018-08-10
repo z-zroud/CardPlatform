@@ -374,11 +374,23 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (CheckAc())
+            if(TransactionConfig.GetInstance().CurrentApp == TransactionApp.VISA)
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                return;
+                if (CheckEmvAc())
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
+                }
             }
+            else
+            {
+                if (CheckPbocAc())
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+
             TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
 

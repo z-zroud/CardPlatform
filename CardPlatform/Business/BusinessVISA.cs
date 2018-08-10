@@ -85,7 +85,6 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "交易结束处理失败，交易终止");
                 return false;
             }
-            //LoadBalance("9F79", "000000010000");
             return true;
         }
 
@@ -102,7 +101,7 @@ namespace CardPlatform.Business
             {
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
-                    var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
+                    var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_VISA };
                     stepCase.Excute(BatchNo, CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
@@ -126,19 +125,20 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             string tag9F38 = transTags.GetTag(TransactionStep.SelectApp, "9F38");
-            if (string.IsNullOrEmpty(tag9F38))
-            {
-                return afls;
-            }
-            var tls = DataParse.ParseTL(tag9F38);
             string pdolData = string.Empty;
-            foreach (var tl in tls)
+            if (!string.IsNullOrEmpty(tag9F38))
             {
-                var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
-                if (terminalData.Length != tl.Len * 2) return new List<AFL>();
-                if (string.IsNullOrEmpty(terminalData)) return new List<AFL>();
-                pdolData += terminalData;
+                var tls = DataParse.ParseTL(tag9F38);
+                
+                foreach (var tl in tls)
+                {
+                    var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                    if (terminalData.Length != tl.Len * 2) return new List<AFL>();
+                    if (string.IsNullOrEmpty(terminalData)) return new List<AFL>();
+                    pdolData += terminalData;
+                }
             }
+
             var response = base.GPO(pdolData);
             if (response.SW != 0x9000)
             {
@@ -153,7 +153,7 @@ namespace CardPlatform.Business
             transTags.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
-            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
+            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_VISA };
             gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
             return afls;
         }
@@ -180,7 +180,7 @@ namespace CardPlatform.Business
                     return false;
                 }
             }
-            IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS };
+            IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_VISA };
             readRecordCase.Excute(BatchNo, CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
@@ -244,15 +244,16 @@ namespace CardPlatform.Business
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string aip = transTags.GetTag(TransactionStep.GPO, "82");
             var aipHelper = new AipHelper(aip);
-            if (!aipHelper.IsSupportSDA())
+            if (aipHelper.IsSupportSDA())
             {
-                return 1;
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "VISA不应支持SDA脱机数据认证");
+                if (!SDA())
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                    return 1;
+                }
             }
-            if (!SDA())
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
-                return 1;
-            }
+
             if (!aipHelper.IsSupportDDA())
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
@@ -281,7 +282,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int HandleLimitation()
         {
-            var handleLimitationCase = new HandleLimitationCase() { CurrentApp = Constant.APP_UICS };
+            var handleLimitationCase = new HandleLimitationCase() { CurrentApp = Constant.APP_VISA };
             handleLimitationCase.Excute(BatchNo, CurrentApp, TransactionStep.HandleLimitation, null);
             return 0;
         }
@@ -292,7 +293,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int CardHolderVerify()
         {
-            var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_UICS };
+            var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_VISA };
             cardHolderVerifyCase.Excute(BatchNo, CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
@@ -304,7 +305,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int TerminalRiskManagement()
         {
-            var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_UICS };
+            var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_VISA };
             terminalRishManagementCase.Excute(BatchNo, CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }
@@ -339,14 +340,13 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
-            var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase() { CurrentApp = Constant.APP_UICS };
+            var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase() { CurrentApp = Constant.APP_VISA };
             terminalActionAnalyzeCase.Excute(BatchNo, CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
             return 0;
         }
 
         protected int IssuerAuthencation()
         {
-            string acSessionKey;
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             if (string.IsNullOrEmpty(TransCfg.TransDesAcKey))
@@ -354,14 +354,9 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "国际算法UDK/MDK不存在");
                 return 1;
             }
-            acSessionKey = GenSessionKey(TransCfg.TransDesAcKey, TransCfg.KeyType, TransCfg.AlgorithmFlag);
 
             string ac = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
-            string arpc;
-            if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
-                arpc = Authencation.GenArpc(acSessionKey, ac, "3030", (int)AlgorithmCategory.DES);
-            else
-                arpc = Authencation.GenArpc(acSessionKey, ac, "3030", (int)AlgorithmCategory.SM);
+            string arpc = Authencation.GenArpc(TransCfg.TransDesAcKey, ac, "3030", (int)AlgorithmCategory.DES);
             var resp = APDU.ExtAuthCmd(arpc, "3030");
             if (resp.SW != 0x9000)
             {
@@ -392,7 +387,7 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
-            var transactionEndCase = new TransactionEndCase() { CurrentApp = Constant.APP_UICS };
+            var transactionEndCase = new TransactionEndCase() { CurrentApp = Constant.APP_VISA };
             transactionEndCase.Excute(BatchNo, CurrentApp, TransactionStep.TransactionEnd, resp);
 
             return 0;

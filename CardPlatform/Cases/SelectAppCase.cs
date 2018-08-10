@@ -13,12 +13,12 @@ namespace CardPlatform.Cases
     public class SelectAppCase : CaseBase
     {
         private ApduResponse response;
-        private List<TLV> TLVs;
+        private List<TLV> tlvs;
 
         public SelectAppCase()
         {
             response = new ApduResponse();
-            TLVs = new List<TLV>();
+            tlvs = new List<TLV>();
         }
 
         protected override void Load()
@@ -29,12 +29,12 @@ namespace CardPlatform.Cases
         public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
-            TLVs = DataParse.ParseTLV(response.Response);
+            tlvs = DataParse.ParseTLV(response.Response);
             base.Excute(batchNo, app, step,srcData);
         }
 
         /// <summary>
-        /// 是否以6F开头
+        /// 检测响应数据是否以6F模板开头
         /// </summary>
         public void SelectAid_001()
         {
@@ -52,7 +52,7 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 6F模板下只能并且包含Tag84和A5模板，顺序不能颠倒
+        /// 检测6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒
         /// </summary>
         public void SelectAid_002()
         {
@@ -60,7 +60,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             var template6F = new List<TLV>();
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if (item.Level == 1)
                 {
@@ -86,7 +86,7 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            var tag84 = from tlv in TLVs where tlv.Tag == "84" select tlv;
+            var tag84 = from tlv in tlvs where tlv.Tag == "84" select tlv;
             if (tag84.First() != null)
             {
                 if (CaseUtil.IsExpectedLen(tag84.First().Value, 10, 32))
@@ -105,14 +105,16 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// A5模板下必须包含tag50
+        /// 检测tag50是否符合规范(必须存在于A5模板下，长度1-16字节，ASCII字符)
         /// </summary>
         public void SelectAid_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
+
+            var subTags = CaseUtil.GetSubTags("A5", tlvs);
             bool hasTag50 = false;
-            foreach (var item in TLVs)
+            foreach (var item in subTags)
             {
                 if (item.Tag == "50")
                 {
@@ -146,11 +148,11 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var items = new List<string>() { "50", "87", "9F38", "5F2D", "9F11", "9F12", "BF0C" };
-            var tlvs = CaseUtil.GetSubTags("A5", TLVs);
+            var items = new List<string>{ "50", "87", "9F38", "5F2D", "9F11", "9F12", "BF0C" };
+            var subTlvs = CaseUtil.GetSubTags("A5", tlvs);
 
             bool hasOtherTag = false;
-            foreach(var tlv in tlvs)
+            foreach(var tlv in subTlvs)
             {
                 if(!items.Contains(tlv.Tag))
                 {
@@ -168,14 +170,15 @@ namespace CardPlatform.Cases
 
 
         /// <summary>
-        /// 87的长度是否为1字节
+        /// 检测87的合规性(长度是否为1字节)
         /// </summary>
         public void SelectAid_006()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
+            var subTags = CaseUtil.GetSubTags("A5", tlvs);
 
-            var tag87 = from tlv in TLVs where tlv.Tag == "87" select tlv;
+            var tag87 = from tlv in subTags where tlv.Tag == "87" select tlv;
             if (tag87.First() != null)
             {
                 if (tag87.First().Value.Length == 2)
@@ -187,34 +190,38 @@ namespace CardPlatform.Cases
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
+            else
+            {
+                //这里应判断若卡片包含多个应用，87必须存在
+            }
         }
 
         /// <summary>
-        /// 检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读字符串)
+        /// 检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读小写字符串)
         /// </summary>
         public void SelectAid_007()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            foreach (var item in TLVs)
+            var subTags = CaseUtil.GetSubTags("A5", tlvs);
+            var tag5F2D = from tlv in subTags where tlv.Tag == "5F2D" select tlv;
+            if(tag5F2D.First() == null)
             {
-                if (item.Tag == "5F2D")
-                {
-                    string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if (item.Value.Length % 2 == 0 &&
-                        item.Value.Length >= 4 &&
-                        item.Value.Length <= 16 &&
-                        CaseUtil.IsAlpha(value))
-                    {
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    }
-                    else
-                    {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    }
-                    break;
-                }
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[tag5F2D不存在]");
+                return;
+            }
+            var item = tag5F2D.First();
+            string value = UtilLib.Utils.BcdToStr(item.Value);
+            if (item.Value.Length % 2 == 0 &&
+                item.Value.Length >= 4 &&
+                item.Value.Length <= 16 &&
+                CaseUtil.IsLowerCaseAlpha(value))
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            }
+            else
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 
@@ -226,7 +233,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if (item.Tag == "9F11")
                 {
@@ -261,7 +268,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach (var item in TLVs)
+            foreach (var item in tlvs)
             {
                 if (item.Tag == "9F12")
                 {
@@ -288,7 +295,7 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            var tags = CaseUtil.GetSubTags("BF0C", TLVs);
+            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
             bool hasTag9F4D = false;
             bool hasTagDF4D = false;
             foreach (var item in tags)
