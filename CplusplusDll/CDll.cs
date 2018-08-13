@@ -182,5 +182,13 @@ namespace CplusplusDll
         [DllImport(@"DataParse.dll", EntryPoint = "ParseAFL", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void ParseAFL(string bcdBuffer, IntPtr arrAFL, ref int count);
         #endregion
+
+        #region import Log.dll
+        [DllImport(@"Log.dll", EntryPoint = "CreateLog", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int CreateLog(string path, int type = 2);
+
+        [DllImport(@"Log.dll", EntryPoint = "TraceLog", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void TraceLog(int handle, string info);
+        #endregion
     }
 }
