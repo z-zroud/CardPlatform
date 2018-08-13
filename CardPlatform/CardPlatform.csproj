@@ -117,6 +117,7 @@
     <Compile Include="Config\ConfigHelper.cs" />
     <Compile Include="Config\DataTemplateConfig.cs" />
     <Compile Include="Config\PersonlizeConfig.cs" />
+    <Compile Include="Helper\AppKeyTypeToVisibility.cs" />
     <Compile Include="Helper\CaseLevelToColorConverter.cs" />
     <Compile Include="Helper\CaseLevelToStringConverter.cs" />
     <Compile Include="Helper\ControlTreeHelper.cs" />
@@ -138,7 +139,7 @@
     <Compile Include="Models\TransInfoModel.cs" />
     <Compile Include="Models\TransKeyModel.cs" />
     <Compile Include="Models\TransResultModel.cs" />
-    <Compile Include="Models\TransTypeModel.cs" />
+    <Compile Include="Models\TransactionModel.cs" />
     <Compile Include="ViewModel\AlgorithomViewModel.cs" />
     <Compile Include="ViewModel\CardCheckViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />

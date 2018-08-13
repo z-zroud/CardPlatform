@@ -31,7 +31,7 @@ namespace CardPlatform.Business
             SaveTags(TransactionStep.SelectPSE,response.Response);
 
             IExcuteCase stepCase = new PSECases() { CurrentApp = Constant.APP_PSE};
-            stepCase.Excute(BatchNo,CurrentApp,TransactionStep.SelectPSE, response);
+            stepCase.Excute(BatchNo,TransCfg.CurrentApp,TransactionStep.SelectPSE, response);
 
             //获取AID列表
             List<string> Aids = new List<string>();
@@ -77,7 +77,7 @@ namespace CardPlatform.Business
             {
                 return string.Empty;
             }
-            stepCase.Excute(BatchNo,CurrentApp,TransactionStep.ReadPSEDir,response);
+            stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadPSEDir,response);
 
             List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
             var aid = from tlv in arrTLV where tlv.Tag == "4F" select tlv.Value;

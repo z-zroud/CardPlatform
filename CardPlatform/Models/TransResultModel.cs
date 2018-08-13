@@ -38,17 +38,17 @@ namespace CardPlatform.Models
             set
             {
                 Set(ref _transType, value);
-                switch(_transType)
-                {
-                    case TransType.PBOC_DES: TransTypeDescription = "PBOC 国际";break;
-                    case TransType.PBOC_SM: TransTypeDescription = "PBOC 国密"; break;
-                    case TransType.UICS_DES: TransTypeDescription = "UICS 国际"; break;
-                    case TransType.UICS_SM: TransTypeDescription = "UICS 国密"; break;
-                    case TransType.ECC_DES: TransTypeDescription = "ECC 国际"; break;
-                    case TransType.ECC_SM: TransTypeDescription = "ECC 国密"; break;
-                    case TransType.QPBOC_DES: TransTypeDescription = "QPBOC 国际"; break;
-                    case TransType.QPBOC_SM: TransTypeDescription = "QPBOC 国密"; break;
-                }
+                //switch(_transType)
+                //{
+                    //case TransType.PBOC_DES: TransTypeDescription = "PBOC 国际";break;
+                    //case TransType.PBOC_SM: TransTypeDescription = "PBOC 国密"; break;
+                    //case TransType.UICS_DES: TransTypeDescription = "UICS 国际"; break;
+                    //case TransType.UICS_SM: TransTypeDescription = "UICS 国密"; break;
+                    //case TransType.ECC_DES: TransTypeDescription = "ECC 国际"; break;
+                    //case TransType.ECC_SM: TransTypeDescription = "ECC 国密"; break;
+                    //case TransType.QPBOC_DES: TransTypeDescription = "QPBOC 国际"; break;
+                    //case TransType.QPBOC_SM: TransTypeDescription = "QPBOC 国密"; break;
+                //}
             }
         }
 

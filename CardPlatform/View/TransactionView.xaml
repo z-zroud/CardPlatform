@@ -13,6 +13,17 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <helper:CaseLevelToColorConverter x:Key="CaseLevelToColorConverter"/>
         <helper:CaseLevelToStringConverter x:Key="CaseLevelToStringConverter"/>
+        <helper:AppKeyTypeToVisibility x:Key="AppKeyTypeToVisibility"/>
+        <Style TargetType="FrameworkElement" x:Key="VisibilityStyle">
+            <Setter Property="Visibility">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource AppKeyTypeToVisibility}" >
+                        <Binding Path="Tag" RelativeSource="{RelativeSource Mode=Self}"/>
+                        <Binding Path="CurrentAlgorithm"/>
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
@@ -30,8 +41,10 @@
                 <TextBlock Text="交易类型 " MinWidth="50" VerticalAlignment="Center"/>
                 <ComboBox  Margin="2,2,65,2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
-                            ItemsSource="{Binding TransCategorys}"
-                            SelectedIndex="{Binding SelectedCategory}"
+                            DisplayMemberPath="DisplayValue"
+                            SelectedValuePath="Value"
+                            ItemsSource="{Binding TransTypes}"
+                            SelectedValue="{Binding CurrentTransType}"
                             MaxDropDownHeight="125" />
             </StackPanel>
             <StackPanel Margin="0,10,0,0">
@@ -41,7 +54,7 @@
                     <ComboBox Margin="2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
                             ItemsSource="{Binding Aids}"
-                            SelectedItem="{Binding SelectedAid}"
+                            SelectedItem="{Binding CurrentAid}"
                             MaxDropDownHeight="125" />
                 </DockPanel>
 
@@ -56,70 +69,54 @@
                             SelectedValue="{Binding CurrentApp}"
                             MaxDropDownHeight="125" />
             </StackPanel>
-            <!--StackPanel Margin="0,10,0,0">
-                <TextBlock Text="应用类型" VerticalAlignment="Bottom" Margin="0,0,0,5" />
-                <ComboBox>
-                    
-                </ComboBox>
-                <UniformGrid  Rows="3">
-                    <CheckBox Content="PBOC" Margin="0,5,10,0"  IsChecked="{Binding TransType.IsCheckPBOC}" />
-                    <CheckBox Content="UICS" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckUICS}"/>
-                    <CheckBox Content="ECC" Margin="0,5,10,0" IsEnabled="{Binding ContactEnable }" IsChecked="{Binding TransType.IsCheckECC}"/>
-                    <CheckBox Content="QPBOC" Margin="0,5,10,0" IsEnabled="{Binding ContactlessEnable }" IsChecked="{Binding TransType.IsCheckQPBOC}"/>
-                    <CheckBox Content="VISA" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckVISA}"/>
-                    <CheckBox Content="qVSDC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckqVSDC}"/>
-                    <CheckBox Content="MC" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckMC}"/>
-                    <CheckBox Content="JETCO" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckJETCO}"/>
-                    <CheckBox Content="AMEX" Margin="0,5,10,0" IsChecked="{Binding TransType.IsCheckAMEX}"/>
-                </UniformGrid>
-            </-->
             <StackPanel Margin="0,10,0,0">
-                <TextBlock Text="算法类型"  VerticalAlignment="Bottom" Margin="0,0,0,5"/>
-                <UniformGrid Columns="4">
-                    <CheckBox Content="国际" Margin="0,0,20,0" IsChecked="{Binding AlgorithmType.IsCheckDES}" />
-                    <CheckBox Name="ckSM" Content="国密" Margin="0,0,20,0" IsChecked="{Binding AlgorithmType.IsCheckSM}"/>
-                </UniformGrid>
+                <TextBlock Text="秘钥类型   "  VerticalAlignment="Center"/>
+                <ComboBox  Margin="2,2,65,2" 
+                            Style="{DynamicResource VirtualisedMetroComboBox}"
+                            DisplayMemberPath="DisplayValue"
+                            SelectedValuePath="Value"
+                            ItemsSource="{Binding AppKeyTypes}"
+                            SelectedValue="{Binding CurrentAppKeyType}"
+                            MaxDropDownHeight="125" />
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Column="2" Margin="20">
-            <DockPanel>
-                <TextBlock Text="秘钥类型   "  VerticalAlignment="Center"/>
-                <ComboBox  Margin="8,2,2,2"
+        <StackPanel Grid.Column="2" Margin="20,0,20,20">
+            <StackPanel Margin="0,10,0,0">
+                <TextBlock Text="算法类型"  VerticalAlignment="Bottom"/>
+                <ComboBox  Margin="2,2,65,2" 
                             Style="{DynamicResource VirtualisedMetroComboBox}"
-                            ItemsSource="{Binding KeyTypeList}"
-                            SelectedIndex="{Binding SelectedKeyType}"
+                            ItemsSource="{Binding AlgorithmTypes}"
+                            DisplayMemberPath="DisplayValue"
+                            SelectedValuePath="Value"
+                            SelectedValue="{Binding CurrentAlgorithm}"
                             MaxDropDownHeight="125" />
-            </DockPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <CheckBox Name="cbDES"  Margin="0,0,20,0" Visibility="Hidden" IsChecked="{Binding HasSelectedDESKey}"/>
-                <CheckBox Name="cbSM" Content="国密"  HorizontalAlignment="Left" IsEnabled="{Binding ElementName=ckSM, Path=IsChecked}" IsChecked="{Binding HasSelectedSMKey}" Command="{Binding SelectSMCmd}"/>
             </StackPanel>
             <StackPanel>
-                <DockPanel LastChildFill="True">
+                <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="AC" MinWidth="65" VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeys.DES_AC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <TextBox  Margin="2" DockPanel.Dock="Right" Text="{Binding TransKeys.SM_AC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    </StackPanel>
-                </DockPanel>
-                <DockPanel LastChildFill="True">
+                    <Grid>
+                        <TextBox Height="27"  Margin="2,2,65,2" DockPanel.Dock="Right" Text="{Binding TransKeys.DES_AC}" Tag="DES" Style="{StaticResource VisibilityStyle}"/>
+                        <TextBox Height="27"  Margin="2,2,65,2" DockPanel.Dock="Right" Text="{Binding TransKeys.SM_AC}" Tag="SM" Style="{StaticResource VisibilityStyle}"/>
+                    </Grid>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="MAC" MinWidth="65" VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBox  Margin="2" Text="{Binding TransKeys.DES_MAC}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <TextBox  Margin="2" Text="{Binding TransKeys.SM_MAC}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    </StackPanel>
-                </DockPanel>
-                <DockPanel LastChildFill="True">
+                    <Grid>
+                        <TextBox Height="27"  Margin="2,2,65,2" Text="{Binding TransKeys.DES_MAC}" Tag="DES" Style="{StaticResource VisibilityStyle}"/>
+                        <TextBox Height="27" Margin="2,2,65,2" Text="{Binding TransKeys.SM_MAC}" Tag="SM" Style="{StaticResource VisibilityStyle}" />
+                    </Grid>
+                </StackPanel>
+                <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="ENC" MinWidth="65" VerticalAlignment="Center"/>
-                    <StackPanel>
-                        <TextBox  Margin="2" Text="{Binding TransKeys.DES_ENC, Mode=TwoWay, NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}" Visibility="{Binding ElementName=cbDES, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <TextBox  Margin="2" Text="{Binding TransKeys.SM_ENC,  Mode=TwoWay,NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}" Visibility="{Binding ElementName=cbSM, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    </StackPanel>
-                </DockPanel>
+                    <Grid>
+                        <TextBox Height="27"  Margin="2,2,65,2" Text="{Binding TransKeys.DES_ENC, Mode=TwoWay, NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}" Tag="DES" Style="{StaticResource VisibilityStyle}"/>
+                        <TextBox Height="27"  Margin="2,2,65,2" Text="{Binding TransKeys.SM_ENC,  Mode=TwoWay,NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}" Tag="SM" Style="{StaticResource VisibilityStyle}"/>
+                    </Grid>
+                </StackPanel>
             </StackPanel>
-            <DockPanel>
-                <Button Content="送检表" Margin="2" MinWidth="60" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenTagInfoFileCmd}"/>
-                <TextBox Margin="2" Text="{Binding TagInfoFile}"/>
+            <DockPanel Margin="0,10,0,0">
+                <Button Content="送检表" DockPanel.Dock="Right" Margin="2" MinWidth="60" Style="{DynamicResource AccentedSquareButtonStyle}" Command="{Binding OpenTagInfoFileCmd}"/>
+                <TextBox Margin="2" DockPanel.Dock="Left" Text="{Binding TagInfoFile}"/>
             </DockPanel>
         </StackPanel>
         <StackPanel Grid.Column="3" Margin="20">

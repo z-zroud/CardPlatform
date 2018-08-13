@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using CardPlatform.Common;
 using CardPlatform.Config;
+using CardPlatform.Models;
 using CplusplusDll;
 
 
@@ -24,7 +25,7 @@ namespace CardPlatform.Cases
             base.Load();
         }
 
-        public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
+        public override void Excute(int batchNo, AppType app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
             base.Excute(batchNo,app,step, srcData);
@@ -70,7 +71,7 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (TransactionConfig.GetInstance().CurrentApp == TransactionApp.VISA)
+            if (TransactionConfig.GetInstance().CurrentApp == AppType.VISA)
             {
                 if (CheckEmvAc())
                 {

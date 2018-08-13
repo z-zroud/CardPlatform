@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using UtilLib;
 using CardPlatform.Common;
+using CardPlatform.Models;
 
 namespace CardPlatform.Cases
 {
@@ -25,7 +26,7 @@ namespace CardPlatform.Cases
             base.Load();
         }
 
-        public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
+        public override void Excute(int batchNo, AppType app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
             tlvs = DataParse.ParseTLV(response.Response);

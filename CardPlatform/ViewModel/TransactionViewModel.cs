@@ -20,25 +20,32 @@ namespace CardPlatform.ViewModel
     {
         public TransactionViewModel()
         {
-            AlgorithmType               = new AlgorithmModel();
-            AlgorithmType.IsCheckDES    = true;
-            AlgorithmType.IsCheckSM     = true;
-            HasSelectedSMKey            = false;
-            HasSelectedDESKey           = true;
             Aids                        = new ObservableCollection<string>();
             CaseInfos                   = new ObservableCollection<TransInfoModel>();
             ErrorCaseInfos              = new ObservableCollection<TransInfoModel>();
-            TransCategorys              = new List<string>();
-            KeyTypeList                 = new List<string>();
-            TransKeys                   = new TransKeyModel();
             TransResult                 = new ObservableCollection<TransResultModel>();
-            Load();
+            TransKeys                   = new TransKeyModel();
         }
 
         #region data binding
+
         /// <summary>
-        /// Aid
+        /// 交易方式(接触/非接)
         /// </summary>
+        public EnumListItemCollection<TransType> TransTypes { get; } = new EnumListItemCollection<TransType>();
+        public TransType _currentTransType;
+        public TransType CurrentTransType
+        {
+            get
+            {
+                return _currentTransType;
+            }
+            set
+            {
+                Set(ref _currentTransType, value);
+            }
+        }
+
         private ObservableCollection<string> _aids;
         public ObservableCollection<string> Aids
         {
@@ -49,89 +56,13 @@ namespace CardPlatform.ViewModel
             }
         }
 
-        private string _selectedAid;
-        public string SelectedAid
+        private string _currentdAid;
+        public string CurrentAid
         {
-            get { return _selectedAid; }
+            get { return _currentdAid; }
             set
             {
-                Set(ref _selectedAid, value);
-            }
-        }
-
-        /// <summary>
-        /// 交易方式
-        /// </summary>
-        private List<string> _transCategorys;
-        public List<string> TransCategorys
-        {
-            get { return _transCategorys; }
-            set
-            {
-                Set(ref _transCategorys, value);
-            }
-        }
-
-        private int _transCategory;
-        public int SelectedCategory
-        {
-            get { return _transCategory; }
-            set
-            {
-                Set(ref _transCategory, value);
-                if(_transCategory == 0)
-                {
-                    ContactEnable = true;
-                    ContactlessEnable = false;
-                }
-                else
-                {
-                    ContactEnable = false;
-                    ContactlessEnable = true;
-                }
-            }
-        }
-
-        /// <summary>
-        /// MDK or UDK
-        /// </summary>
-        private List<string> _keyTypeList;
-        public List<string> KeyTypeList
-        {
-            get { return _keyTypeList; }
-            set
-            {
-                Set(ref _keyTypeList, value);
-            }
-        }
-
-        private int _selectedKeyType;
-        public int SelectedKeyType
-        {
-            get { return _selectedKeyType; }
-            set
-            {
-                Set(ref _selectedKeyType, value);
-            }
-        }
-
-        private bool _contactEnable;
-        public bool ContactEnable
-        {
-            get { return _contactEnable; }
-            set
-            {
-                Set(ref _contactEnable, value);
-            }
-        }
-
-        private bool _contactlessEnable;
-        public bool ContactlessEnable
-        {
-            get { return _contactlessEnable; }
-            set
-            {
-                Set(ref _contactlessEnable, value);
+                Set(ref _currentdAid, value);
             }
         }
 
@@ -151,23 +82,39 @@ namespace CardPlatform.ViewModel
                 Set(ref _currentApp, value);
             }
         }
+
         /// <summary>
-        /// 交易使用的算法
+        /// MDK or UDK
         /// </summary>
-        private AlgorithmModel _algorithmType;
-        public AlgorithmModel AlgorithmType
+        public EnumListItemCollection<AppKeyType> AppKeyTypes { get; } = new EnumListItemCollection<AppKeyType>();
+        public AppKeyType _currentAppKeyType;
+        public AppKeyType CurrentAppKeyType
         {
             get
             {
-                if(_algorithmType.IsCheckSM == false)
-                {
-                    HasSelectedSMKey = false;
-                }
-                return _algorithmType;
+                return _currentAppKeyType;
             }
             set
             {
-                Set(ref _algorithmType, value);
+                Set(ref _currentAppKeyType, value);
+            }
+        }
+
+
+        /// <summary>
+        /// 交易使用的算法
+        /// </summary>
+        public EnumListItemCollection<AlgorithmType> AlgorithmTypes { get; } = new EnumListItemCollection<AlgorithmType>();
+        public AlgorithmType _currentAlgorithm;
+        public AlgorithmType CurrentAlgorithm
+        {
+            get
+            {
+                return _currentAlgorithm;
+            }
+            set
+            {
+                Set(ref _currentAlgorithm, value);
             }
         }
 
@@ -176,26 +123,13 @@ namespace CardPlatform.ViewModel
         /// </summary>
         public ObservableCollection<TransResultModel> TransResult { get; set; }
 
-        /// <summary>
-        /// 选中国密
-        /// </summary>
-        private bool _hasSelectedSMKey;
-        public bool HasSelectedSMKey
+        private TransKeyModel _transKeys;
+        public TransKeyModel TransKeys
         {
-            get { return _hasSelectedSMKey; }
+            get { return _transKeys; }
             set
             {
-                Set(ref _hasSelectedSMKey, value);
-            }
-        }
-
-        private bool _hasSelectedDESKey;
-        public bool HasSelectedDESKey
-        {
-            get { return _hasSelectedDESKey; }
-            set
-            {
-                Set(ref _hasSelectedDESKey, value);
+                Set(ref _transKeys, value);
             }
         }
 
@@ -232,11 +166,6 @@ namespace CardPlatform.ViewModel
             }
         }
 
-        /// <summary>
-        /// 应用密钥信息
-        /// </summary>
-        public TransKeyModel TransKeys { get; set; }
-
         #endregion
 
         #region command binding
@@ -251,16 +180,6 @@ namespace CardPlatform.ViewModel
             }
         }
 
-        private ICommand _selectSMCmd;
-        public ICommand SelectSMCmd
-        {
-            get
-            {
-                if (_selectSMCmd == null)
-                    _selectSMCmd = new RelayCommand(SelectSMKey);
-                return _selectSMCmd;
-            }
-        }
 
         private ICommand _doTransCmd;
         public ICommand DoTransCmd
@@ -311,13 +230,13 @@ namespace CardPlatform.ViewModel
             }
             Thread thread = new Thread(() =>
             {
-                switch ((TransCategory)SelectedCategory)
+                switch (CurrentTransType)
                 {
-                    case TransCategory.Contact:
+                    case TransType.Contact:
                         BusinessPSE businessPSE = new BusinessPSE();
                         aids = businessPSE.SelectPSE();
                         break;
-                    case TransCategory.Contactless:
+                    case TransType.Contactless:
                         BusinessPPSE businessPPSE = new BusinessPPSE();
                         aids = businessPPSE.SelectPPSE();
                         break;
@@ -329,15 +248,10 @@ namespace CardPlatform.ViewModel
                         Aids.Add(aid);
                     }
                     if (Aids.Count > 0)
-                        SelectedAid = Aids.First();
+                        CurrentAid = Aids.First();
                 });
             });
             thread.Start();           
-        }
-
-        private void SelectSMKey()
-        {
-            HasSelectedDESKey = !HasSelectedSMKey;
         }
 
         /// <summary>
@@ -355,85 +269,55 @@ namespace CardPlatform.ViewModel
             return string.Empty;
         }
 
-        private void Load()
-        {
-            ISerialize serialize = new XmlSerialize();
-            var transactionCfg = (TransConfig)serialize.DeserizlizeFromFile(".\\Configuration\\AppConfig\\TransConfiguration.xml", typeof(TransConfig));
-            TransCategorys = transactionCfg.TransCates;
-            if (TransCategorys.Count > 0)
-                SelectedCategory = 0;
-            KeyTypeList = transactionCfg.KeyTypeList;
-            if (KeyTypeList.Count > 0)
-                SelectedKeyType = 0;
-        }
+        //private void Load()
+        //{
+        //    ISerialize serialize = new XmlSerialize();
+        //    var transactionCfg = (TransConfig)serialize.DeserizlizeFromFile(".\\Configuration\\AppConfig\\TransConfiguration.xml", typeof(TransConfig));
+        //}
 
         private void DoTrans()
         {
-            BusinessBase trans;
+            BusinessBase trans = new BusinessBase();
             BusinessBase.PersoFile = TagInfoFile;
+
+            TransactionConfig transConfig = TransactionConfig.GetInstance();
+            transConfig.CurrentApp      = CurrentApp;
+            transConfig.Algorithm       = CurrentAlgorithm;
+            transConfig.KeyType         = CurrentAppKeyType;
+            transConfig.TransType       = CurrentTransType;
+            transConfig.TransDesAcKey   = TransKeys.DES_AC;
+            transConfig.TransDesMacKey  = TransKeys.DES_MAC;
+            transConfig.TransDesEncKey  = TransKeys.DES_ENC;
+            transConfig.TransSmAcKey    = TransKeys.SM_AC;
+            transConfig.TransSmMacKey   = TransKeys.SM_MAC;
+            transConfig.TransSmEncKey   = TransKeys.SM_ENC;
             
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
                 TransResult.Clear();
             });
-            
-            //if (TransType.IsCheckPBOC || TransType.IsCheckUICS)
-            //{
-            //    trans = new BusinessUICS();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
 
-            //}
-            //if (TransType.IsCheckECC)
-            //{
-            //    trans = new BusinessECC();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
-            //}
-            //if (TransType.IsCheckQPBOC)
-            //{
-            //    trans = new BusinessQPBOC();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, AlgorithmType.IsCheckDES, AlgorithmType.IsCheckSM);
-            //}
-            //if (TransType.IsCheckVISA)
-            //{
-            //    trans = new BusinessVISA();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, true, false);
-            //}
-            //if (TransType.IsCheckqVSDC)
-            //{
-            //    trans = new BusinessqVSDC();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, true, false);
-            //}
-            //if (TransType.IsCheckAMEX)
-            //{
-            //    trans = new BusinessAMEX();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, true, false);
-            //}
-            //if (TransType.IsCheckMC)
-            //{
-            //    trans = new BusinessMC();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, true, false);
-            //}
-            //if (TransType.IsCheckJETCO)
-            //{
-            //    trans = new BusinessJETCO();
-            //    trans.TransCfg.SaveConfig();
-            //    trans.IsContactTrans = ((TransCategory)SelectedCategory == TransCategory.Contact) ? true : false;
-            //    trans.DoTransaction(SelectedAid, true, false);
-            //}
+            switch(CurrentApp)
+            {
+                case AppType.qVSDC_offline:
+                case AppType.qVSDC_online:
+                    trans = new BusinessqVSDC();                   
+                    break;
+                case AppType.UICS:
+                    trans = new BusinessUICS();
+                    break;
+                case AppType.qPBOC:
+                case AppType.qUICS:
+                    trans = new BusinessQPBOC();
+                    break;
+                case AppType.ECC:
+                    trans = new BusinessECC();
+                    break;
+                case AppType.VISA:
+                    trans = new BusinessVISA();
+                    break;
+            }
+            trans.DoTransaction(CurrentAid);
         }
 
     }

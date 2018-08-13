@@ -40,7 +40,6 @@ namespace CardPlatform.Business
             caseObj = new CaseBase();
         }
         public int BatchNo { get; set; }                //一次检测中重复跑该交易的序号
-        public TransactionApp CurrentApp { get; set; }  //此次交易的应用类型
         public bool IsContactTrans { get; set; }    //需要此参数来判断写入到个人化信息表中的内容
         public TransactionConfig TransCfg = TransactionConfig.GetInstance();
         protected bool doDesTrans = false;  //是否执行DES算法的交易
@@ -64,10 +63,8 @@ namespace CardPlatform.Business
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
         /// <param name="doSMTrans"></param>
-        public virtual void DoTransaction(string aid, bool doDesTrans, bool doSMTrans)
+        public virtual void DoTransaction(string aid)
         {
-            this.doDesTrans = doDesTrans;
-            this.doSMTrans = doSMTrans;
             this.aid = aid;
         }
 
@@ -77,56 +74,25 @@ namespace CardPlatform.Business
             if (!string.IsNullOrEmpty(PersoFile))
             {
                 //不需要对非接国密交易填写送检表，和非接DES一致
-                if(IsContactTrans)
-                {
-                    if (CurrentApp == TransactionApp.PBOC_DES ||
-                        CurrentApp == TransactionApp.UICS_DES) songJianFile.WriteToFile(TagType.UICS_Contact_DES);
-                    else if (CurrentApp == TransactionApp.PBOC_SM ||
-                        CurrentApp == TransactionApp.UICS_SM) songJianFile.WriteToFile(TagType.UICS_Contact_SM);
-                    else if (CurrentApp == TransactionApp.ECC_DES) songJianFile.WriteToFile(TagType.ECC_DES);
-                    else if (CurrentApp == TransactionApp.ECC_SM) songJianFile.WriteToFile(TagType.ECC_SM);
-                }
-                else
-                {
-                    if (CurrentApp == TransactionApp.PBOC_DES) songJianFile.WriteToFile(TagType.UICS_Contactless_DES);
-                    else if (CurrentApp == TransactionApp.QUICS_DES ||
-                        CurrentApp == TransactionApp.QPBOC_DES) songJianFile.WriteToFile(TagType.QPBOC_DES);
-                    else if (CurrentApp == TransactionApp.QUICS_SM ||
-                        CurrentApp == TransactionApp.QPBOC_SM) songJianFile.WriteToFile(TagType.QPBOC_SM);
-                }
+                songJianFile.WriteToFile(TransCfg.CurrentApp, TransCfg.Algorithm, TransCfg.TransType);
             }
         }
 
-        public void SetCurrentApp(TransactionApp app)
+        public void DoTransaction(Func<bool> DoActualTransaction)
         {
-            TransCfg.CurrentApp = app;
-            CurrentApp = app;
-        }
-
-        public void DoTransaction(TransType type, Func<bool> DoActualTransaction)
-        {
-            switch (type)
+            if(TransCfg.Algorithm == AlgorithmType.DES)
             {
-                case TransType.UICS_DES:
-                case TransType.QPBOC_DES:
-                case TransType.PBOC_DES:
-                case TransType.ECC_DES:
-                    locator.Terminal.TermianlSettings.TagDF69 = "00";
-                    TransCfg.AlgorithmFlag = AlgorithmCategory.DES;
-                    break;
-                case TransType.UICS_SM:
-                case TransType.QPBOC_SM:
-                case TransType.PBOC_SM:
-                case TransType.ECC_SM:
-                    locator.Terminal.TermianlSettings.TagDF69 = "01";
-                    TransCfg.AlgorithmFlag = AlgorithmCategory.SM;
-                    break;
+                locator.Terminal.TermianlSettings.TagDF69 = "00";
+            }
+            else
+            {
+                locator.Terminal.TermianlSettings.TagDF69 = "01";
             }
             bool isSucess = DoActualTransaction();
             WriteTagToSongJianFile();
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
-                TransResultModel TransactionResult = new TransResultModel(type);
+                TransResultModel TransactionResult = new TransResultModel(TransCfg.TransType);
                 if (isSucess)
                 {
                     TransactionResult.Result = TransResult.Sucess;
@@ -260,7 +226,7 @@ namespace CardPlatform.Business
             string AIP = tagDict.GetTag("82");
             string expiryDate = tagDict.GetTag(TransactionStep.ReadRecord, "5F24");
 
-            if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES) //DES算法
+            if (TransCfg.Algorithm == AlgorithmType.DES) //DES算法
             {
                 //获取发卡行公钥
                 string issuerPublicKeyRemainder = tagDict.GetTag("92");
@@ -301,7 +267,7 @@ namespace CardPlatform.Business
             string PAN = tagDict.GetTag("5A");
             string AIP = tagDict.GetTag("82");
             string expiryDate = tagDict.GetTag(TransactionStep.ReadRecord, "5F24");
-            if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
+            if (TransCfg.Algorithm == AlgorithmType.DES)
             {
                 //获取IC卡公钥
                 string iccPublicKeyRemainder = tagDict.GetTag("9F48");
@@ -340,7 +306,7 @@ namespace CardPlatform.Business
             string AIP = tagDict.GetTag("82");
             string issuerPublicKey = GetIssuerPublicKey();
 
-            if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES) //DES算法
+            if (TransCfg.Algorithm == AlgorithmType.DES) //DES算法
             {
                 string issuerExp = tagDict.GetTag("9F32");
                 //验证hash签名
@@ -376,7 +342,7 @@ namespace CardPlatform.Business
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var iccPublicKey = GetIccPublicKey(issuerPublicKey);
-            if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
+            if (TransCfg.Algorithm == AlgorithmType.DES)
             {
                 //获取IC卡公钥
                 string iccPublicKeyRemainder = tagDict.GetTag("9F48");
@@ -442,21 +408,21 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        protected string GenSessionKey(string key, TransKeyType transKeyType, AlgorithmCategory algorithmCategory)
+        protected string GenSessionKey(string key, AppKeyType appKeyType, AlgorithmType algorithmType)
         {
             string acSessionKey = string.Empty;
             var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
-            if (transKeyType == TransKeyType.MDK)
+            if (appKeyType == AppKeyType.MDK)
             {
                 string cardAcct = tagDict.GetTag("5A");
                 string cardSeq = tagDict.GetTag("5F34");
-                string UDKACKey = Authencation.GenUdk(key, cardAcct, cardSeq, (int)algorithmCategory);
-                acSessionKey = Authencation.GenUdkSessionKey(UDKACKey, ATC, (int)algorithmCategory);
+                string UDKACKey = Authencation.GenUdk(key, cardAcct, cardSeq, (int)algorithmType);
+                acSessionKey = Authencation.GenUdkSessionKey(UDKACKey, ATC, (int)algorithmType);
             }
             else
             {
-                acSessionKey = Authencation.GenUdkSessionKey(key, ATC, (int)algorithmCategory);
+                acSessionKey = Authencation.GenUdkSessionKey(key, ATC, (int)algorithmType);
             }
 
             return acSessionKey;
@@ -486,19 +452,19 @@ namespace CardPlatform.Business
             string cardSeq = tagDict.GetTag("5F34");
             string mac = string.Empty;
 
-            if (TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
+            if (TransCfg.Algorithm == AlgorithmType.DES)
             {
                 if (string.IsNullOrEmpty(TransCfg.TransDesMacKey) || TransCfg.TransDesMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransCfg.TransDesMacKey, TransCfg.KeyType, TransCfg.AlgorithmFlag);
+                macSessionKey = GenSessionKey(TransCfg.TransDesMacKey, TransCfg.KeyType, TransCfg.Algorithm);
             }
             else
             {
                 if (string.IsNullOrEmpty(TransCfg.TransSmMacKey) || TransCfg.TransSmMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransCfg.TransSmMacKey, TransCfg.KeyType, TransCfg.AlgorithmFlag);               
+                macSessionKey = GenSessionKey(TransCfg.TransSmMacKey, TransCfg.KeyType, TransCfg.Algorithm);               
             }
-            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)TransCfg.AlgorithmFlag);
+            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)TransCfg.Algorithm);
             if (mac == tag9F10Mac)
             {
                 return true;
@@ -511,7 +477,7 @@ namespace CardPlatform.Business
             string udkACKey = string.Empty;
             var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
-            if (TransCfg.KeyType == TransKeyType.MDK)
+            if (TransCfg.KeyType == AppKeyType.MDK)
             {
                 string cardAcct = tagDict.GetTag("5A");
                 string cardSeq = tagDict.GetTag("5F34");
@@ -556,7 +522,7 @@ namespace CardPlatform.Business
             string udkACKey = string.Empty;
             var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
-            if (TransCfg.KeyType == TransKeyType.MDK)
+            if (TransCfg.KeyType == AppKeyType.MDK)
             {
                 string cardAcct = tagDict.GetTag("5A");
                 string cardSeq = tagDict.GetTag("5F34");

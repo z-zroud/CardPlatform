@@ -34,7 +34,7 @@ namespace CardPlatform.Cases
         /// 基类中不执行任何case,由子类执行
         /// </summary>
         /// <param name="srcData"></param>
-        public virtual void Excute(int batchNo, TransactionApp app, TransactionStep step,object srcData)
+        public virtual void Excute(int batchNo, AppType app, TransactionStep step,object srcData)
         {
             Step = step;
             Load();
@@ -165,11 +165,11 @@ namespace CardPlatform.Cases
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        protected string GenSessionKey(string key, TransKeyType transKeyType, AlgorithmCategory algorithmFlag)
+        protected string GenSessionKey(string key, AppKeyType transKeyType, AlgorithmType algorithmFlag)
         {
             string sessionKey = string.Empty;
             string atc = TransactionTag.GetInstance().GetTag("9F36");
-            if (transKeyType == TransKeyType.MDK)
+            if (transKeyType == AppKeyType.MDK)
             {
                 string cardAcct = TransactionTag.GetInstance().GetTag("5A");
                 string cardSeq = TransactionTag.GetInstance().GetTag("5F34");
@@ -199,19 +199,19 @@ namespace CardPlatform.Cases
             string cardSeq = TransactionTag.GetInstance().GetTag("5F34");
             string mac = string.Empty;
             string macSessionKey = string.Empty;
-            if (TransConfig.AlgorithmFlag == AlgorithmCategory.DES)
+            if (TransConfig.Algorithm == AlgorithmType.DES)
             {
                 if (string.IsNullOrEmpty(TransConfig.TransDesMacKey) || TransConfig.TransDesMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransConfig.TransDesMacKey, TransConfig.KeyType, TransConfig.AlgorithmFlag);
+                macSessionKey = GenSessionKey(TransConfig.TransDesMacKey, TransConfig.KeyType, TransConfig.Algorithm);
             }
             else
             {
                 if (string.IsNullOrEmpty(TransConfig.TransSmMacKey) || TransConfig.TransSmMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransConfig.TransSmMacKey, TransConfig.KeyType, TransConfig.AlgorithmFlag);
+                macSessionKey = GenSessionKey(TransConfig.TransSmMacKey, TransConfig.KeyType, TransConfig.Algorithm);
             }
-            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)TransConfig.AlgorithmFlag);
+            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)TransConfig.Algorithm);
             if (mac == tag9F10Mac)
             {
                 return true;
@@ -273,19 +273,19 @@ namespace CardPlatform.Cases
                 input.PadRight(zeroCount, '0');
             }
             string acSessionKey = string.Empty;
-            if (TransConfig.AlgorithmFlag == AlgorithmCategory.DES)
+            if (TransConfig.Algorithm == AlgorithmType.DES)
             {
                 if (string.IsNullOrEmpty(TransConfig.TransDesAcKey) || TransConfig.TransDesAcKey.Length != 32)
                     return false;
-                acSessionKey = GenSessionKey(TransConfig.TransDesAcKey, TransConfig.KeyType, TransConfig.AlgorithmFlag);
+                acSessionKey = GenSessionKey(TransConfig.TransDesAcKey, TransConfig.KeyType, TransConfig.Algorithm);
             }
             else
             {
                 if (string.IsNullOrEmpty(TransConfig.TransSmAcKey) || TransConfig.TransSmAcKey.Length != 32)
                     return false;
-                acSessionKey = GenSessionKey(TransConfig.TransSmAcKey, TransConfig.KeyType, TransConfig.AlgorithmFlag);
+                acSessionKey = GenSessionKey(TransConfig.TransSmAcKey, TransConfig.KeyType, TransConfig.Algorithm);
             }
-            var mac = Authencation.GenAc(acSessionKey, input, (int)TransConfig.AlgorithmFlag);
+            var mac = Authencation.GenAc(acSessionKey, input, (int)TransConfig.Algorithm);
             string tag9F26 = TransactionTag.GetInstance().GetTag("9F26");
             if(mac == tag9F26)
             {

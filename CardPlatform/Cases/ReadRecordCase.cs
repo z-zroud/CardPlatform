@@ -7,6 +7,7 @@ using CardPlatform.Config;
 using CplusplusDll;
 using CardPlatform.Helper;
 using CardPlatform.ViewModel;
+using CardPlatform.Models;
 
 namespace CardPlatform.Cases
 {
@@ -23,7 +24,7 @@ namespace CardPlatform.Cases
             base.Load();
         }
 
-        public override void Excute(int batchNo, TransactionApp app, TransactionStep step, object srcData)
+        public override void Excute(int batchNo, AppType app, TransactionStep step, object srcData)
         {
             resps = (List<ApduResponse>)srcData;
             List<string> tags = new List<string> { "9F12", "9F79", "9F51", "9F52" };
@@ -716,8 +717,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             string tag57 = string.Empty;
-            if(TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_DES ||
-                TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_SM)
+            if(TransactionConfig.GetInstance().CurrentApp == AppType.qUICS)
             {
                 tag57 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "57");
             }
@@ -748,8 +748,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             string tag57 = string.Empty;
-            if (TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_DES ||
-                TransactionConfig.GetInstance().CurrentApp == TransactionApp.QUICS_SM)
+            if (TransactionConfig.GetInstance().CurrentApp == AppType.qUICS)
             {
                 tag57 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "57");
             }

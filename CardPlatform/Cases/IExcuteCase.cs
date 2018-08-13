@@ -1,6 +1,7 @@
 ﻿using System;
 using CardPlatform.Config;
 using CardPlatform.Common;
+using CardPlatform.Models;
 
 namespace CardPlatform.Cases
 {
@@ -13,7 +14,7 @@ namespace CardPlatform.Cases
         /// <param name="app">应用类型</param>
         /// <param name="step">交易步骤</param>
         /// <param name="srcData">case传入的数据,一般为ApduRespone对象</param>
-        void Excute(int batchNo, TransactionApp app, TransactionStep step, Object srcData);
+        void Excute(int batchNo, AppType app, TransactionStep step, Object srcData);
 
         /// <summary>
         /// 输出当前case执行情况

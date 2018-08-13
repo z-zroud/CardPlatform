@@ -24,18 +24,14 @@ namespace CardPlatform.Business
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
         /// <param name="doSMTrans"></param>
-        public override void DoTransaction(string aid, bool doDesTrans, bool doSmTrans)
+        public override void DoTransaction(string aid)
         {
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
-            base.DoTransaction(aid, doDesTrans, doSmTrans);
+            base.DoTransaction(aid);
             locator.Terminal.TermianlSettings.Tag9C = "00";         //交易类型(消费交易)
             locator.Terminal.TermianlSettings.Tag9F66 = "26000000"; //终端交易属性  
 
-            if (doDesTrans)  // 做国际算法交易
-            {
-                SetCurrentApp(TransactionApp.qVSDC);
-                DoTransaction(TransType.QPBOC_DES, DoTransactionEx);
-            }
+            DoTransaction(DoTransactionEx);
         }
 
         protected bool DoTransactionEx()
@@ -82,7 +78,7 @@ namespace CardPlatform.Business
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
-                    stepCase.Excute(BatchNo, CurrentApp, TransactionStep.SelectApp, response);
+                    stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -126,7 +122,7 @@ namespace CardPlatform.Business
                 }
                 afls = DataParse.ParseAFL(transTags.GetTag("94"));
                 var gpoCase = new GPOCase() { CurrentApp = Constant.APP_QUICS };
-                gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
+                gpoCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.GPO, response);
             }
             return afls;
         }
@@ -155,7 +151,7 @@ namespace CardPlatform.Business
             }
 
             var readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_QUICS };
-            readRecordCase.Excute(BatchNo, CurrentApp, TransactionStep.ReadRecord, resps);
+            readRecordCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadRecord, resps);
 
             return true;
         }

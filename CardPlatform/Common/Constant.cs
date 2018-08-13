@@ -23,25 +23,25 @@ namespace CardPlatform.Common
         TransactionEnd
     }
 
-    public enum TransactionApp
-    {
-        PSE,
-        PPSE,
-        PBOC_DES,
-        PBOC_SM,
-        UICS_DES,
-        UICS_SM,
-        ECC_DES,
-        ECC_SM,
-        QUICS_DES,
-        QUICS_SM,
-        QPBOC_DES,
-        QPBOC_SM,
-        VISA,
-        MC,
-        JETCO,
-        qVSDC
-    }
+    //public enum TransactionApp
+    //{
+    //    PSE,
+    //    PPSE,
+    //    PBOC_DES,
+    //    PBOC_SM,
+    //    UICS_DES,
+    //    UICS_SM,
+    //    ECC_DES,
+    //    ECC_SM,
+    //    QUICS_DES,
+    //    QUICS_SM,
+    //    QPBOC_DES,
+    //    QPBOC_SM,
+    //    VISA,
+    //    MC,
+    //    JETCO,
+    //    qVSDC
+    //}
 
     public class Constant
     {
@@ -89,29 +89,29 @@ namespace CardPlatform.Common
         Contactless = 1
     }
 
-    public enum TransType
-    {
-        PBOC_DES,
-        UICS_DES,
-        ECC_DES,
-        QPBOC_DES,
-        PBOC_SM,
-        UICS_SM,
-        ECC_SM,
-        QPBOC_SM
-    }
+    //public enum TransType
+    //{
+    //    PBOC_DES,
+    //    UICS_DES,
+    //    ECC_DES,
+    //    QPBOC_DES,
+    //    PBOC_SM,
+    //    UICS_SM,
+    //    ECC_SM,
+    //    QPBOC_SM
+    //}
 
-    public enum AlgorithmCategory
-    {
-        DES = 0,
-        SM = 1
-    }
+    //public enum AlgorithmCategory
+    //{
+    //    DES = 0,
+    //    SM = 1
+    //}
 
-    public enum TransKeyType
-    {
-        MDK,
-        UDK
-    }
+    //public enum TransKeyType
+    //{
+    //    MDK,
+    //    UDK
+    //}
 
     public enum CardRespDataType
     {

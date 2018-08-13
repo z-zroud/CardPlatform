@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CardPlatform.Common;
+using CardPlatform.Models;
 using UtilLib;
 
 namespace CardPlatform.Helper
@@ -19,20 +20,20 @@ namespace CardPlatform.Helper
         public int Column { get; set; }
     }
 
-    /// <summary>
-    /// 定义写入的tag交易应用类型
-    /// </summary>
-    public enum TagType
-    {
-        UICS_Contact_DES = 1,
-        UICS_Contact_SM = 2,
-        UICS_Contactless_DES = 3,
-        //ContactlessDC_SM = 4, //非接国际、国密填写的tag一致。
-        ECC_DES = 5,
-        ECC_SM = 6,
-        QPBOC_DES = 7,
-        QPBOC_SM = 8
-    }
+    ///// <summary>
+    ///// 定义写入的tag交易应用类型
+    ///// </summary>
+    //public enum TagType
+    //{
+    //    UICS_Contact_DES = 1,
+    //    UICS_Contact_SM = 2,
+    //    UICS_Contactless_DES = 3,
+    //    //ContactlessDC_SM = 4, //非接国际、国密填写的tag一致。
+    //    ECC_DES = 5,
+    //    ECC_SM = 6,
+    //    QPBOC_DES = 7,
+    //    QPBOC_SM = 8
+    //}
 
     /// <summary>
     /// 该类用于填写个人化信息表
@@ -261,7 +262,7 @@ namespace CardPlatform.Helper
             sm_qpbocTable.Add("93", new TagLocaton(216, 5));
         }
 
-        public bool WriteToFile(TagType type)
+        public bool WriteToFile(AppType appType, AlgorithmType algorithmType, TransType transType)
         {
             IExcelOp op = new ExcelOp();
             if(!op.OpenExcel(tagFile,OpExcelType.Modify))
@@ -269,85 +270,83 @@ namespace CardPlatform.Helper
                 return false;
             }
             var tagDict = TransactionTag.GetInstance();
-            switch(type)
+            if(appType == AppType.UICS && transType == TransType.Contact && algorithmType == AlgorithmType.DES)
             {
-                case TagType.UICS_Contact_DES:
-                    foreach(var item in contactTable)
+                foreach (var item in contactTable)
+                {
+                    var tag = tagDict.GetTag(item.Key);
+                    if (string.IsNullOrEmpty(tag))
                     {
-                        var tag = tagDict.GetTag(item.Key);
-                        if(string.IsNullOrEmpty(tag))
-                        {
-                            tag = "无";
-                        }
-                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                        tag = "无";
                     }
-                    break;
-                case TagType.UICS_Contact_SM:
-                    foreach (var item in sm_contactTable)
+                    op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                }
+            }else if(appType == AppType.UICS && transType == TransType.Contact && algorithmType == AlgorithmType.SM)
+            {
+                foreach (var item in sm_contactTable)
+                {
+                    var tag = tagDict.GetTag(item.Key);
+                    if (string.IsNullOrEmpty(tag))
                     {
-                        var tag = tagDict.GetTag(item.Key);
-                        if (string.IsNullOrEmpty(tag))
-                        {
-                            tag = "无";
-                        }
-                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                        tag = "无";
                     }
-                    break;
-                case TagType.UICS_Contactless_DES:
-                    foreach (var item in contactlessTable)
+                    op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                }
+            }else if(appType == AppType.UICS && transType == TransType.Contactless && algorithmType == AlgorithmType.SM)
+            {
+                foreach (var item in contactlessTable)
+                {
+                    var tag = tagDict.GetTag(item.Key);
+                    if (string.IsNullOrEmpty(tag))
                     {
-                        var tag = tagDict.GetTag(item.Key);
-                        if (string.IsNullOrEmpty(tag))
-                        {
-                            tag = "无";
-                        }
-                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                        tag = "无";
                     }
-                    break;
-                case TagType.ECC_DES:
-                    foreach (var item in eccTable)
+                    op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                }
+            }else if(appType == AppType.ECC && transType == TransType.Contact && algorithmType == AlgorithmType.DES)
+            {
+                foreach (var item in eccTable)
+                {
+                    var tag = tagDict.GetTag(item.Key);
+                    if (string.IsNullOrEmpty(tag))
                     {
-                        var tag = tagDict.GetTag(item.Key);
-                        if (string.IsNullOrEmpty(tag))
-                        {
-                            tag = "无";
-                        }
-                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                        tag = "无";
                     }
-                    break;
-                case TagType.ECC_SM:
-                    foreach (var item in sm_eccTable)
+                    op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                }
+            }else if(appType == AppType.ECC && transType == TransType.Contact && algorithmType == AlgorithmType.SM)
+            {
+                foreach (var item in sm_eccTable)
+                {
+                    var tag = tagDict.GetTag(item.Key);
+                    if (string.IsNullOrEmpty(tag))
                     {
-                        var tag = tagDict.GetTag(item.Key);
-                        if (string.IsNullOrEmpty(tag))
-                        {
-                            tag = "无";
-                        }
-                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                        tag = "无";
                     }
-                    break;
-                case TagType.QPBOC_DES:
-                    foreach (var item in qpbocTable)
+                    op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                }
+            }else if(appType == AppType.qPBOC && transType == TransType.Contactless && algorithmType == AlgorithmType.DES)
+            {
+                foreach (var item in qpbocTable)
+                {
+                    var tag = tagDict.GetTag(item.Key);
+                    if (string.IsNullOrEmpty(tag))
                     {
-                        var tag = tagDict.GetTag(item.Key);
-                        if (string.IsNullOrEmpty(tag))
-                        {
-                            tag = "无";
-                        }
-                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                        tag = "无";
                     }
-                    break;
-                case TagType.QPBOC_SM:
-                    foreach (var item in sm_qpbocTable)
+                    op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                }
+            }else if(appType == AppType.qPBOC && transType == TransType.Contactless && algorithmType == AlgorithmType.SM)
+            {
+                foreach (var item in sm_qpbocTable)
+                {
+                    var tag = tagDict.GetTag(item.Key);
+                    if (string.IsNullOrEmpty(tag))
                     {
-                        var tag = tagDict.GetTag(item.Key);
-                        if (string.IsNullOrEmpty(tag))
-                        {
-                            tag = "无";
-                        }
-                        op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                        tag = "无";
                     }
-                    break;
+                    op.ModifyCell(shettNmae, item.Value.Column, item.Value.Row, tag);
+                }
             }
             op.Close();
             return true;

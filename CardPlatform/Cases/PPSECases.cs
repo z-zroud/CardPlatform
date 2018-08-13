@@ -4,6 +4,7 @@ using CardPlatform.Common;
 using System.Collections.Generic;
 using System.Reflection;
 using CardPlatform.Config;
+using CardPlatform.Models;
 
 namespace CardPlatform.Cases
 {
@@ -18,7 +19,7 @@ namespace CardPlatform.Cases
             tlvs = new List<TLV>();
         }
 
-        public override void Excute(int batchNo, TransactionApp app, TransactionStep step,Object srcData)
+        public override void Excute(int batchNo, AppType app, TransactionStep step,Object srcData)
         {
             response = (ApduResponse)srcData;
             tlvs = DataParse.ParseTLV(response.Response);

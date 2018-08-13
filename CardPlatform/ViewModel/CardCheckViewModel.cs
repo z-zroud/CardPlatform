@@ -50,13 +50,13 @@ namespace CardPlatform.ViewModel
             {
                 if(config.ConfigName == msg)
                 {
-                    locator.Transaction.SelectedKeyType = config.KeyType;
-                    locator.Transaction.TransKeys.DES_AC = config.TransDesAcKey;
-                    locator.Transaction.TransKeys.DES_MAC = config.TransDesMacKey;
-                    locator.Transaction.TransKeys.DES_ENC = config.TransDesEncKey;
-                    locator.Transaction.TransKeys.SM_AC = config.TransSmAcKey;
-                    locator.Transaction.TransKeys.SM_MAC = config.TransSmMacKey;
-                    locator.Transaction.TransKeys.SM_ENC = config.TransSmEncKey;
+                    //locator.Transaction.SelectedKeyType = config.KeyType;
+                    //locator.Transaction.TransKeys.DES_AC = config.TransDesAcKey;
+                    //locator.Transaction.TransKeys.DES_MAC = config.TransDesMacKey;
+                    //locator.Transaction.TransKeys.DES_ENC = config.TransDesEncKey;
+                    //locator.Transaction.TransKeys.SM_AC = config.TransSmAcKey;
+                    //locator.Transaction.TransKeys.SM_MAC = config.TransSmMacKey;
+                    //locator.Transaction.TransKeys.SM_ENC = config.TransSmEncKey;
                     break;
                 }
             }
@@ -80,13 +80,13 @@ namespace CardPlatform.ViewModel
         {
             Config                  = new CardCheckConfig();
             Config.ConfigName       = msg;
-            Config.KeyType          = locator.Transaction.SelectedKeyType;
-            Config.TransDesAcKey    = locator.Transaction.TransKeys.DES_AC;
-            Config.TransDesMacKey   = locator.Transaction.TransKeys.DES_MAC;
-            Config.TransDesEncKey   = locator.Transaction.TransKeys.DES_ENC;
-            Config.TransSmAcKey     = locator.Transaction.TransKeys.SM_AC;
-            Config.TransSmMacKey    = locator.Transaction.TransKeys.SM_MAC;
-            Config.TransSmEncKey    = locator.Transaction.TransKeys.SM_ENC;
+            //Config.KeyType          = locator.Transaction.SelectedKeyType;
+            //Config.TransDesAcKey    = locator.Transaction.TransKeys.DES_AC;
+            //Config.TransDesMacKey   = locator.Transaction.TransKeys.DES_MAC;
+            //Config.TransDesEncKey   = locator.Transaction.TransKeys.DES_ENC;
+            //Config.TransSmAcKey     = locator.Transaction.TransKeys.SM_AC;
+            //Config.TransSmMacKey    = locator.Transaction.TransKeys.SM_MAC;
+            //Config.TransSmEncKey    = locator.Transaction.TransKeys.SM_ENC;
             ConfigCollection.Add(Config);
             ISerialize serialize = new XmlSerialize();
             serialize.Serialize(ConfigCollection, ".\\Configuration\\AppConfig\\CardCheckSettings.xml");

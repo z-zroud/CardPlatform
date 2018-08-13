@@ -27,25 +27,14 @@ namespace CardPlatform.Business
         /// <param name="aid"></param>
         /// <param name="doDesTrans"></param>
         /// <param name="doSMTrans"></param>
-        public override void DoTransaction(string aid, bool doDesTrans, bool doSmTrans)
+        public override void DoTransaction(string aid)
         {
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
-            base.DoTransaction(aid, doDesTrans, doSmTrans);
+            base.DoTransaction(aid);
             locator.Terminal.TermianlSettings.Tag9F7A = "01";   //电子现金交易指示器
             locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)          
 
-            if (doDesTrans)  // 做国际算法交易
-            {
-                //TransCfg.CurrentApp = TransactionApp.ECC_DES;
-                SetCurrentApp(TransactionApp.ECC_DES);
-                DoTransaction(TransType.ECC_DES, DoTransactionEx);
-            }
-            if (doSMTrans)  //做国密算法交易
-            {
-                //TransCfg.CurrentApp = TransactionApp.ECC_SM;
-                SetCurrentApp(TransactionApp.ECC_SM);
-                DoTransaction(TransType.ECC_SM, DoTransactionEx);
-            }
+            DoTransaction(DoTransactionEx);
         }
 
         protected bool DoTransactionEx()
@@ -127,7 +116,7 @@ namespace CardPlatform.Business
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
-                    stepCase.Excute(BatchNo, CurrentApp, TransactionStep.SelectApp, response);
+                    stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -180,7 +169,7 @@ namespace CardPlatform.Business
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
 
             var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
-            gpoCase.Excute(BatchNo, CurrentApp, TransactionStep.GPO, response);
+            gpoCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.GPO, response);
 
             return afls;
         }
@@ -208,7 +197,7 @@ namespace CardPlatform.Business
                 }
             }
             IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS };
-            readRecordCase.Excute(BatchNo, CurrentApp, TransactionStep.ReadRecord, resps);
+            readRecordCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
 
@@ -317,21 +306,21 @@ namespace CardPlatform.Business
         protected int HandleLimitation()
         {
             var handleLimitationCase = new HandleLimitationCase() { CurrentApp = Constant.APP_UICS };
-            handleLimitationCase.Excute(BatchNo, CurrentApp, TransactionStep.HandleLimitation, null);
+            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.HandleLimitation, null);
             return 0;
         }
 
         protected int CardHolderVerify()
         {
             var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_UICS };
-            cardHolderVerifyCase.Excute(BatchNo, CurrentApp, TransactionStep.CardHolderVerify, null);
+            cardHolderVerifyCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
 
         protected int TerminalRiskManagement()
         {
             var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_UICS };
-            terminalRishManagementCase.Excute(BatchNo, CurrentApp, TransactionStep.TerminalRiskManagement, null);
+            terminalRishManagementCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }
 
@@ -358,7 +347,7 @@ namespace CardPlatform.Business
 
                 if (SaveTags(TransactionStep.TerminalActionAnalyze,response.Response))
                 {
-                    if(TransCfg.AlgorithmFlag == AlgorithmCategory.DES)
+                    if(TransCfg.Algorithm == AlgorithmType.DES)
                     {
                         string tag9F4B = transTags.GetTag("9F4B");
                         string exp = transTags.GetTag("9F47");
@@ -463,7 +452,7 @@ namespace CardPlatform.Business
                     }
                 }
                 CheckTag9F10Mac();
-                TransType type = TransCfg.AlgorithmFlag == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
+                //TransType type = TransCfg.AlgorithmFlag == AlgorithmCategory.DES ? TransType.ECC_DES : TransType.ECC_SM;
                 int cardAction = Convert.ToInt32(transTags.GetTag("9F27"), 16);
                 if(cardAction != Constant.TC)
                 {
