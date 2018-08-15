@@ -94,7 +94,7 @@
     <Compile Include="Business\BusinessUICS.cs" />
     <Compile Include="Cases\CardHolderVerifyCase.cs" />
     <Compile Include="Cases\GetDataCase.cs" />
-    <Compile Include="Cases\HandleLimitationCase.cs" />
+    <Compile Include="Cases\ProcessRestrictionCase.cs" />
     <Compile Include="Cases\IssuerAuthencationCase.cs" />
     <Compile Include="Cases\TerminalRiskManagementCase.cs" />
     <Compile Include="Cases\TransactionEndCase.cs" />

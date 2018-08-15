@@ -574,6 +574,20 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
             insertedTag.pos = stoi(strPos);
             m_vecTagInsert.push_back(insertedTag);
         }
+        else if (nodeName == "GoldMap") {
+            GoldMap goldMap;
+            goldMap.emvTag = node->first_attribute("EMVTag")->value();
+            goldMap.sddfTag = node->first_attribute("SDDFTag")->value();
+            goldMap.emvDataName = node->first_attribute("EMVDataName")->value();
+            goldMap.valueFormat = node->first_attribute("ValueFormat")->value();
+            m_vecGoldMap.push_back(goldMap);
+        }
+        else if (nodeName == "SDDFElement") {
+            SDDFElement element;
+            element.sddfTag = node->first_attribute("SDDFTag")->value();
+            element.value = node->first_attribute("Value")->value();
+            m_vecSDDFElement.push_back(element);
+        }
     }
   
     return true;
@@ -588,7 +602,7 @@ void IRule::HandleRule(CPS& cpsItem)
     //4. 添加tag到value
     //5. 删除DGI、tag
     //处理顺序：DGI映射-->DGI交换-->DGI删除-->DGI解密-->DGI删除tag
-
+    HandleGoldpacData(cpsItem);
     HandleDGIMap(cpsItem);
     HandleDGIExchange(cpsItem);   
 
@@ -830,6 +844,134 @@ void IRule::HandleDGIExchange(CPS& cpsItem)
         cpsItem.dgis[secondIndex].dgi = item.srcDgi;
         cpsItem.dgis[secondIndex].value.ReplaceKey(item.exchangedDgi, item.srcDgi);
 	}
+}
+
+vector<pair<string, GoldMap>> IRule::GetSDDF(string sddfElement, string sddfValue)
+{
+    vector<pair<string, GoldMap>> dgiList;
+    vector<string> sddfTags;
+    if (sddfValue.length() <= 2)
+        return dgiList;
+    int count = Tool::HexStrToInt(sddfValue.substr(0, 2));
+    for (int i = 0; i < count; i++)
+    {
+        string sddfTag = sddfElement.substr(0,4) + sddfValue.substr(2 + i * 4, 4);
+        sddfTags.push_back(sddfTag);
+    }
+    for (auto sddfTag : sddfTags)
+    {
+        for (auto goldMap : m_vecGoldMap)
+        {
+            if (sddfTag.substr(0, 4) == goldMap.sddfTag.substr(0, 4) &&
+                sddfTag.substr(5, 3) == goldMap.sddfTag.substr(5, 3))
+            {
+                dgiList.push_back(make_pair(sddfTag, goldMap));
+                break;
+            }
+        }
+    }
+
+    return dgiList;
+}
+
+void IRule::HandleGoldpacData(CPS& cps)
+{
+    vector<string> sddfTags;
+    if (m_vecSDDFElement.size() == 0 || m_vecGoldMap.size() == 0)
+        return;
+    //目前只支持双应用
+    int second = 0;
+    CPS copyCps;
+    for (auto item : cps.dgis)
+    {
+        DGI dgiItem;
+        dgiItem.dgi = item.dgi;
+        dgiItem.value.AddItem(item.dgi, item.value.GetItem());
+        copyCps.AddDGI(dgiItem);
+    }
+    for (auto sddfElement : m_vecSDDFElement)
+    {        
+        second++;
+        vector<pair<string, GoldMap>> dgiList = GetSDDF(sddfElement.sddfTag, sddfElement.value);
+        for (auto dgi : dgiList)
+        {
+            for (auto item : copyCps.dgis)
+            {
+                if (dgi.first == item.dgi)
+                {
+                    DGI dgiItem;
+                    if (second == 2)
+                    {
+                        dgiItem.dgi = dgi.second.emvTag + "second";
+                    }
+                    else {
+                        dgiItem.dgi = dgi.second.emvTag;
+                    }
+                    
+                    if (dgi.second.valueFormat == "TLV")
+                    {
+                        string value = item.value.GetItem();
+                        if (value.substr(dgi.second.emvTag.length(), 2) == "81")
+                        {
+                            value = value.substr(dgi.second.emvTag.length() + 4);
+                        }
+                        else {
+                            value = value.substr(dgi.second.emvTag.length() + 2);
+                        }
+                        int sDgi = stoi(dgi.second.emvTag, 0, 16);
+                        if (sDgi < 0x0B01)
+                        {
+                            if (value.substr(2, 2) == "81") {
+                                value = value.substr(6);
+                            }
+                            else {
+                                value = value.substr(4);
+                            }
+                        }
+                        BCD_TLV pTlvs[32] = { 0 };
+                        unsigned int tlvCount = 32;
+                        ParseBcdTLV((char*)value.c_str(), pTlvs, tlvCount);
+                        for (unsigned int i = 0; i < tlvCount; i++)
+                        {
+                            string strLen = (char*)pTlvs[i].length;
+                            string strValue = (char*)pTlvs[i].value;
+                            string strTag = (char*)pTlvs[i].tag;
+                            int nLen = std::stoi((char*)pTlvs[i].length, 0, 16);
+                            if (nLen > 0xFF) {
+                                char dataLen[5] = { 0 };
+                                Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+                                strLen = "82" + string(dataLen);
+                            }
+                            else if (nLen > 0x80) {
+                                char dataLen[5] = { 0 };
+                                Tool::GetBcdDataLen(strValue.c_str(), dataLen, 5);
+                                strLen = "81" + string(dataLen);
+                            }
+
+                            strValue = strTag + strLen + strValue;
+                            dgiItem.value.AddItem(strTag, strValue);
+                        }
+                    }
+                    else if (dgi.second.valueFormat == "V")
+                    {
+                        dgiItem.value.AddItem(dgi.second.emvTag, item.value.GetItem());
+                    }
+                    cps.AddDGI(dgiItem);
+                }
+            }
+        }
+        for (auto item : copyCps.dgis)
+        {
+            for (auto iter = cps.dgis.begin(); iter != cps.dgis.end(); iter++)
+            {
+                if (item.dgi == iter->dgi)
+                {
+                    iter = cps.dgis.erase(iter);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void IRule::HandleTagDecrypt(CPS& cpsItem)

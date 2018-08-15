@@ -166,6 +166,20 @@ struct AddKCV
     string keyType;
 };
 
+struct GoldMap
+{
+    string emvTag;
+    string sddfTag;
+    string emvDataName;
+    string valueFormat;
+};
+
+struct SDDFElement
+{
+    string sddfTag;
+    string value;
+};
+
 /************************************************************
 //定义DGI转换的基本规则，DP解析库调用该接口实现DGI的转换
 *************************************************************/
@@ -185,6 +199,7 @@ protected:
     void HandleDGIAddFixedTagValue(CPS& cps);   //处理DGI添加固定值的Tag
 	void HandleTagDelete(CPS& cps);        //处理删除DGI某个tag
     void HandleTagInsertValue(CPS& cps);   //处理Tag添加值的问题
+    void HandleGoldpacData(CPS& cps);   //专用处理金邦达数据格式
     void AddKcv(CPS& cps);                 //增加KCV
     void AddTagPrefix(CPS& cps);      //添加tag及长度到key=value 中的value部分
     void SpliteEF02(CPS& cps);             //解析EFO2 神舟数码专用 存储8201,8202...IC卡私钥
@@ -198,7 +213,7 @@ protected:
     *****************************************************************/
     string DesDecryptDGI(string tk, string encryptData);
     string SMDecryptDGI(string tk, string encryptData1);
-
+    vector<pair<string, GoldMap>> GetSDDF(string sddfElement, string sddfValue);
 private:
 
 
@@ -213,6 +228,8 @@ private:
     vector<TagMerge>            m_vecTagMerge;
     vector<TagInsert>           m_vecTagInsert;
     vector<AddKCV>              m_vecAddKcv;
+    vector<GoldMap>             m_vecGoldMap;
+    vector<SDDFElement>         m_vecSDDFElement;
     vector<string>              m_vecAddTagAndTemplate;
     bool                        m_hasEF02;
     bool                        m_addPse;

@@ -21,7 +21,12 @@ namespace CplusplusDll
         public static Log CreateLog(string path)
         {
             handle = CDll.CreateLog(path);
-            if(handle != 0x1000000)
+            return CreateLog();
+        }
+
+        public static Log CreateLog()
+        {
+            if (handle != 0x10000000)
             {
                 _log = new Log();
             }

@@ -456,5 +456,60 @@ namespace CardPlatform.Cases
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
+        /// <summary>
+        /// 检测GPO Online with ODA返回数据必须包含(tag82,94,9F10,9F26,9F27,9F36,9F6E)
+        /// </summary>
+        public void GPO_018()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tags = new List<Tuple<string, TipLevel, string>>()
+            {
+                new Tuple<string, TipLevel,string>("82",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag82"),
+                new Tuple<string, TipLevel,string>("94",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag94"),
+                new Tuple<string, TipLevel,string>("57",TipLevel.Warn,"GPO Offline with ODA返回数据缺少tag57,读记录必须要存在tag57"),
+                new Tuple<string, TipLevel,string>("9F10",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F10"),
+                new Tuple<string, TipLevel,string>("9F26",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F26"),
+                new Tuple<string, TipLevel,string>("9F27",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F27"),
+                new Tuple<string, TipLevel,string>("9F36",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag36"),
+                new Tuple<string, TipLevel,string>("9F4B",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F4B"),
+                new Tuple<string, TipLevel,string>("9F6C",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F6C"),
+                new Tuple<string, TipLevel,string>("9F6E",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F6E")
+            };
+            var gpoTags = from tag in tlvs select tag.Tag;
+            bool ret = true;
+            foreach (var tag in tags)
+            {
+                if (!gpoTags.Contains(tag.Item1))
+                {
+                    if (tag.Item2 == TipLevel.Failed)
+                        ret = false;
+                    TraceInfo(tag.Item2, caseNo, tag.Item3);
+                }
+            }
+            if (ret)
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测GPO Offline with ODA返回数据
+        /// </summary>
+        public void GPO_019()
+        {
+            
+        }
+
+        /// <summary>
+        /// 检测GPO Online and Decline without ODA返回数据
+        /// </summary>
+        public void GPO_020()
+        {
+
+        }
+
     }
 }

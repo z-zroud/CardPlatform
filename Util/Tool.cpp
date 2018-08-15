@@ -286,6 +286,17 @@ namespace  Tool
         }		
 	}
 
+    int HexStrToInt(string str)
+    {
+        int ret = 0;
+        for (int i = 0; i < str.length(); i++)
+        {
+            int x = ctoi(str[i]);
+            ret += x * pow(16, str.length() - i - 1);
+        }
+        return ret;
+    }
+
     string GetBcdStrLen(string data)
     {
         char len[5] = { 0 };

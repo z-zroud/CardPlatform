@@ -29,7 +29,10 @@ namespace CardPlatform.Business
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTransaction(aid);
             locator.Terminal.TermianlSettings.Tag9C = "00";         //交易类型(消费交易)
-            locator.Terminal.TermianlSettings.Tag9F66 = "26000000"; //终端交易属性  
+            if (TransCfg.CurrentApp == AppType.qVSDC_online)
+                locator.Terminal.TermianlSettings.Tag9F66 = "27000000"; //终端交易属性  
+            else
+                locator.Terminal.TermianlSettings.Tag9F66 = "26000000";
 
             DoTransaction(DoTransactionEx);
         }
@@ -77,7 +80,7 @@ namespace CardPlatform.Business
             {
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
-                    var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
+                    var stepCase = new SelectAppCase() { CurrentApp = TransCfg.CurrentApp.ToString() };
                     stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
@@ -156,6 +159,8 @@ namespace CardPlatform.Business
             return true;
         }
 
+
+
         public override void GetRequirementData()
         {
             base.GetRequirementData();
@@ -212,6 +217,12 @@ namespace CardPlatform.Business
                     transTags.SetTag(TransactionStep.GetData, tlv.First().Tag, tlv.First().Value); //保存
                 }
             }
+        }
+
+        public void ProcessRestriction()
+        {
+            var processRestrictionCase = new ProcessRestrictionCase() { CurrentApp = TransCfg.CurrentApp.ToString() };
+            processRestrictionCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
         }
 
         /// <summary>

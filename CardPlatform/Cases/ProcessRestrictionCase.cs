@@ -10,9 +10,9 @@ using CardPlatform.Config;
 
 namespace CardPlatform.Cases
 {
-    public class HandleLimitationCase : CaseBase
+    public class ProcessRestrictionCase : CaseBase
     {
-        public HandleLimitationCase()
+        public ProcessRestrictionCase()
         {
 
         }

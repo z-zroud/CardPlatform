@@ -16,7 +16,7 @@ namespace CardPlatform.Common
         GPO,            //应用初始化
         ReadRecord,     //读应用记录
         GetData,        //取必要数据(不是标准交易步骤，但需要检查这些数据是否存在于卡片)
-        HandleLimitation,   //处理限制
+        ProcessRestriction,   //处理限制
         CardHolderVerify,   //持卡人验证
         TerminalRiskManagement, //终端风险管理
         TerminalActionAnalyze,   //终端行为分析

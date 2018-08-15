@@ -19,7 +19,6 @@ namespace CardPlatform.Business
     {
         private TransactionTag transTags = TransactionTag.GetInstance();
         private ViewModelLocator locator = new ViewModelLocator();
-        private TransactionConfig transCfg = TransactionConfig.GetInstance();
 
         /// <summary>
         /// 开始UICS交易流程
@@ -282,8 +281,8 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int HandleLimitation()
         {
-            var handleLimitationCase = new HandleLimitationCase() { CurrentApp = Constant.APP_UICS };
-            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.HandleLimitation, null);
+            var handleLimitationCase = new ProcessRestrictionCase() { CurrentApp = Constant.APP_UICS };
+            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
             return 0;
         }
 

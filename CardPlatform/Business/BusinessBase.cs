@@ -42,8 +42,6 @@ namespace CardPlatform.Business
         public int BatchNo { get; set; }                //一次检测中重复跑该交易的序号
         public bool IsContactTrans { get; set; }    //需要此参数来判断写入到个人化信息表中的内容
         public TransactionConfig TransCfg = TransactionConfig.GetInstance();
-        protected bool doDesTrans = false;  //是否执行DES算法的交易
-        protected bool doSMTrans = false;   //是否执行国密算法
         protected string toBeSignAppData;   //当前交易流程认证数据
         protected string aid;       //当前应用AID
         protected IExcuteCase caseObj;  //定义了基本的case,涉及到程序逻辑，不在case配置文件中配置

@@ -96,6 +96,9 @@ void Decrypt_Des3_CBC(const char* key, const char* input, char* output, int outp
 
 int main()
 {
+    int ret = 0;
+    ret = Tool::HexStrToInt("0E");
+    ret = Tool::HexStrToInt("0200");
     //HANDLE hPipe1, hPipe2;
     //BOOL Finished;
     //char buf[] = "fuck\n";

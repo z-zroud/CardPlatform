@@ -49,11 +49,11 @@ int main()
 	}
     string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
     string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "other";
-    string dpPath = dpDir + dpFormat + "\\EXPORT_0000004008_20180803054413.dat";
-    rulePath += "澳门立桥借记_银联_同方.xml";
-    string installParamCfg = "澳门立桥银行_同方_G8C140049.xml";
-    GenCpsFile("DpParse_AC.dll", "HandleDp", dpPath.c_str(), NULL);
+    string dpFormat = "goldpac";
+    string dpPath = dpDir + dpFormat + "\\PBH00PBH.00D";
+    rulePath += "金邦达测试.xml";
+    string installParamCfg = "OpenWay_同方_G8C140026.xml";
+    GenCpsFile("DpParse_Goldpac.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
 
     SetPersonlizationConfig("A000000003000000", "404142434445464748494A4B4C4D4E4F", DIV_NONE, SECURE_NONE);
     

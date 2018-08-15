@@ -496,5 +496,50 @@ namespace CardPlatform.Cases
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
+
+        /// <summary>
+        /// qVSDC应用选择，检测BF0C模板下是否存在9F5A
+        /// </summary>
+        public void SelectAid_019()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
+            foreach(var tag in tags)
+            {
+                if(tag.Tag == "9F5A")
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测tag9F38中是否包含tag9F66(必须包含)
+        /// </summary>
+        public void SelectAid_020()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
+            if (string.IsNullOrEmpty(tag9F38))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            var tls = DataParse.ParseTL(tag9F38);
+            foreach(var tl in tls)
+            {
+                if(tl.Tag == "9F66")
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
     }
 }

@@ -15,7 +15,6 @@ namespace CardPlatform.Business
     {
         private TransactionTag transTags    = TransactionTag.GetInstance();
         private ViewModelLocator locator    = new ViewModelLocator();
-        private TransactionConfig transCfg  = TransactionConfig.GetInstance();
 
         /// <summary>
         /// 开始UICS交易流程
@@ -31,10 +30,9 @@ namespace CardPlatform.Business
             locator.Terminal.TermianlSettings.Tag9C     = "00";         //交易类型
             locator.Terminal.TermianlSettings.Tag9F66   = "46000000";   //终端交易属性
 
-            if (doDesTrans)  // 做国际算法交易
-            {
-                //DoTransaction(TransType.UICS_DES, DoTransactionEx);
-            }
+
+            DoTransaction(DoTransactionEx);
+
         }
 
         private bool DoTransactionEx()
@@ -281,8 +279,8 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int HandleLimitation()
         {
-            var handleLimitationCase = new HandleLimitationCase() { CurrentApp = Constant.APP_VISA };
-            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.HandleLimitation, null);
+            var handleLimitationCase = new ProcessRestrictionCase() { CurrentApp = Constant.APP_VISA };
+            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
             return 0;
         }
 

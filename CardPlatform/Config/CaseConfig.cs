@@ -5,6 +5,7 @@ using System.Linq;
 using CardPlatform.Common;
 using System.Xml;
 using System.Xml.Linq;
+using CardPlatform.Models;
 
 namespace CardPlatform.Config
 {
@@ -85,18 +86,12 @@ namespace CardPlatform.Config
             if (doc != null)
             {
                 var root = doc.Root;
-                var apps = new List<string>
+                var apps = new List<string>();
+                foreach (var name in Enum.GetNames(typeof(AppType)))
                 {
-                    Constant.APP_PSE,
-                    Constant.APP_PPSE,
-                    Constant.APP_UICS,
-                    Constant.APP_ECC,
-                    Constant.APP_QUICS,
-                    Constant.APP_VISA,
-                    Constant.APP_PAYWAVE,
-                    Constant.APP_MC,
-                    Constant.APP_JETCO
-                };
+                    apps.Add(name);
+                }
+                
                 foreach (var app in apps)
                 {
                     var appNode = root.Element(app);

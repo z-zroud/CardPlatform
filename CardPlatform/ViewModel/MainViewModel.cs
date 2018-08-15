@@ -38,7 +38,7 @@ namespace CardPlatform.ViewModel
             ////}
             DispatcherHelper.Initialize();
             pipServer = new NamedPipeServer(@"\\.\pipe\LogOutputNamedPipe", 0);
-            pipServer.Start(OutputLog);
+            //pipServer.Start(OutputLog);
         }
 
         public void Relase()
