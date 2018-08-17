@@ -364,5 +364,15 @@ namespace  Tool
             index = index2 + sep.length();
         }       
     }
+
+    bool IsHexStr(string str)
+    {
+        for (char s : str)
+        {
+            if (ctoi(s) == -1)
+                return false;
+        }
+        return true;
+    }
 }
 

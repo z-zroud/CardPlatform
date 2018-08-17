@@ -69,6 +69,8 @@ namespace Tool
     * 功能：将字符串str按sep分割成子字符串，存储到subStrs容器中
     ************************************************************/
     void SplitStr(const string& str, string sep, vector<string>& subStrs);
+
+    bool IsHexStr(string str);
 }
 
 //#ifdef __cplusplus

@@ -9,6 +9,7 @@
 #include "../PCSC/PCSC.h"
 #include<io.h>
 #include<iostream>
+#include "../DpParse_Goldpac/DpParse_Goldpac.h"
 using namespace std;
 
 void getFiles(string path, vector<string>& files)
@@ -40,6 +41,7 @@ void getFiles(string path, vector<string>& files)
 
 int main()
 {
+
 	int count = 0;
 	char* readers[2] = { 0 };
 	GetReaders(readers, count);
@@ -52,7 +54,7 @@ int main()
     string dpFormat = "goldpac";
     string dpPath = dpDir + dpFormat + "\\PBH00PBH.00D";
     rulePath += "金邦达测试.xml";
-    string installParamCfg = "OpenWay_同方_G8C140026.xml";
+    string installParamCfg = "澳门立桥银行_同方_G8C140049.xml";
     GenCpsFile("DpParse_Goldpac.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
 
     SetPersonlizationConfig("A000000003000000", "404142434445464748494A4B4C4D4E4F", DIV_NONE, SECURE_NONE);

@@ -199,11 +199,12 @@ protected:
     void HandleDGIAddFixedTagValue(CPS& cps);   //处理DGI添加固定值的Tag
 	void HandleTagDelete(CPS& cps);        //处理删除DGI某个tag
     void HandleTagInsertValue(CPS& cps);   //处理Tag添加值的问题
-    void HandleGoldpacData(CPS& cps);   //专用处理金邦达数据格式
+    bool HandleGoldpacData(CPS& cps);   //专用处理金邦达数据格式
     void AddKcv(CPS& cps);                 //增加KCV
     void AddTagPrefix(CPS& cps);      //添加tag及长度到key=value 中的value部分
     void SpliteEF02(CPS& cps);             //解析EFO2 神舟数码专用 存储8201,8202...IC卡私钥
     void AddPseAndPPSE(CPS& cps);      //增加PSE和PPSE DGI
+    void SplitRSA(CPS& cps);        //金邦达专用解析RSA数据
 
     /***************************************************************
     * 对DP分组数据进行解密
@@ -231,6 +232,7 @@ private:
     vector<GoldMap>             m_vecGoldMap;
     vector<SDDFElement>         m_vecSDDFElement;
     vector<string>              m_vecAddTagAndTemplate;
+    vector<string>              m_vecRSAs;
     bool                        m_hasEF02;
     bool                        m_addPse;
     string                      m_aid;

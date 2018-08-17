@@ -218,7 +218,8 @@ bool GreaterSort(DGI item1, DGI item2)
     else if (compare2 == "A001") {
         compare2 = "8019";
     }
-
+    if (!Tool::IsHexStr(compare1) || !Tool::IsHexStr(compare2))
+        return false;
     int nItem1 = stoi(compare1, 0, 16);
     int nItem2 = stoi(compare2, 0, 16);
 
@@ -463,6 +464,9 @@ bool IRule::SetRuleCfg(const char* szRuleConfig)
         else if (nodeName == "AddPSEAndPPSE") {
             m_aid = node->first_attribute("aid")->value();
             m_addPse = true;
+        }
+        else if (nodeName == "SpliteGoldpacRsa") {
+            m_vecRSAs.push_back(node->first_attribute("tag")->value());
         }
         else if (nodeName == "AddKcv") {
             AddKCV kcvItem;
@@ -846,6 +850,112 @@ void IRule::HandleDGIExchange(CPS& cpsItem)
 	}
 }
 
+
+int GetTlvLen(string& data)
+{
+    string strLen;
+    if (data.substr(0, 2) == "82")
+    {
+        strLen = data.substr(2, 4);
+        data = data.substr(6);
+    }
+    else if (data.substr(0, 2) == "81")
+    {
+        strLen = data.substr(2, 2);
+        data = data.substr(4);
+    }
+    else {
+        strLen = data.substr(0, 2);
+        data = data.substr(2);
+    }
+    return 2 * Tool::HexStrToInt(strLen);
+}
+
+string DeleteFlag02(string data)
+{
+    return data.substr(2);
+}
+
+string GetTlvValue(string &data, int len)
+{
+    string result;
+    if (len > 1 && data.substr(0, 2) == "00")
+    {
+        result = data.substr(2, len - 2);
+    }
+    else {
+        result = data.substr(0, len);
+    }
+    data = data.substr(len);
+    return result;
+}
+
+
+void IRule::SplitRSA(CPS& cps)
+{
+    int second = 0;
+    for (auto rsa : m_vecRSAs)
+    {
+        second++;
+        for (auto item : cps.dgis)
+        {
+            if (rsa == item.dgi)
+            {
+                DGI item8201, item8202, item8203, item8204, item8205;
+                
+                item8201.dgi = "8201";
+                item8202.dgi = "8202";
+                item8203.dgi = "8203";
+                item8204.dgi = "8204";
+                item8205.dgi = "8205";
+                if (second == 2)
+                {
+                    item8201.dgi += "_sec";
+                    item8202.dgi += "_sec";
+                    item8203.dgi += "_sec";
+                    item8204.dgi += "_sec";
+                    item8205.dgi += "_sec";
+                }
+                string data = item.value.GetItem();
+                for (auto iter = m_vecDGIEncrypt.begin();iter != m_vecDGIEncrypt.end();iter++)
+                {
+                    if (item.dgi == iter->dgi) {
+                        string decryptedData;
+                        decryptedData = DesDecryptDGI(iter->key, data);
+                        if (iter->isDelete80) {
+                            int found = decryptedData.length();
+                            found = decryptedData.rfind("80");
+                            if (found != string::npos)
+                                decryptedData = decryptedData.substr(0, found);
+                        }
+                        m_vecDGIEncrypt.erase(iter);
+                        data = decryptedData;
+                        break;
+                    }
+                }
+                if (data.substr(0, 2) == "30")
+                {
+                    data = data.substr(2);
+                    int len = GetTlvLen(data);
+                    for (int i = 0; i < 9; i++)
+                    {
+                        data = DeleteFlag02(data);
+                        len = GetTlvLen(data);
+                        string value = GetTlvValue(data, len);
+                        if (i == 4) { item8201.value.AddItem(item8201.dgi, value); cps.AddDGI(item8201);}
+                        else if (i == 5) { item8202.value.AddItem(item8202.dgi, value); cps.AddDGI(item8202);}
+                        else if (i == 6) { item8203.value.AddItem(item8203.dgi, value); cps.AddDGI(item8203);}
+                        else if (i == 7) {item8204.value.AddItem(item8204.dgi, value); cps.AddDGI(item8204);}
+                        else if (i == 8) {item8205.value.AddItem(item8205.dgi, value); cps.AddDGI(item8205);}
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+}
+
 vector<pair<string, GoldMap>> IRule::GetSDDF(string sddfElement, string sddfValue)
 {
     vector<pair<string, GoldMap>> dgiList;
@@ -868,17 +978,32 @@ vector<pair<string, GoldMap>> IRule::GetSDDF(string sddfElement, string sddfValu
                 dgiList.push_back(make_pair(sddfTag, goldMap));
                 break;
             }
+
+        }
+    }
+    for (auto goldMap : m_vecGoldMap)
+    {
+        if (goldMap.emvTag == "8000_1" ||
+            goldMap.emvTag == "8000_2" ||
+            goldMap.emvTag == "8000_3" ||
+            goldMap.emvTag == "9000_1" ||
+            goldMap.emvTag == "9000_2" ||
+            goldMap.emvTag == "9000_3" ||
+            goldMap.emvTag == "RSA")
+        {
+            string sddfTag = sddfElement.substr(0, 5) + goldMap.sddfTag.substr(5, 3);
+            dgiList.push_back(make_pair(sddfTag, goldMap));
         }
     }
 
     return dgiList;
 }
 
-void IRule::HandleGoldpacData(CPS& cps)
+bool IRule::HandleGoldpacData(CPS& cps)
 {
     vector<string> sddfTags;
     if (m_vecSDDFElement.size() == 0 || m_vecGoldMap.size() == 0)
-        return;
+        return false;
     //目前只支持双应用
     int second = 0;
     CPS copyCps;
@@ -902,7 +1027,7 @@ void IRule::HandleGoldpacData(CPS& cps)
                     DGI dgiItem;
                     if (second == 2)
                     {
-                        dgiItem.dgi = dgi.second.emvTag + "second";
+                        dgiItem.dgi = dgi.second.emvTag + "_sec";
                     }
                     else {
                         dgiItem.dgi = dgi.second.emvTag;
@@ -960,6 +1085,7 @@ void IRule::HandleGoldpacData(CPS& cps)
                 }
             }
         }
+        SplitRSA(cps);
         for (auto item : copyCps.dgis)
         {
             for (auto iter = cps.dgis.begin(); iter != cps.dgis.end(); iter++)
@@ -972,6 +1098,7 @@ void IRule::HandleGoldpacData(CPS& cps)
             }
         }
     }
+    return true;
 }
 
 void IRule::HandleTagDecrypt(CPS& cpsItem)

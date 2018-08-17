@@ -14,10 +14,12 @@
 #pragma comment(lib,"..//lib//Debug//CPS.lib")
 #pragma comment(lib,"..//lib//Debug//PCSC.lib")
 #pragma comment(lib,"..//lib//Debug//DpParse.lib")
+#pragma comment(lib,"..//lib//Debug//DpParse_Goldpac.lib")
 #else
 #pragma comment(lib,"..//lib//Release//CPS.lib")
 #pragma comment(lib,"..//lib//Release//PCSC.lib")
 #pragma comment(lib,"..//lib//Release//DpParse.lib")
+#pragma comment(lib,"..//lib//Release//DpParse_Goldpac.lib")
 #endif
 
 // TODO: reference additional headers your program requires here
