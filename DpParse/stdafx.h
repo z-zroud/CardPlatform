@@ -15,10 +15,12 @@
 #pragma comment(lib,"..\\lib\\Debug\\Util.lib")
 #pragma comment(lib,"..\\lib\\Debug\\Authencation.lib")
 #pragma comment(lib,"..\\lib\\Debug\\DataParse.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Tool.lib")
 #else
 #pragma comment(lib,"..\\lib\\Release\\Des0.lib")
 #pragma comment(lib,"..\\lib\\Release\\Util.lib")
 #pragma comment(lib,"..\\lib\\Release\\Authencation.lib")
 #pragma comment(lib,"..\\lib\\Release\\DataParse.lib")
+#pragma comment(lib,"..\\lib\\Release\\Tool.lib")
 #endif
 // TODO: reference additional headers your program requires here
