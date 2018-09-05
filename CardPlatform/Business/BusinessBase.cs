@@ -12,6 +12,7 @@ using CardPlatform.Models;
 
 namespace CardPlatform.Business
 {
+    //一个用于GetData获取数据的结构描述
     public class RequirementData
     {
         public RequirementData(string tag, int len, TipLevel level,string desc)
@@ -33,21 +34,17 @@ namespace CardPlatform.Business
     /// </summary>
     public class BusinessBase
     {
-        private ViewModelLocator locator;
-        public BusinessBase()
-        {
-            locator = new ViewModelLocator();
-            caseObj = new CaseBase();
-        }
-        public int BatchNo { get; set; }                //一次检测中重复跑该交易的序号
-        public bool IsContactTrans { get; set; }    //需要此参数来判断写入到个人化信息表中的内容
-        public TransactionConfig TransCfg = TransactionConfig.GetInstance();
-        protected string toBeSignAppData;   //当前交易流程认证数据
-        protected string aid;       //当前应用AID
-        protected IExcuteCase caseObj;  //定义了基本的case,涉及到程序逻辑，不在case配置文件中配置
-        public static string PersoFile; //个人化信息表Excel文件
+        protected static readonly ViewModelLocator  locator         = new ViewModelLocator();
+        protected static readonly TransactionConfig transCfg        = TransactionConfig.GetInstance();
+        protected static readonly TransactionTag    transTags       = TransactionTag.GetInstance();
+        protected static readonly IExcuteCase       caseObj         = new CaseBase();
+        protected static readonly Log               log             = Log.CreateLog(Constant.LogPath);
+        protected string                            needSignAppData;    //当前交易流程认证数据
+        protected string                            currentAid;         //当前应用AID
         
-
+        public int BatchNo { get; set; }                //一次检测中重复跑该交易的序号
+        public bool IsContactTrans { get; set; }        //需要此参数来判断写入到个人化信息表中的内容
+        public string PersoFile { get; set; }           //个人化信息表Excel文件
 
 
         public TipLevel GetTipLevel(bool result, TipLevel level = TipLevel.Failed)
@@ -63,54 +60,103 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public virtual void DoTransaction(string aid)
         {
-            this.aid = aid;
+            currentAid = aid;
         }
-
+        
+        /// <summary>
+        /// 填写送检表
+        /// </summary>
         public void WriteTagToSongJianFile()
         {
             var songJianFile = new SongJianHelper(PersoFile);
             if (!string.IsNullOrEmpty(PersoFile))
             {
-                //不需要对非接国密交易填写送检表，和非接DES一致
-                songJianFile.WriteToFile(TransCfg.CurrentApp, TransCfg.Algorithm, TransCfg.TransType);
+                songJianFile.WriteToFile(transCfg.CurrentApp, transCfg.Algorithm, transCfg.TransType);
             }
         }
 
+        /// <summary>
+        /// 开始检测，实际的检测流程由传入的回调函数完成.
+        /// </summary>
+        /// <param name="DoActualTransaction"></param>
         public void DoTransaction(Func<bool> DoActualTransaction)
         {
-            if(TransCfg.Algorithm == AlgorithmType.DES)
+            if(transCfg.Algorithm == AlgorithmType.DES)
             {
-                locator.Terminal.TermianlSettings.TagDF69 = "00";
+                locator.Terminal.SetTag("DF69", "00");
             }
             else
             {
-                locator.Terminal.TermianlSettings.TagDF69 = "01";
+                locator.Terminal.SetTag("DF69", "01");
             }
             bool isSucess = DoActualTransaction();
             WriteTagToSongJianFile();
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
-                TransResultModel TransactionResult = new TransResultModel(TransCfg.TransType);
+                TransResultModel transactionResult = new TransResultModel(transCfg.TransType);
                 if (isSucess)
                 {
-                    TransactionResult.Result = TransResult.Sucess;
+                    transactionResult.Result = TransResult.Sucess;
                 }
                 else
                 {
-                    TransactionResult.Result = TransResult.Failed;
+                    transactionResult.Result = TransResult.Failed;
                 }
-                locator.Transaction.TransResult.Add(TransactionResult);
+                locator.Transaction.TransResult.Add(transactionResult);
             });
         }
 
         /// <summary>
-        /// 此函数定义了所有应用都应用GetData命令获取的数据
+        /// 此函数定义了所有应用用GetData命令获取的数据
         /// </summary>
         public virtual void GetRequirementData()
         {
-
+            ///...get basic data
         }
 
+        protected string GetDolData(string dol)
+        {
+            string data = string.Empty;
+            if (!string.IsNullOrEmpty(dol))
+            {
+                var tls = DataParse.ParseTL(dol);
+
+                foreach (var tl in tls)
+                {
+                    var terminalData = locator.Terminal.GetTag(tl.Tag);
+                    if (string.IsNullOrEmpty(terminalData))
+                    {
+                        log.TraceLog(LogLevel.Error, "终端设置中不存在tag{0},请检查终端设置是否正确.", tl.Tag);
+                        return null;
+                    }
+                    if (terminalData.Length != tl.Len * 2)
+                    {
+                        log.TraceLog(LogLevel.Error, "tag{0} 终端设置长度[{1}]与tag9F38中指定长度[{2}]不一致", tl.Tag, terminalData.Length / 2, tl.Len);
+                        return null;
+                    }
+                    data += terminalData;
+                }
+            }
+            return data;
+        }
+
+        protected void ParseTlvToLog(List<TLV> tlvs)
+        {
+            foreach(var tlv in tlvs)
+            {
+                string info = string.Empty;
+                string prefixPadding = info.PadLeft(tlv.Level * 4, ' ');
+                if(tlv.IsTemplate)
+                {
+                    info = prefixPadding + "<" + tlv.Tag + ">";
+                }
+                else
+                {
+                    info = prefixPadding + "[" + tlv.Tag + "]=" + tlv.Value;
+                }
+                log.TraceLog(LogLevel.Info, info);
+            }
+        }
         /// <summary>
         /// 解析TLV结构，并保存到数据字典中
         /// </summary>
@@ -121,7 +167,7 @@ namespace CardPlatform.Business
             bool result = false;
             if (DataParse.IsTLV(response))
             {
-                var arrTLV = DataParse.ParseTLV(response);
+                var arrTLV = DataParse.ParseTLV(response);               
                 TransactionTag tagDict = TransactionTag.GetInstance();
                 tagDict.SetTags(step,arrTLV);
                 result = true;
@@ -145,7 +191,13 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected virtual ApduResponse SelectAid(string aid)
         {
-            return APDU.SelectCmd(aid);
+            var resp= APDU.SelectCmd(aid);
+            if(resp.SW == 0x9000)
+            {
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                ParseTlvToLog(tlvs);
+            }
+            return resp;
         }
 
         /// <summary>
@@ -165,20 +217,21 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected virtual List<ApduResponse> ReadRecords(List<AFL> afls)
         {
-            toBeSignAppData = string.Empty; //每次读取记录时，置空
+            needSignAppData = string.Empty; //每次读取记录时，置空
             var responses = new List<ApduResponse>();
             foreach(var afl in afls)
             {
                 var resp = APDU.ReadRecordCmd(afl.SFI, afl.RecordNo);
                 responses.Add(resp);
-                if(afl.IsSignedRecordNo)
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                ParseTlvToLog(tlvs);
+                if (afl.IsSignedRecordNo)
                 {
-                    var tlvs = DataParse.ParseTLV(resp.Response);
-                    foreach(var tlv in tlvs)
+                    foreach (var tlv in tlvs)
                     {
                         if(tlv.IsTemplate && tlv.Tag == "70") //用于脱机数据认证中的签名数据
                         {
-                            toBeSignAppData += tlv.Value;
+                            needSignAppData += tlv.Value;
                             break;
                         }
                     }                   
@@ -196,15 +249,15 @@ namespace CardPlatform.Business
             string issuerPublicKey = string.Empty;
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (aid.Length < 10 || aid.Length > 16)
+            if (currentAid.Length < 10 || currentAid.Length > 16)
             {
-                excuteCase.TraceInfo(TipLevel.Failed, caseNo, "应用AID长度为{0}不在规范内", aid.Length);
+                excuteCase.TraceInfo(TipLevel.Failed, caseNo, "应用AID长度为{0}不在规范内", currentAid.Length);
                 return issuerPublicKey;
             }
 
             //获取CA公钥
             TransactionTag tagDict = TransactionTag.GetInstance();
-            string rid = aid.Substring(0, 10);
+            string rid = currentAid.Substring(0, 10);
             string CAIndex = tagDict.GetTag("8F");
             if (CAIndex.Length != 2)
             {
@@ -224,7 +277,7 @@ namespace CardPlatform.Business
             string AIP = tagDict.GetTag("82");
             string expiryDate = tagDict.GetTag(TransactionStep.ReadRecord, "5F24");
 
-            if (TransCfg.Algorithm == AlgorithmType.DES) //DES算法
+            if (transCfg.Algorithm == AlgorithmType.DES) //DES算法
             {
                 //获取发卡行公钥
                 string issuerPublicKeyRemainder = tagDict.GetTag("92");
@@ -265,12 +318,12 @@ namespace CardPlatform.Business
             string PAN = tagDict.GetTag("5A");
             string AIP = tagDict.GetTag("82");
             string expiryDate = tagDict.GetTag(TransactionStep.ReadRecord, "5F24");
-            if (TransCfg.Algorithm == AlgorithmType.DES)
+            if (transCfg.Algorithm == AlgorithmType.DES)
             {
                 //获取IC卡公钥
                 string iccPublicKeyRemainder = tagDict.GetTag("9F48");
                 string iccPublicKeyExp = tagDict.GetTag("9F47");
-                var result = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, toBeSignAppData, iccPublicKeyExp, AIP,PAN, expiryDate, out iccPublicKey);
+                var result = Authencation.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccPublicKeyRemainder, needSignAppData, iccPublicKeyExp, AIP,PAN, expiryDate, out iccPublicKey);
                 CheckPublicKeyResult(result, "IC卡公钥");
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
@@ -280,7 +333,7 @@ namespace CardPlatform.Business
             }
             else
             {
-                var result = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, toBeSignAppData, AIP, PAN, expiryDate,out iccPublicKey);
+                var result = Authencation.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needSignAppData, AIP, PAN, expiryDate,out iccPublicKey);
                 CheckSMPublicKeyResult(result, "IC卡公钥");
                 if (string.IsNullOrWhiteSpace(iccPublicKey))
                 {
@@ -304,11 +357,11 @@ namespace CardPlatform.Business
             string AIP = tagDict.GetTag("82");
             string issuerPublicKey = GetIssuerPublicKey();
 
-            if (TransCfg.Algorithm == AlgorithmType.DES) //DES算法
+            if (transCfg.Algorithm == AlgorithmType.DES) //DES算法
             {
                 string issuerExp = tagDict.GetTag("9F32");
                 //验证hash签名
-                result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, toBeSignAppData, AIP);
+                result = Authencation.DES_SDA(issuerPublicKey, issuerExp, signedStaticAppData, needSignAppData, AIP);
                 if (!CheckOfflineResult(result,"SDA") )
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "静态数据认证失败! 返回码: {0}", result);
@@ -317,7 +370,7 @@ namespace CardPlatform.Business
             }
             else //SM算法
             {
-                result = Authencation.SM_SDA(issuerPublicKey, toBeSignAppData, signedStaticAppData, AIP);
+                result = Authencation.SM_SDA(issuerPublicKey, needSignAppData, signedStaticAppData, AIP);
                 if (!CheckSMOfflineResult(result, "SDA"))
                 {
                     excuteCase.TraceInfo(TipLevel.Failed, caseNo, "SM算法 静态数据认证失败! 返回码: {0}", result);
@@ -340,7 +393,7 @@ namespace CardPlatform.Business
             IExcuteCase excuteCase = new CaseBase();
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var iccPublicKey = GetIccPublicKey(issuerPublicKey);
-            if (TransCfg.Algorithm == AlgorithmType.DES)
+            if (transCfg.Algorithm == AlgorithmType.DES)
             {
                 //获取IC卡公钥
                 string iccPublicKeyRemainder = tagDict.GetTag("9F48");
@@ -378,7 +431,7 @@ namespace CardPlatform.Business
             var tls = DataParse.ParseTL(CDOL1);
             foreach(var tl in tls)
             {
-                CDOL1Data += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                CDOL1Data += locator.Terminal.GetTag(tl.Tag);
             }
             return APDU.GACCmd(acType, CDOL1Data);
         }
@@ -395,7 +448,7 @@ namespace CardPlatform.Business
             var tls = DataParse.ParseTL(cdol2);
             foreach (var tl in tls)
             {
-                cdol2Data += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                cdol2Data += locator.Terminal.GetTag(tl.Tag);
             }
 
             return APDU.GACCmd(acType, cdol2Data);
@@ -450,19 +503,19 @@ namespace CardPlatform.Business
             string cardSeq = tagDict.GetTag("5F34");
             string mac = string.Empty;
 
-            if (TransCfg.Algorithm == AlgorithmType.DES)
+            if (transCfg.Algorithm == AlgorithmType.DES)
             {
-                if (string.IsNullOrEmpty(TransCfg.TransDesMacKey) || TransCfg.TransDesMacKey.Length != 32)
+                if (string.IsNullOrEmpty(transCfg.TransDesMacKey) || transCfg.TransDesMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransCfg.TransDesMacKey, TransCfg.KeyType, TransCfg.Algorithm);
+                macSessionKey = GenSessionKey(transCfg.TransDesMacKey, transCfg.KeyType, transCfg.Algorithm);
             }
             else
             {
-                if (string.IsNullOrEmpty(TransCfg.TransSmMacKey) || TransCfg.TransSmMacKey.Length != 32)
+                if (string.IsNullOrEmpty(transCfg.TransSmMacKey) || transCfg.TransSmMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransCfg.TransSmMacKey, TransCfg.KeyType, TransCfg.Algorithm);               
+                macSessionKey = GenSessionKey(transCfg.TransSmMacKey, transCfg.KeyType, transCfg.Algorithm);               
             }
-            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)TransCfg.Algorithm);
+            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)transCfg.Algorithm);
             if (mac == tag9F10Mac)
             {
                 return true;
@@ -475,25 +528,25 @@ namespace CardPlatform.Business
             string udkACKey = string.Empty;
             var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
-            if (TransCfg.KeyType == AppKeyType.MDK)
+            if (transCfg.KeyType == AppKeyType.MDK)
             {
                 string cardAcct = tagDict.GetTag("5A");
                 string cardSeq = tagDict.GetTag("5F34");
-                udkACKey = Authencation.GenUdk(TransCfg.TransDesAcKey, cardAcct, cardSeq);
+                udkACKey = Authencation.GenUdk(transCfg.TransDesAcKey, cardAcct, cardSeq);
             }
             else
             {
-                udkACKey = TransCfg.TransDesAcKey;
+                udkACKey = transCfg.TransDesAcKey;
             }
 
-            string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");  //授权金额
-            string tag9F03 = locator.Terminal.TermianlSettings.GetTag("9F03");  //其他金额
-            string tag9F1A = locator.Terminal.TermianlSettings.GetTag("9F1A");  //终端国家代码
-            string tag95 = locator.Terminal.TermianlSettings.GetTag("95");      //终端验证结果           
-            string tag5A = locator.Terminal.TermianlSettings.GetTag("5F2A");  //交易货币代码
-            string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
-            string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
-            string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
+            string tag9F02 = locator.Terminal.GetTag("9F02");  //授权金额
+            string tag9F03 = locator.Terminal.GetTag("9F03");  //其他金额
+            string tag9F1A = locator.Terminal.GetTag("9F1A");  //终端国家代码
+            string tag95 = locator.Terminal.GetTag("95");      //终端验证结果           
+            string tag5A = locator.Terminal.GetTag("5F2A");  //交易货币代码
+            string tag9A = locator.Terminal.GetTag("9A");      //交易日期
+            string tag9C = locator.Terminal.GetTag("9C");      //交易类型
+            string tag9F37 = locator.Terminal.GetTag("9F37");  //不可预知数
             string tag82 = TransactionTag.GetInstance().GetTag("82");
             string tag9F36 = TransactionTag.GetInstance().GetTag("9F36");
             string tag9F10 = TransactionTag.GetInstance().GetTag("9F10");
@@ -520,25 +573,25 @@ namespace CardPlatform.Business
             string udkACKey = string.Empty;
             var tagDict = TransactionTag.GetInstance();
             string ATC = tagDict.GetTag("9F36");
-            if (TransCfg.KeyType == AppKeyType.MDK)
+            if (transCfg.KeyType == AppKeyType.MDK)
             {
                 string cardAcct = tagDict.GetTag("5A");
                 string cardSeq = tagDict.GetTag("5F34");
-                udkACKey = Authencation.GenUdk(TransCfg.TransDesAcKey, cardAcct, cardSeq);
+                udkACKey = Authencation.GenUdk(transCfg.TransDesAcKey, cardAcct, cardSeq);
             }
             else
             {
-                udkACKey = TransCfg.TransDesAcKey;
+                udkACKey = transCfg.TransDesAcKey;
             }
 
-            string tag9F02 = locator.Terminal.TermianlSettings.GetTag("9F02");  //授权金额
-            string tag9F03 = locator.Terminal.TermianlSettings.GetTag("9F03");  //其他金额
-            string tag9F1A = locator.Terminal.TermianlSettings.GetTag("9F1A");  //终端国家代码
-            string tag95 = locator.Terminal.TermianlSettings.GetTag("95");      //终端验证结果           
-            string tag5A = locator.Terminal.TermianlSettings.GetTag("5F2A");  //交易货币代码
-            string tag9A = locator.Terminal.TermianlSettings.GetTag("9A");      //交易日期
-            string tag9C = locator.Terminal.TermianlSettings.GetTag("9C");      //交易类型
-            string tag9F37 = locator.Terminal.TermianlSettings.GetTag("9F37");  //不可预知数
+            string tag9F02 = locator.Terminal.GetTag("9F02");  //授权金额
+            string tag9F03 = locator.Terminal.GetTag("9F03");  //其他金额
+            string tag9F1A = locator.Terminal.GetTag("9F1A");  //终端国家代码
+            string tag95 = locator.Terminal.GetTag("95");      //终端验证结果           
+            string tag5A = locator.Terminal.GetTag("5F2A");  //交易货币代码
+            string tag9A = locator.Terminal.GetTag("9A");      //交易日期
+            string tag9C = locator.Terminal.GetTag("9C");      //交易类型
+            string tag9F37 = locator.Terminal.GetTag("9F37");  //不可预知数
             string tag82 = TransactionTag.GetInstance().GetTag("82");
             string tag9F36 = TransactionTag.GetInstance().GetTag("9F36");
             string tag9F10 = TransactionTag.GetInstance().GetTag("9F10");

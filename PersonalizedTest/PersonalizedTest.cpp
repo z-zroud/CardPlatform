@@ -41,8 +41,7 @@ void getFiles(string path, vector<string>& files)
 
 int main()
 {
-
-	int count = 0;
+    int count = 0;
 	char* readers[2] = { 0 };
 	GetReaders(readers, count);
 	for (int i = 0; i < count; i++)
@@ -51,11 +50,11 @@ int main()
 	}
     string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
     string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "CPS";
-    string dpPath = dpDir + dpFormat + "\\cps.txt";
+    string dpFormat = "other";
+    string dpPath = dpDir + dpFormat + "\\EXPORT_0000004011_20180825013719.dat";
     rulePath += "澳门立桥借记_银联_同方.xml";
-    string installParamCfg = "澳门立桥银行_同方_Visa_G8C140049.xml";
-    //GenCpsFile("DpParse_YL.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
+    string installParamCfg = "金邦达测试.xml";
+    GenCpsFile("DpParse_AC.dll", "HandleDp", dpPath.c_str(), NULL);
 
     SetPersonlizationConfig("A000000003000000", "404142434445464748494A4B4C4D4E4F", DIV_NONE, SECURE_NONE);
     

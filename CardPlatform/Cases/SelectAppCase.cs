@@ -33,6 +33,7 @@ namespace CardPlatform.Cases
             tlvs = DataParse.ParseTLV(response.Response);
             base.Excute(batchNo, app, step,srcData);
         }
+        #region 通用case
 
         /// <summary>
         /// 检测响应数据是否以6F模板开头
@@ -41,8 +42,8 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            if (!CaseUtil.RespStartWith(response.Response,"6F"))
+            caseItem.Description += "【响应数据:" + response.Response + "】";
+            if (!CaseUtil.RespStartWith(response.Response, "6F"))
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
@@ -68,9 +69,12 @@ namespace CardPlatform.Cases
                     template6F.Add(item);
                 }
             }
-            if (template6F.Count != 2 ||
-                template6F[0].Tag != "84" ||
-                template6F[1].Tag != "A5")
+            caseItem.Description += "【A5模板依次包含以下tag及模板";
+            foreach(var subTag in template6F)
+            {
+                caseItem.Description += "[" + subTag.Tag + "]";
+            }
+            if (template6F.Count != 2 || template6F[0].Tag != "84" || template6F[1].Tag != "A5")
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
@@ -87,10 +91,11 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            var tag84 = from tlv in tlvs where tlv.Tag == "84" select tlv;
-            if (tag84.First() != null)
+            var tag84 = tlvs.FirstOrDefault(tlv => tlv.Tag == "84");
+            if (tag84 != null)
             {
-                if (CaseUtil.IsExpectedLen(tag84.First().Value, 10, 32))
+                caseItem.Description += "【tag84=" + tag84.Value + "】";
+                if (CaseUtil.IsExpectedLen(tag84.Value, 10, 32))
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
@@ -101,7 +106,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag84不存在]");
             }
         }
 
@@ -119,24 +124,26 @@ namespace CardPlatform.Cases
             {
                 if (item.Tag == "50")
                 {
+                    caseItem.Description += "【tag50=" + item.Value + "】";
                     hasTag50 = true;
                     if (item.Len < 1 || item.Len > 16)
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50长度要求在1-16字节之间]");
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【tag50长度要求在1-16字节之间】");
                         return;
                     }
                     string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if(!CaseUtil.IsAlpha(value))
+                    if (!CaseUtil.IsAlpha(value))
                     {
                         TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50无法转换为合法的ANSII字符]");
                         return;
                     }
+                    caseItem.Description += "字符串显示为:" + value;
                 }
             }
             if (!hasTag50)
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50应用标签不存在]");
-                return;               
+                return;
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
@@ -149,13 +156,19 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var items = new List<string>{ "50", "87", "9F38", "5F2D", "9F11", "9F12", "BF0C" };
+            var items = new List<string> { "50", "87", "9F38", "5F2D", "9F11", "9F12", "BF0C" };
             var subTlvs = CaseUtil.GetSubTags("A5", tlvs);
 
             bool hasOtherTag = false;
+            caseItem.Description += "【tagA5依次包含以下值:";
             foreach(var tlv in subTlvs)
             {
-                if(!items.Contains(tlv.Tag))
+                caseItem.Description += "[" + tlv.Tag + "]";
+            }
+            caseItem.Description += "】";
+            foreach (var tlv in subTlvs)
+            {
+                if (!items.Contains(tlv.Tag))
                 {
                     hasOtherTag = true;
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -168,8 +181,6 @@ namespace CardPlatform.Cases
             }
         }
 
-
-
         /// <summary>
         /// 检测87的合规性(长度是否为1字节)
         /// </summary>
@@ -179,10 +190,11 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             var subTags = CaseUtil.GetSubTags("A5", tlvs);
 
-            var tag87 = from tlv in subTags where tlv.Tag == "87" select tlv;
-            if (tag87.First() != null)
+            var tag87 = subTags.FirstOrDefault(tlv => tlv.Tag == "87");
+            if (tag87 != null)
             {
-                if (tag87.First().Value.Length == 2)
+                caseItem.Description += "【tag87=" + tag87.Value + "】";
+                if (tag87.Value.Length == 2)
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
@@ -205,17 +217,17 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var subTags = CaseUtil.GetSubTags("A5", tlvs);
-            var tag5F2D = from tlv in subTags where tlv.Tag == "5F2D" select tlv;
-            if(tag5F2D.First() == null)
+            var tag5F2D = subTags.FirstOrDefault(tlv => tlv.Tag == "5F2D");
+            if (tag5F2D == null)
             {
                 TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[tag5F2D不存在]");
                 return;
             }
-            var item = tag5F2D.First();
-            string value = UtilLib.Utils.BcdToStr(item.Value);
-            if (item.Value.Length % 2 == 0 &&
-                item.Value.Length >= 4 &&
-                item.Value.Length <= 16 &&
+            string value = UtilLib.Utils.BcdToStr(tag5F2D.Value);
+            caseItem.Description += "【tag5F2D=" + tag5F2D.Value + "】字符串显示:" + value;
+            if (tag5F2D.Value.Length % 2 == 0 &&
+                tag5F2D.Value.Length >= 4 &&
+                tag5F2D.Value.Length <= 16 &&
                 CaseUtil.IsLowerCaseAlpha(value))
             {
                 TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
@@ -227,113 +239,31 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 9F11的长度必须是1字节，值在01～10之间
+        /// 9F11的长度必须是1字节，在A5模板下值在01～10之间,如果tag9F12存在，则tag9F11必须存在
         /// </summary>
         public void SelectAid_008()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            foreach (var item in tlvs)
+            var subTlvs = CaseUtil.GetSubTags("A5", tlvs);
+            var tag9F12 = subTlvs.FirstOrDefault(tlv => tlv.Tag == "9F12");
+            var tag9F11 = subTlvs.FirstOrDefault(tlv => tlv.Tag == "9F11");
+            if (tag9F12 != null && tag9F11 == null) //如果tag9F12存在，则tag9F11必须存在
             {
-                if (item.Tag == "9F11")
-                {
-                    var tag9F11Value = Convert.ToInt16(item.Value, 16);
-                    if (item.Len == 1 &&
-                        tag9F11Value >= 1 &&
-                        tag9F11Value <= 10)
-                    {
-                        var pse9F11 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F11");
-                        if(!string.IsNullOrEmpty(pse9F11))
-                        {
-                            if (pse9F11 == item.Value)
-                                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                            else
-                                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                        }
-                    }
-                    else
-                    {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    }
-                    break;
-                }
+                caseItem.Description += "【如果tag9F12存在，则tag9F11必须存在】";
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
             }
-        }
-
-        /// <summary>
-        /// 9F12的长度必须在1～16之间,Tag9F12转成BCD显示
-        /// </summary>
-        public void SelectAid_009()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-
-            foreach (var item in tlvs)
+            if (tag9F11 == null)
             {
-                if (item.Tag == "9F12")
-                {
-                    string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if (item.Value.Length >= 2 &&
-                        item.Value.Length <= 32 &&
-                        CaseUtil.IsAlpha(value))
-                    {
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    }
-                    else
-                    {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    }
-                    break;
-                }
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[tag9F11不存在]");
+                return;
             }
-        }
-
-        /// <summary>
-        /// 9F4D和DF4D的长度是否为2字节,是否存在
-        /// </summary>
-        public void SelectAid_010()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
-            bool hasTag9F4D = false;
-            bool hasTagDF4D = false;
-            foreach (var item in tags)
-            {
-                if (item.Tag == "9F4D")
-                {
-                    hasTag9F4D = true;
-                    if(item.Len == 2)
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    else
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                }
-                if (item.Tag == "DF4D")
-                {
-                    hasTagDF4D = true;
-                    if (item.Len == 2)
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    else
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                }
-            }
-            if (!hasTag9F4D)
-                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[缺少tag9F4D, 没有记录交易日志入口]");
-            if(!hasTagDF4D)
-                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[缺少tagDF4D, 没有记录ECC/QPBOC交易日志入口]");
-        }
-
-        /// <summary>
-        /// 每个Tag只能存在一个，包括6F，A5，BF0C模板
-        /// </summary>
-        public void SelectAid_012()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-
-            var dupTags = new List<string>();
-            if(CaseUtil.IsUniqTag(response.Response, out dupTags))
+            caseItem.Description += "【tag9F11=" + tag9F11.Value + "】";
+            var tag9F11Value = Convert.ToInt16(tag9F11.Value, 16);
+            if (tag9F11.Len == 1 &&
+                tag9F11Value >= 1 &&
+                tag9F11Value <= 10)
             {
                 TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
@@ -344,7 +274,60 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测tag9F38是否存在,是否能正常分解
+        /// 9F12在A5模板下长度必须在1～16之间,Tag9F12转成BCD显示
+        /// </summary>
+        public void SelectAid_009()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var subTags = CaseUtil.GetSubTags("A5", tlvs);
+            var tag9F12 = subTags.FirstOrDefault(tlv => tlv.Tag == "9F12");
+            if(tag9F12 == null)
+            {
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[tag9F12不存在]");
+                return;
+            }
+            string value = UtilLib.Utils.BcdToStr(tag9F12.Value);
+            caseItem.Description += "【tag9F12=" + tag9F12.Value + "】转为字符串显示:" + value;
+            if (tag9F12.Value.Length >= 2 &&
+                tag9F12.Value.Length <= 32 &&
+                CaseUtil.IsAlpha(value))
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            }
+            else
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+        }
+
+        /// <summary>
+        /// 检测Select Application响应数据tag的唯一性
+        /// </summary>
+        public void SelectAid_012()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var dupTags = new List<string>();
+            if (CaseUtil.IsUniqTag(response.Response, out dupTags))
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            }
+            else
+            {
+                caseItem.Description += "【包含重复的tag";
+                foreach (var dupTag in dupTags)
+                {
+                    caseItem.Description += "[" + dupTag + "]";
+                }
+                caseItem.Description += "】";
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+        }
+
+        /// <summary>
+        /// 检测tag9F38是否存在,是否能正常分解,长度是否符合规范
         /// </summary>
         public void SelectAid_013()
         {
@@ -353,47 +336,79 @@ namespace CardPlatform.Cases
             var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
             if (string.IsNullOrEmpty(tag9F38))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "缺少tag9F38");
                 return;
             }
             var tls = DataParse.ParseTL(tag9F38);
+            caseItem.Description += "【tag9F38=" + tag9F38 + "】";
             if (tls.Count == 0)  //分解不正确
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "无法分解tag9F38");
                 return;
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-        }
-
-        /// <summary>
-        /// 检测tag9F38每个tag长度是否符合规范
-        /// </summary>
-        public void SelectAid_014()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
-            var locator = new ViewModelLocator();
-            if (string.IsNullOrEmpty(tag9F38))
-            {
-                return;
-            }
-            var tls = DataParse.ParseTL(tag9F38);
             foreach (var tl in tls)
             {
-                var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                var terminalData = locator.Terminal.GetTag(tl.Tag);
                 if (string.IsNullOrEmpty(terminalData))
                 {
-                    TraceInfo(TipLevel.Failed, caseNo, "终端数据[tag{0}]不存在，请联系开发人员添加该tag", tl.Tag);
+                    TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "终端数据[tag{0}]不存在，请联系开发人员添加该tag", tl.Tag);
                     return;
                 }
                 if (tl.Len * 2 != terminalData.Length)
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【tag" + tl.Tag + "长度为" + tl.Len + "终端规范长度为:" + terminalData.Length / 2 + "】");
                     return;
                 }
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        #endregion
+        #region UICS 应用
+        /// <summary>
+        /// 检测BF0C模板下是否包含9F4D借贷记交易日志入口
+        /// </summary>
+        public void SelectAid_010()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
+            var tag9F4D = tags.FirstOrDefault(tag => tag.Tag == "9F4D");
+            if(tag9F4D != null)
+            {
+                caseItem.Description += "【tag9F4D=" + tag9F4D.Value + "】";
+                if (tag9F4D.Len == 2 && tag9F4D.Value == "0B0A")
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                else
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+            else
+            {
+                TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[缺少tag9F4D, 没有记录交易日志入口]");
+            }
+        }
+
+        /// <summary>
+        /// 检测BF0C模板下是否包含DF4D电子现金交易日志入口
+        /// </summary>
+        public void SelectAid_011()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
+            var tagDF4D = tags.FirstOrDefault(tag => tag.Tag == "DF4D");
+            if (tagDF4D != null)
+            {
+                caseItem.Description += "【tagDF4D=" + tagDF4D.Value + "】";
+                if (tagDF4D.Len == 2 && tagDF4D.Value == "0C0A")
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                else
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+            else
+            {
+                TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[缺少tagDF4D, 没有ECC/qUICS交易日志入口]");
+            }
         }
 
         /// <summary>
@@ -405,9 +420,9 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
             var tls = DataParse.ParseTL(tag9F38);
-            foreach(var tl in tls)
+            foreach (var tl in tls)
             {
-                if(tl.Tag == "DF69" && tl.Len == 1)
+                if (tl.Tag == "DF69" && tl.Len == 1)
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     return;
@@ -415,6 +430,45 @@ namespace CardPlatform.Cases
             }
             TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
+
+        #endregion
+        #region Visa 特有case
+        /// <summary>
+        /// 检测Select Application BF0C模板是否存在9F4D,Visa应用已废弃日志的使用
+        /// </summary>
+        public void SelectAid_021()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
+            var tag9F4D = tags.FirstOrDefault(tag => tag.Tag == "9F4D");
+            if(tag9F4D == null)
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【tag9F4D=" + tag9F4D.Value + "】");
+        }
+
+        /// <summary>
+        /// 检测Select Application BF0C模板是否存在DF4D,Visa应用已废弃日志的使用
+        /// </summary>
+        public void SelectAid_022()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
+            var tagDF4D = tags.FirstOrDefault(tag => tag.Tag == "DF4D");
+            if (tagDF4D == null)
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【tagDF4D=" + tagDF4D.Value + "】");
+        }
+        #endregion
+
+
 
         /// <summary>
         /// 检测采用密文版本01的QPBOC最基本的PDOL包含的标签是否存在(tag9F66/9F02/9F03/9F1A/95/5F2A/9A/9C/9F37)

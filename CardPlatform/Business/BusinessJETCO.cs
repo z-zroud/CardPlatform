@@ -13,8 +13,6 @@ namespace CardPlatform.Business
 {
     public class BusinessJETCO : BusinessBase
     {
-        private TransactionTag transTags = TransactionTag.GetInstance();
-        private ViewModelLocator locator = new ViewModelLocator();
 
         /// <summary>
         /// 开始UICS交易流程
@@ -26,10 +24,9 @@ namespace CardPlatform.Business
         {
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTransaction(aid);
-            locator.Terminal.TermianlSettings.Tag9F7A = "00";         //电子现金支持指示器(这里走借贷记交易流程)
-            locator.Terminal.TermianlSettings.Tag9C = "00";         //交易类型
-            locator.Terminal.TermianlSettings.Tag9F66 = "46000000";   //终端交易属性
-
+            locator.Terminal.SetTag("9F7A", "00", "电子现金支持指示器(这里走借贷记交易流程)");
+            locator.Terminal.SetTag("9C", "00", "交易类型");
+            locator.Terminal.SetTag("9F66", "46000000", "终端交易属性");
             DoTransaction(DoTransactionEx);
 
         }
@@ -37,7 +34,7 @@ namespace CardPlatform.Business
         private bool DoTransactionEx()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (!SelectApp(aid))
+            if (!SelectApp(currentAid))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
@@ -99,7 +96,7 @@ namespace CardPlatform.Business
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
-                    stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.SelectApp, response);
+                    stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -130,7 +127,7 @@ namespace CardPlatform.Business
             string pdolData = string.Empty;
             foreach (var tl in tls)
             {
-                var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                var terminalData = locator.Terminal.GetTag(tl.Tag);
                 if (terminalData.Length != tl.Len * 2) return new List<AFL>();
                 if (string.IsNullOrEmpty(terminalData)) return new List<AFL>();
                 pdolData += terminalData;
@@ -150,7 +147,7 @@ namespace CardPlatform.Business
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
             var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
-            gpoCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.GPO, response);
+            gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
             return afls;
         }
 
@@ -177,7 +174,7 @@ namespace CardPlatform.Business
                 }
             }
             IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS };
-            readRecordCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadRecord, resps);
+            readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
 
@@ -278,7 +275,7 @@ namespace CardPlatform.Business
         protected int HandleLimitation()
         {
             var handleLimitationCase = new ProcessRestrictionCase() { CurrentApp = Constant.APP_UICS };
-            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
+            handleLimitationCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
             return 0;
         }
 
@@ -289,7 +286,7 @@ namespace CardPlatform.Business
         protected int CardHolderVerify()
         {
             var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_UICS };
-            cardHolderVerifyCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
+            cardHolderVerifyCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
 
@@ -301,7 +298,7 @@ namespace CardPlatform.Business
         protected int TerminalRiskManagement()
         {
             var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_UICS };
-            terminalRishManagementCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
+            terminalRishManagementCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }
 
@@ -336,7 +333,7 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
             var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase() { CurrentApp = Constant.APP_UICS };
-            terminalActionAnalyzeCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
+            terminalActionAnalyzeCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
             return 0;
         }
 
@@ -345,16 +342,16 @@ namespace CardPlatform.Business
             string acSessionKey;
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
-            if (string.IsNullOrEmpty(TransCfg.TransDesAcKey))
+            if (string.IsNullOrEmpty(transCfg.TransDesAcKey))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "国际算法UDK/MDK不存在");
                 return 1;
             }
-            acSessionKey = GenSessionKey(TransCfg.TransDesAcKey, TransCfg.KeyType, TransCfg.Algorithm);
+            acSessionKey = GenSessionKey(transCfg.TransDesAcKey, transCfg.KeyType, transCfg.Algorithm);
 
             string ac = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
             string arpc;
-            if (TransCfg.Algorithm == AlgorithmType.DES)
+            if (transCfg.Algorithm == AlgorithmType.DES)
                 arpc = Authencation.GenArpc(acSessionKey, ac, "3030", (int)AlgorithmType.DES);
             else
                 arpc = Authencation.GenArpc(acSessionKey, ac, "3030", (int)AlgorithmType.SM);
@@ -365,7 +362,7 @@ namespace CardPlatform.Business
                 return 1;
             }
             caseObj.TraceInfo(TipLevel.Sucess, caseNo, "发卡行认证成功");
-            locator.Terminal.TermianlSettings.Tag8A = "3030";
+            locator.Terminal.SetTag("8A", "3030");
             return 0;
         }
 
@@ -389,7 +386,7 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
             var transactionEndCase = new TransactionEndCase() { CurrentApp = Constant.APP_UICS };
-            transactionEndCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TransactionEnd, resp);
+            transactionEndCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TransactionEnd, resp);
 
             return 0;
         }

@@ -13,8 +13,10 @@
 
 #ifdef _DEBUG
 #pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+#pragma comment(lib,"..\\lib\\Debug\\Log.lib")
 #else
 #pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#pragma comment(lib,"..\\lib\\Release\\Log.lib")
 #endif
 
 

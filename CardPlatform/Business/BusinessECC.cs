@@ -15,8 +15,6 @@ namespace CardPlatform.Business
 {
     public class BusinessECC : BusinessBase
     {
-        private TransactionTag transTags    = TransactionTag.GetInstance();
-        private ViewModelLocator locator    = new ViewModelLocator();
         private bool isEccTranction         = false;
         private bool isSupportCDA           = false;
         private string pdolData             = string.Empty;
@@ -30,10 +28,9 @@ namespace CardPlatform.Business
         public override void DoTransaction(string aid)
         {
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
-            base.DoTransaction(aid);
-            locator.Terminal.TermianlSettings.Tag9F7A = "01";   //电子现金交易指示器
-            locator.Terminal.TermianlSettings.Tag9C = "00";     //交易类型(消费)          
-
+            base.DoTransaction(aid);     
+            locator.Terminal.SetTag("9F7A", "01", "电子现金交易指示器");
+            locator.Terminal.SetTag("9C", "00", "交易类型(消费)");
             DoTransaction(DoTransactionEx);
         }
 
@@ -42,7 +39,7 @@ namespace CardPlatform.Business
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             pdolData = string.Empty;    //PDOL Data也需要清空，防止做CDA时，出现重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (!SelectApp(aid))
+            if (!SelectApp(currentAid))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
@@ -116,7 +113,7 @@ namespace CardPlatform.Business
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
-                    stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.SelectApp, response);
+                    stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -147,7 +144,7 @@ namespace CardPlatform.Business
             string pdolData = string.Empty;
             foreach (var tl in tls)
             {
-                var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                var terminalData = locator.Terminal.GetTag(tl.Tag);
                 if (terminalData.Length != tl.Len * 2) return afls;
                 if (string.IsNullOrEmpty(terminalData)) return afls;
                 pdolData += terminalData;
@@ -169,7 +166,7 @@ namespace CardPlatform.Business
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
 
             var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
-            gpoCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.GPO, response);
+            gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
 
             return afls;
         }
@@ -197,7 +194,7 @@ namespace CardPlatform.Business
                 }
             }
             IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS };
-            readRecordCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadRecord, resps);
+            readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
 
@@ -306,21 +303,21 @@ namespace CardPlatform.Business
         protected int HandleLimitation()
         {
             var handleLimitationCase = new ProcessRestrictionCase() { CurrentApp = Constant.APP_UICS };
-            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
+            handleLimitationCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
             return 0;
         }
 
         protected int CardHolderVerify()
         {
             var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_UICS };
-            cardHolderVerifyCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
+            cardHolderVerifyCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
 
         protected int TerminalRiskManagement()
         {
             var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_UICS };
-            terminalRishManagementCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
+            terminalRishManagementCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }
 
@@ -341,13 +338,13 @@ namespace CardPlatform.Business
                 var tls = DataParse.ParseTL(CDOL1);
                 foreach (var tl in tls)
                 {
-                    CDOL1Data += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                    CDOL1Data += locator.Terminal.GetTag(tl.Tag);
                 }
                 response = APDU.GACCmd(Constant.TC_CDA, CDOL1Data);
 
                 if (SaveTags(TransactionStep.TerminalActionAnalyze,response.Response))
                 {
-                    if(TransCfg.Algorithm == AlgorithmType.DES)
+                    if(transCfg.Algorithm == AlgorithmType.DES)
                     {
                         string tag9F4B = transTags.GetTag("9F4B");
                         string exp = transTags.GetTag("9F47");
@@ -358,7 +355,7 @@ namespace CardPlatform.Business
                         }
                         string recoveryHash = recoveryData.Substring(recoveryData.Length - 42, 40);
                         string hashInput = recoveryData.Substring(2, recoveryData.Length - 44);
-                        hashInput += locator.Terminal.TermianlSettings.GetTag("9F37");
+                        hashInput += locator.Terminal.GetTag("9F37");
                         string hash = Authencation.GetHash(hashInput);
                         if (hash != recoveryHash)
                         {
@@ -417,7 +414,7 @@ namespace CardPlatform.Business
                             return -4;
                         }
                         string verifyData = tag9F4B.Substring(0, 4 + icDynamicLen * 2);
-                        verifyData += locator.Terminal.TermianlSettings.GetTag("9F37");
+                        verifyData += locator.Terminal.GetTag("9F37");
                         string signedData = tag9F4B.Substring(4 + icDynamicLen * 2);
                         if(Authencation.SM2Verify(iccPulicKey, verifyData, signedData) != 0)
                         {

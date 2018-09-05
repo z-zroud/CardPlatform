@@ -36,6 +36,7 @@ namespace CardPlatform.Cases
             CheckTemplateTag(tlvs);            
         }
 
+        #region 通用检测case
         /// <summary>
         /// 检测GPO响应数据是否以80开头,格式是否正确
         /// </summary>
@@ -43,32 +44,32 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
+            caseItem.Description += "【GPO响应数据:" + response.Response + "】";
             if (!CaseUtil.RespStartWith(response.Response, "80"))
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 return;
-            }   
+            }
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count != 1 || tlvs[0].Value.Length <= 4)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO数据无法TLV分解]");
                 return;
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
-
         /// <summary>
-        /// 检测tag94是否为4字节的倍数
+        /// 检测tag94是否为4字节的整数倍
         /// </summary>
         public void GPO_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO,"94");
-            if(tag94.Length % 4 != 0)
+            var tag94Value = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
+            caseItem.Description += "【tag94=" + tag94Value + "】";
+            if (tag94Value.Length % 4 != 0)
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
@@ -79,7 +80,7 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测GPO相应数据中没有重复的AFL记录
+        /// 检测tag94是否包含重复的AFL记录
         /// </summary>
         public void GPO_003()
         {
@@ -89,26 +90,26 @@ namespace CardPlatform.Cases
             bool hasDuplex = false;
             var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
             var tls = DataParse.ParseAFL(tag94);
-            for(int i = 0; i < tls.Count; i++)
+            for (int i = 0; i < tls.Count; i++)
             {
-                for(int j = i + 1; j < tls.Count; j++)
+                for (int j = i + 1; j < tls.Count; j++)
                 {
-                    if(tls[i].SFI == tls[j].SFI &&
+                    if (tls[i].SFI == tls[j].SFI &&
                         tls[i].RecordNo == tls[j].RecordNo)
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[重复的记录号为:" + tls[i].RecordNo + "]");
                         hasDuplex = true;
                     }
                 }
             }
-            if(!hasDuplex)
+            if (!hasDuplex)
             {
                 TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
         /// <summary>
-        /// 检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于第3个字节)
+        /// 检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于等于第3个字节)
         /// </summary>
         public void GPO_004()
         {
@@ -117,36 +118,18 @@ namespace CardPlatform.Cases
 
             var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
             int count = tag94.Length / 8;
-            for(int i = 0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 var firstRecord = Convert.ToInt16(tag94.Substring(2 + i * 8, 2), 16);
                 var secondRecord = Convert.ToInt16(tag94.Substring(4 + i * 8, 2), 16);
 
                 if (firstRecord > secondRecord)
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[请检查tag94是否按序排列]");
                     return;
                 }
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-        }
-
-
-        /// <summary>
-        /// 检测卡片是否支持SDA功能
-        /// </summary>
-        public void GPO_005()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
-            var aipHelper = new AipHelper(aip);
-            if(aipHelper.IsSupportSDA())
-            {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                return;
-            }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -157,6 +140,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            caseItem.Description += "【tag82=" + aip + "】";
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportDDA())
             {
@@ -174,6 +158,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            caseItem.Description += "【tag82=" + aip + "】";
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportCardHolderVerify())
             {
@@ -191,6 +176,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            caseItem.Description += "【tag82=" + aip + "】";
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportTerminalRiskManagement())
             {
@@ -208,6 +194,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            caseItem.Description += "【tag82=" + aip + "】";
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportIssuerAuth())
             {
@@ -225,6 +212,7 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            caseItem.Description += "【tag82=" + aip + "】";
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportCDA())
             {
@@ -234,6 +222,30 @@ namespace CardPlatform.Cases
             TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
 
+        #endregion
+        #region Visa case
+        #endregion
+        #region qUICS
+        #endregion
+        #region qVSDC
+        #endregion
+
+        /// <summary>
+        /// 检测卡片是否支持SDA功能
+        /// </summary>
+        public void GPO_005()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(aip);
+            if(aipHelper.IsSupportSDA())
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
         /// <summary>
         /// 检测GPO响应数据是否以77开头,格式是否正确
         /// </summary>
@@ -377,7 +389,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if(TransactionConfig.GetInstance().CurrentApp == AppType.VISA)
             {
-                if (CheckEmvAc())
+                if (CheckVisaAc())
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     return;

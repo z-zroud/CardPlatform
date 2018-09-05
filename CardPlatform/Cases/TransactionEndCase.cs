@@ -70,7 +70,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if (TransactionConfig.GetInstance().CurrentApp == AppType.VISA)
             {
-                if (CheckEmvAc())
+                if (CheckVisaAc())
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     return;

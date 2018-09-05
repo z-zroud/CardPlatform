@@ -19,16 +19,16 @@ const int SM_KEY = 1;
 * 功能： 生成秘钥的KCV校验值
 * 参数： key 秘钥
 *********************************************************************************/
-extern "C" GENKEY_API int GenDesKcv(const char* key, char* kcv, int kcvLen);
+extern "C" int GENKEY_API GenDesKcv(const char* key, char* kcv, int kcvLen);
 
-extern "C" GENKEY_API int GenSmKcv(const char* key, char* kcv, int kcvLen);
+extern "C" int GENKEY_API GenSmKcv(const char* key, char* kcv, int kcvLen);
 
 /********************************************************************************
 * 功能：从数据库(sqlite)中获取CA公钥
 * 参数：caIndex: 公钥索引
 * 参数：rid 和caIndex 获取唯一的CA公钥
 *********************************************************************************/
-extern "C" GENKEY_API int GenCAPublicKey(const char* caIndex, const char* rid, char* caPublicKey);
+extern "C" int GENKEY_API GenCAPublicKey(const char* caIndex, const char* rid, char* caPublicKey);
 
 /********************************************************************************
 * 功能： 获取发卡行公钥
@@ -36,7 +36,7 @@ extern "C" GENKEY_API int GenCAPublicKey(const char* caIndex, const char* rid, c
 *		ipkRemainder 发卡行公钥余项
 *		type
 *********************************************************************************/
-extern "C" GENKEY_API  int GenDesIssuerPublicKey(
+extern "C" int GENKEY_API  GenDesIssuerPublicKey(
 	const char* caPublicKey, 
 	const char* issuerPublicCert, 
 	const char* ipkRemainder, 
@@ -54,7 +54,7 @@ extern "C" GENKEY_API  int GenDesIssuerPublicKey(
 * 参数： iccExponent IC卡公钥指数
 * 返回： 发卡行公钥
 *********************************************************************************/
-extern "C" GENKEY_API  int GenDesICCPublicKey(
+extern "C" int GENKEY_API GenDesICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
 	const char* iccRemainder,
@@ -72,7 +72,7 @@ extern "C" GENKEY_API  int GenDesICCPublicKey(
 *       PAN 账号
 * 返回：	发卡行公钥
 *********************************************************************************/
-extern "C" GENKEY_API  int GenSMIssuerPublicKey(
+extern "C" int GENKEY_API  GenSMIssuerPublicKey(
 	const char* caPublicKey, 
 	const char* issuerPublicCert,
     const char* PAN,
@@ -85,7 +85,7 @@ extern "C" GENKEY_API  int GenSMIssuerPublicKey(
 *		ipkRemainder 发卡行公钥余项
 *		type
 *********************************************************************************/
-extern "C" GENKEY_API  int GenSMICCPublicKey(
+extern "C" int GENKEY_API   GenSMICCPublicKey(
 	const char* issuerPublicKey,
 	const char* iccPublicCert,
 	const char* needAuthStaticData,
@@ -101,53 +101,53 @@ extern "C" GENKEY_API  int GenSMICCPublicKey(
 * 参数： tag82 AIP(应用交互特征)
 * 返回： 0 表示SDA验证成功，非零表示验证失败
 *********************************************************************************/
-extern "C" GENKEY_API int DES_SDA(const char* issuerPublicKey, 
+extern "C" int GENKEY_API DES_SDA(const char* issuerPublicKey,
 	const char*ipkExponent,  
 	const char* tag93, 
 	const char* sigStaticData,
 	const char* tag82);
-extern "C" GENKEY_API int SM_SDA(const char* issuerPublicKey, const char* toBeSignedStaticAppData, const char* tag93, const char* tag82);
+extern "C" int GENKEY_API SM_SDA(const char* issuerPublicKey, const char* toBeSignedStaticAppData, const char* tag93, const char* tag82);
 
-extern "C" GENKEY_API int DES_DDA(const char* iccPublicKey, 
+extern "C" int GENKEY_API DES_DDA(const char* iccPublicKey,
 	const char*iccExponent,
 	const char* tag9F4B,
 	const char* dynamicData);
-extern "C" GENKEY_API int SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicData);
+extern "C" int GENKEY_API SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicData);
 
 /********************************************************************************
 * 通过UDK_AC  UDK_MAC  UDK_ENC 生成对应的会话密钥
 * 参数udkSubKey 可以传入UDK_AC/UDK_MAC/UDK_ENC 生成对应的sessionKey
 * 参数atc 应用交易计数器
 *********************************************************************************/
-extern "C" GENKEY_API void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey, int keyType=0);
-
+extern "C" void GENKEY_API GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey, int keyType=0);
+extern "C" void GENKEY_API GenVisaUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey);
 /********************************************************************************
 * 通过对应的MDK_AC MDK_MAC MDK_ENC 生成对应的UDK_AC UDK_MAC  UDK_ENC
 * 参数 mdk 可以传入MDK_AC/MDK_MAC/MDK_ENC 生成对应的UDK_AC/UDK_MAC/UDK_ENC
 * 参数 cardNo 卡号
 * 参数cardSequence 卡片序列号
 *********************************************************************************/
-extern "C" GENKEY_API void GenUdk(const char* mdk,const char* cardNo,const char* cardSequence,char* udk, int keyType = 0);
+extern "C" void GENKEY_API GenUdk(const char* mdk,const char* cardNo,const char* cardSequence,char* udk, int keyType = 0);
 
 /********************************************************************************
 * 生成ARPC
 * 参数： udkAcSessionKey 为UDK_AC生成的会话密钥
 * 参数：ac 应用密文
 *********************************************************************************/
-extern "C" GENKEY_API void GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc, int keyType = 0);
+extern "C" void GENKEY_API GenArpc(const char* udkAuthSessionKey, char* ac, char* authCode, char* arpc, int keyType = 0);
 
 /*******************************************************************************
 * 生成发卡行脚本MAC
 ********************************************************************************/
-extern "C" GENKEY_API void GenPBOCMac(const char* udkMacSessionKey, const char* data, char* mac, int keyType = 0);
-extern "C" GENKEY_API void GenEMVMac(const char* udkAC, const char* data, char* mac);
+extern "C" void GENKEY_API GenPBOCMac(const char* udkMacSessionKey, const char* data, char* mac, int keyType = 0);
+extern "C" void GENKEY_API GenEMVMac(const char* udkAC, const char* data, char* mac);
 
 
-extern "C" GENKEY_API void Decrypt_Des3_CBC(const char* key, const char* input, char* output, int outputLen);
+extern "C" void GENKEY_API Decrypt_Des3_CBC(const char* key, const char* input, char* output, int outputLen);
 
-extern "C" GENKEY_API int GenHash(const char* input, char* hash, int len);
-extern "C" GENKEY_API int DES_GenRecovery(const char* publicKey, const char* publicKeyExp, const char* encryptionData, char* recoveryData, int len);
+extern "C" int GENKEY_API GenHash(const char* input, char* hash, int len);
+extern "C" int GENKEY_API DES_GenRecovery(const char* publicKey, const char* publicKeyExp, const char* encryptionData, char* recoveryData, int len);
 
-extern "C" GENKEY_API int SM2Verify(const char *pPublicKey, const char *pMSG, const char *pSignData);
+extern "C" int GENKEY_API SM2Verify(const char *pPublicKey, const char *pMSG, const char *pSignData);
 
-extern "C" GENKEY_API  int GenSMHash(char *input, char *output);
+extern "C" int GENKEY_API  GenSMHash(char *input, char *output);

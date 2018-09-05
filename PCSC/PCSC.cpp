@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "PCSC.h"
 #include "../Util/Tool.h"
-#include "../Util/Log.h"
+#include "../Log/Log.h"
 #include <stdio.h>
 #include <winscard.h>
 
@@ -322,9 +322,9 @@ int  SendApdu(const char* cmd, char* output, int len)
     strncpy_s(szCmdLen, 3, g_cmd + 8, 2);
 #ifdef _DEBUG
     if (cmdLen > 10)
-        Log->Debug("APDU: %s %s %s\n", cmdHeader, szCmdLen, g_cmd + 10);
+        TraceDebug(GetCurLog(),"APDU: %s %s %s\n", cmdHeader, szCmdLen, g_cmd + 10);
     else
-        Log->Debug("APDU: %s\n", g_cmd);
+        TraceDebug(GetCurLog(), "APDU: %s\n", g_cmd);
 #endif // DEBUG
     if (!SendApduCmd(cmd, response, responseLen))
     {
@@ -371,10 +371,10 @@ int  SendApdu(const char* cmd, char* output, int len)
 #ifdef _DEBUG
     if (result != 0x9000)
     {
-        Log->Error("Response: %s    SW=%04X\n", output, result);
+        TraceError(GetCurLog(), "RESP: %s SW=%04X\n", output, result);
     }
     else {
-        Log->Debug("Response: %s    SW=%04X\n", output, result);
+        TraceDebug(GetCurLog(), "RESP: %s SW=%04X\n", output, result);
     }
         
 #endif

@@ -72,5 +72,59 @@ namespace CardPlatform.Cases
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
+
+        /// <summary>
+        /// 检测Tag5F28与9F57发卡行国家代码的一致性
+        /// </summary>
+        public void GetData_004()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag5F28 = TransactionTag.GetInstance().GetTag("5F28");
+            var tag9F57 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F57");
+            if (string.IsNullOrEmpty(tag9F57))
+            {
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "卡片缺少tag9F57，如果支持卡片频度检测，该数据必须存在");
+                return;
+            }
+            if (tag5F28 != tag9F57)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测Tag9F42与9F51应用货币代码的一致性
+        /// </summary>
+        public void GetData_005()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag9F42 = TransactionTag.GetInstance().GetTag("9F42");
+            var tag9F51 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F51");
+            if (string.IsNullOrEmpty(tag9F42))
+            {
+                TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少tag9F42,如果8E中X,Y金额不为0，该数据必须存在");
+                return;
+            }
+            
+            if (string.IsNullOrEmpty(tag9F51))
+            {
+                TraceInfo(caseItem.Level, caseNo, "卡片缺少tag9F51,如果只选频度检测，该数据必须存在");
+                return;
+            }
+            caseItem.Description += "【tag9F42=" + tag9F42 + "】";
+            caseItem.Description += "【tag9F51=" + tag9F51 + "】";
+            if (tag9F42 != tag9F51)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
     }
 }

@@ -278,7 +278,7 @@ namespace CardPlatform.ViewModel
         private void DoTrans()
         {
             BusinessBase trans = new BusinessBase();
-            BusinessBase.PersoFile = TagInfoFile;
+            trans.PersoFile = TagInfoFile;
 
             TransactionConfig transConfig = TransactionConfig.GetInstance();
             transConfig.CurrentApp      = CurrentApp;

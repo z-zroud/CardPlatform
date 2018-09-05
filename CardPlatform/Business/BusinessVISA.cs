@@ -13,9 +13,6 @@ namespace CardPlatform.Business
 {
     public class BusinessVISA : BusinessBase
     {
-        private TransactionTag transTags    = TransactionTag.GetInstance();
-        private ViewModelLocator locator    = new ViewModelLocator();
-
         /// <summary>
         /// 开始UICS交易流程
         /// </summary>
@@ -26,30 +23,28 @@ namespace CardPlatform.Business
         {
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTransaction(aid);
-            locator.Terminal.TermianlSettings.Tag9F7A   = "00";         //电子现金支持指示器(这里走借贷记交易流程)
-            locator.Terminal.TermianlSettings.Tag9C     = "00";         //交易类型
-            locator.Terminal.TermianlSettings.Tag9F66   = "46000000";   //终端交易属性
-
-
+            locator.Terminal.SetTag("9F7A", "00", "电子现金支持指示器(这里走借贷记交易流程)");
+            locator.Terminal.SetTag("9C", "00", "交易类型");
+            locator.Terminal.SetTag("9F66", "46000000", "终端交易属性");
             DoTransaction(DoTransactionEx);
-
         }
 
         private bool DoTransactionEx()
         {
+            log.TraceLog(LogLevel.Info, "========================= Begin Visa transaction  =========================\n");
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (!SelectApp(aid))
+            if (!ApplicationSelection(currentAid))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
             }
-            var afls = GPOEx();
+            var afls = InitiateApplicationProcessing();
             if (afls.Count == 0)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                 return false;
             }
-            if (!ReadAppRecords(afls))
+            if (!ReadApplicationData(afls))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
                 return false;
@@ -59,15 +54,15 @@ namespace CardPlatform.Business
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportSDA() || aipHelper.IsSupportDDA() || aipHelper.IsSupportCDA())
             {
-                OfflineAuthcation();    //脱机数据认证
+                OfflineDataAuthentication();    //脱机数据认证
             }
-            HandleLimitation();         //处理限制
+            ProcessingRestrictions();         //处理限制
             if (aipHelper.IsSupportCardHolderVerify())
             {
-                CardHolderVerify();     //持卡人验证
+                CardHolderVerification();     //持卡人验证
             }
             TerminalRiskManagement();   //终端风险管理
-            if (0 != TerminalActionAnalyze())   //终端行为分析
+            if (0 != TerminalActionAnalysis())   //终端行为分析
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
                 return false;
@@ -90,23 +85,24 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="aid"></param>
         /// <returns></returns>
-        protected bool SelectApp(string aid)
+        protected bool ApplicationSelection(string aid)
         {
+            log.TraceLog(LogLevel.Info, "========================= Application Selection  =========================");
             bool result = false;
-            ApduResponse response = base.SelectAid(aid);
-            if (response.SW == 0x9000)
+            ApduResponse resp = base.SelectAid(aid);
+            if (resp.SW == 0x9000)
             {
-                if (SaveTags(TransactionStep.SelectApp, response.Response))
+                if (SaveTags(TransactionStep.SelectApp, resp.Response))
                 {
                     var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_VISA };
-                    stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.SelectApp, response);
+                    stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, resp);
                     result = true;
                 }
             }
             else
             {
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, resp.SW);
             }
             return result;
         }
@@ -116,26 +112,14 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="pdol"></param>
         /// <returns></returns>
-        protected List<AFL> GPOEx()
+        protected List<AFL> InitiateApplicationProcessing()
         {
+            log.TraceLog(LogLevel.Info, "========================= Initiate Application Processing  =========================");
             var afls = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             string tag9F38 = transTags.GetTag(TransactionStep.SelectApp, "9F38");
-            string pdolData = string.Empty;
-            if (!string.IsNullOrEmpty(tag9F38))
-            {
-                var tls = DataParse.ParseTL(tag9F38);
-                
-                foreach (var tl in tls)
-                {
-                    var terminalData = locator.Terminal.TermianlSettings.GetTag(tl.Tag);
-                    if (terminalData.Length != tl.Len * 2) return new List<AFL>();
-                    if (string.IsNullOrEmpty(terminalData)) return new List<AFL>();
-                    pdolData += terminalData;
-                }
-            }
-
+            var pdolData = GetDolData(tag9F38);
             var response = base.GPO(pdolData);
             if (response.SW != 0x9000)
             {
@@ -151,7 +135,7 @@ namespace CardPlatform.Business
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
             var gpoCase = new GPOCase() { CurrentApp = Constant.APP_VISA };
-            gpoCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.GPO, response);
+            gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
             return afls;
         }
 
@@ -160,8 +144,9 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="afls"></param>
         /// <returns></returns>
-        protected bool ReadAppRecords(List<AFL> afls)
+        protected bool ReadApplicationData(List<AFL> afls)
         {
+            log.TraceLog(LogLevel.Info, "========================= Read Application Data  =========================");
             var resps = base.ReadRecords(afls);
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
@@ -178,7 +163,7 @@ namespace CardPlatform.Business
                 }
             }
             IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_VISA };
-            readRecordCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadRecord, resps);
+            readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
 
@@ -190,23 +175,23 @@ namespace CardPlatform.Business
 
             RequirementData[] tagStandards =
             {
-                new RequirementData("9F51",2,TipLevel.Warn,"如果卡片执行连续脱机交易-国际货币频度检查或累计金额(包括双币)频度检测，需要此应用货币代码"),  //如果执行频度检查，需要此应用货币代码
-                new RequirementData("9F52",2,TipLevel.Failed,"如果支持发卡行认证，需要ADA应用缺省行为"),  //如果支持发卡行认证，需要ADA应用缺省行为
-                new RequirementData("9F53",1,TipLevel.Failed,"如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)"),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
-                new RequirementData("9F54",6,TipLevel.Failed,"如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)"),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
-                new RequirementData("9F56",1,TipLevel.Failed,"如果支持发卡行认证，需要此发卡行认证指示位"),  //如果支持发卡行认证，需要此发卡行认证指示位
-                new RequirementData("9F57",2,TipLevel.Warn,"如果支持卡片频度检查，需要此发卡行国家代码"),  //如果支持卡片频度检查，需要此发卡行国家代码
-                new RequirementData("9F58",1,TipLevel.Failed,"如果执行卡片频度检查，需要此连续脱机交易下限"),  //如果执行卡片频度检查，需要此连续脱机交易下限
-                new RequirementData("9F59",1,TipLevel.Failed,"如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易"),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
-                new RequirementData("9F5C",6,TipLevel.Failed,"累计脱机交易金额上限"),  //累计脱机交易金额上限
-                new RequirementData("9F72",1,TipLevel.Warn,"连续脱机交易限制数,如果执行国际-国家频度检查,该数据必须存在"),  //连续脱机交易限制数
-                new RequirementData("9F75",1,TipLevel.Warn,"累计脱机交易金额(双货币)"),  //累计脱机交易金额(双货币)
-                new RequirementData("9F76",0,TipLevel.Warn,"第二应用货币代码"),  //第二应用货币代码
-                new RequirementData("9F4F",0,TipLevel.Failed,"交易日志格式"),  //交易日志格式
-                new RequirementData("9F68",0,TipLevel.Warn,"缺少卡片附加处理选项"),
-                new RequirementData("9F36",2,TipLevel.Failed,"应用交易计数器"),  //应用交易计数器
-                new RequirementData("9F13",0,TipLevel.Failed,"终端风险管理阶段需要此数据用于新卡检查，发卡行认证通过后，需要设置该值"),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
-                new RequirementData("9F17",0,TipLevel.Warn,"如果支持脱机PIN,需要此PIN尝试计数器"),  //如果支持脱机PIN,需要此PIN尝试计数器
+                //new RequirementData("9F51",2,TipLevel.Warn,"如果卡片执行连续脱机交易-国际货币频度检查或累计金额(包括双币)频度检测，需要此应用货币代码"),  //如果执行频度检查，需要此应用货币代码
+                //new RequirementData("9F52",2,TipLevel.Failed,"如果支持发卡行认证，需要ADA应用缺省行为"),  //如果支持发卡行认证，需要ADA应用缺省行为
+                //new RequirementData("9F53",1,TipLevel.Failed,"如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)"),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
+                //new RequirementData("9F54",6,TipLevel.Failed,"如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)"),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
+                //new RequirementData("9F56",1,TipLevel.Failed,"如果支持发卡行认证，需要此发卡行认证指示位"),  //如果支持发卡行认证，需要此发卡行认证指示位
+                //new RequirementData("9F57",2,TipLevel.Warn,"如果支持卡片频度检查，需要此发卡行国家代码"),  //如果支持卡片频度检查，需要此发卡行国家代码
+                //new RequirementData("9F58",1,TipLevel.Failed,"如果执行卡片频度检查，需要此连续脱机交易下限"),  //如果执行卡片频度检查，需要此连续脱机交易下限
+                //new RequirementData("9F59",1,TipLevel.Failed,"如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易"),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
+                //new RequirementData("9F5C",6,TipLevel.Failed,"累计脱机交易金额上限"),  //累计脱机交易金额上限
+                //new RequirementData("9F72",1,TipLevel.Warn,"连续脱机交易限制数,如果执行国际-国家频度检查,该数据必须存在"),  //连续脱机交易限制数
+                //new RequirementData("9F75",1,TipLevel.Warn,"累计脱机交易金额(双货币)"),  //累计脱机交易金额(双货币)
+                //new RequirementData("9F76",0,TipLevel.Warn,"第二应用货币代码"),  //第二应用货币代码
+                //new RequirementData("9F4F",0,TipLevel.Failed,"交易日志格式"),  //交易日志格式
+                //new RequirementData("9F68",0,TipLevel.Warn,"缺少卡片附加处理选项"),
+                //new RequirementData("9F36",2,TipLevel.Failed,"应用交易计数器"),  //应用交易计数器
+                //new RequirementData("9F13",0,TipLevel.Failed,"终端风险管理阶段需要此数据用于新卡检查，发卡行认证通过后，需要设置该值"),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
+                //new RequirementData("9F17",0,TipLevel.Warn,"如果支持脱机PIN,需要此PIN尝试计数器"),  //如果支持脱机PIN,需要此PIN尝试计数器
             };
             for (int i = 0; i < tagStandards.Length; i++)
             {
@@ -236,8 +221,9 @@ namespace CardPlatform.Business
         /// 脱机数据认证
         /// </summary>
         /// <returns></returns>
-        protected int OfflineAuthcation()
+        protected int OfflineDataAuthentication()
         {
+            log.TraceLog(LogLevel.Info, "========================= Offline Data Authentication  =========================");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string aip = transTags.GetTag(TransactionStep.GPO, "82");
             var aipHelper = new AipHelper(aip);
@@ -277,10 +263,11 @@ namespace CardPlatform.Business
         /// 处理限制,
         /// </summary>
         /// <returns></returns>
-        protected int HandleLimitation()
+        protected int ProcessingRestrictions()
         {
+            log.TraceLog(LogLevel.Info, "========================= Processing Restrictions  =========================");
             var handleLimitationCase = new ProcessRestrictionCase() { CurrentApp = Constant.APP_VISA };
-            handleLimitationCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
+            handleLimitationCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
             return 0;
         }
 
@@ -288,10 +275,11 @@ namespace CardPlatform.Business
         /// 持卡人认证
         /// </summary>
         /// <returns></returns>
-        protected int CardHolderVerify()
+        protected int CardHolderVerification()
         {
+            log.TraceLog(LogLevel.Info, "========================= Cardholder Verification  =========================");
             var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_VISA };
-            cardHolderVerifyCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
+            cardHolderVerifyCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
 
@@ -302,18 +290,24 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int TerminalRiskManagement()
         {
+            log.TraceLog(LogLevel.Info, "========================= Terminal Risk Management  =========================");
             var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_VISA };
-            terminalRishManagementCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
+            terminalRishManagementCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }
 
         /// <summary>
-        /// 终端行为分析，1，终端检查脱机处理结果，决定交易是拒绝/接受/联机(默认联机)
-        /// 2. 终端请求卡片生成密文
+        /// 终端行为分析:终端根据发卡行设置在卡片里的规则，基于脱机数据认证处理结果
+        /// 决定交易是拒绝/接受/联机(默认联机)
+        /// 终端行为分析包括以下两步骤：
+        /// 1. 查看脱机数据处理结果
+        /// 2. 请求密文
+        /// 终端完成请求密文命令后，卡片执行卡片风险管理，然后返回应用密文给终端
         /// </summary>
         /// <returns></returns>
-        protected int TerminalActionAnalyze()
+        protected int TerminalActionAnalysis()
         {
+            log.TraceLog(LogLevel.Info, "========================= Terminal Action Analysis  =========================");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string CDOL1 = transTags.GetTag(TransactionStep.ReadRecord, "8C");
             ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
@@ -338,22 +332,23 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
             var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase() { CurrentApp = Constant.APP_VISA };
-            terminalActionAnalyzeCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
+            terminalActionAnalyzeCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
             return 0;
         }
 
         protected int IssuerAuthencation()
         {
+            log.TraceLog(LogLevel.Info, "========================= Online Processing  =========================");
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
-            if (string.IsNullOrEmpty(TransCfg.TransDesAcKey))
+            if (string.IsNullOrEmpty(transCfg.TransDesAcKey))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "国际算法UDK/MDK不存在");
                 return 1;
             }
 
             string ac = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
-            string arpc = Authencation.GenArpc(TransCfg.TransDesAcKey, ac, "3030", (int)AlgorithmType.DES);
+            string arpc = Authencation.GenArpc(transCfg.TransDesAcKey, ac, "3030", (int)AlgorithmType.DES);
             var resp = APDU.ExtAuthCmd(arpc, "3030");
             if (resp.SW != 0x9000)
             {
@@ -361,12 +356,13 @@ namespace CardPlatform.Business
                 return 1;
             }
             caseObj.TraceInfo(TipLevel.Sucess, caseNo, "发卡行认证成功");
-            locator.Terminal.TermianlSettings.Tag8A = "3030";
+            locator.Terminal.SetTag("8A", "3030");
             return 0;
         }
 
         protected int TransactionEnd()
         {
+            log.TraceLog(LogLevel.Info, "========================= Completion Processing  =========================");
             string CDOL2 = transTags.GetTag(TransactionStep.ReadRecord, "8D");
             ApduResponse resp = SecondGAC(Constant.TC, CDOL2);
             var tlvs = DataParse.ParseTLV(resp.Response);
@@ -385,7 +381,7 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
             var transactionEndCase = new TransactionEndCase() { CurrentApp = Constant.APP_VISA };
-            transactionEndCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.TransactionEnd, resp);
+            transactionEndCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TransactionEnd, resp);
 
             return 0;
         }

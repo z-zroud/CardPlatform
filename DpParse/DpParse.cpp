@@ -922,6 +922,7 @@ void IRule::SplitRSA(CPS& cps)
                     if (item.dgi == iter->dgi) {
                         string decryptedData;
                         decryptedData = DesDecryptDGI(iter->key, data);
+                        printf("%s", decryptedData.c_str());
                         if (iter->isDelete80) {
                             int found = decryptedData.length();
                             found = decryptedData.rfind("80");

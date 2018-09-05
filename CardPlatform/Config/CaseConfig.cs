@@ -91,7 +91,8 @@ namespace CardPlatform.Config
                 {
                     apps.Add(name);
                 }
-                
+                apps.Add("PSE");
+                apps.Add("PPSE");
                 foreach (var app in apps)
                 {
                     var appNode = root.Element(app);

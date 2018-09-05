@@ -19,7 +19,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5F24应用失效日期,应用是否失效
         /// </summary>
-        public void HandleLimitation_001()
+        public void ProcessRestriction_001()
         {
             int expiryDate;
             int currentDate;
@@ -39,7 +39,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5F25应用生效日期，应用是否生效
         /// </summary>
-        public void HandleLimitation_002()
+        public void ProcessRestriction_002()
         {
             int effectiveDate;
             int currentDate;
@@ -60,7 +60,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5F24和Tag5F25时间顺序关系是否正确
         /// </summary>
-        public void HandleLimitation_003()
+        public void ProcessRestriction_003()
         {
             int expiryDate;
             int effectiveDate;

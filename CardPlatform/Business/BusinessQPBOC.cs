@@ -19,8 +19,6 @@ namespace CardPlatform.Business
      *************************************************************/
     public class BusinessQPBOC : BusinessBase
     {
-        private TransactionTag transTags = TransactionTag.GetInstance();
-        private ViewModelLocator locator = new ViewModelLocator();
         private bool isQPBOCTranction = false;
 
         /// <summary>
@@ -33,10 +31,9 @@ namespace CardPlatform.Business
         {
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTransaction(aid);
-            locator.Terminal.TermianlSettings.Tag9C = "00";         //交易类型(消费交易)
-            locator.Terminal.TermianlSettings.Tag9F66 = "2A000080"; //终端交易属性
-            locator.Terminal.TermianlSettings.TagDF60 = "00";   //扩展交易指示位  
-
+            locator.Terminal.SetTag("DF60", "00", "扩展交易指示位");
+            locator.Terminal.SetTag("9C", "00", "交易类型");
+            locator.Terminal.SetTag("9F66", "2A000080", "终端交易属性");
             DoTransaction(DoTransactionEx);
         }
 
@@ -44,7 +41,7 @@ namespace CardPlatform.Business
         {
             transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (!SelectApp(aid))
+            if (!SelectApp(currentAid))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
@@ -90,7 +87,7 @@ namespace CardPlatform.Business
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
                     var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
-                    stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.SelectApp, response);
+                    stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
             }
@@ -115,7 +112,7 @@ namespace CardPlatform.Business
             string PDOLData = string.Empty;
             foreach (var tl in tls)
             {
-                PDOLData += locator.Terminal.TermianlSettings.GetTag(tl.Tag);
+                PDOLData += locator.Terminal.GetTag(tl.Tag);
             }
 
             ApduResponse response = base.GPO(PDOLData);           
@@ -134,7 +131,7 @@ namespace CardPlatform.Business
                 }
                 afls = DataParse.ParseAFL(transTags.GetTag("94"));
                 var gpoCase = new GPOCase() { CurrentApp = Constant.APP_QUICS };
-                gpoCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.GPO, response);
+                gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
             }
             return afls;
         }
@@ -163,7 +160,7 @@ namespace CardPlatform.Business
             }
 
             var readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_QUICS };
-            readRecordCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadRecord, resps);
+            readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
 
             return true;
         }
@@ -257,9 +254,9 @@ namespace CardPlatform.Business
                 return 1;
             }
             string issuerPublicKey = GetIssuerPublicKey();
-            string tag9F37 = locator.Terminal.TermianlSettings.Tag9F37;
-            string tag9F02 = locator.Terminal.TermianlSettings.Tag9F02;
-            string tag5F2A = locator.Terminal.TermianlSettings.Tag5F2A;
+            string tag9F37 = locator.Terminal.GetTag("9F37");
+            string tag9F02 = locator.Terminal.GetTag("9F02");
+            string tag5F2A = locator.Terminal.GetTag("5F2A");
             string tag9F69 = transTags.GetTag("9F69");
             if (string.IsNullOrEmpty(tag9F69))
             {

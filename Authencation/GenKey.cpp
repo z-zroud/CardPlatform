@@ -97,6 +97,18 @@ int GenSmKcv(const char* key, char* kcv, int kcvLen)
     return 0;
 }
 
+void GenVisaUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey)
+{
+    string leftInput = string(atc) + "F00000000000";
+    string rightInput = string(atc) + "0F0000000000";
+    char leftKey[33] = { 0 };
+    char rightKey[33] = { 0 };
+    Des3(leftKey, (char*)udkSubKey, (char*)leftInput.c_str());
+    Des3(rightKey, (char*)udkSubKey, (char*)rightInput.c_str());
+    string sessionKey = leftKey + string(rightKey);
+    strcpy(udkSessionKey, sessionKey.c_str());
+}
+
 void GenUdkSessionKey(const char* udkSubKey, const char* atc, char* udkSessionKey, int keyType)
 {
 	string leftInput = "000000000000" + string(atc);

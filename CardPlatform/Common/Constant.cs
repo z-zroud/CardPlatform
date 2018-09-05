@@ -23,26 +23,6 @@ namespace CardPlatform.Common
         TransactionEnd
     }
 
-    //public enum TransactionApp
-    //{
-    //    PSE,
-    //    PPSE,
-    //    PBOC_DES,
-    //    PBOC_SM,
-    //    UICS_DES,
-    //    UICS_SM,
-    //    ECC_DES,
-    //    ECC_SM,
-    //    QUICS_DES,
-    //    QUICS_SM,
-    //    QPBOC_DES,
-    //    QPBOC_SM,
-    //    VISA,
-    //    MC,
-    //    JETCO,
-    //    qVSDC
-    //}
-
     public class Constant
     {
         public static readonly string PSE = "315041592E5359532E4444463031";
@@ -69,7 +49,7 @@ namespace CardPlatform.Common
         public static readonly int ARQC_CDA = 0x90;
 
         public static readonly string DataComparedConfigFile = "ProjectTemplate.xml";
-
+        public static readonly string LogPath = "test.log";
         public static readonly string TransactionCase = "Transcation case";
 
 

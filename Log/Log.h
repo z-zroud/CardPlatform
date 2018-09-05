@@ -17,7 +17,7 @@ typedef int     log_t;
 #define OUT_FILE        2
 
 extern "C" LOG_API log_t CreateLog(const char* path, int type = 2);
-    
+extern "C" LOG_API log_t GetCurLog();
 extern "C" LOG_API void TraceInfo(log_t, const char* formatString, ...);
 extern "C" LOG_API void TraceWarn(log_t, const char* formatString, ...);
 extern "C" LOG_API void TraceDebug(log_t, const char* formatString, ...);

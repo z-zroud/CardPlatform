@@ -9,11 +9,8 @@ namespace CardPlatform.Business
 {
     public class BusinessPSE : BusinessBase
     {
-        private Dictionary<string, List<TLV>> aidTags;
-
         public BusinessPSE()
         {
-            aidTags = new Dictionary<string, List<TLV>>();
         }
 
         /// <summary>
@@ -22,37 +19,46 @@ namespace CardPlatform.Business
         /// <returns></returns>
         public List<string> SelectPSE()
         {
+            log.TraceLog(LogLevel.Info, "========================= PSE Selection  =========================");
             ApduResponse response = new ApduResponse();
             response = APDU.SelectCmd(Constant.PSE);
             if(response.SW != 0x9000)
             {
-                return new List<string>();
+                return null;
             }
+            var tlvs = DataParse.ParseTLV(response.Response);
+            ParseTlvToLog(tlvs);
             SaveTags(TransactionStep.SelectPSE,response.Response);
 
             IExcuteCase stepCase = new PSECases() { CurrentApp = Constant.APP_PSE};
-            stepCase.Excute(BatchNo,TransCfg.CurrentApp,TransactionStep.SelectPSE, response);
+            stepCase.Excute(BatchNo, transCfg.CurrentApp,TransactionStep.SelectPSE, response);
 
             //获取AID列表
-            List<string> Aids = new List<string>();
+            List<string> cardAids = new List<string>();
             int SFI;
             if(int.TryParse(TransactionTag.GetInstance().GetTag("88"),out SFI))
             {
-                string aid = string.Empty;
                 int recordNo = 1;
+                var aids = new List<string>();
                 do
                 {                 
-                    aid = ReadPSERecord(SFI, recordNo);
+                    aids = ReadPSERecord(SFI, recordNo);
                     recordNo++;
-                    if(!string.IsNullOrWhiteSpace(aid))
+                    if(aids != null)
                     {
-                        Aids.Add(aid);
+                        foreach (var aid in aids)
+                        {
+                            if (!string.IsNullOrWhiteSpace(aid))
+                            {
+                                cardAids.Add(aid);
+                            }
+                        }
                     }
                 }
-                while (!string.IsNullOrWhiteSpace(aid));
+                while (aids != null);
                
             }
-            return Aids;
+            return cardAids;
         }
 
         /// <summary>
@@ -61,29 +67,29 @@ namespace CardPlatform.Business
         /// <param name="SFI"></param>
         /// <param name="recordNo"></param>
         /// <returns></returns>
-        protected string ReadPSERecord(int SFI, int recordNo)
+        protected List<string> ReadPSERecord(int SFI, int recordNo)
         {
+            log.TraceLog(LogLevel.Info, "========================= Read PSE Record  =========================");
             ApduResponse response = new ApduResponse();
             response = APDU.ReadRecordCmd(SFI, recordNo);
 
-            //IExcuteCase stepCase = CaseFactory.GetCaseInstance(Constant.APP_PSE, Constant.STEP_READ_PSE_DIR);
             IExcuteCase stepCase = new PSEDirCase() { CurrentApp = Constant.APP_PSE };
             if (response.SW != 0x9000 && response.SW != 0x6A83)
             {
                 caseObj.TraceInfo(Config.TipLevel.Failed, "ReadPSERecord", "读到最后一条记录后再读下一条应返回6A83");
-                return string.Empty;
+                return null;
             }
             if(response.SW == 0x6A83)
             {
-                return string.Empty;
+                return null;
             }
-            stepCase.Excute(BatchNo, TransCfg.CurrentApp, TransactionStep.ReadPSEDir,response);
+            stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadPSEDir,response);
 
-            List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
-            var aid = from tlv in arrTLV where tlv.Tag == "4F" select tlv.Value;
-            aidTags.Add(aid.First(), arrTLV);
+            var tlvs = DataParse.ParseTLV(response.Response);
+            ParseTlvToLog(tlvs);
+            var aids = from tlv in tlvs where tlv.Tag == "4F" select tlv.Value;
 
-            return aid.First();
+            return aids.ToList();
         }
     }
 }
