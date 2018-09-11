@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CardPlatform.Models;
 using System.Collections.ObjectModel;
+using GalaSoft.MvvmLight.Threading;
 
 namespace CardPlatform.ViewModel
 {
@@ -49,7 +50,22 @@ namespace CardPlatform.ViewModel
 
         public void SetTag(string tag,string tagValue,string mark="")
         {
-            TerminalTags.Add(new TerminalModel() { Tag = tag, TagValue = tagValue, Mark = mark });
+            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            {
+                bool hasExisted = false;
+                foreach(var item in TerminalTags)
+                {
+                    if(item.Tag == tag)
+                    {
+                        item.TagValue = tagValue;
+                        item.Mark = mark;
+                        hasExisted = true;
+                    }
+                }
+                if(!hasExisted)
+                    TerminalTags.Add(new TerminalModel() { Tag = tag, TagValue = tagValue, Mark = mark });
+            });
+            
         }
     }
 }

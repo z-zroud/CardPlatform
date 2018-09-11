@@ -29,7 +29,6 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public override void DoTransaction(string aid)
         {
-            transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTransaction(aid);
             locator.Terminal.SetTag("DF60", "00", "扩展交易指示位");
             locator.Terminal.SetTag("9C", "00", "交易类型");
@@ -39,7 +38,6 @@ namespace CardPlatform.Business
 
         protected bool DoTransactionEx()
         {
-            transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(currentAid))
             {
@@ -86,7 +84,7 @@ namespace CardPlatform.Business
             {
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
-                    var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
+                    var stepCase = new SelectAppCase();
                     stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
@@ -130,7 +128,7 @@ namespace CardPlatform.Business
                     isQPBOCTranction = true;    //表明卡片支持QPBOC交易
                 }
                 afls = DataParse.ParseAFL(transTags.GetTag("94"));
-                var gpoCase = new GPOCase() { CurrentApp = Constant.APP_QUICS };
+                var gpoCase = new GPOCase();
                 gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
             }
             return afls;
@@ -159,7 +157,7 @@ namespace CardPlatform.Business
                 }               
             }
 
-            var readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_QUICS };
+            var readRecordCase = new ReadRecordCase();
             readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
 
             return true;

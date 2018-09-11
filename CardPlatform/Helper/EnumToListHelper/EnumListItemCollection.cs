@@ -33,7 +33,14 @@ namespace CardPlatform.Helper.EnumToListHelper
                 resourceManager = new ResourceManager(resourceType.FullName, resourceType.Assembly);
           
             foreach (T item in Enum.GetValues(enumType))
-                Add(new EnumListItem() { Value = item, DisplayValue = GetEnumDisplayValue(item) });
+            {
+                var desc = GetEnumVisableDisplayValue(item);
+                if(!string.IsNullOrEmpty(desc))
+                {
+                    Add(new EnumListItem() { Value = item, DisplayValue = desc });
+                }           
+            }
+                
         }
 
         Type GetResourceTypeFromEnumType()
@@ -44,6 +51,15 @@ namespace CardPlatform.Helper.EnumToListHelper
             return null;
         }
 
+        string GetEnumVisableDisplayValue(T item)
+        {
+            var value = default(String);
+            var descriptionAttribute = (item as Enum).GetAttribute<DescriptionExAttribute>();
+            if (descriptionAttribute == null || descriptionAttribute.Hide)
+                return value;
+            return descriptionAttribute.Description;
+        }
+
         String GetEnumDisplayValue(T item)
         {
             var value = default(String);
@@ -52,7 +68,7 @@ namespace CardPlatform.Helper.EnumToListHelper
 
             if (value == null)
             {
-                var descriptionAttribute = (item as Enum).GetAttribute<DescriptionAttribute>();
+                var descriptionAttribute = (item as Enum).GetAttribute<DescriptionExAttribute>();
                 if (descriptionAttribute == null) 
                     return item.ToString();
                 return descriptionAttribute.Description;

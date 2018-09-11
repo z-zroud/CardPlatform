@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using CardPlatform.Common;
+using CardPlatform.Models;
 
 namespace CardPlatform.Config
 {
@@ -72,17 +73,17 @@ namespace CardPlatform.Config
             if (doc != null)
             {
                 var root = doc.Root;
-                var apps = new List<string> {
-                    Constant.APP_PSE,
-                    Constant.APP_PPSE,
-                    Constant.APP_UICS,
-                    Constant.APP_ECC,
-                    Constant.APP_QUICS,
-                    Constant.APP_VISA,
-                    Constant.APP_PAYWAVE,
-                    Constant.APP_MC,
-                    Constant.APP_JETCO
-                };
+                var apps = new List<string>();
+                foreach (var name in Enum.GetNames(typeof(AppType)))
+                {
+                    string appName = name;
+                    if (name.Contains("_"))
+                    {
+                        appName = name.Substring(0, name.IndexOf('_'));
+                    }
+                    if (!apps.Contains(appName))
+                        apps.Add(appName);
+                }
                 TemplateTags.Clear();   //加载之前，清除之前的模板
                 foreach (var app in apps)
                 {

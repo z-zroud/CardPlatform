@@ -14,14 +14,8 @@ namespace CardPlatform.Cases
     public class ReadRecordCase : CaseBase
     {
         private List<ApduResponse> resps;
-        private List<TLV> tlvs;
+        private List<TLV> tlvs = new List<TLV>();
         private Dictionary<string, TLV> readRecordTags = new Dictionary<string, TLV>();
-
-        protected override void Load()
-        {
-            tlvs = new List<TLV>();
-            base.Load();
-        }
 
         public override void Excute(int batchNo, AppType app, TransactionStep step, object srcData)
         {
@@ -86,18 +80,20 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            if (!readRecordTags.ContainsKey("57"))
+            var tag57 =TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "57");
+            if (!readRecordTags.ContainsKey("57") &&
+                string.IsNullOrEmpty(tag57))
             {
                 TraceInfo(TipLevel.Failed, caseNo, "读记录缺少tag57");
                 return;
             }
-            var tag57 = readRecordTags["57"];
-            caseItem.Description += "【tag57=" + tag57.Value + "】";
-            //if (!CaseUtil.RespStartWith(tag57.Value, "62"))
-            //{
-            //    TraceInfo(TipLevel.Warn, caseNo, "中国地区银联卡号一般以62开头");
-            //}
-            if (!CaseUtil.IsCorrectTag57Format(tag57.Value))
+            if(string.IsNullOrEmpty(tag57))
+            {
+                tag57 = readRecordTags["57"].Value;
+            }
+            
+            caseItem.Description += "【tag57=" + tag57 + "】";
+            if (!CaseUtil.IsCorrectTag57Format(tag57))
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 return;
@@ -175,16 +171,7 @@ namespace CardPlatform.Cases
                 var tag5F20 = readRecordTags["5F20"];
                 string value = UtilLib.Utils.BcdToStr(tag5F20.Value);
                 caseItem.Description += "【tag5F20=" + tag5F20.Value + "】转为字符串显示:" + value;
-                if (tag5F20.Value != "202F")
-                {
-                    TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "【tag5F20="+ tag5F20.Value + "】5F20一般建议值为202F");
-                }
-                else
-                {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    return;
-                }
-                if (!CaseUtil.IsAlpha(value) || value.Contains("/"))
+                if (!value.Contains("/"))
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     return;
@@ -192,6 +179,16 @@ namespace CardPlatform.Cases
                 if (tag5F20.Len < 2 || tag5F20.Len > 26)
                 {
                     TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "tag5F20长度需要在2-26字节之间");
+                }
+                if (tag5F20.Value != "202F")
+                {
+                    TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "【tag5F20="+ tag5F20.Value + "】5F20一般建议值为202F");
+                    return;
+                }
+                else
+                {
+                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                    return;
                 }
             }
             else
@@ -269,7 +266,7 @@ namespace CardPlatform.Cases
             {
                 var tag8D = readRecordTags["8D"];
                 var tls8D = DataParse.ParseTL(tag8D.Value);
-                caseItem.Description += "【tag8D" + tag8D.Value + "】";
+                caseItem.Description += "【tag8D=" + tag8D.Value + "】";
                 if (tls8D.Count == 0)
                 {
                     TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag8D无法TL分解]");
@@ -363,9 +360,14 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (!readRecordTags.ContainsKey("5F24") || !readRecordTags.ContainsKey("5F25"))
+            if (!readRecordTags.ContainsKey("5F24"))
             {
-                TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag5F24/tag5F25");
+                TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag5F24");
+                return;
+            }
+            else if(!readRecordTags.ContainsKey("5F25"))
+            {
+                TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag5F25");
                 return;
             }
             else
@@ -1049,6 +1051,26 @@ namespace CardPlatform.Cases
                 TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 return;
             }
+        }
+
+        /// <summary>
+        /// 检测qVSDC 读记录最后一条数据必须是tag9F69
+        /// </summary>
+        public void ReadRecord_037()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            int count = resps.Count;
+            var tlvs = DataParse.ParseTLV(resps[count - 1].Response);
+
+            var lastTag = tlvs[tlvs.Count - 1];
+            if(lastTag.Tag != "9F69")
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description += "最后一条记录为:tag{0}", lastTag.Tag);
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

@@ -39,13 +39,19 @@ namespace CardPlatform.Business
         protected static readonly TransactionTag    transTags       = TransactionTag.GetInstance();
         protected static readonly IExcuteCase       caseObj         = new CaseBase();
         protected static readonly Log               log             = Log.CreateLog(Constant.LogPath);
+        protected TVR                               tvr             = TVR.GetInstance();
         protected string                            needSignAppData;    //当前交易流程认证数据
         protected string                            currentAid;         //当前应用AID
-        
+
         public int BatchNo { get; set; }                //一次检测中重复跑该交易的序号
         public bool IsContactTrans { get; set; }        //需要此参数来判断写入到个人化信息表中的内容
         public string PersoFile { get; set; }           //个人化信息表Excel文件
 
+
+        public BusinessBase()
+        {
+            tvr.Clear();    //需要在每次交易之前清除上次TVR结果
+        }
 
         public TipLevel GetTipLevel(bool result, TipLevel level = TipLevel.Failed)
         {
@@ -60,6 +66,17 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public virtual void DoTransaction(string aid)
         {
+            CaseBase.ResetCase();
+            if(transCfg.CurrentApp == AppType.PSE ||
+                transCfg.CurrentApp == AppType.PPSE)
+            {
+                transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
+            }
+            else
+            {
+                transTags.ClearExceptPSEandPPSE();  //不需要删除PSE或PPSE应用，后续应用需要用到PSE做关联性检测
+            }
+            
             currentAid = aid;
         }
         

@@ -30,16 +30,17 @@ namespace CardPlatform.Common
         public static readonly string DebitAid = "A000000333010101";
         public static readonly string CreditAid = "A000000333010102";
 
-        public static readonly string APP_UICS = "UICS";
-        public static readonly string APP_ECC = "ECC";
-        public static readonly string APP_QUICS = "QUICS";
-        public static readonly string APP_PSE = "PSE";
-        public static readonly string APP_PPSE = "PPSE";
-        public static readonly string APP_VISA = "VISA";
-        public static readonly string APP_MC = "MC";
-        public static readonly string APP_JETCO = "JETCO";
-        public static readonly string APP_PAYWAVE = "PAYWAVE";
-        public static readonly string APP_AMEX = "AMEX";
+        //public static readonly string APP_UICS = "UICS";
+        //public static readonly string APP_ECC = "ECC";
+        //public static readonly string APP_QUICS = "QUICS";
+        //public static readonly string APP_PSE = "PSE";
+        //public static readonly string APP_PPSE = "PPSE";
+        //public static readonly string APP_VISA = "VISA";
+        //public static readonly string APP_MC = "MC";
+        //public static readonly string APP_JETCO = "JETCO";
+        //public static readonly string APP_PAYWAVE = "PAYWAVE";
+        //public static readonly string APP_AMEX = "AMEX";
+        //public static readonly string APP_qVSDC = "qVSDC";
 
         public static readonly int ARQC = 0x80;
         public static readonly int TC = 0x40;

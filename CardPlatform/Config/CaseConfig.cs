@@ -54,7 +54,7 @@ namespace CardPlatform.Config
         private static CaseConfig config;
         private Dictionary<string,List<TransStepCase>> allAppCases;
 
-        public bool HasLoaded { get; private set; }
+        public bool HasLoaded { get; set; }
 
         private CaseConfig()
         {
@@ -82,6 +82,7 @@ namespace CardPlatform.Config
         /// <returns></returns>
         public Dictionary<string, List<TransStepCase>> Load(string path)
         {
+            allAppCases.Clear();
             XDocument doc = XDocument.Load(path);
             if (doc != null)
             {
@@ -89,10 +90,14 @@ namespace CardPlatform.Config
                 var apps = new List<string>();
                 foreach (var name in Enum.GetNames(typeof(AppType)))
                 {
-                    apps.Add(name);
+                    string appName = name;
+                    if(name.Contains("_"))
+                    {
+                        appName = name.Substring(0, name.IndexOf('_'));
+                    }
+                    if(!apps.Contains(appName))
+                        apps.Add(appName);
                 }
-                apps.Add("PSE");
-                apps.Add("PPSE");
                 foreach (var app in apps)
                 {
                     var appNode = root.Element(app);

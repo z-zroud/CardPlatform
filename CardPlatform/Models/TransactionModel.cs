@@ -1,54 +1,60 @@
-﻿using System.ComponentModel;
+﻿using CardPlatform.Helper;
+using System.ComponentModel;
 
 namespace CardPlatform.Models
 {
     public enum AppType
     {
-        [Description("UICS")]
+
+        [DescriptionEx("UICS")]
         UICS,
-        [Description("qUICS")]
+        [DescriptionEx("qUICS")]
         qUICS,
-        [Description("PBOC")]
+        [DescriptionEx("PBOC")]
         PBOC,
-        [Description("qPBOC")]
+        [DescriptionEx("qPBOC")]
         qPBOC,
-        [Description("电子现金")]
+        [DescriptionEx("电子现金")]
         ECC,
-        [Description("VISA")]
+        [DescriptionEx("VISA")]
         VISA,
-        [Description("qVSDC online ODA")]
+        [DescriptionEx("qVSDC online ODA")]
         qVSDC_online,
-        [Description("qVSDC offline ODA")]
+        [DescriptionEx("qVSDC offline ODA")]
         qVSDC_offline,
-        [Description("MChip Advance")]
+        [DescriptionEx("MChip Advance")]
         MC,
-        [Description("Jetco")]
+        [DescriptionEx("Jetco")]
         JETCO,
-        [Description("AMEX")]
-        AMEX
+        [DescriptionEx("AMEX")]
+        AMEX,
+        [DescriptionEx("PSE", Hide = true)]
+        PSE,
+        [DescriptionEx("PPSE", Hide = true)]
+        PPSE
     }
 
     public enum TransType
     {
-        [Description("接触式交易")]
+        [DescriptionEx("接触式交易")]
         Contact,
-        [Description("非接触式交易")]
+        [DescriptionEx("非接触式交易")]
         Contactless
     }
 
     public enum AppKeyType
     {
-        [Description("MDK发卡行主控密钥")]
+        [DescriptionEx("MDK发卡行主控密钥")]
         MDK,
-        [Description("UDK卡片应用密钥")]
+        [DescriptionEx("UDK卡片应用密钥")]
         UDK
     }
 
     public enum AlgorithmType
     {
-        [Description("DES国际算法")]
+        [DescriptionEx("DES国际算法")]
         DES,
-        [Description("SM国密算法")]
+        [DescriptionEx("SM国密算法")]
         SM
     }
 

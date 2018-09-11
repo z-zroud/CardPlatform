@@ -21,11 +21,6 @@ namespace CardPlatform.Cases
             tlvs = new List<TLV>();
         }
 
-        protected override void Load()
-        {
-            base.Load();
-        }
-
         public override void Excute(int batchNo, AppType app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;

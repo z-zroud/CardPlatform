@@ -21,11 +21,13 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public override void DoTransaction(string aid)
         {
-            transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTransaction(aid);
             locator.Terminal.SetTag("9F7A", "00", "电子现金支持指示器(这里走借贷记交易流程)");
             locator.Terminal.SetTag("9C", "00", "交易类型");
-            locator.Terminal.SetTag("9F66", "46000000", "终端交易属性");
+            if (IsContactTrans)
+                locator.Terminal.SetTag("9F66", "46000000", "终端交易属性");
+            else
+                locator.Terminal.SetTag("9F66", "66000000", "终端交易属性");
             DoTransaction(DoTransactionEx);
         }
 
@@ -94,7 +96,7 @@ namespace CardPlatform.Business
             {
                 if (SaveTags(TransactionStep.SelectApp, resp.Response))
                 {
-                    var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_VISA };
+                    var stepCase = new SelectAppCase();
                     stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, resp);
                     result = true;
                 }
@@ -134,7 +136,7 @@ namespace CardPlatform.Business
             transTags.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
-            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_VISA };
+            var gpoCase = new GPOCase();
             gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
             return afls;
         }
@@ -162,7 +164,7 @@ namespace CardPlatform.Business
                     return false;
                 }
             }
-            IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_VISA };
+            IExcuteCase readRecordCase = new ReadRecordCase();
             readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
@@ -266,7 +268,7 @@ namespace CardPlatform.Business
         protected int ProcessingRestrictions()
         {
             log.TraceLog(LogLevel.Info, "========================= Processing Restrictions  =========================");
-            var handleLimitationCase = new ProcessRestrictionCase() { CurrentApp = Constant.APP_VISA };
+            var handleLimitationCase = new ProcessRestrictionCase();
             handleLimitationCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
             return 0;
         }
@@ -278,7 +280,7 @@ namespace CardPlatform.Business
         protected int CardHolderVerification()
         {
             log.TraceLog(LogLevel.Info, "========================= Cardholder Verification  =========================");
-            var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_VISA };
+            var cardHolderVerifyCase = new CardHolderVerifyCase();
             cardHolderVerifyCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
@@ -291,7 +293,7 @@ namespace CardPlatform.Business
         protected int TerminalRiskManagement()
         {
             log.TraceLog(LogLevel.Info, "========================= Terminal Risk Management  =========================");
-            var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_VISA };
+            var terminalRishManagementCase = new TerminalRiskManagementCase();
             terminalRishManagementCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }
@@ -331,7 +333,7 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
-            var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase() { CurrentApp = Constant.APP_VISA };
+            var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase();
             terminalActionAnalyzeCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
             return 0;
         }
@@ -380,7 +382,7 @@ namespace CardPlatform.Business
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F26", tag9F26);
                 transTags.SetTag(TransactionStep.TerminalActionAnalyze, "9F10", tag9F10);
             }
-            var transactionEndCase = new TransactionEndCase() { CurrentApp = Constant.APP_VISA };
+            var transactionEndCase = new TransactionEndCase();
             transactionEndCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TransactionEnd, resp);
 
             return 0;

@@ -23,11 +23,17 @@ namespace CardPlatform.Cases
         {
             int expiryDate;
             int currentDate;
-            int.TryParse(TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F24"), out expiryDate);
+            string tag5F24 = TransactionTag.GetInstance().GetTag("5F24");
+            int.TryParse(tag5F24, out expiryDate);
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
+            if(string.IsNullOrEmpty(tag5F24))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag5F24]"); 
+                return;
+            }
+            caseItem.Description += "【tag5F24=" + tag5F24 + "】";
             if (expiryDate < currentDate)    //应用已失效
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -43,11 +49,17 @@ namespace CardPlatform.Cases
         {
             int effectiveDate;
             int currentDate;
-            int.TryParse(TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F25"), out effectiveDate);
+            string tag5F25 = TransactionTag.GetInstance().GetTag("5F25");
+            int.TryParse(tag5F25, out effectiveDate);
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
+            if(string.IsNullOrEmpty(tag5F25))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag5F25]");
+                return;
+            }
+            caseItem.Description += "【tag5F25" + tag5F25 + "】";
             if (effectiveDate >= currentDate) // 应用未生效
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -77,6 +89,43 @@ namespace CardPlatform.Cases
                 return;
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测tag9F07是否符合规范
+        /// </summary>
+        public void ProcessRestriction_004()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            string tag9F07 = TransactionTag.GetInstance().GetTag("9F07");
+            if (string.IsNullOrEmpty(tag9F07))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag9F07]");
+                return;
+            }
+            caseItem.Description += "【tag9F07" + tag9F07 + "】";
+            if (tag9F07 == "FF00")
+            {
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return;
+            }
+            else
+            {
+                int auc = Convert.ToInt32(tag9F07, 16);
+                if ((auc & 0x8000) == 0) caseItem.Description += "[国内现金交易有效检测失败]";
+                if ((auc & 0x4000) == 0) caseItem.Description += "[国际现金交易有效检测失败]";
+                if ((auc & 0x2000) == 0) caseItem.Description += "[国内商品有效检测失败]";
+                if ((auc & 0x1000) == 0) caseItem.Description += "[国际商品有效效检测失败]";
+                if ((auc & 0x0800) == 0) caseItem.Description += "[国内服务有效检测失败]";
+                if ((auc & 0x0400) == 0) caseItem.Description += "[国际服务有效检测失败]";
+                if ((auc & 0x0200) == 0) caseItem.Description += "[ATM有效检测失败]";
+                if ((auc & 0x0100) == 0) caseItem.Description += "[除ATM外的终端有效检测失败]";
+                //if ((auc & 0x0080) == 0) caseItem.Description += "[允许国内返现检测失败]";
+                //if ((auc & 0x0040) == 0) caseItem.Description += "[允许国际返现检测失败]";
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
         }
     }
 }

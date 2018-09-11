@@ -30,7 +30,7 @@ namespace CardPlatform.Business
             ParseTlvToLog(tlvs);
             SaveTags(TransactionStep.SelectPSE,response.Response);
 
-            IExcuteCase stepCase = new PSECases() { CurrentApp = Constant.APP_PSE};
+            IExcuteCase stepCase = new PSECases();
             stepCase.Excute(BatchNo, transCfg.CurrentApp,TransactionStep.SelectPSE, response);
 
             //获取AID列表
@@ -73,7 +73,7 @@ namespace CardPlatform.Business
             ApduResponse response = new ApduResponse();
             response = APDU.ReadRecordCmd(SFI, recordNo);
 
-            IExcuteCase stepCase = new PSEDirCase() { CurrentApp = Constant.APP_PSE };
+            IExcuteCase stepCase = new PSEDirCase();
             if (response.SW != 0x9000 && response.SW != 0x6A83)
             {
                 caseObj.TraceInfo(Config.TipLevel.Failed, "ReadPSERecord", "读到最后一条记录后再读下一条应返回6A83");

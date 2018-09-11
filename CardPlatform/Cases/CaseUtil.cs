@@ -398,7 +398,7 @@ namespace CardPlatform.Cases
         /// <returns></returns>
         public static bool IsAplhaDigit(string str)
         {
-            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
             foreach (var c in str)
             {
                 if (!alphaNum.Contains(c))

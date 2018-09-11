@@ -23,11 +23,6 @@ namespace CardPlatform.Cases
             tlvs        = new List<TLV>();
         }
 
-        protected override void Load()
-        {
-            base.Load();
-        }
-
         public override void Excute(int batchNo, AppType app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
@@ -228,6 +223,112 @@ namespace CardPlatform.Cases
         #region qUICS
         #endregion
         #region qVSDC
+        /// <summary>
+        /// 检测qVSDC AIP的规范性
+        /// </summary>
+        public void GPO_021()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag82 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var intTag82 = Convert.ToInt32(tag82, 16);
+            if ((intTag82 & 0x9F1F) != 0)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[AIP保留位需置零]");
+                return;
+            }
+            if ((intTag82 & 0x0020) != 0x0020)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[非接交易位需置1]");
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测GPO响应数据的规范性(只能出现指定范围内的tag)
+        /// </summary>
+        public void GPO_022()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tags = from tlv in tlvs where tlv.Tag != "77" select tlv.Tag;
+            List<string> tagSpecified = new List<string> { "82", "94", "57", "5F20", "5F34", "9F10", "9F26", "9F27", "9F36", "9F4B", "9F5D", "9F6C", "9F6E", "9F7C" };
+            foreach(var item in tagSpecified)
+            {
+                caseItem.Description += "[" + item + "]";
+            }
+            foreach (var tag in tags)
+            {
+                if (!tagSpecified.Contains(tag))
+                {
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[包含了其他tag{0}]",tag);
+                    return;
+                }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测GPO 响应数据的合规性(必须出现的tag,可能出现的tag,一定条件出现的tag)
+        /// </summary>
+        public void GPO_018()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tagMustIncludeWithODA = new List<string>() { "82", "94", "9F10", "9F26", "9F27", "9F36" };
+            var tagMustIncludeWithoutODA = new List<string>() { "82", "9F10", "9F26", "9F27", "9F36" };
+            var tagNeedAppearWithODA = new List<string>() { "57", "5F20", "5F34", "9F4B", "9F6C", "9F6E" };
+            var tag9F27 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "9F27");
+            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
+            var gpoTags = from tag in tlvs select tag.Tag;
+
+            bool isSucess = true;
+            if (string.IsNullOrEmpty(tag94))
+            {
+                //说明不走ODA流程，GPO Online and Decline without ODA返回数据
+                foreach (var tag in tagMustIncludeWithoutODA)
+                {
+                    if (!gpoTags.Contains(tag))
+                    {
+                        isSucess = false;
+                        TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[响应数据缺失必要tag{0}]", tag);
+                    }
+                }
+            }
+            else
+            {
+                if (tag9F27 == "80" || tag9F27 == "40")
+                {
+                    foreach (var tag in tagMustIncludeWithODA)
+                    {
+                        if (!gpoTags.Contains(tag))
+                        {
+                            isSucess = false;
+                            TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[响应数据缺失必要tag{0}]", tag);
+                        }
+                    }
+                    foreach (var tag in tagNeedAppearWithODA)
+                    {
+                        if (!gpoTags.Contains(tag))
+                        {
+                            TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[响应数据缺失必要tag{0}],请在读记录数据中查找该值，该值务必存在", tag);
+                        }
+                    }
+                    return;
+                }
+                else
+                {
+                    //数据有问题
+                    isSucess = false;
+                    TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[请检查tag94的值是否符合规范tag9F27={0}]", tag9F27);
+                    return;
+                }
+            }
+            if (isSucess)
+                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
         #endregion
 
         /// <summary>
@@ -260,71 +361,6 @@ namespace CardPlatform.Cases
                 return;
             }
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-        }
-
-        /// <summary>
-        /// 检测GPO响应数据，联机/拒绝交易包含数据(tag82/9F36/57/9F10/9F26/9F63/9F34/9F6C/9F5D/5F20),脱机批准(tag82/94/9F36/9F26/9F10/57/5F34/9F4B/9F6C/9F5D)
-        /// </summary>
-        public void GPO_012()
-        {
-            List<Tuple<string, TipLevel>> onlineTags = new List<Tuple<string, TipLevel>>
-            {
-                new Tuple<string, TipLevel>("82",TipLevel.Failed),
-                new Tuple<string, TipLevel>("9F36",TipLevel.Failed),
-                new Tuple<string, TipLevel>("57",TipLevel.Failed),
-                new Tuple<string, TipLevel>("9F10",TipLevel.Failed),
-                new Tuple<string, TipLevel>("9F26",TipLevel.Failed),
-                new Tuple<string, TipLevel>("9F63",TipLevel.Warn),
-                new Tuple<string, TipLevel>("5F34",TipLevel.Warn),
-                new Tuple<string, TipLevel>("9F6C",TipLevel.Warn),
-                new Tuple<string, TipLevel>("9F5D",TipLevel.Warn),
-                new Tuple<string, TipLevel>("5F20",TipLevel.Tip)
-            };
-            List<Tuple<string, TipLevel>> accptedTags = new List<Tuple<string, TipLevel>>
-            {
-                new Tuple<string, TipLevel>("82",TipLevel.Failed),
-                new Tuple<string, TipLevel>("94",TipLevel.Failed),
-                new Tuple<string, TipLevel>("9F36",TipLevel.Failed),
-                new Tuple<string, TipLevel>("57",TipLevel.Warn),
-                new Tuple<string, TipLevel>("9F10",TipLevel.Failed),
-                new Tuple<string, TipLevel>("9F26",TipLevel.Failed),
-                new Tuple<string, TipLevel>("5F34",TipLevel.Warn),
-                new Tuple<string, TipLevel>("9F6C",TipLevel.Warn),
-                new Tuple<string, TipLevel>("9F5D",TipLevel.Warn),
-            };
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-
-            var tag9F27 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "9F27");
-            bool bSuccess = true;
-            if(tag9F27 == "40")
-            {
-                foreach(var tag in accptedTags)
-                {
-                    var transTag = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, tag.Item1);
-                    if(string.IsNullOrEmpty(transTag))
-                    {
-                        TraceInfo(tag.Item2, caseNo, "QUICS/QPBOC脱机批准GPO返回缺少tag{0}", tag.Item1);
-                        bSuccess = false;
-                    }
-                }
-            }
-            else
-            {
-                foreach (var tag in onlineTags)
-                {
-                    var transTag = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, tag.Item1);
-                    if (string.IsNullOrEmpty(transTag))
-                    {
-                        TraceInfo(tag.Item2, caseNo, "QUICS/QPBOC脱机批准GPO返回缺少tag{0}", tag.Item1);
-                        bSuccess = false;
-                    }
-                }
-            }
-            if(bSuccess)
-            {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-            }
         }
 
         /// <summary>
@@ -387,7 +423,8 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if(TransactionConfig.GetInstance().CurrentApp == AppType.VISA)
+            if(TransactionConfig.GetInstance().CurrentApp == AppType.qVSDC_offline ||
+                TransactionConfig.GetInstance().CurrentApp == AppType.qVSDC_online)
             {
                 if (CheckVisaAc())
                 {
@@ -453,6 +490,7 @@ namespace CardPlatform.Cases
                 if(tlv.Tag == "5F34")
                 {
                     bExisted = true;
+                    caseItem.Description += "【tag5F35=" + tlv.Value + "】";
                     if(tlv.Len != 1)
                     {
                         TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -468,60 +506,7 @@ namespace CardPlatform.Cases
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
-        /// <summary>
-        /// 检测GPO Online with ODA返回数据必须包含(tag82,94,9F10,9F26,9F27,9F36,9F6E)
-        /// </summary>
-        public void GPO_018()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            var tags = new List<Tuple<string, TipLevel, string>>()
-            {
-                new Tuple<string, TipLevel,string>("82",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag82"),
-                new Tuple<string, TipLevel,string>("94",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag94"),
-                new Tuple<string, TipLevel,string>("57",TipLevel.Warn,"GPO Offline with ODA返回数据缺少tag57,读记录必须要存在tag57"),
-                new Tuple<string, TipLevel,string>("9F10",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F10"),
-                new Tuple<string, TipLevel,string>("9F26",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F26"),
-                new Tuple<string, TipLevel,string>("9F27",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F27"),
-                new Tuple<string, TipLevel,string>("9F36",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag36"),
-                new Tuple<string, TipLevel,string>("9F4B",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F4B"),
-                new Tuple<string, TipLevel,string>("9F6C",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F6C"),
-                new Tuple<string, TipLevel,string>("9F6E",TipLevel.Failed,"GPO Offline with ODA返回数据缺少tag9F6E")
-            };
-            var gpoTags = from tag in tlvs select tag.Tag;
-            bool ret = true;
-            foreach (var tag in tags)
-            {
-                if (!gpoTags.Contains(tag.Item1))
-                {
-                    if (tag.Item2 == TipLevel.Failed)
-                        ret = false;
-                    TraceInfo(tag.Item2, caseNo, tag.Item3);
-                }
-            }
-            if (ret)
-            {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                return;
-            }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-        }
 
-        /// <summary>
-        /// 检测GPO Offline with ODA返回数据
-        /// </summary>
-        public void GPO_019()
-        {
-            
-        }
-
-        /// <summary>
-        /// 检测GPO Online and Decline without ODA返回数据
-        /// </summary>
-        public void GPO_020()
-        {
-
-        }
 
     }
 }

@@ -36,6 +36,19 @@ namespace CardPlatform.Common
             transTags.Clear();
         }
 
+        public void ClearExceptPSEandPPSE()
+        {
+            foreach(var item in transTags)
+            {
+                if(item.Key != TransactionStep.SelectPSE &&
+                    item.Key != TransactionStep.ReadPSEDir &&
+                    item.Key != TransactionStep.SelectPPSE)
+                {
+                    item.Value.Clear();
+                }
+            }
+        }
+
         /// <summary>
         /// 保存TLV格式的list集合
         /// </summary>

@@ -27,7 +27,6 @@ namespace CardPlatform.Business
         /// <param name="doSMTrans"></param>
         public override void DoTransaction(string aid)
         {
-            transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             base.DoTransaction(aid);     
             locator.Terminal.SetTag("9F7A", "01", "电子现金交易指示器");
             locator.Terminal.SetTag("9C", "00", "交易类型(消费)");
@@ -36,7 +35,6 @@ namespace CardPlatform.Business
 
         protected bool DoTransactionEx()
         {
-            transTags.Clear();    //做交易之前，需要将tag清空，避免与上次交易重叠
             pdolData = string.Empty;    //PDOL Data也需要清空，防止做CDA时，出现重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!SelectApp(currentAid))
@@ -112,7 +110,7 @@ namespace CardPlatform.Business
             {
                 if (SaveTags(TransactionStep.SelectApp, response.Response))
                 {
-                    var stepCase = new SelectAppCase() { CurrentApp = Constant.APP_UICS };
+                    var stepCase = new SelectAppCase();
                     stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, response);
                     result = true;
                 }
@@ -165,7 +163,7 @@ namespace CardPlatform.Business
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
             afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
 
-            var gpoCase = new GPOCase() { CurrentApp = Constant.APP_UICS };
+            var gpoCase = new GPOCase();
             gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
 
             return afls;
@@ -193,7 +191,7 @@ namespace CardPlatform.Business
                     return false;
                 }
             }
-            IExcuteCase readRecordCase = new ReadRecordCase() { CurrentApp = Constant.APP_UICS };
+            IExcuteCase readRecordCase = new ReadRecordCase();
             readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
@@ -302,21 +300,21 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected int HandleLimitation()
         {
-            var handleLimitationCase = new ProcessRestrictionCase() { CurrentApp = Constant.APP_UICS };
+            var handleLimitationCase = new ProcessRestrictionCase();
             handleLimitationCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
             return 0;
         }
 
         protected int CardHolderVerify()
         {
-            var cardHolderVerifyCase = new CardHolderVerifyCase() { CurrentApp = Constant.APP_UICS };
+            var cardHolderVerifyCase = new CardHolderVerifyCase() ;
             cardHolderVerifyCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
             return 0;
         }
 
         protected int TerminalRiskManagement()
         {
-            var terminalRishManagementCase = new TerminalRiskManagementCase() { CurrentApp = Constant.APP_UICS };
+            var terminalRishManagementCase = new TerminalRiskManagementCase() ;
             terminalRishManagementCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
             return 0;
         }

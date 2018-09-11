@@ -36,6 +36,24 @@ namespace CardPlatform.Cases
                     return;
                 }
             }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "tag82={0}不支持终端风险管理",aip);
+        }
+
+        /// <summary>
+        /// 检测tag9F13的规范性
+        /// </summary>
+        public void TerminalRiskManagement_002()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tag9F13 = TransactionTag.GetInstance().GetTag("9F13");
+            if(string.IsNullOrEmpty(tag9F13))
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【缺少tag9F13,终端将无法执行新卡检查】");
+                return;
+            }
+            caseItem.Description += "【Tag9F13=" + tag9F13 + "】";
             TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }

@@ -233,22 +233,27 @@ namespace CardPlatform.ViewModel
                 switch (CurrentTransType)
                 {
                     case TransType.Contact:
+                        TransactionConfig.GetInstance().CurrentApp = AppType.PSE;
                         BusinessPSE businessPSE = new BusinessPSE();
                         aids = businessPSE.SelectPSE();
                         break;
                     case TransType.Contactless:
+                        TransactionConfig.GetInstance().CurrentApp = AppType.PPSE;
                         BusinessPPSE businessPPSE = new BusinessPPSE();
                         aids = businessPPSE.SelectPPSE();
                         break;
                 }
                 DispatcherHelper.CheckBeginInvokeOnUI(() =>
                 {
-                    foreach (var aid in aids)
+                    if(aids != null)
                     {
-                        Aids.Add(aid);
+                        foreach (var aid in aids)
+                        {
+                            Aids.Add(aid);
+                        }
+                        if (Aids.Count > 0)
+                            CurrentAid = Aids.First();
                     }
-                    if (Aids.Count > 0)
-                        CurrentAid = Aids.First();
                 });
             });
             thread.Start();           

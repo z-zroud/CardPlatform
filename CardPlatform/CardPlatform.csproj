@@ -112,6 +112,7 @@
     <Compile Include="Cases\PSEDirCase.cs" />
     <Compile Include="Cases\ReadRecordCase.cs" />
     <Compile Include="Cases\SelectAppCase.cs" />
+    <Compile Include="Common\TvrHelper.cs" />
     <Compile Include="Config\CardCheckConfig.cs" />
     <Compile Include="Config\CaseConfig.cs" />
     <Compile Include="Config\ConfigHelper.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="Helper\CaseLevelToColorConverter.cs" />
     <Compile Include="Helper\CaseLevelToStringConverter.cs" />
     <Compile Include="Helper\ControlTreeHelper.cs" />
+    <Compile Include="Helper\DescriptionExAttribute.cs" />
     <Compile Include="Helper\DialogCloseHelper.cs" />
     <Compile Include="Helper\EnumToListHelper\AttributeExtentions.cs" />
     <Compile Include="Helper\EnumToListHelper\EnumListItem.cs" />

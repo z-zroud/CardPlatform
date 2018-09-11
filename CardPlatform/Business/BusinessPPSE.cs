@@ -19,7 +19,7 @@ namespace CardPlatform.Business
             List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
             TransactionTag.GetInstance().SetTags(TransactionStep.SelectPPSE, arrTLV);
 
-            IExcuteCase ppseCase = new PPSECases() { CurrentApp = Constant.APP_PPSE };
+            IExcuteCase ppseCase = new PPSECases();
             ppseCase.Excute(BatchNo, TransactionConfig.GetInstance().CurrentApp,TransactionStep.SelectPPSE, response);
 
             List<string> Aids = new List<string>();

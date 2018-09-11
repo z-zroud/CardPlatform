@@ -18,17 +18,16 @@ namespace CardPlatform.Cases
     /// </summary>
     public class CaseBase : IExcuteCase
     {
-        private static Dictionary<string, List<TransStepCase>> caseDict = new Dictionary<string, List<TransStepCase>>();
-        private static List<CaseInfo> caseInfos = new List<CaseInfo>();        
-        protected TransactionStep Step = TransactionStep.Base;
-        protected static ViewModelLocator locator = new ViewModelLocator();
-        protected static TransactionConfig TransConfig = TransactionConfig.GetInstance();
-        protected static Log log = Log.CreateLog(Constant.LogPath);
-        public string CurrentApp { get; set; }
+        private static Dictionary<string, List<TransStepCase>>  caseDict    = new Dictionary<string, List<TransStepCase>>();
+        private static List<CaseInfo>                           caseInfos   = new List<CaseInfo>();        
+        protected TransactionStep                               step        = TransactionStep.Base;
+        protected static ViewModelLocator                       locator     = new ViewModelLocator();
+        protected static TransactionConfig                      transConfig = TransactionConfig.GetInstance();
+        protected static Log                                    log         = Log.CreateLog(Constant.LogPath);
 
         public CaseBase()
         {
-            Load();           
+            //Load();           
         }
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace CardPlatform.Cases
         /// <param name="srcData"></param>
         public virtual void Excute(int batchNo, AppType app, TransactionStep step,object srcData)
         {
-            Step = step;
+            this.step = step;
             Load();
             if(caseInfos.Count > 0)
             {
@@ -63,7 +62,7 @@ namespace CardPlatform.Cases
             {                               
                 foreach (var item in locator.TemplateCompare.TemplateComparedInfos)
                 {
-                    if(CurrentApp == item.CurrentApp && Step == item.Step)
+                    if(transConfig.CurrentApp.ToString() == item.CurrentApp && step == item.Step)
                     {
                         if (tlv.Tag == item.Tag)
                         {
@@ -105,14 +104,10 @@ namespace CardPlatform.Cases
                 ViewModelLocator locator = new ViewModelLocator();
                 locator.Transaction.CaseInfos.Add(caseInfo);
 
-                //LogLevel logLevel = LogLevel.Info;
-                //if(level == TipLevel.Failed || level == TipLevel.Warn)
-                //{
-                //    locator.Transaction.ErrorCaseInfos.Add(caseInfo);
-                //    if (level == TipLevel.Failed) logLevel = LogLevel.Error;
-                //    if (level == TipLevel.Warn) logLevel = LogLevel.Warn;
-                //}
-                //log.TraceLog(logLevel, description);
+                if (level == TipLevel.Failed || level == TipLevel.Warn)
+                {
+                    locator.Transaction.ErrorCaseInfos.Add(caseInfo);
+                }
             });
 
         }
@@ -135,6 +130,11 @@ namespace CardPlatform.Cases
             return null;
         }
 
+        public static void ResetCase()
+        {
+            var caseConfig = CaseConfig.GetInstance();
+            caseConfig.HasLoaded = false;
+        }
         /// <summary>
         /// 加载配置文件
         /// </summary>
@@ -147,18 +147,20 @@ namespace CardPlatform.Cases
             }
             var allStepCases = new List<TransStepCase>();
             caseInfos.Clear();
-            if (CurrentApp != null)
+            string appName = transConfig.CurrentApp.ToString();
+            if (appName.Contains("_"))
             {
-                caseDict.TryGetValue(CurrentApp, out allStepCases);
-                if (allStepCases != null)
+                appName = appName.Substring(0, appName.IndexOf('_'));
+            }
+            caseDict.TryGetValue(appName, out allStepCases);
+            if (allStepCases != null)
+            {
+                foreach (var stepCases in allStepCases)
                 {
-                    foreach (var stepCases in allStepCases)
+                    if (stepCases.Step == step)
                     {
-                        if (stepCases.Step == Step)
-                        {
-                            caseInfos = new List<CaseInfo>(stepCases.Cases.ToArray());
-                            break;
-                        }
+                        caseInfos = new List<CaseInfo>(stepCases.Cases.ToArray());
+                        break;
                     }
                 }
             }
@@ -204,19 +206,19 @@ namespace CardPlatform.Cases
             string cardSeq = TransactionTag.GetInstance().GetTag("5F34");
             string mac = string.Empty;
             string macSessionKey = string.Empty;
-            if (TransConfig.Algorithm == AlgorithmType.DES)
+            if (transConfig.Algorithm == AlgorithmType.DES)
             {
-                if (string.IsNullOrEmpty(TransConfig.TransDesMacKey) || TransConfig.TransDesMacKey.Length != 32)
+                if (string.IsNullOrEmpty(transConfig.TransDesMacKey) || transConfig.TransDesMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransConfig.TransDesMacKey, TransConfig.KeyType, TransConfig.Algorithm);
+                macSessionKey = GenSessionKey(transConfig.TransDesMacKey, transConfig.KeyType, transConfig.Algorithm);
             }
             else
             {
-                if (string.IsNullOrEmpty(TransConfig.TransSmMacKey) || TransConfig.TransSmMacKey.Length != 32)
+                if (string.IsNullOrEmpty(transConfig.TransSmMacKey) || transConfig.TransSmMacKey.Length != 32)
                     return false;
-                macSessionKey = GenSessionKey(TransConfig.TransSmMacKey, TransConfig.KeyType, TransConfig.Algorithm);
+                macSessionKey = GenSessionKey(transConfig.TransSmMacKey, transConfig.KeyType, transConfig.Algorithm);
             }
-            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)TransConfig.Algorithm);
+            mac = Authencation.GenTag9F10Mac(macSessionKey, data, (int)transConfig.Algorithm);
             if (mac == tag9F10Mac)
             {
                 return true;
@@ -245,9 +247,9 @@ namespace CardPlatform.Cases
             {
                 inputCVN10.PadRight(zeroCount, '0');
             }
-            if (string.IsNullOrEmpty(TransConfig.TransDesAcKey))
+            if (string.IsNullOrEmpty(transConfig.TransDesAcKey))
                 return false;
-            var mac = Authencation.GenEMVAC(TransConfig.TransDesAcKey, inputCVN10);
+            var mac = Authencation.GenEMVAC(transConfig.TransDesAcKey, inputCVN10);
             string tag9F26 = TransactionTag.GetInstance().GetTag("9F26");
             if (mac == tag9F26)
             {
@@ -278,19 +280,19 @@ namespace CardPlatform.Cases
                 input.PadRight(zeroCount, '0');
             }
             string acSessionKey = string.Empty;
-            if (TransConfig.Algorithm == AlgorithmType.DES)
+            if (transConfig.Algorithm == AlgorithmType.DES)
             {
-                if (string.IsNullOrEmpty(TransConfig.TransDesAcKey) || TransConfig.TransDesAcKey.Length != 32)
+                if (string.IsNullOrEmpty(transConfig.TransDesAcKey) || transConfig.TransDesAcKey.Length != 32)
                     return false;
-                acSessionKey = GenSessionKey(TransConfig.TransDesAcKey, TransConfig.KeyType, TransConfig.Algorithm);
+                acSessionKey = GenSessionKey(transConfig.TransDesAcKey, transConfig.KeyType, transConfig.Algorithm);
             }
             else
             {
-                if (string.IsNullOrEmpty(TransConfig.TransSmAcKey) || TransConfig.TransSmAcKey.Length != 32)
+                if (string.IsNullOrEmpty(transConfig.TransSmAcKey) || transConfig.TransSmAcKey.Length != 32)
                     return false;
-                acSessionKey = GenSessionKey(TransConfig.TransSmAcKey, TransConfig.KeyType, TransConfig.Algorithm);
+                acSessionKey = GenSessionKey(transConfig.TransSmAcKey, transConfig.KeyType, transConfig.Algorithm);
             }
-            var mac = Authencation.GenAc(acSessionKey, input, (int)TransConfig.Algorithm);
+            var mac = Authencation.GenAc(acSessionKey, input, (int)transConfig.Algorithm);
             string tag9F26 = TransactionTag.GetInstance().GetTag("9F26");
             if(mac == tag9F26)
             {

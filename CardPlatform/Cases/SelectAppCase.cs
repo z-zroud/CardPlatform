@@ -22,11 +22,6 @@ namespace CardPlatform.Cases
             tlvs = new List<TLV>();
         }
 
-        protected override void Load()
-        {
-            base.Load();
-        }
-
         public override void Excute(int batchNo, AppType app, TransactionStep step, object srcData)
         {
             response = (ApduResponse)srcData;
@@ -467,51 +462,7 @@ namespace CardPlatform.Cases
             TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【tagDF4D=" + tagDF4D.Value + "】");
         }
         #endregion
-
-
-
-        /// <summary>
-        /// 检测采用密文版本01的QPBOC最基本的PDOL包含的标签是否存在(tag9F66/9F02/9F03/9F1A/95/5F2A/9A/9C/9F37)
-        /// </summary>
-        public void SelectAid_016()
-        {
-            List<Tuple<string, int>> tags = new List<Tuple<string, int>>
-            {
-                new Tuple<string, int>("9F66",4),
-                new Tuple<string, int>("9F02",6),
-                new Tuple<string, int>("9F03",6),
-                new Tuple<string, int>("9F1A",2),
-                new Tuple<string, int>("5F2A",2),
-                new Tuple<string, int>("9A",3),
-                new Tuple<string, int>("9C",1),
-                new Tuple<string, int>("9F37",4),
-                new Tuple<string, int>("95",5)
-            };
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
-            var tls = DataParse.ParseTL(tag9F38);
-            bool bFind = false;
-            foreach(var tag in tags)
-            {
-                bFind = false;
-                foreach(var tl in tls)
-                {
-                    if(tl.Tag == tag.Item1 && tl.Len == tag.Item2)
-                    {
-                        bFind = true;
-                        break;
-                    }
-                }
-                if (!bFind)
-                {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    return;
-                }
-            }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-        }
-
+        #region 非接特有case
         /// <summary>
         /// 检测PPSE返回的tag50和tag87是否和选择AID应用时的FCI模板中的tag50和tag87一致
         /// </summary>
@@ -524,7 +475,7 @@ namespace CardPlatform.Cases
             var ppseTag87 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPPSE, "87");
             var tag50 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "50");
             var tag87 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "87");
-            if(ppseTag50 != tag50 ||
+            if (ppseTag50 != tag50 ||
                 ppseTag87 != tag87)
             {
                 TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -552,26 +503,6 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// qVSDC应用选择，检测BF0C模板下是否存在9F5A
-        /// </summary>
-        public void SelectAid_019()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-
-            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
-            foreach(var tag in tags)
-            {
-                if(tag.Tag == "9F5A")
-                {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    return;
-                }
-            }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-        }
-
-        /// <summary>
         /// 检测tag9F38中是否包含tag9F66(必须包含)
         /// </summary>
         public void SelectAid_020()
@@ -581,13 +512,13 @@ namespace CardPlatform.Cases
             var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
             if (string.IsNullOrEmpty(tag9F38))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【tag9F38不存在】");
                 return;
             }
             var tls = DataParse.ParseTL(tag9F38);
-            foreach(var tl in tls)
+            foreach (var tl in tls)
             {
-                if(tl.Tag == "9F66")
+                if (tl.Tag == "9F66")
                 {
                     TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     return;
@@ -595,5 +526,83 @@ namespace CardPlatform.Cases
             }
             TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
+        #endregion
+        #region q交易特有case
+        #endregion
+        #region qVSDC特有case
+        /// <summary>
+        /// 检测BF0C模板下tag9F5A的规范性
+        /// </summary>
+        public void SelectAid_019()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var tags = CaseUtil.GetSubTags("BF0C", tlvs);
+            var tag9F5A = tags.FirstOrDefault(tlv => tlv.Tag == "9F5A");
+            if (tag9F5A == null)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【tag9F5A不存在】");
+                return;
+            }
+
+            caseItem.Description += "【tag9F5A=" + tag9F5A.Value + "】";
+            if (tag9F5A.Len < 5 || tag9F5A.Len > 16)
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return;
+            }
+            if (tag9F5A.Value.Substring(0, 2) != "40")
+            {
+                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[亚洲地区区域代码必须是40，请确认该卡是否为亚洲地区发卡]");
+                return;
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return;
+        }
+        #endregion
+        #region qPBOC特有case
+        /// <summary>
+        /// 检测采用密文版本01的QPBOC最基本的PDOL包含的标签是否存在(tag9F66/9F02/9F03/9F1A/95/5F2A/9A/9C/9F37)
+        /// </summary>
+        public void SelectAid_016()
+        {
+            List<Tuple<string, int>> tags = new List<Tuple<string, int>>
+            {
+                new Tuple<string, int>("9F66",4),
+                new Tuple<string, int>("9F02",6),
+                new Tuple<string, int>("9F03",6),
+                new Tuple<string, int>("9F1A",2),
+                new Tuple<string, int>("5F2A",2),
+                new Tuple<string, int>("9A",3),
+                new Tuple<string, int>("9C",1),
+                new Tuple<string, int>("9F37",4),
+                new Tuple<string, int>("95",5)
+            };
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F38 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectApp, "9F38");
+            var tls = DataParse.ParseTL(tag9F38);
+            bool bFind = false;
+            foreach (var tag in tags)
+            {
+                bFind = false;
+                foreach (var tl in tls)
+                {
+                    if (tl.Tag == tag.Item1 && tl.Len == tag.Item2)
+                    {
+                        bFind = true;
+                        break;
+                    }
+                }
+                if (!bFind)
+                {
+                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    return;
+                }
+            }
+            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+        #endregion
     }
 }
