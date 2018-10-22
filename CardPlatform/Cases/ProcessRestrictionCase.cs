@@ -19,7 +19,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag5F24应用失效日期,应用是否失效
         /// </summary>
-        public void ProcessRestriction_001()
+        public TipLevel ProcessRestriction_001()
         {
             int expiryDate;
             int currentDate;
@@ -30,22 +30,22 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if(string.IsNullOrEmpty(tag5F24))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag5F24]"); 
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag5F24]"); 
             }
             caseItem.Description += "【tag5F24=" + tag5F24 + "】";
+            log.TraceLog("tag5F24失效日期为:【{0}】", tag5F24);
+            log.TraceLog("当前日期为:【{0}】", DateTime.Now.ToString("yyMMdd"));
             if (expiryDate < currentDate)    //应用已失效
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测Tag5F25应用生效日期，应用是否生效
         /// </summary>
-        public void ProcessRestriction_002()
+        public TipLevel ProcessRestriction_002()
         {
             int effectiveDate;
             int currentDate;
@@ -56,23 +56,23 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if(string.IsNullOrEmpty(tag5F25))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag5F25]");
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag5F25]");
             }
+            log.TraceLog("tag5F25生效日期为:【{0}】", tag5F25);
+            log.TraceLog("当前日期为:【{0}】", DateTime.Now.ToString("yyMMdd"));
             caseItem.Description += "【tag5F25" + tag5F25 + "】";
             if (effectiveDate >= currentDate) // 应用未生效
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
 
         }
 
         /// <summary>
         /// 检测Tag5F24和Tag5F25时间顺序关系是否正确
         /// </summary>
-        public void ProcessRestriction_003()
+        public TipLevel ProcessRestriction_003()
         {
             int expiryDate;
             int effectiveDate;
@@ -82,33 +82,32 @@ namespace CardPlatform.Cases
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
+            log.TraceLog("tag5F24失效日期为:【{0}】", TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F24"));
+            log.TraceLog("tag5F25生效日期为:【{0}】", TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F25"));
             if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测tag9F07是否符合规范
         /// </summary>
-        public void ProcessRestriction_004()
+        public TipLevel ProcessRestriction_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             string tag9F07 = TransactionTag.GetInstance().GetTag("9F07");
             if (string.IsNullOrEmpty(tag9F07))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag9F07]");
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag9F07]");
             }
             caseItem.Description += "【tag9F07" + tag9F07 + "】";
+            log.TraceLog("tag9F07=【{0}】", tag9F07);
             if (tag9F07 == "FF00")
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
@@ -123,9 +122,32 @@ namespace CardPlatform.Cases
                 if ((auc & 0x0100) == 0) caseItem.Description += "[除ATM外的终端有效检测失败]";
                 //if ((auc & 0x0080) == 0) caseItem.Description += "[允许国内返现检测失败]";
                 //if ((auc & 0x0040) == 0) caseItem.Description += "[允许国际返现检测失败]";
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
+        }
+
+        /// <summary>
+        /// 应用版本信息比较
+        /// </summary>
+        /// <returns></returns>
+        public TipLevel ProcessRestriction_005()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            string tag9F08 = TransactionTag.GetInstance().GetTag("9F08");
+            if (string.IsNullOrEmpty(tag9F08))
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag9F08]");
+            }
+            var tag9F09 = locator.Terminal.GetTag("9F09");
+            caseItem.Description += "【tag9F08" + tag9F08 + "】";
+            log.TraceLog("卡片版本号:tag9F08=【{0}】", tag9F08);
+            log.TraceLog("终端版本号:【{0}】", tag9F09);
+            if(tag9F09 != tag9F08)
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

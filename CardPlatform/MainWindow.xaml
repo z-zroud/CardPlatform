@@ -27,9 +27,9 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Controls:MetroAnimatedSingleRowTabControl Grid.Row="1" x:Name="MainTabControl">
-                <TabItem Header="制 卡">
+                <!--TabItem Header="制 卡">
                     <Views:PersonlizeView />
-                </TabItem>
+                </-->
                 <TabItem Header="卡片检测">
                     <Views:CardCheckView />
                 </TabItem>

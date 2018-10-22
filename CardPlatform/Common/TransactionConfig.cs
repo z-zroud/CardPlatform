@@ -33,6 +33,8 @@ namespace CardPlatform.Common
         public string TransSmAcKey { get; set; }       //SM_AC (MDK/UDK) 由KeyType决定
         public string TransSmMacKey { get; set; }      //SM_MAC
         public string TransSmEncKey { get; set; }      //SM_ENC
+        public string TransIdnKey { get; set; } //IDN key for Mastercard
+        public string TransCvcKey { get; set; } //DCVC3 key for Mastercard
         
         public void SaveConfig()
         {

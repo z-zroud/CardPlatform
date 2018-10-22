@@ -86,7 +86,10 @@
     <Compile Include="Business\BusinessECC.cs" />
     <Compile Include="Business\BusinessJETCO.cs" />
     <Compile Include="Business\BusinessMC.cs" />
+    <Compile Include="Business\BusinessMSD.cs" />
+    <Compile Include="Business\BusinessPaypass.cs" />
     <Compile Include="Business\BusinessqVSDC.cs" />
+    <Compile Include="Business\BusinessUtil.cs" />
     <Compile Include="Business\BusinessVISA.cs" />
     <Compile Include="Business\BusinessPPSE.cs" />
     <Compile Include="Business\BusinessPSE.cs" />

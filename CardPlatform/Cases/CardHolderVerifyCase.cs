@@ -19,7 +19,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测8E格式是否符合规范
         /// </summary>
-        public void CardHolderVerfiy_001()
+        public TipLevel CardHolderVerfiy_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -27,38 +27,36 @@ namespace CardPlatform.Cases
             var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
             if (tag8E.Length < 20 || (tag8E.Length - 16) % 4 != 0)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测X，Y金额是否全0
         /// </summary>
-        public void CardHolderVerfiy_002()
+        public TipLevel CardHolderVerfiy_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
             var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
             if (tag8E.Length < 20)
-            {               
-                return;
+            {
+                return TraceInfo(caseItem.Level, caseNo, "8E长度有误");
             }
             if(tag8E.Substring(0,16) != "0000000000000000")
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
 
         /// <summary>
         /// 检测X，Y金额是否全0
         /// </summary>
-        public void CardHolderVerfiy_003()
+        public TipLevel CardHolderVerfiy_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -66,17 +64,16 @@ namespace CardPlatform.Cases
             var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
             if (tag8E.Length != 28 || tag8E.Substring(16) != "42031E031F00")
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
 
         /// <summary>
         /// 检测8E是否存在脱机PIN入口，若有是否有相应的tag存在卡片中
         /// </summary>
-        public void CardHolderVerfiy_004()
+        public TipLevel CardHolderVerfiy_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -89,11 +86,10 @@ namespace CardPlatform.Cases
                 int methodSixBit = method & 0x3F;
                 if (methodSixBit == 1)   //存在脱机PIN入口，需要判断是否有脱机PIN相关tag
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    return;
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

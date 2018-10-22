@@ -45,7 +45,17 @@ namespace CardPlatform.Cases
                     var methods = GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance);
                     var methodsName = from method in methods select method.Name;
                     if (methodsName.Contains(item.CaseNo))
-                        GetType().GetMethod(item.CaseNo).Invoke(this, null);
+                    {
+                        log.TraceLog("执行case [{0}]:{1}", item.CaseNo, item.Description);
+                        var result = (TipLevel)GetType().GetMethod(item.CaseNo).Invoke(this, null);
+                        string caseReuslt = "";
+                        if (result == TipLevel.Failed) caseReuslt = "失败";
+                        if (result == TipLevel.Sucess) caseReuslt = "成功";
+                        if (result == TipLevel.Warn) caseReuslt = "警告";
+                        if (result == TipLevel.Unknown) caseReuslt = "未知";
+                        log.TraceLog("执行case [{0}] 结果: {1}\n", item.CaseNo, caseReuslt);
+                    }
+                       
                 }
             }
                
@@ -90,7 +100,7 @@ namespace CardPlatform.Cases
         /// <param name="caseNo"></param>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        public virtual void TraceInfo(TipLevel level, string caseNo, string format, params object[] args)
+        public virtual TipLevel TraceInfo(TipLevel level, string caseNo, string format, params object[] args)
         {
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
@@ -109,7 +119,7 @@ namespace CardPlatform.Cases
                     locator.Transaction.ErrorCaseInfos.Add(caseInfo);
                 }
             });
-
+            return level;
         }
 
 
@@ -258,6 +268,37 @@ namespace CardPlatform.Cases
             return false;
         }
 
+        public bool CheckMcAc()
+        {
+            string tag9F02 = locator.Terminal.GetTag("9F02");  //授权金额
+            string tag9F03 = locator.Terminal.GetTag("9F03");  //其他金额
+            string tag9F1A = locator.Terminal.GetTag("9F1A");  //终端国家代码
+            string tag95 = locator.Terminal.GetTag("95");      //终端验证结果           
+            string tag5A = locator.Terminal.GetTag("5F2A");  //交易货币代码
+            string tag9A = locator.Terminal.GetTag("9A");      //交易日期
+            string tag9C = locator.Terminal.GetTag("9C");      //交易类型
+            string tag9F37 = locator.Terminal.GetTag("9F37");  //不可预知数
+            string tag82 = TransactionTag.GetInstance().GetTag("82");
+            string tag9F36 = TransactionTag.GetInstance().GetTag("9F36");
+            string tag9F10 = TransactionTag.GetInstance().GetTag("9F10");
+            var cvr = tag9F10.Substring(4, 12);   //卡片验证结果
+            var plaintextCounters = tag9F10.Substring(20, 16);
+
+            string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + cvr;
+            if (string.IsNullOrEmpty(transConfig.TransDesAcKey) || transConfig.TransDesAcKey.Length != 32)
+                return false;
+            //input += plaintextCounters;
+            string acSessionKey = Authencation.GenMcSessionKeyCsk(transConfig.TransDesAcKey, tag9F36);
+            //string acSessionKey = Authencation.GenMcSessionKeySkd(transConfig.TransDesAcKey, tag9F36,tag9F37);
+            var mac = Authencation.GenAc(acSessionKey, input, (int)transConfig.Algorithm);
+            string tag9F26 = TransactionTag.GetInstance().GetTag("9F26");
+            if (mac == tag9F26)
+            {
+                return true;
+            }
+            return false;
+        }
+
         public bool CheckPbocAc()
         {      
             string tag9F02  = locator.Terminal.GetTag("9F02");  //授权金额
@@ -272,6 +313,7 @@ namespace CardPlatform.Cases
             string tag9F36  = TransactionTag.GetInstance().GetTag("9F36");
             string tag9F10  = TransactionTag.GetInstance().GetTag("9F10");
             var cvr = tag9F10.Substring(6, 8);   //卡片验证结果
+            var plaintextCounters = tag9F10.Substring(20, 16);
 
             string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + cvr;
             int zeroCount = input.Length % 16;

@@ -59,86 +59,6 @@ namespace CplusplusDll
             return CAPublicKey.ToString();
         }
 
-        public static int GenDesIssuerPublicKey(string caPublicKey, 
-            string issuerPublicCert, 
-            string ipkRemainder, 
-            string issuerExponent, 
-            string pan,
-            string tag5F24,
-            out string publicKey)
-        {
-            StringBuilder issuerPublicKey = new StringBuilder(1024 * 4);
-            var result = CDll.GenDesIssuerPublicKey(caPublicKey, issuerPublicCert, ipkRemainder, issuerExponent, pan, tag5F24, issuerPublicKey);
-            publicKey = issuerPublicKey.ToString();
-            return result;
-        }
-
-        public static int GenDesICCPublicKey(string issuerPublicKey, 
-            string iccPublicCert, 
-            string iccRemainder, 
-            string sigStaticData, 
-            string iccExponent, 
-            string tag82, 
-            string pan,
-            string tag5F24,
-            out string publicKey)
-        {
-            StringBuilder iccPublicKey = new StringBuilder(1024 * 4);
-            var result = CDll.GenDesICCPublicKey(issuerPublicKey, iccPublicCert, iccRemainder, sigStaticData, iccExponent, tag82, pan, tag5F24, iccPublicKey);
-
-            publicKey = iccPublicKey.ToString();
-            return result;
-        }
-
-        public static int GenSMIssuerPublicKey(string caPublicKey, 
-            string issuerPublicCert, 
-            string PAN,
-            string tag5F24,
-            out string publicKey)
-        {
-            StringBuilder issuerPublicKey = new StringBuilder(1024 * 4);
-            var result = CDll.GenSMIssuerPublicKey(caPublicKey, issuerPublicCert,  PAN, tag5F24, issuerPublicKey);
-
-            publicKey = issuerPublicKey.ToString();
-
-            return result;
-        }
-
-        public static int GenSMICCPublicKey(string issuerPublicKey, 
-            string iccPublicCert, 
-            string needAuthStaticData, 
-            string tag82, 
-            string PAN,
-            string tag5F24,
-            out string publicKey)
-        {
-            StringBuilder iccPublicKey = new StringBuilder(1024 * 2);
-            var result = CDll.GenSMICCPublicKey(issuerPublicKey, iccPublicCert, needAuthStaticData, tag82, PAN, tag5F24,iccPublicKey);
-
-            publicKey = iccPublicKey.ToString();
-            return result;
-        }
-
-        public static int DES_SDA(string issuerPublicKey, string ipkExponent, string tag93, string sigStaticData, string tag82)
-        {
-            return CDll.DES_SDA(issuerPublicKey, ipkExponent, tag93, sigStaticData, tag82);
-        }
-
-        public static int SM_SDA(string issuerPublicKey, string sigStaticData, string tag93, string tag82)
-        {
-            return CDll.SM_SDA(issuerPublicKey, sigStaticData, tag93, tag82);
-        }
-
-        public static int DES_DDA(string iccPublicKey, string iccExponent, string tag9F4B, string dynamicData)
-        {
-            return CDll.DES_DDA(iccPublicKey, iccExponent, tag9F4B, dynamicData);
-        }
-
-        public static int SM_DDA(string iccPublicKey, string tag9F4B, string dynamicData)
-        {
-            return CDll.SM_DDA(iccPublicKey, tag9F4B, dynamicData);
-        }
-
         public static string GenUdkSessionKey(string udkSubKey, string atc, int keyType = 0)
         {
             StringBuilder udkSessionKey = new StringBuilder(33);
@@ -215,6 +135,28 @@ namespace CplusplusDll
             CDll.GenPBOCMac(udkMacSessionKey, data, mac, keyType);
 
             return mac.ToString().Substring(0, 8);
+        }
+
+        public static string GenMcSessionKeySkd(string mkAc,string atc, string un)
+        {
+            string leftInput = atc + "F000" + un;
+            string rightInput = atc + "0F00" + un;
+
+            string leftKey = Algorithm.Des3Encrypt(mkAc, leftInput);
+            string rightKey = Algorithm.Des3Encrypt(mkAc, rightInput);
+
+            return leftKey + rightKey;
+        }
+
+        public static string GenMcSessionKeyCsk(string mkAc,string atc)
+        {
+            string leftInput = atc + "F00000000000";
+            string rightInput = atc + "0F0000000000";
+
+            string leftKey = Algorithm.Des3Encrypt(mkAc, leftInput);
+            string rightKey = Algorithm.Des3Encrypt(mkAc, rightInput);
+
+            return leftKey + rightKey;
         }
     }
 }

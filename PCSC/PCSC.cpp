@@ -320,12 +320,10 @@ int  SendApdu(const char* cmd, char* output, int len)
     char szCmdLen[3] = { 0 };
     strncpy_s(cmdHeader, 10, g_cmd, 8);
     strncpy_s(szCmdLen, 3, g_cmd + 8, 2);
-#ifdef _DEBUG
     if (cmdLen > 10)
         TraceDebug(GetCurLog(),"APDU: %s %s %s\n", cmdHeader, szCmdLen, g_cmd + 10);
     else
         TraceDebug(GetCurLog(), "APDU: %s\n", g_cmd);
-#endif // DEBUG
     if (!SendApduCmd(cmd, response, responseLen))
     {
         return -1;
@@ -371,10 +369,10 @@ int  SendApdu(const char* cmd, char* output, int len)
 #ifdef _DEBUG
     if (result != 0x9000)
     {
-        TraceError(GetCurLog(), "RESP: %s SW=%04X\n", output, result);
+        TraceError(GetCurLog(), "RESP: %s \nS  W: %04X\n", output, result);
     }
     else {
-        TraceDebug(GetCurLog(), "RESP: %s SW=%04X\n", output, result);
+        TraceDebug(GetCurLog(), "RESP: %s \nS  W: %04X\n", output, result);
     }
         
 #endif

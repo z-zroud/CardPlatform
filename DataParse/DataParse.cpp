@@ -125,7 +125,14 @@ void _ParseTLVEx(PBCD_TLV ptlvs, unsigned int tlvCount, int level, vector<TLV>& 
 
 bool IsTLV(char* bcdBuffer, int buffLen)
 {
-    return IsBcdTlvStruct(bcdBuffer, buffLen);
+    //printf("buff=%s,len=%d\n", bcdBuffer, buffLen);
+    bool ret = IsBcdTlvStruct(bcdBuffer, buffLen);
+    //printf("ret=%d\n", ret);
+    if (ret)
+        ret = 1;
+    else
+        ret = 0;
+    return ret;
 }
 
 bool ParseTLV(char* buffer, PTLV pTlvs, unsigned int& count)

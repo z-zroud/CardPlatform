@@ -22,7 +22,7 @@ namespace CardPlatform.ViewModel
     /// </summary>
     public class MainViewModel : ViewModelBase
     {
-        NamedPipeServer pipServer;
+        //NamedPipeServer pipServer;
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
         /// </summary>
@@ -37,13 +37,13 @@ namespace CardPlatform.ViewModel
             ////    // Code runs "for real"
             ////}
             DispatcherHelper.Initialize();
-            pipServer = new NamedPipeServer(@"\\.\pipe\LogOutputNamedPipe", 0);
+            //pipServer = new NamedPipeServer(@"\\.\pipe\LogOutputNamedPipe", 0);
             //pipServer.Start(OutputLog);
         }
 
         public void Relase()
         {
-            pipServer.StopServer();
+            //pipServer.StopServer();
         }
 
         private void OutputLog(string message)

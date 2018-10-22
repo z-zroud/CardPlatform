@@ -23,8 +23,8 @@ namespace CardPlatform.ViewModel
             Aids                        = new ObservableCollection<string>();
             CaseInfos                   = new ObservableCollection<TransInfoModel>();
             ErrorCaseInfos              = new ObservableCollection<TransInfoModel>();
-            TransResult                 = new ObservableCollection<TransResultModel>();
             TransKeys                   = new TransKeyModel();
+            TransResult                 = new TransResultModel();
         }
 
         #region data binding
@@ -121,7 +121,15 @@ namespace CardPlatform.ViewModel
         /// <summary>
         /// 交易结果显示
         /// </summary>
-        public ObservableCollection<TransResultModel> TransResult { get; set; }
+        private TransResultModel _transResult;
+        public TransResultModel TransResult
+        {
+            get { return _transResult; }
+            set
+            {
+                Set(ref _transResult, value);
+            }
+        }
 
         private TransKeyModel _transKeys;
         public TransKeyModel TransKeys
@@ -130,6 +138,50 @@ namespace CardPlatform.ViewModel
             set
             {
                 Set(ref _transKeys, value);
+            }
+        }
+
+        private string _applicationDesKey;
+        public string ApplicationDesKey
+        {
+            get {
+                if(!string.IsNullOrEmpty(_applicationDesKey) && _applicationDesKey.Length == 32 * 3)
+                {
+                    if(CurrentAlgorithm == AlgorithmType.DES)
+                    {
+                        TransKeys.DES_AC = _applicationDesKey.Substring(0, 32);
+                        TransKeys.DES_MAC = _applicationDesKey.Substring(32, 32);
+                        TransKeys.DES_ENC = _applicationDesKey.Substring(63, 32);
+                    }
+
+                }
+                return _applicationDesKey;
+            }
+            set
+            {
+                Set(ref _applicationDesKey, value);
+            }
+        }
+
+        private string _applicationSmKey;
+        public string ApplicationSmKey
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_applicationSmKey) && _applicationSmKey.Length == 32 * 3)
+                {
+                    if (CurrentAlgorithm == AlgorithmType.SM)
+                    {
+                        TransKeys.SM_AC = _applicationSmKey.Substring(0, 32);
+                        TransKeys.SM_MAC = _applicationSmKey.Substring(32, 32);
+                        TransKeys.SM_ENC = _applicationSmKey.Substring(63, 32);
+                    }
+                }
+                return _applicationSmKey;
+            }
+            set
+            {
+                Set(ref _applicationSmKey, value);
             }
         }
 
@@ -283,7 +335,7 @@ namespace CardPlatform.ViewModel
         private void DoTrans()
         {
             BusinessBase trans = new BusinessBase();
-            trans.PersoFile = TagInfoFile;
+            trans.PersoInfoFile = TagInfoFile;
 
             TransactionConfig transConfig = TransactionConfig.GetInstance();
             transConfig.CurrentApp      = CurrentApp;
@@ -296,6 +348,8 @@ namespace CardPlatform.ViewModel
             transConfig.TransSmAcKey    = TransKeys.SM_AC;
             transConfig.TransSmMacKey   = TransKeys.SM_MAC;
             transConfig.TransSmEncKey   = TransKeys.SM_ENC;
+            transConfig.TransCvcKey     = TransKeys.CVCKey;
+            transConfig.TransIdnKey     = TransKeys.IDNKey;
             
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {
@@ -320,6 +374,15 @@ namespace CardPlatform.ViewModel
                     break;
                 case AppType.VISA:
                     trans = new BusinessVISA();
+                    break;
+                case AppType.MC:
+                    trans = new BusinessMC();
+                    break;
+                case AppType.Paypass:
+                    trans = new BusinessPaypass();
+                    break;
+                case AppType.MSD:
+                    trans = new BusinessMSD();
                     break;
             }
             trans.DoTransaction(CurrentAid);

@@ -68,5 +68,25 @@ namespace CardPlatform.Models
                 Set(ref _smENC, value);
             }
         }
+
+        private string _idnKey;
+        public string IDNKey
+        {
+            get { return _idnKey; }
+            set
+            {
+                Set(ref _idnKey, value);
+            }
+        }
+
+        private string _cvcKey;
+        public string CVCKey
+        {
+            get { return _cvcKey; }
+            set
+            {
+                Set(ref _cvcKey, value);
+            }
+        }
     }
 }

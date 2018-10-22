@@ -24,60 +24,63 @@ namespace CardPlatform.Business
             base.DoTransaction(aid);
             locator.Terminal.SetTag("9F7A", "00", "电子现金支持指示器(这里走借贷记交易流程)");
             locator.Terminal.SetTag("9C", "00", "交易类型");
-            if (IsContactTrans)
-                locator.Terminal.SetTag("9F66", "46000000", "终端交易属性");
-            else
-                locator.Terminal.SetTag("9F66", "66000000", "终端交易属性");
+            locator.Terminal.SetTag("9F09", "00A0", "终端应用版本号");
+            locator.Terminal.SetTag("9F66", "46000000", "终端交易属性");
             DoTransaction(DoTransactionEx);
         }
 
         private bool DoTransactionEx()
         {
-            log.TraceLog(LogLevel.Info, "========================= Begin Visa transaction  =========================\n");
+            log.TraceLog("开始执行VISA借贷记交易流程...\n");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             if (!ApplicationSelection(currentAid))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
             }
-            var afls = InitiateApplicationProcessing();
-            if (afls.Count == 0)
+            var ret = InitiateApplicationProcessing();
+            if (!ret)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                 return false;
             }
-            if (!ReadApplicationData(afls))
+            string tag94 = transTags.GetTag("94");
+            if (!string.IsNullOrEmpty(tag94))
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                return false;
-            }
-            GetRequirementData();   //在脱机之前先进行必要数据的获取
-            string aip = transTags.GetTag(TransactionStep.GPO, "82");
-            var aipHelper = new AipHelper(aip);
-            if (aipHelper.IsSupportSDA() || aipHelper.IsSupportDDA() || aipHelper.IsSupportCDA())
-            {
-                OfflineDataAuthentication();    //脱机数据认证
-            }
-            ProcessingRestrictions();         //处理限制
-            if (aipHelper.IsSupportCardHolderVerify())
-            {
-                CardHolderVerification();     //持卡人验证
-            }
-            TerminalRiskManagement();   //终端风险管理
-            if (0 != TerminalActionAnalysis())   //终端行为分析
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
-                return false;
-            }
-            if (0 != IssuerAuthencation())   //发卡行认证
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
-                return false;
-            }
-            if (0 != TransactionEnd())   //交易结束处理
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "交易结束处理失败，交易终止");
-                return false;
+                var afls = DataParse.ParseAFL(tag94);
+                if (!ReadApplicationData(afls))
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                    return false;
+                }
+                GetRequirementData();   //在脱机之前先进行必要数据的获取
+                string aip = transTags.GetTag(TransactionStep.GPO, "82");
+                var aipHelper = new AipHelper(aip);
+                if (aipHelper.IsSupportSDA() || aipHelper.IsSupportDDA() || aipHelper.IsSupportCDA())
+                {
+                    OfflineDataAuthentication();    //脱机数据认证
+                }
+                ProcessingRestrictions();         //处理限制
+                if (aipHelper.IsSupportCardHolderVerify())
+                {
+                    CardHolderVerification();     //持卡人验证
+                }
+                TerminalRiskManagement();   //终端风险管理
+                if (0 != TerminalActionAnalysis())   //终端行为分析
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
+                    return false;
+                }
+                if (0 != IssuerAuthencation())   //发卡行认证
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
+                    return false;
+                }
+                if (0 != TransactionEnd())   //交易结束处理
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "交易结束处理失败，交易终止");
+                    return false;
+                }
             }
             return true;
         }
@@ -87,19 +90,18 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="aid"></param>
         /// <returns></returns>
-        protected bool ApplicationSelection(string aid)
+        public new bool ApplicationSelection(string aid)
         {
-            log.TraceLog(LogLevel.Info, "========================= Application Selection  =========================");
+            log.TraceLog("执行应用选择流程...");
             bool result = false;
-            ApduResponse resp = base.SelectAid(aid);
+            ApduResponse resp = base.ApplicationSelection(aid);
             if (resp.SW == 0x9000)
             {
-                if (SaveTags(TransactionStep.SelectApp, resp.Response))
-                {
-                    var stepCase = new SelectAppCase();
-                    stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, resp);
-                    result = true;
-                }
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                businessUtil.SaveTags(TransactionStep.SelectApp, tlvs);
+                var selectAppCase = new SelectAppCase();
+                selectAppCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, resp);
+                result = true;
             }
             else
             {
@@ -114,31 +116,31 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="pdol"></param>
         /// <returns></returns>
-        protected List<AFL> InitiateApplicationProcessing()
+        protected bool InitiateApplicationProcessing()
         {
-            log.TraceLog(LogLevel.Info, "========================= Initiate Application Processing  =========================");
+            log.TraceLog("开始执行应用初始化流程检测...");
             var afls = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             string tag9F38 = transTags.GetTag(TransactionStep.SelectApp, "9F38");
-            var pdolData = GetDolData(tag9F38);
-            var response = base.GPO(pdolData);
+            var pdolData = businessUtil.GetDolData(tag9F38);
+            var response = base.InitiateApplicationProcessing(pdolData);
             if (response.SW != 0x9000)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令失败，SW={0}", response.SW);
-                return afls;
+                return false;
             }
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count != 1 || tlvs[0].Value.Length <= 4)
             {
-                return afls;
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "请检查GPO响应数据格式是否正确");
+                return false;
             }
             transTags.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
-            afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
             var gpoCase = new GPOCase();
             gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
-            return afls;
+            return true;
         }
 
         /// <summary>
@@ -146,11 +148,11 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="afls"></param>
         /// <returns></returns>
-        protected bool ReadApplicationData(List<AFL> afls)
+        protected new bool ReadApplicationData(List<AFL> afls)
         {
-            log.TraceLog(LogLevel.Info, "========================= Read Application Data  =========================");
-            var resps = base.ReadRecords(afls);
+            log.TraceLog("开始执行读记录数据流程检测...");
             var caseNo = MethodBase.GetCurrentMethod().Name;
+            var resps = base.ReadApplicationData(afls);
 
             foreach (var resp in resps)
             {
@@ -159,20 +161,18 @@ namespace CardPlatform.Business
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!SaveTags(TransactionStep.ReadRecord, resp.Response))
-                {
-                    return false;
-                }
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                businessUtil.SaveTags(TransactionStep.ReadRecord, tlvs);
             }
+
             IExcuteCase readRecordCase = new ReadRecordCase();
             readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
 
 
-        public override void GetRequirementData()
+        public void GetRequirementData()
         {
-            base.GetRequirementData();
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             RequirementData[] tagStandards =
@@ -223,79 +223,33 @@ namespace CardPlatform.Business
         /// 脱机数据认证
         /// </summary>
         /// <returns></returns>
-        protected int OfflineDataAuthentication()
+        protected bool OfflineDataAuthentication()
         {
-            log.TraceLog(LogLevel.Info, "========================= Offline Data Authentication  =========================");
+            log.TraceLog(LogLevel.Info, "开始脱机数据认证流程检测...");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string aip = transTags.GetTag(TransactionStep.GPO, "82");
             var aipHelper = new AipHelper(aip);
-            if (aipHelper.IsSupportSDA())
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "VISA不应支持SDA脱机数据认证");
-                if (!SDA())
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
-                    return 1;
-                }
-            }
 
             if (!aipHelper.IsSupportDDA())
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
-                return 1;
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "该卡片不支持DDA脱机数据认证，请检查tag82是否符合要求");
+                return false;
             }
             string ddol = transTags.GetTag(TransactionStep.ReadRecord, "9F49");
             string ddolData = "12345678";
             var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
             if (string.IsNullOrWhiteSpace(tag9F4B))
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
-                return 1;
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取tag9F4B,请检查内部认证命令是否成功");
+                return false;
             }
             string issuerPublicKey = GetIssuerPublicKey();
             if (!DDA(issuerPublicKey, tag9F4B, ddolData))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
-                return 1;
+                return false;
             }
-            return 0;
-        }
-
-        /// <summary>
-        /// 处理限制,
-        /// </summary>
-        /// <returns></returns>
-        protected int ProcessingRestrictions()
-        {
-            log.TraceLog(LogLevel.Info, "========================= Processing Restrictions  =========================");
-            var handleLimitationCase = new ProcessRestrictionCase();
-            handleLimitationCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
-            return 0;
-        }
-
-        /// <summary>
-        /// 持卡人认证
-        /// </summary>
-        /// <returns></returns>
-        protected int CardHolderVerification()
-        {
-            log.TraceLog(LogLevel.Info, "========================= Cardholder Verification  =========================");
-            var cardHolderVerifyCase = new CardHolderVerifyCase();
-            cardHolderVerifyCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
-            return 0;
-        }
-
-        /// <summary>
-        /// 终端风险管理为大额交易提供了发卡行授权，确保卡片交易可以周期性的
-        /// 进行联机处理。
-        /// </summary>
-        /// <returns></returns>
-        protected int TerminalRiskManagement()
-        {
-            log.TraceLog(LogLevel.Info, "========================= Terminal Risk Management  =========================");
-            var terminalRishManagementCase = new TerminalRiskManagementCase();
-            terminalRishManagementCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
-            return 0;
+            return true;
         }
 
         /// <summary>
@@ -312,7 +266,7 @@ namespace CardPlatform.Business
             log.TraceLog(LogLevel.Info, "========================= Terminal Action Analysis  =========================");
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string CDOL1 = transTags.GetTag(TransactionStep.ReadRecord, "8C");
-            ApduResponse resp = FirstGAC(Constant.ARQC, CDOL1);
+            ApduResponse resp = GAC(Constant.ARQC, CDOL1);
             if (resp.SW != 0x9000)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "第一次发送GAC命令失败,返回{0:4X}", resp.SW);
@@ -366,7 +320,7 @@ namespace CardPlatform.Business
         {
             log.TraceLog(LogLevel.Info, "========================= Completion Processing  =========================");
             string CDOL2 = transTags.GetTag(TransactionStep.ReadRecord, "8D");
-            ApduResponse resp = SecondGAC(Constant.TC, CDOL2);
+            ApduResponse resp = GAC(Constant.TC, CDOL2);
             var tlvs = DataParse.ParseTLV(resp.Response);
             if (tlvs.Count > 0 && tlvs[0].Tag == "80")
             {

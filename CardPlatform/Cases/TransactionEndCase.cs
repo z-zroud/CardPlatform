@@ -32,39 +32,37 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测第一个GAC卡片返回结果是否为80
         /// </summary>
-        public void TransactionEnd_001()
+        public TipLevel TransactionEnd_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
             if (!CaseUtil.RespStartWith(response.Response, "80"))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
 
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测tag9F10中MAC的正确性
         /// </summary>
-        public void TransactionEnd_002()
+        public TipLevel TransactionEnd_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             if (Check9F10Mac())
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测tag9F26的值与终端计算的mac一致性
         /// </summary>
-        public void TransactionEnd_003()
+        public TipLevel TransactionEnd_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -72,19 +70,24 @@ namespace CardPlatform.Cases
             {
                 if (CheckVisaAc())
                 {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    return;
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                }
+            }
+            else if(TransactionConfig.GetInstance().CurrentApp == AppType.MC)
+            {
+                if (CheckMcAc())
+                {
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
             }
             else
             {
                 if (CheckPbocAc())
                 {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    return;
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
             }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
     }
 }

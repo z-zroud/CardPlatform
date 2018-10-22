@@ -165,17 +165,17 @@ int main()
         
 
     //Test Base64 decode
- //   int len = 0;
- //   string testBase64 = Tool::base64_decode("fccMwd6wotmr/UhcqZL1kdvI0BqmcJwI6fBEF374ecrbAZwPgp9b2hukA+PwoXeWRhyeoQV4jq4G//Wp4/Axp3OLeRxdYMRJiNJGr2HHPZdeXQcE9v41vA==",len);
- //   string testBase641 = Tool::StrToBcd(testBase64.c_str(),len);
- //   char tmp[2048] = { 0 };
- //   Tool::AscToBcd(tmp, (char*)testBase64.c_str(), len * 2);
- //   //Test StrToBcd 6C696A6965
- //   char* a = "lijie";
- //   string test = Tool::StrToBcd(a,5);
- //   //Test GetDirectory
- //   const char* filePath = "a\\b\\c.txt";
- //   string dir = Tool::GetDirectory(filePath);
+    int len = 0;
+    string testBase64 = Tool::base64_decode("Lm595NXdgKqzX53sb1oEjviRYZ+lTW7rrg9LcJZ/60Hy8R+7Eq6x7srFTydmxEI/S2jkD1jkXHxM103oy1JXK2sqZG3TiIHB",len);
+    string testBase641 = Tool::StrToBcd(testBase64.c_str(),len);
+    char tmp[2048] = { 0 };
+    Tool::AscToBcd(tmp, (char*)testBase64.c_str(), len * 2);
+    //Test StrToBcd 6C696A6965
+    char* a = "lijie";
+    string test = Tool::StrToBcd(a,5);
+    //Test GetDirectory
+    const char* filePath = "a\\b\\c.txt";
+    string dir = Tool::GetDirectory(filePath);
 
  //   //Test BcdToStr
  //   char* bcd = "50525950463030303031";

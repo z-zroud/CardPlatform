@@ -261,7 +261,7 @@ void GenPBOCMac(const char* udkMacSessionKey, const char* data, char* mac, int k
             calcData.append(remaindZero, '0');
         }
     }
-
+    printf("%s", calcData.c_str());
     char szOutput[33] = { 0 };
     if (keyType == DES_KEY)
     {

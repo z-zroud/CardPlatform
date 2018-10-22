@@ -37,21 +37,26 @@ namespace CardPlatform.Business
         {
             pdolData = string.Empty;    //PDOL Data也需要清空，防止做CDA时，出现重叠
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (!SelectApp(currentAid))
+            if (!ApplicationSelection(currentAid))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
             }
-            var AFLs = GPOEx();
-            if (AFLs.Count == 0)
+            var ret = InitiateApplicationProcessing();
+            if (!ret)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                 return false;
             }
-            if (!ReadAppRecords(AFLs))
+            string tag94 = transTags.GetTag("94");
+            if (!string.IsNullOrEmpty(tag94))
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                return false;
+                var afls = DataParse.ParseAFL(tag94);
+                if (!ReadApplicationData(afls))
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                    return false;
+                }
             }
             GetRequirementData();
            
@@ -59,9 +64,9 @@ namespace CardPlatform.Business
             if (tag9F74.Length == 12)
             {
                 var resp = APDU.GetDataCmd("9F79");
-                SaveTags(TransactionStep.GetData, resp.Response);
+                //SaveTags(TransactionStep.GetData, resp.Response);
                 resp = APDU.GetDataCmd("9F6D");
-                SaveTags(TransactionStep.GetData, resp.Response);
+                //SaveTags(TransactionStep.GetData, resp.Response);
                 var tag9F79 = transTags.GetTag("9F79");
                 if (int.Parse(tag9F79) > 0)
                 {
@@ -77,10 +82,10 @@ namespace CardPlatform.Business
                     OfflineAuthcation();    //脱机数据认证
                 }
 
-                HandleLimitation();
+                ProcessingRestrictions();
                 if (aipHelper.IsSupportCardHolderVerify())
                 {
-                    CardHolderVerify();     //持卡人验证
+                    CardHolderVerification();     //持卡人验证
                 }
 
                 TerminalRiskManagement();
@@ -102,23 +107,23 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="aid"></param>
         /// <returns></returns>
-        protected bool SelectApp(string aid)
+        public new bool ApplicationSelection(string aid)
         {
+            log.TraceLog("执行应用选择流程...");
             bool result = false;
-            ApduResponse response = base.SelectAid(aid);
-            if (response.SW == 0x9000)
+            ApduResponse resp = base.ApplicationSelection(aid);
+            if (resp.SW == 0x9000)
             {
-                if (SaveTags(TransactionStep.SelectApp, response.Response))
-                {
-                    var stepCase = new SelectAppCase();
-                    stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, response);
-                    result = true;
-                }
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                businessUtil.SaveTags(TransactionStep.SelectApp, tlvs);
+                var selectAppCase = new SelectAppCase();
+                selectAppCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, resp);
+                result = true;
             }
             else
             {
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, resp.SW);
             }
             return result;
         }
@@ -128,45 +133,31 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="pdol"></param>
         /// <returns></returns>
-        protected List<AFL> GPOEx()
+        protected bool InitiateApplicationProcessing()
         {
+            log.TraceLog("开始执行应用初始化流程检测...");
             var afls = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             string tag9F38 = transTags.GetTag(TransactionStep.SelectApp, "9F38");
-            if (string.IsNullOrEmpty(tag9F38))
-            {
-                return afls;
-            }
-            var tls = DataParse.ParseTL(tag9F38);
-            string pdolData = string.Empty;
-            foreach (var tl in tls)
-            {
-                var terminalData = locator.Terminal.GetTag(tl.Tag);
-                if (terminalData.Length != tl.Len * 2) return afls;
-                if (string.IsNullOrEmpty(terminalData)) return afls;
-                pdolData += terminalData;
-            }
-            var response = base.GPO(pdolData);
+            var pdolData = businessUtil.GetDolData(tag9F38);
+            var response = base.InitiateApplicationProcessing(pdolData);
             if (response.SW != 0x9000)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令失败，SW={0}", response.SW);
-                return afls;
+                return false;
             }
             var tlvs = DataParse.ParseTLV(response.Response);
             if (tlvs.Count != 1 || tlvs[0].Value.Length <= 4)
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令返回数据格式不正确[{0}]",response.Response);
-                return afls;
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "请检查GPO响应数据格式是否正确");
+                return false;
             }
             transTags.SetTag(TransactionStep.GPO, "82", tlvs[0].Value.Substring(0, 4));
             transTags.SetTag(TransactionStep.GPO, "94", tlvs[0].Value.Substring(4));
-            afls = DataParse.ParseAFL(transTags.GetTag(TransactionStep.GPO, "94"));
-
             var gpoCase = new GPOCase();
             gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
-
-            return afls;
+            return true;
         }
 
         /// <summary>
@@ -174,10 +165,11 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="afls"></param>
         /// <returns></returns>
-        protected bool ReadAppRecords(List<AFL> afls)
+        protected new bool ReadApplicationData(List<AFL> afls)
         {
-            var resps = base.ReadRecords(afls);
+            log.TraceLog("开始执行读记录数据流程检测...");
             var caseNo = MethodBase.GetCurrentMethod().Name;
+            var resps = base.ReadApplicationData(afls);
 
             foreach (var resp in resps)
             {
@@ -186,19 +178,17 @@ namespace CardPlatform.Business
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if (!SaveTags(TransactionStep.ReadRecord, resp.Response))
-                {
-                    return false;
-                }
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                businessUtil.SaveTags(TransactionStep.ReadRecord, tlvs);
             }
+
             IExcuteCase readRecordCase = new ReadRecordCase();
             readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
             return true;
         }
 
-        public override void GetRequirementData()
+        public void GetRequirementData()
         {
-            base.GetRequirementData();
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             RequirementData[] tagStandards =
@@ -294,31 +284,6 @@ namespace CardPlatform.Business
             return 0;
         }
 
-        /// <summary>
-        /// 处理限制
-        /// </summary>
-        /// <returns></returns>
-        protected int HandleLimitation()
-        {
-            var handleLimitationCase = new ProcessRestrictionCase();
-            handleLimitationCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ProcessRestriction, null);
-            return 0;
-        }
-
-        protected int CardHolderVerify()
-        {
-            var cardHolderVerifyCase = new CardHolderVerifyCase() ;
-            cardHolderVerifyCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.CardHolderVerify, null);
-            return 0;
-        }
-
-        protected int TerminalRiskManagement()
-        {
-            var terminalRishManagementCase = new TerminalRiskManagementCase() ;
-            terminalRishManagementCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalRiskManagement, null);
-            return 0;
-        }
-
         protected int TerminalActionAnalyze()
         {
             //如果卡片支持CDA，在执行终端行为分析之前获取发卡行公钥、IC卡公钥
@@ -339,92 +304,89 @@ namespace CardPlatform.Business
                     CDOL1Data += locator.Terminal.GetTag(tl.Tag);
                 }
                 response = APDU.GACCmd(Constant.TC_CDA, CDOL1Data);
-
-                if (SaveTags(TransactionStep.TerminalActionAnalyze,response.Response))
+                var tlvs = DataParse.ParseTLV(response.Response);
+                businessUtil.SaveTags(TransactionStep.TerminalActionAnalyze, tlvs);
+                if(transCfg.Algorithm == AlgorithmType.DES)
                 {
-                    if(transCfg.Algorithm == AlgorithmType.DES)
+                    string tag9F4B = transTags.GetTag("9F4B");
+                    string exp = transTags.GetTag("9F47");
+                    string recoveryData = Authencation.GenRecoveryData(iccPulicKey, exp, tag9F4B);
+                    if (recoveryData.Length == 0 || !recoveryData.StartsWith("6A05"))
                     {
-                        string tag9F4B = transTags.GetTag("9F4B");
-                        string exp = transTags.GetTag("9F47");
-                        string recoveryData = Authencation.GenRecoveryData(iccPulicKey, exp, tag9F4B);
-                        if (recoveryData.Length == 0 || !recoveryData.StartsWith("6A05"))
-                        {
 
-                        }
-                        string recoveryHash = recoveryData.Substring(recoveryData.Length - 42, 40);
-                        string hashInput = recoveryData.Substring(2, recoveryData.Length - 44);
-                        hashInput += locator.Terminal.GetTag("9F37");
-                        string hash = Authencation.GetHash(hashInput);
-                        if (hash != recoveryHash)
-                        {
-
-                        }
-                        string recoveryTag9F36 = recoveryData.Substring(10, 4);
-                        string recoveryTag9F27 = recoveryData.Substring(14, 2);
-                        string recoveryTag9F26 = recoveryData.Substring(16, 16);
-                        string recoveryHash2 = recoveryData.Substring(32, 40);
-                        string hashInput2 = pdolData + CDOL1Data;
-                        string[] tags = { "9F27", "9F36", "9F10" };
-                        foreach (var tag in tags)
-                        {
-                            string tagValue = transTags.GetTag(tag);
-                            string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
-                            hashInput2 += tag + len + tagValue;
-                        }
-                        string hash2 = Authencation.GetHash(hashInput2);
-                        if (hash2 != recoveryHash2)
-                        {
-
-                        }
                     }
-                    else
+                    string recoveryHash = recoveryData.Substring(recoveryData.Length - 42, 40);
+                    string hashInput = recoveryData.Substring(2, recoveryData.Length - 44);
+                    hashInput += locator.Terminal.GetTag("9F37");
+                    string hash = Authencation.GetHash(hashInput);
+                    if (hash != recoveryHash)
                     {
-                        var tag9F4B = transTags.GetTag("9F4B");
-                        if(string.IsNullOrEmpty(tag9F4B))
-                        {
-                            return -1;
-                        }
-                        if(!tag9F4B.StartsWith("15"))
-                        {
-                            return -2;
-                        }
-                        int icDynamicLen = Convert.ToInt32(tag9F4B.Substring(2, 2), 16);
-                        if(icDynamicLen < 44)
-                        {
-                            return -2;
-                        }
-                        int iccDynamicDigitLen = Convert.ToInt32(tag9F4B.Substring(4, 2));
-                        string dynamicDigit = tag9F4B.Substring(6, iccDynamicDigitLen * 2);
-                        string cryptoInfoData = tag9F4B.Substring(6 + iccDynamicDigitLen * 2, 2);
-                        string ac = tag9F4B.Substring(8 + iccDynamicDigitLen * 2, 16);
-                        string hash = tag9F4B.Substring(24 + iccDynamicDigitLen * 2, 64);
-                        string hashInput = pdolData + CDOL1Data;
-                        string[] tags = { "9F27", "9F36", "9F10" };
-                        foreach (var tag in tags)
-                        {
-                            string tagValue = transTags.GetTag(tag);
-                            string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
-                            hashInput += tag + len + tagValue;
-                        }
-                        string verfiyHash = Authencation.GetSMHash(hashInput);
-                        if(hash != verfiyHash)
-                        {
-                            return -4;
-                        }
-                        string verifyData = tag9F4B.Substring(0, 4 + icDynamicLen * 2);
-                        verifyData += locator.Terminal.GetTag("9F37");
-                        string signedData = tag9F4B.Substring(4 + icDynamicLen * 2);
-                        if(Authencation.SM2Verify(iccPulicKey, verifyData, signedData) != 0)
-                        {
-                            return -5;
-                        }
+
                     }
-                    
+                    string recoveryTag9F36 = recoveryData.Substring(10, 4);
+                    string recoveryTag9F27 = recoveryData.Substring(14, 2);
+                    string recoveryTag9F26 = recoveryData.Substring(16, 16);
+                    string recoveryHash2 = recoveryData.Substring(32, 40);
+                    string hashInput2 = pdolData + CDOL1Data;
+                    string[] tags = { "9F27", "9F36", "9F10" };
+                    foreach (var tag in tags)
+                    {
+                        string tagValue = transTags.GetTag(tag);
+                        string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
+                        hashInput2 += tag + len + tagValue;
+                    }
+                    string hash2 = Authencation.GetHash(hashInput2);
+                    if (hash2 != recoveryHash2)
+                    {
+
+                    }
+                }
+                else
+                {
+                    var tag9F4B = transTags.GetTag("9F4B");
+                    if(string.IsNullOrEmpty(tag9F4B))
+                    {
+                        return -1;
+                    }
+                    if(!tag9F4B.StartsWith("15"))
+                    {
+                        return -2;
+                    }
+                    int icDynamicLen = Convert.ToInt32(tag9F4B.Substring(2, 2), 16);
+                    if(icDynamicLen < 44)
+                    {
+                        return -2;
+                    }
+                    int iccDynamicDigitLen = Convert.ToInt32(tag9F4B.Substring(4, 2));
+                    string dynamicDigit = tag9F4B.Substring(6, iccDynamicDigitLen * 2);
+                    string cryptoInfoData = tag9F4B.Substring(6 + iccDynamicDigitLen * 2, 2);
+                    string ac = tag9F4B.Substring(8 + iccDynamicDigitLen * 2, 16);
+                    string hash = tag9F4B.Substring(24 + iccDynamicDigitLen * 2, 64);
+                    string hashInput = pdolData + CDOL1Data;
+                    string[] tags = { "9F27", "9F36", "9F10" };
+                    foreach (var tag in tags)
+                    {
+                        string tagValue = transTags.GetTag(tag);
+                        string len = UtilLib.Utils.IntToHexStr(tagValue.Length / 2, 2);
+                        hashInput += tag + len + tagValue;
+                    }
+                    string verfiyHash = Authencation.GetSMHash(hashInput);
+                    if(hash != verfiyHash)
+                    {
+                        return -4;
+                    }
+                    string verifyData = tag9F4B.Substring(0, 4 + icDynamicLen * 2);
+                    verifyData += locator.Terminal.GetTag("9F37");
+                    string signedData = tag9F4B.Substring(4 + icDynamicLen * 2);
+                    if(Authencation.SM2Verify(iccPulicKey, verifyData, signedData) != 0)
+                    {
+                        return -5;
+                    }
                 }
             }
             else
             {
-                response = FirstGAC(Constant.TC, CDOL1);
+                response = GAC(Constant.TC, CDOL1);
             }
             
             if (response.SW == 0x9000)

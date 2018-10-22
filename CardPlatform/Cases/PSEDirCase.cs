@@ -32,25 +32,25 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 是否以70开头
         /// </summary>
-        public void PSEDIR_001()
+        public TipLevel PSEDIR_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
             if (response.Response.Length < 2 || response.Response.Substring(0, 2) != "70")
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
             else
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
         }
 
         /// <summary>
         /// 70后是否仅包含61模板
         /// </summary>
-        public void PSEDIR_002()
+        public TipLevel PSEDIR_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -61,20 +61,21 @@ namespace CardPlatform.Cases
                 {
                     if(item.Tag != "61")
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
                     else
                     {
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
                 }
             }
+            return TipLevel.Unknown;
         }
 
         /// <summary>
         /// 61中是否包含4F（必选包含）4F的长度是否在5～16字节之间
         /// </summary>
-        public void PSEDIR_003()
+        public TipLevel PSEDIR_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -91,25 +92,24 @@ namespace CardPlatform.Cases
                     }
                     else
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                        return;
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
                 }
             }
             if(hasTag4F && isCorrectLen)
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 
         /// <summary>
         /// 50必须包含在61模板内，50的长度是否在1～16字节之间
         /// </summary>
-        public void PSEDIR_004()
+        public TipLevel PSEDIR_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -126,25 +126,24 @@ namespace CardPlatform.Cases
                     }
                     else
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                        return;
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
                 }
             }
             if (hasTag50 && isCorrectLen)
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 
         /// <summary>
         /// 61中可包含的其他Tag有 50.9F12、87、73，其他Tag不能出现
         /// </summary>
-        public void PSEDIR_005()
+        public TipLevel PSEDIR_005()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -154,17 +153,16 @@ namespace CardPlatform.Cases
             {
                 if (!tags.Contains(item.Tag))
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    return;
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 9F12的长度应在1～16字节之间,BCD码显示
         /// </summary>
-        public void PSEDIR_006()
+        public TipLevel PSEDIR_006()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -178,21 +176,21 @@ namespace CardPlatform.Cases
                         item.Len <= 16 &&
                         CaseUtil.IsAlpha(value))
                     {
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
                     else
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
-                    break;
                 }
             }
+            return TipLevel.Unknown;
         }
 
         /// <summary>
         /// 87的长度是否为1字节,值的合规性检测
         /// </summary>
-        public void PSEDIR_007()
+        public TipLevel PSEDIR_007()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -207,20 +205,21 @@ namespace CardPlatform.Cases
                         (tag87Value > 0x80 && tag87Value <= 0x8F))
                         )
                     {
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
                     else
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);                       
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);                       
                     }
                 }
             }
+            return TipLevel.Unknown;
         }
 
         /// <summary>
         /// PSE的FCI中有9F11的话在PSE的DIR文件中是否存在9F12
         /// </summary>
-        public void PSEDIR_008()
+        public TipLevel PSEDIR_008()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -232,18 +231,17 @@ namespace CardPlatform.Cases
                     string tag9F12 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F12");
                     if (string.IsNullOrEmpty(tag9F12))
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                        return;
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
                 }
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测4F和50的一致性
         /// </summary>
-        public void PSEDIR_009()
+        public TipLevel PSEDIR_009()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -262,21 +260,21 @@ namespace CardPlatform.Cases
                 {
                     if(item.Item2 == tag50)
                     {
-                        TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
                     else
                     {
-                        TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
-                    break;
                 }
             }
+            return TipLevel.Unknown;
         }
 
         /// <summary>
         /// PSE DIR tag重复性检测
         /// </summary>
-        public void PSEDIR_010()
+        public TipLevel PSEDIR_010()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -284,11 +282,11 @@ namespace CardPlatform.Cases
             List<string> duplexTags = new List<string>();
             if(CaseUtil.IsUniqTag(response.Response,out duplexTags))
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             else
-            {               
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
 

@@ -19,7 +19,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测Tag9F79小于等于tag9F77, tag9F78小于等于tag9F77
         /// </summary>
-        public void GetData_001()
+        public TipLevel GetData_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -33,16 +33,15 @@ namespace CardPlatform.Cases
 
             if(nTag9F79 > nTag9F77 || nTag9F78 > nTag9F77)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测tag9F6D设置的合理性，数值不宜过大，一般默认为0
         /// </summary>
-        public void GetData_002()
+        public TipLevel GetData_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -50,16 +49,15 @@ namespace CardPlatform.Cases
             var tag9F6D = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F6D");
             if(tag9F6D != "000000000000")
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测tag9F68卡片附加处理选项的规范性
         /// </summary>
-        public void GetData_003()
+        public TipLevel GetData_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -67,16 +65,15 @@ namespace CardPlatform.Cases
             var tag9F68 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F68");
             if (string.IsNullOrEmpty(tag9F68))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测Tag5F28与9F57发卡行国家代码的一致性
         /// </summary>
-        public void GetData_004()
+        public TipLevel GetData_004()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -85,21 +82,19 @@ namespace CardPlatform.Cases
             var tag9F57 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F57");
             if (string.IsNullOrEmpty(tag9F57))
             {
-                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "卡片缺少tag9F57，如果支持卡片频度检测，该数据必须存在");
-                return;
+                return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "卡片缺少tag9F57，如果支持卡片频度检测，该数据必须存在");
             }
             if (tag5F28 != tag9F57)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测Tag9F42与9F51应用货币代码的一致性
         /// </summary>
-        public void GetData_005()
+        public TipLevel GetData_005()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -108,23 +103,20 @@ namespace CardPlatform.Cases
             var tag9F51 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F51");
             if (string.IsNullOrEmpty(tag9F42))
             {
-                TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少tag9F42,如果8E中X,Y金额不为0，该数据必须存在");
-                return;
+                return TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少tag9F42,如果8E中X,Y金额不为0，该数据必须存在");
             }
             
             if (string.IsNullOrEmpty(tag9F51))
             {
-                TraceInfo(caseItem.Level, caseNo, "卡片缺少tag9F51,如果只选频度检测，该数据必须存在");
-                return;
+                return TraceInfo(caseItem.Level, caseNo, "卡片缺少tag9F51,如果只选频度检测，该数据必须存在");
             }
             caseItem.Description += "【tag9F42=" + tag9F42 + "】";
             caseItem.Description += "【tag9F51=" + tag9F51 + "】";
             if (tag9F42 != tag9F51)
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

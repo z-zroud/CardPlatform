@@ -23,6 +23,6 @@ namespace CardPlatform.Cases
         /// <param name="caseNo"></param>
         /// <param name="format"></param>
         /// <param name="args"></param>
-        void TraceInfo(TipLevel level, string caseNo, string format, params object[] args);
+        TipLevel TraceInfo(TipLevel level, string caseNo, string format, params object[] args);
     }
 }

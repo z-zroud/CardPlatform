@@ -39,24 +39,29 @@ namespace CardPlatform.Business
         protected bool DoTransactionEx()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            if (!SelectApp(currentAid))
+            if (!ApplicationSelection(currentAid))
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用失败，交易流程终止");
                 return false;
             }
-            var AFLs = GPOEx();
-            if (AFLs.Count == 0)
+            var ret = InitiateApplicationProcessing();
+            if (!ret)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，交易流程终止");
                 return false;
             }
-            if (!ReadAppRecords(AFLs))
+            string tag94 = transTags.GetTag("94");
+            if (!string.IsNullOrEmpty(tag94))
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                return false;
+                var afls = DataParse.ParseAFL(tag94);
+                if (!ReadApplicationData(afls))
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                    return false;
+                }
             }
 
-            GetRequirementData();
+                GetRequirementData();
 
             //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
             if (isQPBOCTranction)
@@ -76,23 +81,23 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="aid"></param>
         /// <returns></returns>
-        protected bool SelectApp(string aid)
+        public new bool ApplicationSelection(string aid)
         {
+            log.TraceLog("执行应用选择流程...");
             bool result = false;
-            ApduResponse response = base.SelectAid(aid);
-            if (response.SW == 0x9000)
+            ApduResponse resp = base.ApplicationSelection(aid);
+            if (resp.SW == 0x9000)
             {
-                if (SaveTags(TransactionStep.SelectApp, response.Response))
-                {
-                    var stepCase = new SelectAppCase();
-                    stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, response);
-                    result = true;
-                }
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                businessUtil.SaveTags(TransactionStep.SelectApp, tlvs);
+                var selectAppCase = new SelectAppCase();
+                selectAppCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.SelectApp, resp);
+                result = true;
             }
             else
             {
                 var caseNo = MethodBase.GetCurrentMethod().Name;
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, response.SW);
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "选择应用{0}失败,SW={1}", aid, resp.SW);
             }
             return result;
         }
@@ -102,36 +107,29 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="pdol"></param>
         /// <returns></returns>
-        protected List<AFL> GPOEx()
+        protected bool InitiateApplicationProcessing()
         {
             var afls = new List<AFL>();
             var caseNo = MethodBase.GetCurrentMethod().Name;
-            var tls = DataParse.ParseTL(transTags.GetTag("9F38"));         
-            string PDOLData = string.Empty;
-            foreach (var tl in tls)
-            {
-                PDOLData += locator.Terminal.GetTag(tl.Tag);
-            }
-
-            ApduResponse response = base.GPO(PDOLData);           
+            string tag9F38 = transTags.GetTag(TransactionStep.SelectApp, "9F38");
+            var pdolData = businessUtil.GetDolData(tag9F38);
+            var response = base.InitiateApplicationProcessing(pdolData);
             if (response.SW != 0x9000)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "GPO命令发送失败，SW={0}", response.SW);
-                return afls;
+                return false;
             }
-            if(SaveTags(TransactionStep.GPO,response.Response))
-            {               
-                string tag9F26 = transTags.GetTag("9F26");
-                string tag9F27 = transTags.GetTag("9F27");
-                if (!string.IsNullOrEmpty(tag9F26))
-                {
-                    isQPBOCTranction = true;    //表明卡片支持QPBOC交易
-                }
-                afls = DataParse.ParseAFL(transTags.GetTag("94"));
-                var gpoCase = new GPOCase();
-                gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
+            var tlvs = DataParse.ParseTLV(response.Response);
+            businessUtil.ShowTlvLog(tlvs);            
+            string tag9F26 = transTags.GetTag("9F26");
+            string tag9F27 = transTags.GetTag("9F27");
+            if (!string.IsNullOrEmpty(tag9F26))
+            {
+                isQPBOCTranction = true;    //表明卡片支持QPBOC交易
             }
-            return afls;
+            var gpoCase = new GPOCase();
+            gpoCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GPO, response);
+            return true;
         }
 
         /// <summary>
@@ -139,33 +137,30 @@ namespace CardPlatform.Business
         /// </summary>
         /// <param name="afls"></param>
         /// <returns></returns>
-        protected bool ReadAppRecords(List<AFL> afls)
+        protected new bool ReadApplicationData(List<AFL> afls)
         {
-            var resps = base.ReadRecords(afls);
+            log.TraceLog("开始执行读记录数据流程检测...");
             var caseNo = MethodBase.GetCurrentMethod().Name;
+            var resps = base.ReadApplicationData(afls);
 
             foreach (var resp in resps)
             {
-                if(resp.SW != 0x9000)
+                if (resp.SW != 0x9000)
                 {
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败,SW={0}", resp.SW);
                     return false;
                 }
-                if(!SaveTags(TransactionStep.ReadRecord,resp.Response))
-                {
-                    return false;
-                }               
+                var tlvs = DataParse.ParseTLV(resp.Response);
+                businessUtil.SaveTags(TransactionStep.ReadRecord, tlvs);
             }
 
-            var readRecordCase = new ReadRecordCase();
+            IExcuteCase readRecordCase = new ReadRecordCase();
             readRecordCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadRecord, resps);
-
             return true;
         }
 
-        public override void GetRequirementData()
+        public void GetRequirementData()
         {
-            base.GetRequirementData();
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
             RequirementData[] tagStandards =

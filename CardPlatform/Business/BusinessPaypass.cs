@@ -11,9 +11,9 @@ using CardPlatform.Common;
 
 namespace CardPlatform.Business
 {
-    public class BusinessMC : BusinessBase
+    public class BusinessPaypass : BusinessBase
     {
-
+        private string issuerPublicKey = string.Empty;  //在脱机数据认证流程中获取，GAC中CDA验证
         /// <summary>
         /// 开始UICS交易流程
         /// </summary>
@@ -70,7 +70,7 @@ namespace CardPlatform.Business
             {
                 caseObj.TraceInfo(TipLevel.Warn, caseNo, "卡片不支持此卡人认证，请确保tag82的正确性");
             }
-            if(aipHelper.IsSupportTerminalRiskManagement())
+            if (aipHelper.IsSupportTerminalRiskManagement())
             {
                 TerminalRiskManagement();   //终端风险管理
             }
@@ -83,26 +83,6 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
                 return false;
             }
-
-            if (aipHelper.IsSupportIssuerAuth())
-            {
-                if (0 != IssuerAuthencation())   //发卡行认证
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
-                    return false;
-                }
-            }
-            else
-            {
-                if (0 != IssuerAuthencation())   //发卡行认证
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
-                    return false;
-                }
-                caseObj.TraceInfo(TipLevel.Warn, caseNo, "卡片不支持发卡行认证，请确保tag82的正确性");
-            }
-            
-
 
             if (0 != TransactionEnd())   //交易结束处理
             {
@@ -255,32 +235,33 @@ namespace CardPlatform.Business
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportSDA())   //如果支持SDA
             {
-                if (!SDA())
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "MC应用已废弃使用SDA脱机数据认证，请确认数据的正确性");
+                return 1;
+            }
+            issuerPublicKey = GetIssuerPublicKey();
+            if (aipHelper.IsSupportDDA())  //Paypass应用一般使用CDA脱机数据认证
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "Paypass应用一般使用CDA脱机数据认证，请确认数据的正确性");
+                string ddol = transTags.GetTag(TransactionStep.ReadRecord, "9F49");
+                if(string.IsNullOrEmpty(ddol))
                 {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法获取DDOL对象列表,请确保tag9F49被正确的个人化成功");
+                    return 1;
+                }
+                string ddolData = businessUtil.GetDolData(ddol);
+                var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
+                if (string.IsNullOrWhiteSpace(tag9F4B))
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
+                    return 1;
+                }
+                if (!DDA(issuerPublicKey, tag9F4B, ddolData))
+                {
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
                     return 1;
                 }
             }
 
-            if (!aipHelper.IsSupportDDA())  //必须支持DDA
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
-                return 1;
-            }
-            string ddol = transTags.GetTag(TransactionStep.ReadRecord, "9F49");
-            string ddolData = "12345678";
-            var tag9F4B = APDU.GenDynamicDataCmd(ddolData);
-            if (string.IsNullOrWhiteSpace(tag9F4B))
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
-                return 1;
-            }
-            string issuerPublicKey = GetIssuerPublicKey();
-            if (!DDA(issuerPublicKey, tag9F4B, ddolData))
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
-                return 1;
-            }
             return 0;
         }
 
@@ -294,7 +275,7 @@ namespace CardPlatform.Business
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             string CDOL1 = transTags.GetTag(TransactionStep.ReadRecord, "8C");
-            ApduResponse resp = GAC(Constant.ARQC, CDOL1);
+            ApduResponse resp = GAC(Constant.TC_CDA, CDOL1);
             if (resp.SW != 0x9000)
             {
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "第一次发送GAC命令失败,返回{0:4X}", resp.SW);
@@ -303,49 +284,28 @@ namespace CardPlatform.Business
             var tlvs = DataParse.ParseTLV(resp.Response);
             transTags.SetTags(TransactionStep.TerminalActionAnalyze, tlvs);
 
+            var tag9F4B = transTags.GetTag("9F4B");
+            if (string.IsNullOrWhiteSpace(tag9F4B))
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "Tag9F4B不存在");
+                return 1;
+            }
+            var dynamicData = locator.Terminal.GetTag("9F37");
+            if (!DDA(issuerPublicKey, tag9F4B, dynamicData))
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                return 1;
+            }
+
             var terminalActionAnalyzeCase = new TerminalActionAnalyzeCase();
             terminalActionAnalyzeCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TerminalActionAnalyze, resp);
             return 0;
         }
 
-        protected int IssuerAuthencation()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
 
-            if (string.IsNullOrEmpty(transCfg.TransDesAcKey))
-            {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "国际算法UDK/MDK不存在");
-                return 1;
-            }
-            string tag9F36 = transTags.GetTag("9F36");
-            string acSessionKey = Authencation.GenMcSessionKeyCsk(transCfg.TransDesAcKey, tag9F36);
-
-            string applicationCryptogram = transTags.GetTag(TransactionStep.TerminalActionAnalyze, "9F26");
-            string arc = "0012";
-            string arpc = Authencation.GenArpc(acSessionKey, applicationCryptogram, arc);
-
-            //var resp = APDU.ExtAuthCmd(arpc, "3030");
-            //if (resp.SW != 0x9000)
-            //{
-            //    caseObj.TraceInfo(TipLevel.Failed, caseNo, "ARPC校验不正确");
-            //    return 1;
-            //}
-            locator.Terminal.SetTag("91", arpc + arc, "Issuer Authentication Data");
-            caseObj.TraceInfo(TipLevel.Sucess, caseNo, "发卡行认证成功");
-            locator.Terminal.SetTag("8A", "3030");
-            return 0;
-        }
 
         protected int TransactionEnd()
         {
-            string CDOL2 = transTags.GetTag(TransactionStep.ReadRecord, "8D");
-            ApduResponse resp = GAC(Constant.TC, CDOL2);
-            var tlvs = DataParse.ParseTLV(resp.Response);
-            transTags.SetTags(TransactionStep.TerminalActionAnalyze, tlvs);
-
-            var transactionEndCase = new TransactionEndCase();
-            transactionEndCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.TransactionEnd, resp);
-
             return 0;
         }
     }

@@ -1,4 +1,5 @@
-﻿using CplusplusDll;
+﻿using CardPlatform.Common;
+using CplusplusDll;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace CardPlatform.Cases
 
     public static class CaseUtil
     {
+        private static Log log = Log.CreateLog(Constant.LogPath);
+
         public static int GetDuplexTemplate(string parentTag, string template, List<TLV> tags)
         {
             int level = 0;
@@ -420,34 +423,42 @@ namespace CardPlatform.Cases
             
 
             int indexD = tag57.IndexOf('D');
+            log.TraceLog("字母D需在第17-20字节之间,当前字母D的位置为:{0}",indexD);
             if (indexD < 16 || indexD > 19)
             {
                 return false;   //字母D需在第17-20字节之间//卡号长度检测
             }
             string account = tag57.Substring(0, indexD);
+            log.TraceLog("账号必须是数字,当前账号为:{0}",account);
             foreach (var c in account)
             {
                 if (!format3.Contains(c))
                 {
+                    
                     return false;   //账号必须是数字
                 }
             }
 
-            foreach(var c in tag57)
+            log.TraceLog("tag57必须是0123456789DF中的数值,且F只能出现一次并在最末尾，当前tag57为：{0}",tag57);
+            foreach (var c in tag57)
             {
                 if(!format2.Contains(c))
                 {
                     return false;   //数字必须是format2集合里面
                 }
+                if (tag57.Substring(0, tag57.Length - 1).Contains("F"))
+                    return false;
             }
             indexD++;
             string MM = tag57.Substring(indexD + 2, 2);
             int month = int.Parse(MM);
-            if(month > 12 || month < 1)
+            log.TraceLog("tag57 失效月份检查，失效月份为: 【{0}】", MM);
+            if (month > 12 || month < 1)
             {
                 return false;   //失效月份检查
             }
-            if(tag57[indexD + 4] != '2' && tag57[indexD + 4] != '6')
+            log.TraceLog("tag57 服务码检查失败 服务码必须以2或6开头.当前服务码以 【{0}】开头", tag57[indexD + 4]);
+            if (tag57[indexD + 4] != '2' && tag57[indexD + 4] != '6')
             {
                 return false;   //服务码必须以2或6开头
             }

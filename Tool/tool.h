@@ -46,4 +46,9 @@ extern "C"
     * 功能：判断hexStr是否全是1-9,a-z,A-Z字符
     **************************************************/
     bool TOOL_API IsHexStr(const char* hexStr);
+
+    /**************************************************
+    * 功能: Base64字符串转BCD码
+    ***************************************************/
+    void TOOL_API Base64ToBcd(const char* base64, char* bcd, int bcdLen);
 }

@@ -19,7 +19,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         public List<string> SelectPSE()
         {
-            log.TraceLog(LogLevel.Info, "========================= PSE Selection  =========================");
+            log.TraceLog("选择PSE交易流程检测...");
             ApduResponse response = new ApduResponse();
             response = APDU.SelectCmd(Constant.PSE);
             if(response.SW != 0x9000)
@@ -27,8 +27,8 @@ namespace CardPlatform.Business
                 return null;
             }
             var tlvs = DataParse.ParseTLV(response.Response);
-            ParseTlvToLog(tlvs);
-            SaveTags(TransactionStep.SelectPSE,response.Response);
+            businessUtil.ShowTlvLog(tlvs);
+            businessUtil.SaveTags(TransactionStep.SelectPSE, tlvs);
 
             IExcuteCase stepCase = new PSECases();
             stepCase.Excute(BatchNo, transCfg.CurrentApp,TransactionStep.SelectPSE, response);
@@ -69,7 +69,7 @@ namespace CardPlatform.Business
         /// <returns></returns>
         protected List<string> ReadPSERecord(int SFI, int recordNo)
         {
-            log.TraceLog(LogLevel.Info, "========================= Read PSE Record  =========================");
+            log.TraceLog(LogLevel.Info, "读取PSE记录流程检测...");
             ApduResponse response = new ApduResponse();
             response = APDU.ReadRecordCmd(SFI, recordNo);
 
@@ -83,12 +83,11 @@ namespace CardPlatform.Business
             {
                 return null;
             }
-            stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadPSEDir,response);
-
+            
             var tlvs = DataParse.ParseTLV(response.Response);
-            ParseTlvToLog(tlvs);
+            businessUtil.ShowTlvLog(tlvs);
             var aids = from tlv in tlvs where tlv.Tag == "4F" select tlv.Value;
-
+            stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadPSEDir, response);
             return aids.ToList();
         }
     }

@@ -19,7 +19,7 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测发卡行支持终端频度检测必要的数据(tag9F14,tag9F23)
         /// </summary>
-        public void TerminalRiskManagement_001()
+        public TipLevel TerminalRiskManagement_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -32,17 +32,16 @@ namespace CardPlatform.Cases
                 var tag9F23 = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "9F23");
                 if (string.IsNullOrEmpty(tag9F14) || string.IsNullOrEmpty(tag9F23))
                 {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    return;
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "tag82={0}不支持终端风险管理",aip);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "tag82={0}不支持终端风险管理",aip);
         }
 
         /// <summary>
         /// 检测tag9F13的规范性
         /// </summary>
-        public void TerminalRiskManagement_002()
+        public TipLevel TerminalRiskManagement_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -50,11 +49,10 @@ namespace CardPlatform.Cases
             var tag9F13 = TransactionTag.GetInstance().GetTag("9F13");
             if(string.IsNullOrEmpty(tag9F13))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【缺少tag9F13,终端将无法执行新卡检查】");
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "【缺少tag9F13,终端将无法执行新卡检查】");
             }
             caseItem.Description += "【Tag9F13=" + tag9F13 + "】";
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
     }
 }

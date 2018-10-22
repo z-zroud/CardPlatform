@@ -21,10 +21,14 @@ namespace CardPlatform.ViewModel
             TerminalTags.Add(new TerminalModel() { Tag = "9F1A", TagValue = "0156", Mark = "" });
             TerminalTags.Add(new TerminalModel() { Tag = "5F2A", TagValue = "0156", Mark = "" });
             TerminalTags.Add(new TerminalModel() { Tag = "95", TagValue = "0000000000", Mark = "" });
-            TerminalTags.Add(new TerminalModel() { Tag = "9F4E", TagValue = "476F6C647061635F54435F4465706172746D656E", Mark = "" });
+            TerminalTags.Add(new TerminalModel() { Tag = "9F4E", TagValue = "476F6C647061635F54435F4465706172746D656E", Mark = "商户名称" });
+            TerminalTags.Add(new TerminalModel() { Tag = "9F7C", TagValue = "476F6C647061635F54435F4465706172746D656E", Mark = "商户名称" });
             TerminalTags.Add(new TerminalModel() { Tag = "9F37", TagValue = "11223344", Mark = "" });
-            TerminalTags.Add(new TerminalModel() { Tag = "9F35", TagValue = "A3", Mark = "" });
+            TerminalTags.Add(new TerminalModel() { Tag = "9F35", TagValue = "A3", Mark = "终端类型" });
+            TerminalTags.Add(new TerminalModel() { Tag = "9F45", TagValue = "0000", Mark = "从SDA恢复数据中获取的数据验证代码" });
+            TerminalTags.Add(new TerminalModel() { Tag = "9F4C", TagValue = "0000000000000000", Mark = "IC卡动态数据" });
             TerminalTags.Add(new TerminalModel() { Tag = "DF60", TagValue = "00", Mark = "" });
+            TerminalTags.Add(new TerminalModel() { Tag = "8A", TagValue = "3030", Mark = "" });
             TerminalTags.Add(new TerminalModel() { Tag = "9A", TagValue = DateTime.Now.ToString("yyMMdd"), Mark = "交易日期" });
             TerminalTags.Add(new TerminalModel() { Tag = "9F21", TagValue = DateTime.Now.ToString("hhmmss"), Mark = "交易时间" });
         }

@@ -6,80 +6,81 @@ namespace CardPlatform.Models
 {
     public class TransResultModel : ObservableObject
     {
-        public TransResultModel(TransType type, TransResult result = TransResult.Unknown)
+        private string _tag5A;
+        public string Tag5A
         {
-            Result = result;
-            TransType = type;
-        }
-
-        private TransResult _result;
-        public TransResult Result
-        {
-            get { return _result; }
+            get { return _tag5A; }
             set
             {
-                Set(ref _result, value);
-                switch(_result)
-                {
-                    case TransResult.Failed:
-                        ResultDescripton = "失败"; ColorMark = new SolidColorBrush(Colors.Red); break;
-                    case TransResult.Sucess:
-                        ResultDescripton = "成功"; ColorMark = new SolidColorBrush(Colors.Black); break;
-                    case TransResult.Unknown:
-                        ResultDescripton= "未执行"; ColorMark = new SolidColorBrush(Colors.Yellow); break;
-                }
+                Set(ref _tag5A, value);
             }
         }
 
-        private TransType _transType;
-        public TransType TransType
+        private string _tag5F34;
+        public string Tag5F34
         {
-            get { return _transType; }
+            get { return _tag5F34; }
             set
             {
-                Set(ref _transType, value);
-                //switch(_transType)
-                //{
-                    //case TransType.PBOC_DES: TransTypeDescription = "PBOC 国际";break;
-                    //case TransType.PBOC_SM: TransTypeDescription = "PBOC 国密"; break;
-                    //case TransType.UICS_DES: TransTypeDescription = "UICS 国际"; break;
-                    //case TransType.UICS_SM: TransTypeDescription = "UICS 国密"; break;
-                    //case TransType.ECC_DES: TransTypeDescription = "ECC 国际"; break;
-                    //case TransType.ECC_SM: TransTypeDescription = "ECC 国密"; break;
-                    //case TransType.QPBOC_DES: TransTypeDescription = "QPBOC 国际"; break;
-                    //case TransType.QPBOC_SM: TransTypeDescription = "QPBOC 国密"; break;
-                //}
+                Set(ref _tag5F34, value);
             }
         }
 
-        private string _transTypeDescription;
-        public string TransTypeDescription
+        private string _tag5F20;
+        public string Tag5F20
         {
-            get { return _transTypeDescription; }
+            get { return _tag5F20; }
             set
             {
-                Set(ref _transTypeDescription, value);
+                Set(ref _tag5F20, value);
             }
         }
 
-        private string _resultDescription;
-        public string ResultDescripton
+
+        private string _tag50;
+        public string Tag50
         {
-            get { return _resultDescription; }
+            get { return _tag50; }
             set
             {
-                Set(ref _resultDescription, value);
+                Set(ref _tag50, value);
             }
         }
 
-        private SolidColorBrush _colorMark;
-        public SolidColorBrush ColorMark
+        private string _tag9F08;
+        public string Tag9F08
         {
-            get { return _colorMark; }
+            get { return _tag9F08; }
             set
             {
-                Set(ref _colorMark, value);
+                Set(ref _tag9F08, value);
             }
         }
+
+        private string _tag5F24;
+        public string Tag5F24
+        {
+            get { return _tag5F24; }
+            set
+            {
+                Set(ref _tag5F24, value);
+            }
+        }
+
+        private string _tag5F25;
+        public string Tag5F25
+        {
+            get { return _tag5F25; }
+            set
+            {
+                Set(ref _tag5F25, value);
+            }
+        }
+
+        public void Clear()
+        {
+
+        }
+
     }
 }

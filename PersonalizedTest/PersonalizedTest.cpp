@@ -50,11 +50,11 @@ int main()
 	}
     string dpDir = "D:\\CardPlatform\\bin\\Debug\\DPTest\\";  
     string rulePath = "D:\\CardPlatform\\bin\\Debug\\Configuration\\Rule\\";
-    string dpFormat = "other";
-    string dpPath = dpDir + dpFormat + "\\EXPORT_0000004011_20180825013719.dat";
-    rulePath += "澳门立桥借记_银联_同方.xml";
-    string installParamCfg = "金邦达测试.xml";
-    GenCpsFile("DpParse_AC.dll", "HandleDp", dpPath.c_str(), NULL);
+    string dpFormat = "神舟数码";
+    string dpPath = dpDir + dpFormat + "\\23_808021_20180109_20180109363_ic (1).txt";
+    rulePath += "河东村镇银行_神码_华大_G81140042.xml";
+    string installParamCfg = "JR1838_河东村镇银行_华大_G81140042.xml";
+    GenCpsFile("DpParse_SZSM.dll", "HandleDp", dpPath.c_str(), rulePath.c_str());
 
     SetPersonlizationConfig("A000000003000000", "404142434445464748494A4B4C4D4E4F", DIV_NONE, SECURE_NONE);
     

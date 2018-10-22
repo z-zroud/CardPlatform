@@ -110,6 +110,9 @@ namespace CplusplusDll
                 if(tlvs.Count == 1)
                 {
                     return tlvs[0].Value;   //Tag9F4B
+                }else if(tlvs.Count == 2)
+                {
+                    return tlvs[1].Value;   //MC应用 发送内部认证返回带77模板的9F4B数据
                 }
             }
             return string.Empty;

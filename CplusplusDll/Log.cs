@@ -39,5 +39,12 @@ namespace CplusplusDll
             info = level.ToString() + ":" + info + "\n";
             CDll.TraceLog(handle, info);
         }
+
+        public void TraceLog(string format, params object[] args)
+        {
+            string info = string.Format(format, args);
+            info = info + "\n";
+            CDll.TraceLog(handle, info);
+        }
     }
 }

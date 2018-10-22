@@ -26,6 +26,10 @@ namespace CardPlatform.Models
         MC,
         [DescriptionEx("Jetco")]
         JETCO,
+        [DescriptionEx("Paypass")]
+        Paypass,
+        [DescriptionEx("MSD")]
+        MSD,
         [DescriptionEx("AMEX")]
         AMEX,
         [DescriptionEx("PSE", Hide = true)]

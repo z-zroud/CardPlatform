@@ -79,6 +79,9 @@ namespace CplusplusDll
 
         [DllImport(@"Des0.dll", EntryPoint = "BcdToAsc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static bool AscToBcd(string asc, StringBuilder bcd, int bcdLen);
+
+        [DllImport(@"Des0.dll", EntryPoint = "RSA_STD", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int RSA_STD(string publicKey, string exp, string signedData, StringBuilder decryptedData);
         #endregion
 
         #region import Authencation.dll

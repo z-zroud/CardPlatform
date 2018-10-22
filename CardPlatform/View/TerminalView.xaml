@@ -24,7 +24,7 @@
                             ScrollViewer.VerticalScrollBarVisibility="Auto"
                             ScrollViewer.HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridTextColumn IsReadOnly="True" Header="Tag"  Binding="{Binding Tag}" Width="150"/>
+                <DataGridTextColumn IsReadOnly="False" Header="Tag"  Binding="{Binding Tag}" Width="150"/>
                 <DataGridTextColumn IsReadOnly="False" Header="值"  Binding="{Binding TagValue}" Width="350"/>
                 <DataGridTextColumn IsReadOnly="False" Header="备注"  Binding="{Binding Mark}" Width="*"/>
             </DataGrid.Columns>

@@ -30,39 +30,37 @@ namespace CardPlatform.Cases
         /// <summary>
         /// 检测第一个GAC卡片返回结果是否为80
         /// </summary>
-        public void TerminalActionAnalyze_001()
+        public TipLevel TerminalActionAnalyze_001()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
             if (!CaseUtil.RespStartWith(response.Response, "80"))
             {
-                TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
 
-            TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测tag9F10中MAC的正确性
         /// </summary>
-        public void TerminalActionAnalyze_002()
+        public TipLevel TerminalActionAnalyze_002()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             if (Check9F10Mac())
             {
-                TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                return;
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
 
         /// <summary>
         /// 检测tag9F26的值与终端计算的mac一致性
         /// </summary>
-        public void TerminalActionAnalyze_003()
+        public TipLevel TerminalActionAnalyze_003()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
@@ -70,19 +68,53 @@ namespace CardPlatform.Cases
             {
                 if (CheckVisaAc())
                 {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    return;
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                }
+            }
+            else if (TransactionConfig.GetInstance().CurrentApp == AppType.MC)
+            {
+                if (CheckMcAc())
+                {
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
             }
             else
             {
                 if (CheckPbocAc())
                 {
-                    TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    return;
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 }
             }
-            TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
+
+        public TipLevel TerminalActionAnalyze_004()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            string tag9F4C = locator.Terminal.GetTag("9F4C");
+            string key = transConfig.TransIdnKey;
+            if(string.IsNullOrEmpty(key))
+            {
+
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "IDN key不存在");
+            }
+            if(string.IsNullOrEmpty(tag9F4C))
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "无法获取IC卡动态数据，请确认DDA是否成功?");
+            }
+            string atc = TransactionTag.GetInstance().GetTag(TransactionStep.TerminalActionAnalyze,"9F36");
+            if(string.IsNullOrEmpty(atc))
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "无法获取 ATC");
+            }
+            var calcIccDynamicData = Algorithm.Des3Encrypt(key, atc + "000000000000");
+            if(calcIccDynamicData != tag9F4C)
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "tag9F4C:{0},计算得到的IC卡动态数据为:{1}",tag9F4C,calcIccDynamicData);
+            }
+            return TipLevel.Sucess;
         }
     }
 }
