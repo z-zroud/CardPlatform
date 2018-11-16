@@ -11,6 +11,7 @@ namespace CardPlatform.Business
     {
         public BusinessPSE()
         {
+            transCfg.Clear();
         }
 
         /// <summary>
@@ -87,6 +88,7 @@ namespace CardPlatform.Business
             var tlvs = DataParse.ParseTLV(response.Response);
             businessUtil.ShowTlvLog(tlvs);
             var aids = from tlv in tlvs where tlv.Tag == "4F" select tlv.Value;
+            transCfg.Aids = aids.ToList();
             stepCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.ReadPSEDir, response);
             return aids.ToList();
         }

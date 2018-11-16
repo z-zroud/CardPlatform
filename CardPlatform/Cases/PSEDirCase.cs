@@ -30,7 +30,7 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 是否以70开头
+        /// 检测响应数据是否以70开头
         /// </summary>
         public TipLevel PSEDIR_001()
         {
@@ -48,7 +48,7 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 70后是否仅包含61模板
+        /// 检测响应数据70模板是否仅包含61模板
         /// </summary>
         public TipLevel PSEDIR_002()
         {
@@ -63,13 +63,9 @@ namespace CardPlatform.Cases
                     {
                         return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
-                    else
-                    {
-                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    }
                 }
             }
-            return TipLevel.Unknown;
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -79,31 +75,26 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            bool hasTag4F = false;
-            bool isCorrectLen = false;
-            foreach(var item in tlvs)
+
+            for(int i = 0; i < transConfig.Aids.Count; i++)
             {
-                if(item.Tag == "4F")
+                var template61 = CaseUtil.GetSubTags("61", i + 1, tlvs);
+                if(!CaseUtil.HasTag("4F",template61))
                 {
-                    hasTag4F = true;
-                    if(item.Len >= 5 && item.Len <= 16)
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+                foreach (var item in template61)
+                {
+                    if (item.Tag == "4F")
                     {
-                        isCorrectLen = true;
-                    }
-                    else
-                    {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        if (item.Len < 5 || item.Len > 16)
+                        {
+                            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        }
                     }
                 }
             }
-            if(hasTag4F && isCorrectLen)
-            {
-                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-            }
-            else
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -113,31 +104,28 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            bool hasTag50 = false;
-            bool isCorrectLen = false;
-            foreach (var item in tlvs)
+
+            for(int i = 0; i < transConfig.Aids.Count; i++)
             {
-                if (item.Tag == "50")
+                var template61 = CaseUtil.GetSubTags("61", i + 1, tlvs);
+                if (!CaseUtil.HasTag("50", template61))
                 {
-                    hasTag50 = true;
-                    if (item.Len >= 1 && item.Len <= 16)
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+                foreach (var item in template61)
+                {
+                    if (item.Tag == "50")
                     {
-                        isCorrectLen = true;
-                    }
-                    else
-                    {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        var value = Utils.BcdToStr(item.Value);
+                        if (item.Len > 16 || item.Len == 0 ||
+                            !CaseUtil.IsAlphaAndBlank(value))
+                        {
+                            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        }
                     }
                 }
             }
-            if (hasTag50 && isCorrectLen)
-            {
-                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-            }
-            else
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -147,15 +135,19 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            var tag61SubTags = CaseUtil.GetSubTags("61", tlvs);
             List<string> tags = new List<string>() { "4F","50", "9F12", "87", "73" };
-            foreach (var item in tag61SubTags)
+            for(int i = 0; i < transConfig.Aids.Count; i++)
             {
-                if (!tags.Contains(item.Tag))
+                var template61 = CaseUtil.GetSubTags("61", i + 1, tlvs);
+                foreach (var item in template61)
                 {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    if (!tags.Contains(item.Tag))
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[不能包含tag{0}]",item.Tag);
+                    }
                 }
             }
+
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -166,72 +158,80 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            foreach (var item in tlvs)
+            for (int i = 0; i < transConfig.Aids.Count; i++)
             {
-                if (item.Tag == "9F12")
+                var template61 = CaseUtil.GetSubTags("61", tlvs);
+                foreach (var item in template61)
                 {
-                    string value = UtilLib.Utils.BcdToStr(item.Value);
-                    if (item.Len >= 1 &&
-                        item.Len <= 16 &&
-                        CaseUtil.IsAlpha(value))
+                    if (item.Tag == "9F12")
                     {
-                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    }
-                    else
-                    {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        string value = UtilLib.Utils.BcdToStr(item.Value);
+                        if (item.Len == 0 ||
+                            item.Len > 16 ||
+                            !CaseUtil.IsAlphaAndBlank(value))
+                        {
+                            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        }
                     }
                 }
             }
-            return TipLevel.Unknown;
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
-        /// 87的长度是否为1字节,值的合规性检测
+        /// 87的长度是否为1字节,值的合规性检测,多个应用下,tag87必须存在
         /// </summary>
         public TipLevel PSEDIR_007()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in tlvs)
+            var transCfg = TransactionConfig.GetInstance();
+            for (int i = 0; i < transCfg.Aids.Count; i++)
             {
-                if(item.Tag == "87")
+                var template61 = CaseUtil.GetSubTags("61", i + 1, tlvs);
+                if (!CaseUtil.HasTag("87", template61))
                 {
-                    var tag87Value = Convert.ToInt16(item.Value, 16);
-                    if (item.Len == 1 &&
-                        ((tag87Value >= 0 && tag87Value <= 0xF) ||
-                        (tag87Value > 0x80 && tag87Value <= 0x8F))
-                        )
+                    return TraceInfo(caseItem.Level, caseNo, "如果存在多个应用，tag87必须存在");
+                }
+                foreach (var item in template61)
+                {
+                    if (item.Tag == "87")
                     {
-                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    }
-                    else
-                    {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);                       
+                        var value = Convert.ToInt16(item.Value, 16);
+                        if (item.Len != 1 ||
+                            !((value >= 0 && value <= 0xF) ||
+                            (value > 0x80 && value <= 0x8F))
+                            )
+                        {
+                            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        }
                     }
                 }
             }
-            return TipLevel.Unknown;
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
-        /// PSE的FCI中有9F11的话在PSE的DIR文件中是否存在9F12
+        /// 检测tag9F12存在的情况下，则tag9F11必须存在
         /// </summary>
         public TipLevel PSEDIR_008()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            foreach(var item in tlvs)
+            for(int i = 0; i < transConfig.Aids.Count; i++)
             {
-                if(item.Tag == "9F11")
+                var template61 = CaseUtil.GetSubTags("61", tlvs);
+                foreach (var item in template61)
                 {
-                    string tag9F12 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F12");
-                    if (string.IsNullOrEmpty(tag9F12))
+                    if (item.Tag == "9F12")
                     {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        string tag9F11 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F11");
+                        if (string.IsNullOrEmpty(tag9F11))
+                        {
+                            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        }
                     }
                 }
             }
@@ -245,30 +245,27 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            List<Tuple<string, string>> tuples = new List<Tuple<string, string>>()
-             {
-                 new Tuple<string, string>("A000000333010101","556E696F6E506179204465626974"),
-                 new Tuple<string, string>("A000000333010102","556E696F6E50617920437265646974"),
-             };
 
-            var tag4F = CaseUtil.GetTag("4F", tlvs);
-            var tag50 = CaseUtil.GetTag("50", tlvs);
-
-            foreach(var item in tuples)
+            for(int i = 0; i < transConfig.Aids.Count; i++)
             {
-                if(item.Item1 == tag4F)
+                var template61 = CaseUtil.GetSubTags("61", i + 1, tlvs);
+                var tag4F = CaseUtil.GetTag("4F", template61);
+                var tag50 = CaseUtil.GetTag("50", template61);
+                var value = Utils.BcdToStr(tag50);
+                if(tag4F == "A000000333010101")
                 {
-                    if(item.Item2 == tag50)
-                    {
-                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    }
-                    else
-                    {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    }
+                    if (tag50 != "556E696F6E506179204465626974")
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50={0}]", value);
+                }else if(tag4F == "A000000333010102")
+                {
+                    if (tag50 != "556E696F6E50617920437265646974")
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50={0}]", value);
+                }else if(tag4F == "A0000000031010")
+                {
+                    //if(value.Contains("Visa"))
                 }
             }
-            return TipLevel.Unknown;
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -279,16 +276,74 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            List<string> duplexTags = new List<string>();
-            if(CaseUtil.IsUniqTag(response.Response,out duplexTags))
+            var transCfg = TransactionConfig.GetInstance();
+            for (int i = 0; i < transCfg.Aids.Count; i++)
             {
-                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                var template61 = CaseUtil.GetSubTags("61", i + 1, tlvs);
+                if (CaseUtil.HasDuplexTag(template61))
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
             }
-            else
+            int count = 0;
+            foreach(var tlv in tlvs)
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                if(tlv.Tag == "70")
+                {
+                    count++;
+                }
             }
+            if(count > 1)
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[包含多个70模板]");
+            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
+        /// <summary>
+        /// 检测模板73是否只包含9F0A
+        /// </summary>
+        /// <returns></returns>
+        public TipLevel PSEDIR_011()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            List<string> tags = new List<string>() { "9F0A"};
+            for (int i = 0; i < transConfig.Aids.Count; i++)
+            {
+                if(CaseUtil.HasTag("73",tlvs))
+                {
+                    var template73 = CaseUtil.GetSubTags("73", i + 1, tlvs);
+                    foreach (var item in template73)
+                    {
+                        if (!tags.Contains(item.Tag))
+                        {
+                            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        }
+                    }
+                }
+            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测DIR文件中的AID是否都能选择成功
+        /// </summary>
+        /// <returns></returns>
+        public TipLevel PSEDIR_012()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            foreach(var aid in transConfig.Aids)
+            {
+                var resp = APDU.SelectCmd(aid);
+                if(resp.SW != 0x9000)
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
     }
 }

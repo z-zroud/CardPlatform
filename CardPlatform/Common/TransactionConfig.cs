@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace CardPlatform.Common
 {
     /// <summary>
-    /// 存储交易时的终端配置信息
+    /// 存储交易时的界面配置信息
     /// </summary>
     public class TransactionConfig
     {
@@ -22,7 +22,13 @@ namespace CardPlatform.Common
             }
             return TransObj;
         }
-        private ViewModelLocator ui = new ViewModelLocator();
+
+        private TransactionConfig()
+        {
+            Aids = new List<string>();
+        }
+
+        public List<string> Aids { get; set; }
         public AppType CurrentApp { get; set; }
         public AlgorithmType Algorithm { get; set; }
         public TransType TransType { get; set; }
@@ -35,6 +41,19 @@ namespace CardPlatform.Common
         public string TransSmEncKey { get; set; }      //SM_ENC
         public string TransIdnKey { get; set; } //IDN key for Mastercard
         public string TransCvcKey { get; set; } //DCVC3 key for Mastercard
+
+        public void Clear()
+        {
+            Aids.Clear();
+            TransDesAcKey = string.Empty;
+            TransDesMacKey = string.Empty;
+            TransDesEncKey = string.Empty;
+            TransSmAcKey = string.Empty;
+            TransSmMacKey = string.Empty;
+            TransSmEncKey = string.Empty;
+            TransIdnKey = string.Empty;
+            TransCvcKey = string.Empty;
+        }
         
         public void SaveConfig()
         {

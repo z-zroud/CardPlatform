@@ -91,8 +91,8 @@ namespace CardPlatform.Cases
                 tag57 = readRecordTags["57"].Value;
             }
             
-            caseItem.Description += "【tag57=" + tag57 + "】";
-            log.TraceLog("tag57=【{0}】", tag57);
+            caseItem.Description += "tag57=" + tag57;
+            log.TraceLog("tag57={0}", tag57);
             if (!CaseUtil.IsCorrectTag57Format(tag57))
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -176,13 +176,13 @@ namespace CardPlatform.Cases
             {
                 var tag5F20 = readRecordTags["5F20"];
                 string value = UtilLib.Utils.BcdToStr(tag5F20.Value);
-                caseItem.Description += "【tag5F20=" + tag5F20.Value + "】转为字符串显示:" + value;
-                log.TraceLog("转码为:【{0}】", value);
-                if (!value.Contains("/"))
+                caseItem.Description += "tag5F20" + "转为字符串显示:" + value;
+                log.TraceLog("转码为:{0}", value);
+                if(!CaseUtil.IsContainSlash(value))
                 {
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
-                log.TraceLog("长度为:【{0}】", tag5F20.Len);
+                log.TraceLog("长度为:{0}", tag5F20.Len);
                 if (tag5F20.Len < 2 || tag5F20.Len > 26)
                 {
                     TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "tag5F20长度需要在2-26字节之间");
@@ -214,7 +214,7 @@ namespace CardPlatform.Cases
                 var tag9F0B = readRecordTags["9F0B"];
                 string value = UtilLib.Utils.BcdToStr(tag9F0B.Value);
                 log.TraceLog("转码为:【{0}】", value);
-                if (!CaseUtil.IsAlpha(value))
+                if (!CaseUtil.IsContainSlash(value))
                 {
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
@@ -274,7 +274,7 @@ namespace CardPlatform.Cases
             {
                 var tag8D = readRecordTags["8D"];
                 var tls8D = DataParse.ParseTL(tag8D.Value);
-                caseItem.Description += "【tag8D=" + tag8D.Value + "】";
+                //caseItem.Description += "【tag8D=" + tag8D.Value + "】";
                 if (tls8D.Count == 0)
                 {
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag8D无法TL分解]");
@@ -310,7 +310,7 @@ namespace CardPlatform.Cases
             {
                 var tag8C = readRecordTags["8C"];
                 var tls8C = DataParse.ParseTL(tag8C.Value);
-                caseItem.Description += "【tag8C" + tag8C.Value + "】";
+                //caseItem.Description += "【tag8C" + tag8C.Value + "】";
                 if (tls8C.Count == 0)
                 {
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag8C无法TL分解]");
@@ -332,7 +332,7 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测Tag5A的规范性(格式、长度等)
+        /// 检测Tag5A的规范性(格式、长度在16~19位之间等)
         /// </summary>
         public TipLevel ReadRecord_013()
         {
@@ -494,7 +494,7 @@ namespace CardPlatform.Cases
             {
                 var tag9F1F = readRecordTags["9F1F"];
                 var value = UtilLib.Utils.BcdToStr(tag9F1F.Value);
-                caseItem.Description += "【tag9F1F=" + tag9F1F.Value + "】转为字符串显示:" + value;
+                caseItem.Description += "tag9F1F" + "转为字符串显示:" + value;
                 if (!CaseUtil.IsAplhaDigit(value))
                 {
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -614,6 +614,14 @@ namespace CardPlatform.Cases
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
+            else if(transCfg.CurrentApp == AppType.MC ||
+                transCfg.CurrentApp == AppType.Paypass)
+            {
+                if (readRecordTags["9F08"].Value != "0002")
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+            }
             else
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[未知的应用类型]");
@@ -638,7 +646,7 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测Tag5F30中的服务码与57中的一致性
+        /// 检测Tag5F30中的服务码与57中的一致性,是否以02或06开头，长度为2字节
         /// </summary>
         public TipLevel ReadRecord_026()
         {
@@ -648,6 +656,15 @@ namespace CardPlatform.Cases
             if (!readRecordTags.ContainsKey("5F30") || !readRecordTags.ContainsKey("57"))
             {
                 return TraceInfo(caseItem.Level, caseNo, "读数据中缺少tag5F30或者tag57");
+            }
+            if(readRecordTags["5F30"].Value.Length != 4)
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[长度错误]");
+            }
+            if(readRecordTags["5F30"].Value.Substring(0,2) != "02" &&
+                readRecordTags["5F30"].Value.Substring(0,2) != "06")
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
             Tag57Helper tag57Helper = new Tag57Helper(readRecordTags["57"].Value);
             caseItem.Description += "【tag5F30=" + readRecordTags["5F30"].Value + "】";

@@ -159,8 +159,12 @@ namespace CardPlatform.Business
             log.TraceLog("计算的hash：{0}", hashOutput);
             if (hash != hashOutput)
             {
-                log.TraceLog("恢复数据中的hash值与签名数据生成的hash比对失败");
+                caseObj.TraceInfo(TipLevel.Failed,caseNo,"检测恢复数据中的hash值与签名数据生成的hash比对是否一致");
                 return false;
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测恢复数据中的hash值与签名数据生成的hash比对是否一致");
             }
             int icCardDynamicDataLen = Convert.ToInt32(recoveryData.Substring(8, 2), 16);
             string tag9F4C = recoveryData.Substring(10, icCardDynamicDataLen * 2);
@@ -202,13 +206,21 @@ namespace CardPlatform.Business
             string recoveryData = Authencation.GenRecoveryData(caPublicKey, ipkExp, issuerPublicCert);
             if (string.IsNullOrEmpty(recoveryData))
             {
-                log.TraceLog("无法通过发卡行公钥证书获取恢复数据");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法通过发卡行公钥证书获取恢复数据");
                 return string.Empty;
             }
             if (recoveryData.Substring(0, 4) != "6A02" || recoveryData.Substring(recoveryData.Length - 2) != "BC")
             {
-                log.TraceLog("通过发卡行公钥证书得到的恢复数据格式不正确");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "通过发卡行公钥证书得到的恢复数据格式不正确");
                 return string.Empty;
+            }
+            if(recoveryData.Substring(22,4) != "0101")
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "检测通过发卡行公钥证书得到的算法标识是否正确");
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测通过发卡行公钥证书得到的算法标识是否正确");
             }
             string hash = recoveryData.Substring(recoveryData.Length - 42, 40);
             string hashInput = recoveryData.Substring(2, recoveryData.Length - 44) + ipkRemainder + ipkExp;
@@ -218,8 +230,12 @@ namespace CardPlatform.Business
             log.TraceLog("计算的hash：{0}", hashOutput);
             if (hash != hashOutput)
             {
-                log.TraceLog("恢复数据中的hash值与签名数据生成的hash比对失败");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "检测恢复数据中的hash值与签名数据生成的hash比对是否一致");
                 return string.Empty;
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测恢复数据中的hash值与签名数据生成的hash比对是否一致");
             }
             string bin = recoveryData.Substring(4, 8);
             bin = bin.Substring(0, bin.IndexOf('F'));
@@ -243,6 +259,14 @@ namespace CardPlatform.Business
             else
                 caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测证书有效期是否比应用有效期早,证书有效期为{0}，应用有效期为{1}", expiryDate, tag5F24);
             int issuerLen = Convert.ToInt32(recoveryData.Substring(26, 2), 16) * 2;
+            if(caPublicKey.Length < issuerLen)
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "检测CA公钥模需要大于或等于发卡行公钥");
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测CA公钥模需要大于或等于发卡行公钥");
+            }
             if (issuerLen <= caPublicKey.Length - 72)
             {
                 return recoveryData.Substring(30, issuerLen);
@@ -264,13 +288,17 @@ namespace CardPlatform.Business
             string recoveryData = Authencation.GenRecoveryData(issuerPublicKey, ipkExp, iccPublicCert);
             if (string.IsNullOrEmpty(recoveryData))
             {
-                log.TraceLog("无法通过IC卡公钥证书获取恢复数据");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "无法通过IC卡公钥证书获取恢复数据");
                 return string.Empty;
             }
             if (recoveryData.Substring(0, 4) != "6A04" || recoveryData.Substring(recoveryData.Length - 2) != "BC")
             {
-                log.TraceLog("通过发IC卡公钥证书得到的恢复数据格式不正确");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "检测通过发IC卡公钥证书得到的恢复数据格式是否正确");
                 return string.Empty;
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测通过发IC卡公钥证书得到的恢复数据格式是否正确");
             }
             string hash = recoveryData.Substring(recoveryData.Length - 42, 40);
             string hashInput = recoveryData.Substring(2, recoveryData.Length - 44) + iccRemainder + iccExp + sigStaticData + tag82;
@@ -280,8 +308,12 @@ namespace CardPlatform.Business
             log.TraceLog("计算的hash：{0}", hashOutput);
             if (hash != hashOutput)
             {
-                log.TraceLog("恢复数据中的hash值与签名数据生成的hash比对失败");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "检测恢复数据中的hash值与签名数据生成的hash比对是否一致");
                 return string.Empty;
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测恢复数据中的hash值与签名数据生成的hash比对是否一致");
             }
             string account = recoveryData.Substring(4, 20);
             account = account.Substring(0, account.IndexOf('F'));
@@ -305,6 +337,14 @@ namespace CardPlatform.Business
             else
                 caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测证书有效期比应用有效期早,证书有效期为{0}，应用有效期为{1}", expiryDate, tag5F24);
             int iccLen = Convert.ToInt32(recoveryData.Substring(38, 2), 16) * 2;
+            if(issuerPublicKey.Length < iccLen)
+            {
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "检测发卡行公钥长度是否大于或等于IC卡公钥长度");
+            }
+            else
+            {
+                caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测发卡行公钥长度是否大于或等于IC卡公钥长度");
+            }
             if (iccLen <= issuerPublicKey.Length - 84)
             {
                 return recoveryData.Substring(42, iccLen);

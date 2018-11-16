@@ -158,6 +158,8 @@ bool ParseBcdTLV(char* buffer, PBCD_TLV pTlvs, unsigned int& count)
                 memcpy(pTlvs[currentTLVIndex].length, buffer + currentIndex, lengthSize);
                 
                 pTlvs[currentTLVIndex].lenSize = lengthSize;
+                if (strlen(pTlvs[currentTLVIndex].length) > 2)  //数据长度一般不可能大于FF
+                    return false;
                 dataSize = 2 * std::stoi((char*)pTlvs[currentTLVIndex].length, 0, 16);
 
                 currentIndex += lengthSize;
@@ -255,7 +257,7 @@ bool IsBcdTlvStruct(char* buffer, unsigned int bufferLength)
         if (lenSize > 4 || lenSize == 0) {
             return false;   //暂时不支持65535长度的TLV
         }
-        if (lenSize + currentIndex >= bufferLength)
+        if (lenSize + currentIndex > bufferLength)
         {
             return false;
         }

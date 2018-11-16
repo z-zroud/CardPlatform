@@ -46,14 +46,15 @@ namespace CardPlatform.Cases
                     var methodsName = from method in methods select method.Name;
                     if (methodsName.Contains(item.CaseNo))
                     {
-                        log.TraceLog("执行case [{0}]:{1}", item.CaseNo, item.Description);
+                        log.TraceLog("执行case [{0}]", item.CaseNo);
+                        log.TraceLog("描述:{0}", item.Description);
                         var result = (TipLevel)GetType().GetMethod(item.CaseNo).Invoke(this, null);
                         string caseReuslt = "";
                         if (result == TipLevel.Failed) caseReuslt = "失败";
                         if (result == TipLevel.Sucess) caseReuslt = "成功";
                         if (result == TipLevel.Warn) caseReuslt = "警告";
                         if (result == TipLevel.Unknown) caseReuslt = "未知";
-                        log.TraceLog("执行case [{0}] 结果: {1}\n", item.CaseNo, caseReuslt);
+                        log.TraceLog("结果: {0}\n", caseReuslt);
                     }
                        
                 }

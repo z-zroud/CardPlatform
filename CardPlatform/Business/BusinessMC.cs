@@ -23,9 +23,9 @@ namespace CardPlatform.Business
         public override void DoTransaction(string aid)
         {
             base.DoTransaction(aid);
-            locator.Terminal.SetTag("9F7A", "00", "电子现金支持指示器(这里走借贷记交易流程)");
             locator.Terminal.SetTag("9C", "00", "交易类型");
             locator.Terminal.SetTag("9F66", "46000000", "终端交易属性");
+            locator.Terminal.SetTag("9F08", "0002", "终端应用版本号");
             DoTransaction(DoTransactionEx);
 
         }
@@ -83,26 +83,6 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "终端行为分析失败，交易终止");
                 return false;
             }
-
-            if (aipHelper.IsSupportIssuerAuth())
-            {
-                if (0 != IssuerAuthencation())   //发卡行认证
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
-                    return false;
-                }
-            }
-            else
-            {
-                if (0 != IssuerAuthencation())   //发卡行认证
-                {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "联机处理失败，交易终止");
-                    return false;
-                }
-                caseObj.TraceInfo(TipLevel.Warn, caseNo, "卡片不支持发卡行认证，请确保tag82的正确性");
-            }
-            
-
 
             if (0 != TransactionEnd())   //交易结束处理
             {
@@ -308,7 +288,7 @@ namespace CardPlatform.Business
             return 0;
         }
 
-        protected int IssuerAuthencation()
+        protected int TransactionEnd()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
 
@@ -324,20 +304,9 @@ namespace CardPlatform.Business
             string arc = "0012";
             string arpc = Authencation.GenArpc(acSessionKey, applicationCryptogram, arc);
 
-            //var resp = APDU.ExtAuthCmd(arpc, "3030");
-            //if (resp.SW != 0x9000)
-            //{
-            //    caseObj.TraceInfo(TipLevel.Failed, caseNo, "ARPC校验不正确");
-            //    return 1;
-            //}
             locator.Terminal.SetTag("91", arpc + arc, "Issuer Authentication Data");
-            caseObj.TraceInfo(TipLevel.Sucess, caseNo, "发卡行认证成功");
-            locator.Terminal.SetTag("8A", "3030");
-            return 0;
-        }
+            locator.Terminal.SetTag("8A", "0012");
 
-        protected int TransactionEnd()
-        {
             string CDOL2 = transTags.GetTag(TransactionStep.ReadRecord, "8D");
             ApduResponse resp = GAC(Constant.TC, CDOL2);
             var tlvs = DataParse.ParseTLV(resp.Response);

@@ -126,7 +126,15 @@ namespace CardPlatform.Cases
         }
 
         
-
+        public static bool HasTag(string tag,List<TLV> tags)
+        {
+            foreach (var item in tags)
+            {
+                if (item.Tag == tag)
+                    return true;
+            }
+            return false;
+        }
 
         /// <summary>
         /// 比较数据是否以startBuffer开头
@@ -355,11 +363,39 @@ namespace CardPlatform.Cases
         public static bool IsAlpha(string ascii)
         {
             //var ascii = UtilLib.Utils.BcdToStr(str);
+            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            foreach (var c in ascii)
+            {
+                if (!alphaNum.Contains(c))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool IsAlphaAndBlank(string ascii)
+        {
+            string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            foreach (var c in ascii)
+            {
+                if (!alphaNum.Contains(c))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool IsContainSlash(string ascii)
+        {
             string alphaNum = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ /";
             foreach (var c in ascii)
             {
                 if (!alphaNum.Contains(c))
                     return false;
+            }
+            if(!ascii.Contains("/"))
+            {
+                return false;
             }
 
             return true;

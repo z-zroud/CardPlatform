@@ -88,13 +88,14 @@ namespace CardPlatform.Cases
             {
                 if(item.Tag == "84")
                 {
+                    string value = UtilLib.Utils.BcdToStr(item.Tag);
                     if(item.Value != Constant.PSE)
                     {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "转码为:{0}",value);
                     }
                     else
                     {
-                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "转码为:{0}", value);
                     }
                 }
             }
@@ -110,15 +111,17 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             List<string> tags = new List<string>() { "88", "5F2D", "9F11", "BF0C" };
-            foreach(var item in tlvs)
+            var templateA5 = CaseUtil.GetSubTags("A5", tlvs);
+            foreach(var item in templateA5)
             {
-                if(item.Level == 2) //A5模板的数据
+                if(!tags.Contains(item.Tag))
                 {
-                    if(!tags.Contains(item.Tag))
-                    {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    }
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
+            }
+            if(!CaseUtil.HasTag("88",templateA5))
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[A5模板缺少必须的tag88]");
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
@@ -130,18 +133,15 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-
-            foreach (var item in tlvs)
+            var templateA5 = CaseUtil.GetSubTags("A5", tlvs);
+            foreach (var item in templateA5)
             {
-                if (item.Level == 2) //A5模板的数据
+                if (item.Tag == "88" && item.Len == 1)
                 {
-                    if (item.Tag == "88" && item.Len == 1)
+                    var value = Convert.ToInt16(item.Value, 16);
+                    if (value >= 1 && value <= 0x1F)
                     {
-                        var tag88Value = Convert.ToInt16(item.Value, 16);
-                        if (tag88Value >= 1 && tag88Value <= 1F)
-                        {
-                            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                        }
+                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
                 }
             }
@@ -168,13 +168,9 @@ namespace CardPlatform.Cases
                     {
                         return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                     }
-                    else
-                    {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                    }
                 }
             }
-            return TipLevel.Unknown;
+            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
 
 
@@ -190,20 +186,16 @@ namespace CardPlatform.Cases
             {
                 if (item.Tag == "9F11")
                 {
-                    var tag9F11Value = Convert.ToInt16(item.Value);
-                    if (item.Len == 1 &&
-                        tag9F11Value >= 1 &&
-                        tag9F11Value <= 10)
-                    {
-                        return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-                    }
-                    else
+                    var value = Convert.ToInt16(item.Value);
+                    if (item.Len != 1 ||
+                        value == 0 ||
+                        value > 10)
                     {
                         return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                     }
                 }
             }
-            return TipLevel.Unknown;
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -215,9 +207,8 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             Dictionary<string, TLV> tags = new Dictionary<string, TLV>();
-            var templates = new List<string>() { "6F", "A5", "BF0C" };
-            var results = CaseUtil.HasDuplexTag(tlvs, templates);
-            if(results.Count != 0)
+            var results = CaseUtil.HasDuplexTag(tlvs);
+            if(results)
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }

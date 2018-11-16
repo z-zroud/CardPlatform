@@ -54,7 +54,7 @@ namespace CardPlatform.ViewModel
 
         public void SetTag(string tag,string tagValue,string mark="")
         {
-            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            DispatcherHelper.UIDispatcher.Invoke(() =>
             {
                 bool hasExisted = false;
                 foreach(var item in TerminalTags)

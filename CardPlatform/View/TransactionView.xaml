@@ -102,13 +102,13 @@
                 <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="IDN Key" MinWidth="65" VerticalAlignment="Center"/>
                     <Grid>
-                        <TextBox Height="27"  Margin="2,2,65,2" Text="{Binding TransKeys.IDNKey}"/>
+                        <TextBox Height="27"  Margin="2,2,65,2" Text="{Binding IdnKey}"/>
                     </Grid>
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="DCVC3 Key" MinWidth="65" VerticalAlignment="Center"/>
                     <Grid>
-                        <TextBox Height="27"  Margin="2,2,65,2" Text="{Binding TransKeys.CVCKey, Mode=TwoWay, NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}"/>
+                        <TextBox Height="27"  Margin="2,2,65,2" Text="{Binding CvcKey, Mode=TwoWay, NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True}"/>
                     </Grid>
                 </StackPanel>
             </StackPanel>

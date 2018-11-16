@@ -64,7 +64,7 @@ namespace CardPlatform.Cases
             var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
             if (tag8E.Length != 28 || tag8E.Substring(16) != "42031E031F00")
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "8E={0}",tag8E);
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }

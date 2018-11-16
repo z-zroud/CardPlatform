@@ -18,12 +18,12 @@ namespace CardPlatform.ViewModel
 {
     public class TransactionViewModel : ViewModelBase
     {
+        
         public TransactionViewModel()
         {
             Aids                        = new ObservableCollection<string>();
             CaseInfos                   = new ObservableCollection<TransInfoModel>();
             ErrorCaseInfos              = new ObservableCollection<TransInfoModel>();
-            TransKeys                   = new TransKeyModel();
             TransResult                 = new TransResultModel();
         }
 
@@ -131,32 +131,30 @@ namespace CardPlatform.ViewModel
             }
         }
 
-        private TransKeyModel _transKeys;
-        public TransKeyModel TransKeys
+        private string _idnKey;
+        public string IdnKey
         {
-            get { return _transKeys; }
+            get { return _idnKey; }
             set
             {
-                Set(ref _transKeys, value);
+                Set(ref _idnKey, value);
+            }
+        }
+
+        private string _cvcKey;
+        public string CvcKey
+        {
+            get { return _cvcKey; }
+            set
+            {
+                Set(ref _cvcKey, value);
             }
         }
 
         private string _applicationDesKey;
         public string ApplicationDesKey
         {
-            get {
-                if(!string.IsNullOrEmpty(_applicationDesKey) && _applicationDesKey.Length == 32 * 3)
-                {
-                    if(CurrentAlgorithm == AlgorithmType.DES)
-                    {
-                        TransKeys.DES_AC = _applicationDesKey.Substring(0, 32);
-                        TransKeys.DES_MAC = _applicationDesKey.Substring(32, 32);
-                        TransKeys.DES_ENC = _applicationDesKey.Substring(63, 32);
-                    }
-
-                }
-                return _applicationDesKey;
-            }
+            get {return _applicationDesKey;}
             set
             {
                 Set(ref _applicationDesKey, value);
@@ -166,19 +164,7 @@ namespace CardPlatform.ViewModel
         private string _applicationSmKey;
         public string ApplicationSmKey
         {
-            get
-            {
-                if (!string.IsNullOrEmpty(_applicationSmKey) && _applicationSmKey.Length == 32 * 3)
-                {
-                    if (CurrentAlgorithm == AlgorithmType.SM)
-                    {
-                        TransKeys.SM_AC = _applicationSmKey.Substring(0, 32);
-                        TransKeys.SM_MAC = _applicationSmKey.Substring(32, 32);
-                        TransKeys.SM_ENC = _applicationSmKey.Substring(63, 32);
-                    }
-                }
-                return _applicationSmKey;
-            }
+            get { return _applicationSmKey; }
             set
             {
                 Set(ref _applicationSmKey, value);
@@ -342,14 +328,20 @@ namespace CardPlatform.ViewModel
             transConfig.Algorithm       = CurrentAlgorithm;
             transConfig.KeyType         = CurrentAppKeyType;
             transConfig.TransType       = CurrentTransType;
-            transConfig.TransDesAcKey   = TransKeys.DES_AC;
-            transConfig.TransDesMacKey  = TransKeys.DES_MAC;
-            transConfig.TransDesEncKey  = TransKeys.DES_ENC;
-            transConfig.TransSmAcKey    = TransKeys.SM_AC;
-            transConfig.TransSmMacKey   = TransKeys.SM_MAC;
-            transConfig.TransSmEncKey   = TransKeys.SM_ENC;
-            transConfig.TransCvcKey     = TransKeys.CVCKey;
-            transConfig.TransIdnKey     = TransKeys.IDNKey;
+            if(!string.IsNullOrEmpty(ApplicationDesKey))
+            {
+                transConfig.TransDesAcKey   = ApplicationDesKey.Length >= 32 ? ApplicationDesKey.Substring(0, 32) : string.Empty;
+                transConfig.TransDesMacKey  = ApplicationDesKey.Length >= 64 ? ApplicationDesKey.Substring(32, 32) : string.Empty;
+                transConfig.TransDesEncKey  = ApplicationDesKey.Length >= 96 ? ApplicationDesKey.Substring(64, 32) : string.Empty;
+            }
+            if(!string.IsNullOrEmpty(ApplicationSmKey))
+            {
+                transConfig.TransSmAcKey    = ApplicationSmKey.Length >= 32 ? ApplicationSmKey.Substring(0, 32) : string.Empty;
+                transConfig.TransSmMacKey   = ApplicationSmKey.Length >= 32 ? ApplicationSmKey.Substring(32, 32) : string.Empty;
+                transConfig.TransSmEncKey   = ApplicationSmKey.Length >= 32 ? ApplicationSmKey.Substring(64, 32) : string.Empty;
+            }
+            transConfig.TransCvcKey     = string.IsNullOrEmpty(CvcKey) ? string.Empty : CvcKey;
+            transConfig.TransIdnKey     = string.IsNullOrEmpty(IdnKey) ? string.Empty : IdnKey;
             
             DispatcherHelper.CheckBeginInvokeOnUI(() =>
             {

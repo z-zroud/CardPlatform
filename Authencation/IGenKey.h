@@ -151,3 +151,45 @@ extern "C" int GENKEY_API DES_GenRecovery(const char* publicKey, const char* pub
 extern "C" int GENKEY_API SM2Verify(const char *pPublicKey, const char *pMSG, const char *pSignData);
 
 extern "C" int GENKEY_API  GenSMHash(char *input, char *output);
+
+extern "C" int GENKEY_API GenRSA(int bitLen, char* exp, 
+    char* D,
+    char* N,
+    char* P, 
+    char* Q, 
+    char* DP, 
+    char* DQ, 
+    char* Qinv);
+
+extern "C" int GENKEY_API GenIssuerCert(
+    const char* ca_D,
+    const char* ca_N,
+    const char* formatFlag,
+    const char* bin,
+    const char* expiryDate,
+    const char* publicKey,
+    const char* publicKeyExp,
+    char* publicCert,
+    char* publicRemainder
+);
+
+extern "C" int GENKEY_API GenIccCert(
+    const char* issuer_D,
+    const char* issuer_N,
+    const char* tag5A,
+    const char* expiryDate,
+    const char* publicKey,
+    const char* publicKeyExp,
+    const char* sigData,
+    char* publicCert,
+    char* publicRemainder
+);
+
+extern "C" int GENKEY_API GenSSDA(
+    const char* p_D,
+    const char* p_N,
+    const char* sigData,
+    const char* tag82,
+    const char* dac,
+    char* tag93
+);

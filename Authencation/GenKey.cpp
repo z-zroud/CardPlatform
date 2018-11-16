@@ -736,7 +736,6 @@ int GenHash(const char* input, char* hash, int len)
 	return 0;
 }
 
-
 int GenSMHash(char *input, char *output)
 {
 	PDllSM3_HASH SM3_Hash = GetSMFunc<PDllSM3_HASH>("dllSM3_HASH");
@@ -749,7 +748,6 @@ int GenSMHash(char *input, char *output)
 	}
 	return -1;
 }
-
 
 int SM2Verify(const char *pPublicKey, const char *pMSG, const char *pSignData)
 {
@@ -821,6 +819,133 @@ int SM_DDA(const char* iccPublicKey, const char* tag9F4B, const char* dynamicDat
 		}
 	}
     return result += 0x80;
+}
+
+int GenRSA(int bitLen, char* exp,
+    char* D,
+    char* N,
+    char* P,
+    char* Q,
+    char* DP,
+    char* DQ,
+    char* Qinv)
+{
+    return GenRSAKey_CRT_STD(bitLen, (char*)exp, D, N, P, Q, DP, DQ, Qinv);
+}
+
+int GenIccCert(
+    const char* issuer_D,
+    const char* issuer_N,
+    const char* tag5A,
+    const char* expiryDate,
+    const char* publicKey,
+    const char* publicKeyExp,
+    const char* sigData,
+    char* publicCert,
+    char* publicRemainder
+) {
+    string hashInput = "04" + string(tag5A);
+    hashInput.append(20 - strlen(tag5A), 'F');
+    hashInput += expiryDate + string("000002") + "0101";
+    hashInput += Tool::GetBcdStrLen(publicKey) + Tool::GetBcdStrLen(publicKeyExp);
+    hashInput += publicKey + string(publicKeyExp) + string(sigData);
+
+    char hash[256] = { 0 };
+    GenHash(hashInput.c_str(), hash, 256);
+
+    string publicCertInput = "6A04" + string(tag5A);
+    publicCertInput.append(20 - strlen(tag5A), 'F');
+    publicCertInput += expiryDate + string("000002") + "0101";
+    publicCertInput += Tool::GetBcdStrLen(publicKey) + Tool::GetBcdStrLen(publicKeyExp);
+    int publicKeyLen = strlen(publicKey);
+    int parentPublicKeyLen = strlen(issuer_N);
+    if (parentPublicKeyLen - 84 > publicKeyLen)
+    {
+        publicCertInput += publicKey;
+        publicCertInput.append(parentPublicKeyLen - 84 - publicKeyLen, 'B');
+    }
+    else {
+        publicCertInput += string(publicKey).substr(0, strlen(issuer_N) - 84);
+        int remainderLen = strlen(publicKey) - (strlen(issuer_N) - 84);
+        strncpy_s(publicRemainder, remainderLen + 1, string(publicKey).substr(strlen(issuer_N) - 84).c_str(), remainderLen);
+    }
+    publicCertInput += hash + string("BC");
+    char result[2048] = { 0 };
+    RSA_Decrypt((char*)issuer_N, (char*)issuer_D, (char*)publicCertInput.c_str(), publicCertInput.length(), result);
+    strncpy_s(publicCert, strlen(result) + 1, result, strlen(result));
+    return 0;
+}
+
+int GenIssuerCert(
+    const char* ca_D,
+    const char* ca_N,
+    const char* formatFlag,
+    const char* bin,
+    const char* expiryDate,
+    const char* publicKey,
+    const char* publicKeyExp,
+    char* publicCert,
+    char* publicRemainder
+)
+{
+    string hashInput = formatFlag + string(bin);
+    hashInput.append(8 - strlen(bin), 'F');
+    hashInput += expiryDate + string("000002") + "0101";
+    hashInput += Tool::GetBcdStrLen(publicKey) + Tool::GetBcdStrLen(publicKeyExp);
+    hashInput += publicKey + string(publicKeyExp);
+
+    char hash[256] = { 0 };
+    GenHash(hashInput.c_str(), hash, 256);
+
+    string publicCertInput = "6A" + string(formatFlag) + string(bin);
+    publicCertInput.append(8 - strlen(bin), 'F');
+    publicCertInput += expiryDate + string("000002") + "0101";
+    publicCertInput += Tool::GetBcdStrLen(publicKey) + Tool::GetBcdStrLen(publicKeyExp);
+    int publicKeyLen = strlen(publicKey);
+    int parentPublicKeyLen = strlen(ca_N);
+    if (parentPublicKeyLen - 72 > publicKeyLen)
+    {
+        publicCertInput += publicKey;
+        publicCertInput.append(parentPublicKeyLen - 72 - publicKeyLen, 'B');
+    }
+    else {
+        publicCertInput += string(publicKey).substr(0, strlen(ca_N) - 72);
+        int remainderLen = strlen(publicKey) - (strlen(ca_N) - 72);
+        strncpy_s(publicRemainder, remainderLen + 1, string(publicKey).substr(strlen(ca_N) - 72).c_str(), remainderLen);
+    }
+    publicCertInput += hash + string("BC");
+    char result[2048] = { 0 };
+    RSA_Decrypt((char*)ca_N, (char*)ca_D, (char*)publicCertInput.c_str(), publicCertInput.length(), result);
+    strncpy_s(publicCert, strlen(result) + 1, result, strlen(result));
+    return 0;
+}
+
+int GenSSDA(
+    const char* p_D,
+    const char* p_N,
+    const char* sigData,
+    const char* tag82,
+    const char* dac,
+    char* tag93
+)
+{
+    string data2bSig = sigData + string(tag82);
+    int fillBCount = strlen(p_N) - 52;
+    string hashInput = "0301" + string(dac);
+    hashInput.append(fillBCount, 'B');
+    hashInput += data2bSig;
+
+    char hash[128] = { 0 };
+    GenHash(hashInput.c_str(), hash, 128);
+
+    string ssdaInput = "6A0301" + string(dac);
+    ssdaInput.append(fillBCount, 'B');
+    ssdaInput += hash + string("BC");
+
+    char ssda[2048] = { 0 };
+    RSA_Encrypt((char*)p_N, (char*)p_D, (char*)ssdaInput.c_str(), ssdaInput.length(), ssda);
+    strncpy_s(tag93, strlen(ssda) + 1, ssda, strlen(ssda));
+    return 0;
 }
 
 /***************************************************************************/

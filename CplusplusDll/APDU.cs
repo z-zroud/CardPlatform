@@ -107,12 +107,19 @@ namespace CplusplusDll
             if(resp.SW == 0x9000)
             {
                 var tlvs = DataParse.ParseTLV(resp.Response);
-                if(tlvs.Count == 1)
+                if(resp.Response.Substring(0,2) == "80")
                 {
-                    return tlvs[0].Value;   //Tag9F4B
-                }else if(tlvs.Count == 2)
+                    if (tlvs.Count == 1)
+                    {
+                        return tlvs[0].Value;   //Tag9F4B
+                    }
+                    return string.Empty;
+                }else if(resp.Response.Substring(0, 2) == "77")
                 {
-                    return tlvs[1].Value;   //MC应用 发送内部认证返回带77模板的9F4B数据
+                    if (tlvs.Count == 2)
+                    {
+                        return tlvs[1].Value;   //MC应用 发送内部认证返回带77模板的9F4B数据
+                    }
                 }
             }
             return string.Empty;

@@ -60,7 +60,7 @@ namespace CardPlatform.Cases
             }
             log.TraceLog("tag5F25生效日期为:【{0}】", tag5F25);
             log.TraceLog("当前日期为:【{0}】", DateTime.Now.ToString("yyMMdd"));
-            caseItem.Description += "【tag5F25" + tag5F25 + "】";
+            caseItem.Description += "【tag5F25=" + tag5F25 + "】";
             if (effectiveDate >= currentDate) // 应用未生效
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -140,7 +140,7 @@ namespace CardPlatform.Cases
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag9F08]");
             }
             var tag9F09 = locator.Terminal.GetTag("9F09");
-            caseItem.Description += "【tag9F08" + tag9F08 + "】";
+            caseItem.Description += "【tag9F08=" + tag9F08 + "】";
             log.TraceLog("卡片版本号:tag9F08=【{0}】", tag9F08);
             log.TraceLog("终端版本号:【{0}】", tag9F09);
             if(tag9F09 != tag9F08)

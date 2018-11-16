@@ -486,7 +486,48 @@ namespace CardPlatform.Cases
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
+        /// <summary>
+        /// 检测GPO响应数据是否以77开头,格式是否正确
+        /// </summary>
+        public TipLevel GPO_019()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            caseItem.Description += "【GPO响应数据:" + response.Response + "】";
+            log.TraceLog("响应数据:【{0}】", response.Response);
+            if (!CaseUtil.RespStartWith(response.Response, "77"))
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+            var tlvs = DataParse.ParseTLV(response.Response);
+            if (tlvs.Count != 3)
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO数据无法TLV分解]");
+            }
+            if(tlvs[1].Tag != "82" || tlvs[2].Tag != "94")
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO数据存在异常Tag]");
+            }
 
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测卡片是否支持发卡行认证，MC应用一般不应支持发卡行认证
+        /// </summary>
+        public TipLevel GPO_020()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            caseItem.Description += "【tag82=" + aip + "】";
+            var aipHelper = new AipHelper(aip);
+            if (!aipHelper.IsSupportIssuerAuth())
+            {
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            }
+            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+        }
 
     }
 }
