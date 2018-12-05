@@ -31,7 +31,6 @@ namespace CardPlatform.Cases
             }
             tlvs = DataParse.ParseTLV(response.Response);
             base.Excute(batchNo, app, step, srcData);
-            CheckTemplateTag(tlvs);
         }
 
         /// <summary>

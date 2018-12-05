@@ -114,6 +114,25 @@ namespace CardPlatform.Common
             return value;
         }
 
+        public List<TLV> GetTags(TransactionStep step)
+        {
+            var tags = new List<TLV>();
+            if(transTags.ContainsKey(step))
+            {
+                foreach(var item in transTags[step])
+                {
+                    var tlv = new TLV();
+                    tlv.Tag = item.Key;
+                    tlv.Value = item.Value;
+                    tlv.Len = item.Value.Length / 2;
+                    tlv.IsTemplate = false;
+                    tlv.Level = 0;
+                    tags.Add(tlv);
+                }
+            }
+            return tags;
+        }
+
         public string GetTag(string tag)
         {
             foreach(var dict in transTags)

@@ -118,7 +118,17 @@ namespace CardPlatform.Business
                 if(!string.IsNullOrEmpty(tag5F25))
                     locator.Transaction.TransResult.Tag5F25 = "20" + tag5F25.Substring(0, 2) + "-" + tag5F25.Substring(2, 2) + "-" + tag5F25.Substring(4);
                 locator.Transaction.TransResult.Tag5F34 = transTags.GetTag("5F34");
-                locator.Transaction.TransResult.Tag9F08 = transTags.GetTag("9F08");
+                var version = transTags.GetTag("9F08");
+                if(transCfg.CurrentApp == AppType.VISA)
+                {
+                    if (version == "0096")
+                        locator.Transaction.TransResult.Tag9F08 = "VISA 1.5";
+                    else if (version == "00A0")
+                        locator.Transaction.TransResult.Tag9F08 = "VISA 1.6";
+                    else
+                        locator.Transaction.TransResult.Tag9F08 = "未知的VISA版本";
+                }
+                
             });
         }
 

@@ -39,6 +39,9 @@ namespace CardPlatform.ViewModel
             DispatcherHelper.Initialize();
             //pipServer = new NamedPipeServer(@"\\.\pipe\LogOutputNamedPipe", 0);
             //pipServer.Start(OutputLog);
+            Readers = SCReader.GetReaders();
+            if (Readers.Count > 0)
+                SelectedReader = Readers[0];
         }
 
         public void Relase()

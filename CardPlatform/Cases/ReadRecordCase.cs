@@ -28,7 +28,7 @@ namespace CardPlatform.Cases
                 {
                     if (tlv.Len == 0)
                     {
-                        TraceInfo(Config.TipLevel.Failed, "ReadRecord", "tag[{0}] 长度为0", tlv.Tag);
+                        TraceInfo(Config.TipLevel.Failed, "ReadRecord", "tag[{0}] 长度为0,银联,Visa,MC都建议空值无需个人化", tlv.Tag);
                     }
                     if (tags.Contains(tlv.Tag))
                     {
@@ -46,7 +46,6 @@ namespace CardPlatform.Cases
                         }
                     }
                 }
-                CheckTemplateTag(tlvs);
             }
 
             base.Excute(batchNo,app,step, srcData);
@@ -156,11 +155,7 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            if (!readRecordTags.ContainsKey("5F20") &&
-                !readRecordTags.ContainsKey("9F0B"))
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
+
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -189,7 +184,7 @@ namespace CardPlatform.Cases
                 }
                 if (tag5F20.Value != "202F")
                 {
-                    return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "【tag5F20="+ tag5F20.Value + "】5F20一般建议值为202F");
+                    return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[5F20一般建议值为202F]");
                 }
                 else
                 {
@@ -198,7 +193,12 @@ namespace CardPlatform.Cases
             }
             else
             {
-                return TraceInfo(TipLevel.Warn, caseNo, "tag5F20不存在");
+                if(transConfig.CurrentApp == AppType.qVSDC_offline ||
+                    transConfig.CurrentApp == AppType.qVSDC_online ||
+                    transConfig.CurrentApp == AppType.qVSDC_online_without_ODA)
+                    return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[tag5F20不存在]");
+                else
+                    return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[tag5F20不存在]");
             }
         }
 
@@ -349,9 +349,37 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
+            if(!readRecordTags["5A"].Value.StartsWith("4"))
+                return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[港澳及海外项目，一般卡号以4开头，请确认卡号的正确性]");
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
+        bool CheckDate(string date, ref string desc)
+        {
+            if (date.Length / 2 != 3)    //校验长度
+            {
+                desc = "[长度校验错误,实际长度为" + (date.Length / 2).ToString() + "]";
+                return false;
+            }
+            var month = Convert.ToInt16(date.Substring(2, 2));
+            var day = Convert.ToInt16(date.Substring(4, 2));
+            if (month < 1 || month > 12)  //月份检测
+            {
+                desc = "[月份校验错误,数据中月份为" + month.ToString() + "]";
+                return false;
+            }
+            if (day < 1 || day > 31)  //天数
+            {
+                date = "[天数校验错误,数据中天数为" + day.ToString() + "]";
+                return false;
+            }
+            if ((month == 2 && day > 28) || (month == 2 && day > 28)) //2月份检测
+            {
+                desc = date = "[二月份天数校验错误,数据中天数为" + day.ToString() + "]";
+                return false;
+            }
+            return true;
+        }
         /// <summary>
         /// 检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)
         /// </summary>
@@ -359,46 +387,31 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
+
             if (!readRecordTags.ContainsKey("5F24"))
             {
                 return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag5F24");
             }
-            else if(!readRecordTags.ContainsKey("5F25"))
+            var tag5F24 = readRecordTags["5F24"].Value;
+            string result = string.Empty;
+            if (!CheckDate(tag5F24, ref result))
             {
-                return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag5F25");
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + result);
             }
-            else
+            if (readRecordTags.ContainsKey("5F25"))
             {
-                var tag5F24 = readRecordTags["5F24"];
-                var tag5F25 = readRecordTags["5F25"];
-                caseItem.Description += "【tag5F24=" + tag5F24.Value + "】";
-                caseItem.Description += "【tag5F25=" + tag5F25.Value + "】";
-                if (tag5F24.Len != 3 || tag5F25.Len != 3)    //校验长度
+                var tag5F25 = readRecordTags["5F25"].Value;
+                if (!CheckDate(tag5F25, ref result))
                 {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[长度校验错误]");
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + result);
                 }
-                var month1 = Convert.ToInt16(tag5F24.Value.Substring(2, 2));
-                var month2 = Convert.ToInt16(tag5F25.Value.Substring(2, 2));
-                var day1 = Convert.ToInt16(tag5F24.Value.Substring(4, 2));
-                var day2 = Convert.ToInt16(tag5F25.Value.Substring(4, 2));
-                if (month1 < 1 || month1 > 12 || month2 < 1 || month2 > 12)  //月份检测
-                {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[月份校验错误]");
-                }
-                if (day1 < 1 || day1 > 31 || day2 < 1 || day2 > 31)  //天数
-                {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                }
-                if ((month1 == 2 && day1 > 28) || (month2 == 2 && day2 > 28)) //2月份检测
-                {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "月份校验错误");
-                }
-                var intTag5F24 = Convert.ToInt32(tag5F24.Value);
-                var intTag5F25 = Convert.ToInt32(tag5F25.Value);
+                var intTag5F24 = Convert.ToInt32(tag5F24);
+                var intTag5F25 = Convert.ToInt32(tag5F25);
                 if (intTag5F24 < intTag5F25) //关系检测
                 {
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "失效日期早于生效日期");
                 }
+
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
@@ -430,16 +443,28 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (!readRecordTags.ContainsKey("9F4A"))
+            if(transConfig.CurrentApp == AppType.UICS ||
+                transConfig.CurrentApp == AppType.VISA ||
+                transConfig.CurrentApp == AppType.MC)
             {
-                return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F4A");
+                var tag82 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+                var aipHelper = new AipHelper(tag82);
+                if (aipHelper.IsSupportDDA() || aipHelper.IsSupportCDA())
+                {
+                    if (!readRecordTags.ContainsKey("9F4A"))
+                    {
+                        return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F4A");
+                    }
+                    caseItem.Description += "【tag5F4A=" + readRecordTags["9F4A"].Value + "】";
+                    if (readRecordTags["9F4A"].Value != "82")
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                }
             }
-            caseItem.Description += "【tag5F34=" + readRecordTags["9F4A"].Value + "】";
-            if (readRecordTags["9F4A"].Value != "82")
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            
+            return TipLevel.Sucess;
         }
 
         /// <summary>
@@ -447,18 +472,25 @@ namespace CardPlatform.Cases
         /// </summary>
         public TipLevel ReadRecord_017()
         {
+
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (!readRecordTags.ContainsKey("9F49"))
+            var tag82 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(tag82);
+            if (aipHelper.IsSupportCDA() || aipHelper.IsSupportDDA() || aipHelper.IsSupportSDA())
             {
-                return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F49");
+                if (!readRecordTags.ContainsKey("9F49"))
+                {
+                    return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F49");
+                }
+                caseItem.Description += "【tag9F49=" + readRecordTags["9F49"].Value + "】";
+                if (readRecordTags["9F49"].Value != "9F3704")
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            caseItem.Description += "【tag9F49=" + readRecordTags["9F49"].Value + "】";
-            if (readRecordTags["9F49"].Value != "9F3704")
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TipLevel.Sucess;
         }
 
         /// <summary>
@@ -468,19 +500,25 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (!readRecordTags.ContainsKey("9F47") ||
+            var tag82 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(tag82);
+            if (aipHelper.IsSupportCDA() || aipHelper.IsSupportDDA() || aipHelper.IsSupportSDA())
+            {
+                if (!readRecordTags.ContainsKey("9F47") ||
                 !readRecordTags.ContainsKey("9F32"))
-            {
-                return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F47/tag9F32");
+                {
+                    return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F47/tag9F32");
+                }
+                caseItem.Description += "【tag9F47=" + readRecordTags["9F47"].Value + "】";
+                caseItem.Description += "【tag9F32=" + readRecordTags["9F32"].Value + "】";
+                if ((readRecordTags["9F47"].Value != "03" && readRecordTags["9F47"].Value != "010001") ||
+                    (readRecordTags["9F32"].Value != "03" && readRecordTags["9F32"].Value != "010001"))
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            caseItem.Description += "【tag9F47=" + readRecordTags["9F47"].Value + "】";
-            caseItem.Description += "【tag9F32=" + readRecordTags["9F32"].Value + "】";
-            if ((readRecordTags["9F47"].Value != "03" && readRecordTags["9F47"].Value != "010001") ||
-                (readRecordTags["9F32"].Value != "03" && readRecordTags["9F32"].Value != "010001"))
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TipLevel.Sucess;
         }
 
         /// <summary>
@@ -514,17 +552,23 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (!readRecordTags.ContainsKey("8F"))
+            var tag82 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            var aipHelper = new AipHelper(tag82);
+            if (aipHelper.IsSupportCDA() || aipHelper.IsSupportDDA() || aipHelper.IsSupportSDA())
             {
-                return TraceInfo(TipLevel.Failed, caseNo, "读记录缺少tag8F");
+                if (!readRecordTags.ContainsKey("8F"))
+                {
+                    return TraceInfo(TipLevel.Failed, caseNo, "读记录缺少tag8F");
+                }
+                var tag8F = readRecordTags["8F"];
+                caseItem.Description += "【tag8F=" + tag8F.Value + "】";
+                if (tag8F.Len != 1)
+                {
+                    return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[长度有误，规范长度为1字节]");
+                }
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            var tag8F = readRecordTags["8F"];
-            caseItem.Description += "【tag8F=" + tag8F.Value + "】";
-            if (tag8F.Len != 1)
-            {
-                return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[长度有误，规范长度为1字节]");
-            }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TipLevel.Sucess;
         }
 
         /// <summary>
@@ -536,6 +580,8 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if (!readRecordTags.ContainsKey("5F28"))
             {
+                if (string.IsNullOrEmpty(TransactionTag.GetInstance().GetTag("9F07")))
+                    return TipLevel.Sucess;
                 return TraceInfo(TipLevel.Failed, caseNo, "读记录缺少tag5F28，终端将无法做应用用途控制检查");
             }
             var tag5F28 = readRecordTags["5F28"];
@@ -597,7 +643,7 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if (!readRecordTags.ContainsKey("9F08"))
             {
-                return TraceInfo(TipLevel.Failed, caseNo, "读记录中缺少tag9F08");
+                return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[读记录中缺少tag9F08]");
             }
             caseItem.Description += "【tag9F08=" + readRecordTags["9F08"].Value + "】";
             if (transCfg.CurrentApp == AppType.UICS)
@@ -611,7 +657,10 @@ namespace CardPlatform.Cases
             {
                 if (readRecordTags["9F08"].Value != "00A0")
                 {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    if(readRecordTags["9F08"].Value == "0096")
+                        return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[VISA版本为1.5，请确认是否正确]");
+                    else
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
             }
             else if(transCfg.CurrentApp == AppType.MC ||
@@ -636,9 +685,13 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if (readRecordTags.ContainsKey("9F69") || readRecordTags.ContainsKey("9F79"))
+            if (readRecordTags.ContainsKey("9F69"))
             {
                 caseItem.Description += "【tag9F69=" + readRecordTags["9F69"].Value + "】";
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+            if (readRecordTags.ContainsKey("9F79"))
+            {
                 caseItem.Description += "【tag9F79=" + readRecordTags["9F79"].Value + "】";
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
@@ -653,11 +706,20 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
 
-            if (!readRecordTags.ContainsKey("5F30") || !readRecordTags.ContainsKey("57"))
+            if (!readRecordTags.ContainsKey("5F30"))
             {
-                return TraceInfo(caseItem.Level, caseNo, "读数据中缺少tag5F30或者tag57");
+                if(transConfig.CurrentApp == AppType.qVSDC_online_without_ODA ||
+                    transConfig.CurrentApp == AppType.qVSDC_offline ||
+                    transConfig.CurrentApp == AppType.qVSDC_online)
+                    return TraceInfo(TipLevel.Tip, caseNo, "读数据中缺少服务码tag5F30,qVSDC无需该tag值");
+                else
+                    return TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少服务码tag5F30");
             }
-            if(readRecordTags["5F30"].Value.Length != 4)
+            if (!readRecordTags.ContainsKey("57"))
+            {
+                return TraceInfo(caseItem.Level, caseNo, "读数据中缺少tag57");
+            }
+            if (readRecordTags["5F30"].Value.Length != 4)
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[长度错误]");
             }
@@ -862,22 +924,6 @@ namespace CardPlatform.Cases
             return TipLevel.Unknown;
         }
 
-        /// <summary>
-        /// 检测tag9F63长度是否等于16字节
-        /// </summary>
-        public void ReadRecord_010()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            if (readRecordTags.ContainsKey("9F63"))
-            {
-                var tag9F63 = readRecordTags["9F63"];
-                if (tag9F63.Len != 16)
-                {
-                    TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-                }
-            }
-        }
         #endregion
 
         /// <summary>
@@ -1033,6 +1079,65 @@ namespace CardPlatform.Cases
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description += "最后一条记录为:tag{0}", lastTag.Tag);
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测qVSDC 必须在GPO或读记录中返回的数据是否存在
+        /// </summary>
+        /// <returns></returns>
+        public TipLevel ReadRecord_038()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var gpoTags = TransactionTag.GetInstance().GetTags(TransactionStep.GPO);
+            var recordTags = TransactionTag.GetInstance().GetTags(TransactionStep.ReadRecord);
+            if(transConfig.CurrentApp == AppType.qVSDC_offline ||
+                transConfig.CurrentApp == AppType.qVSDC_online)
+            {
+                var tagsNeedReturn = new List<string> { "57", "9F4B", "9F6E" };
+                foreach(var tag in tagsNeedReturn)
+                {
+                    if(!CaseUtil.HasTag(tag,gpoTags) && !CaseUtil.HasTag(tag,recordTags))
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[qVSDC缺少必备tag{0}]", tag);
+                    }
+                }
+            }else if(transConfig.CurrentApp == AppType.qVSDC_online_without_ODA)
+            {
+                var tagsNeedReturn = new List<string> { "57", "9F6E" };
+                foreach (var tag in tagsNeedReturn)
+                {
+                    if (!CaseUtil.HasTag(tag, gpoTags) && !CaseUtil.HasTag(tag, recordTags))
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[qVSDC缺少必备tag{0}]", tag);
+                    }
+                }
+            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
+
+        /// <summary>
+        /// 检测qVSDC交易，tag9F07是否存在,若存在，则qVSDC所有路径都需返回该值(联机ODA,脱机ODA,联机without ODA)
+        /// </summary>
+        /// <returns></returns>
+        public TipLevel ReadRecord_039()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+
+            var gpoTags = TransactionTag.GetInstance().GetTags(TransactionStep.GPO);
+            var recordTags = TransactionTag.GetInstance().GetTags(TransactionStep.ReadRecord);
+            if (transConfig.CurrentApp == AppType.qVSDC_offline ||
+                transConfig.CurrentApp == AppType.qVSDC_online ||
+                transConfig.CurrentApp == AppType.qVSDC_online_without_ODA)
+            {
+                if(CaseUtil.HasTag("9F07",gpoTags))
+                {
+                    return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description);
+                }
+            }
+            return TipLevel.Sucess; //不在界面中显示
         }
     }
 }

@@ -45,8 +45,8 @@
                 <TabItem Header="交易流程" Background="#FFF0F0F0" IsSelected="True">
                     <Views:TransactionView />
                 </TabItem>
-                <TabItem Header="执行脚本" Background="#FFF0F0F0"></TabItem>
-                <TabItem Header="扩展应用" Background="#FFF0F0F0"></TabItem>
+                <!--TabItem Header="执行脚本" Background="#FFF0F0F0"></-->
+                <!--TabItem Header="扩展应用" Background="#FFF0F0F0"></TabItem-->
                 <TabItem Header="模板比对" Background="#FFF0F0F0">
                     <Views:TemplateCompareView />
                 </TabItem>

@@ -28,8 +28,7 @@ namespace CardPlatform.Cases
                 TraceInfo(TipLevel.Failed, "TLV分解", "无法解析GAC1返回的TLV数据");
             }
             tlvs = DataParse.ParseTLV(response.Response);
-            base.Excute(batchNo,app,step, srcData);
-            CheckTemplateTag(tlvs);           
+            base.Excute(batchNo,app,step, srcData);          
         }
 
         /// <summary>

@@ -16,14 +16,15 @@ namespace CardPlatform.Business
             {
                 return new List<string>();
             }
-            List<TLV> arrTLV = DataParse.ParseTLV(response.Response);
-            TransactionTag.GetInstance().SetTags(TransactionStep.SelectPPSE, arrTLV);
+            var tlvs = DataParse.ParseTLV(response.Response);
+            businessUtil.ShowTlvLog(tlvs);
+            businessUtil.SaveTags(TransactionStep.SelectPPSE, tlvs);
 
             IExcuteCase ppseCase = new PPSECases();
             ppseCase.Excute(BatchNo, TransactionConfig.GetInstance().CurrentApp,TransactionStep.SelectPPSE, response);
 
             List<string> Aids = new List<string>();
-            foreach(var tlv in arrTLV)
+            foreach(var tlv in tlvs)
             {
                 if(tlv.Tag == "4F")
                 {

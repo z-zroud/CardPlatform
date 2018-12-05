@@ -22,6 +22,8 @@ namespace CardPlatform.Models
         qVSDC_online,
         [DescriptionEx("qVSDC offline ODA")]
         qVSDC_offline,
+        [DescriptionEx("qVSDC online without ODA")]
+        qVSDC_online_without_ODA,
         [DescriptionEx("MChip Advance")]
         MC,
         [DescriptionEx("Jetco")]

@@ -53,42 +53,41 @@ namespace CardPlatform.Cases
                         if (result == TipLevel.Failed) caseReuslt = "失败";
                         if (result == TipLevel.Sucess) caseReuslt = "成功";
                         if (result == TipLevel.Warn) caseReuslt = "警告";
+                        if (result == TipLevel.Tip) caseReuslt = "提示";
                         if (result == TipLevel.Unknown) caseReuslt = "未知";
                         log.TraceLog("结果: {0}\n", caseReuslt);
                     }
-                       
                 }
             }
-               
+            //case执行完之后，检测所有tag长度的规范性
+            var tags = TransactionTag.GetInstance().GetTags(step);
+            foreach (var item in tags)
+            {
+                CheckTagLen(item.Tag, item.Value);
+            }
         }
 
         /// <summary>
         /// 检测模板数据是否合规
         /// </summary>
-        public virtual void CheckTemplateTag(List<TLV> TLVs)
+        public static void CheckTemplateTag()
         {
             ViewModelLocator locator = new ViewModelLocator();
-            var compareObj = DataTemplateConfig.GetInstance();
-            foreach (var tlv in TLVs)
-            {                               
-                foreach (var item in locator.TemplateCompare.TemplateComparedInfos)
+            var transTags = TransactionTag.GetInstance();
+                   
+            foreach (var item in locator.TemplateCompare.TemplateComparedInfos)
+            {
+                if(transConfig.CurrentApp.ToString() == item.CurrentApp)
                 {
-                    if(transConfig.CurrentApp.ToString() == item.CurrentApp && step == item.Step)
+                    item.CardValue = transTags.GetTag(item.Step, item.Tag);
+                    item.HasCheck = true;
+                    if (item.CardValue == item.TemplateValue)
                     {
-                        if (tlv.Tag == item.Tag)
-                        {
-                            item.CardValue = tlv.Value;
-                            item.HasCheck = true;
-                            if (tlv.Value == item.TemplateValue)
-                            {
-                                item.ActualLevel = TipLevel.Sucess;
-                            }
-                            else
-                            {
-                                item.ActualLevel = item.ConfigLevel;
-                            }
-                            break;
-                        }
+                        item.ActualLevel = TipLevel.Sucess;
+                    }
+                    else
+                    {
+                        item.ActualLevel = item.ConfigLevel;
                     }
                 }
             }
@@ -115,7 +114,7 @@ namespace CardPlatform.Cases
                 ViewModelLocator locator = new ViewModelLocator();
                 locator.Transaction.CaseInfos.Add(caseInfo);
 
-                if (level == TipLevel.Failed || level == TipLevel.Warn)
+                if (level == TipLevel.Failed || level == TipLevel.Warn || level == TipLevel.Tip)
                 {
                     locator.Transaction.ErrorCaseInfos.Add(caseInfo);
                 }
@@ -342,6 +341,30 @@ namespace CardPlatform.Cases
                 return true;
             }
             return false;
+        }
+
+        public TipLevel CheckTagLen(string tag, string value)
+        {
+            var ignoreTags = new List<string> { "5A" };
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+
+            if(!ignoreTags.Contains(tag))
+            {
+                if (!TagLenInfo.CheckTagLen(tag, value))
+                {
+                    var lenInfo = TagLenInfo.GetLenInfo(tag);
+                    if (lenInfo == null)
+                    {
+                        return TraceInfo(TipLevel.Failed, caseNo, "未知的tag{0}，请在字典中添加该tag的引用", tag);
+                    }
+                    if (lenInfo.type == LenType.Range)
+                        return TraceInfo(TipLevel.Failed, caseNo, "检测tag{0}长度是否符合规范.[tag{1}规范长度值在{2}~{3}之间，但实际长度为{4}]", tag, tag, lenInfo.min, lenInfo.max, value.Length / 2);
+                    else
+                        return TraceInfo(TipLevel.Failed, caseNo, "检测tag{0}长度是否符合规范.[tag{1}规范长度为{2}，但实际长度为{3}]", tag, tag, lenInfo.fixedLen, value.Length / 2);
+                }
+                return TraceInfo(TipLevel.Sucess, caseNo, "检测tag{0}长度是否符合规范", tag);
+            }
+            return TipLevel.Sucess;
         }
         #endregion
     }

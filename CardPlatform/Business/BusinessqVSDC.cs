@@ -34,11 +34,15 @@ namespace CardPlatform.Business
             locator.Terminal.SetTag("9C", "00", "交易类型(消费交易)");
             if(transCfg.CurrentApp == AppType.qVSDC_offline)
             {
-                locator.Terminal.SetTag("9F66", "26000000", "终端交易属性");
+                locator.Terminal.SetTag("9F66", "28000000", "终端交易属性");
+            }
+            else if(transCfg.CurrentApp == AppType.qVSDC_online)
+            {
+                locator.Terminal.SetTag("9F66", "27800000", "终端交易属性");
             }
             else
             {
-                locator.Terminal.SetTag("9F66", "27800000", "终端交易属性");
+                locator.Terminal.SetTag("9F66", "26800000", "终端交易属性");
             }
             
             DoTransaction(DoTransactionEx);
@@ -57,24 +61,26 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "应用初始化失败，交易流程终止");
                 return false;
             }
-            string tag94 = transTags.GetTag("94");
-            if(!string.IsNullOrEmpty(tag94))
+            if(transCfg.CurrentApp != AppType.qVSDC_online_without_ODA)
             {
-                var afls = DataParse.ParseAFL(tag94);
-                if (!ReadApplicationData(afls))
+                string tag94 = transTags.GetTag("94");
+                if (!string.IsNullOrEmpty(tag94))
                 {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
-                    return false;
+                    var afls = DataParse.ParseAFL(tag94);
+                    if (!ReadApplicationData(afls))
+                    {
+                        caseObj.TraceInfo(TipLevel.Failed, caseNo, "读取应用记录失败，交易流程终止");
+                        return false;
+                    }
+
+                    GetRequirementData();
+
+                    //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
+
+                    OfflineAuthcation();
                 }
-
-                GetRequirementData();
-
-                //Step 4, 此时卡片可以离开读卡器，终端进行后续的步骤
-
-                OfflineAuthcation();
             }
-
-
+            
             return true;
         }
 
@@ -143,7 +149,6 @@ namespace CardPlatform.Business
             var tlvs = DataParse.ParseTLV(response.Response);
             businessUtil.SaveTags(TransactionStep.GPO, tlvs);
             string tag9F27 = transTags.GetTag("9F27");
-            string tag94 = transTags.GetTag("94");
             if(transCfg.CurrentApp == AppType.qVSDC_offline)
             {
                 if(tag9F27 != "40")
@@ -151,7 +156,8 @@ namespace CardPlatform.Business
                     caseObj.TraceInfo(TipLevel.Failed, caseNo, "期望执行qVSDC脱机交易，卡片行为不一致，请检查卡片是否支持脱机交易");
                     return false;
                 }
-            }else if(transCfg.CurrentApp == AppType.qVSDC_online)
+            }else if(transCfg.CurrentApp == AppType.qVSDC_online ||
+                transCfg.CurrentApp == AppType.qVSDC_online_without_ODA)
             {
                 if(tag9F27 != "80")
                 {
@@ -195,60 +201,10 @@ namespace CardPlatform.Business
 
         public void GetRequirementData()
         {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-
-            RequirementData[] tagStandards =
-            {
-                //new RequirementData("9F51",2,TipLevel.Failed,"如果执行频度检查，需要此应用货币代码"),  //如果执行频度检查，需要此应用货币代码
-                //new RequirementData("9F52",2,TipLevel.Failed,"如果支持发卡行认证，需要ADA应用缺省行为"),  //如果支持发卡行认证，需要ADA应用缺省行为
-                //new RequirementData("9F53",1,TipLevel.Failed,"如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)"),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
-                //new RequirementData("9F54",6,TipLevel.Failed,"如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)"),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
-                //new RequirementData("9F55",0,TipLevel.Warn,""),
-                //new RequirementData("9F56",1,TipLevel.Failed,"如果支持发卡行认证，需要此发卡行认证指示位"),  //如果支持发卡行认证，需要此发卡行认证指示位
-                //new RequirementData("9F57",2,TipLevel.Warn,"如果支持卡片频度检查，需要此发卡行国家代码"),  //如果支持卡片频度检查，需要此发卡行国家代码
-                //new RequirementData("9F58",1,TipLevel.Failed,"如果执行卡片频度检查，需要此连续脱机交易下限"),  //如果执行卡片频度检查，需要此连续脱机交易下限
-                //new RequirementData("9F59",1,TipLevel.Failed,"如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易"),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
-                //new RequirementData("9F5C",6,TipLevel.Failed,"累计脱机交易金额上限"),  //累计脱机交易金额上限
-                //new RequirementData("9F5D",0,TipLevel.Warn,""),
-                //new RequirementData("9F72",1,TipLevel.Warn,"连续脱机交易限制数"),  //连续脱机交易限制数
-                //new RequirementData("9F75",1,TipLevel.Warn,"累计脱机交易金额(双货币)"),  //累计脱机交易金额(双货币)
-                //new RequirementData("9F76",0,TipLevel.Failed,"第二应用货币代码"),  //第二应用货币代码
-                //new RequirementData("9F77",0,TipLevel.Failed,""),
-                //new RequirementData("9F78",0,TipLevel.Failed,""),
-                //new RequirementData("9F79",0,TipLevel.Failed,""),
-                //new RequirementData("9F4F",0,TipLevel.Failed,"交易日志格式"),  //交易日志格式
-                //new RequirementData("9F68",0,TipLevel.Failed,""),
-                //new RequirementData("9F6B",0,TipLevel.Warn,""),
-                //new RequirementData("9F6D",0,TipLevel.Failed,""),
-                //new RequirementData("9F36",2,TipLevel.Failed,"应用交易计数器"),  //应用交易计数器
-                //new RequirementData("9F13",0,TipLevel.Failed,"终端风险管理阶段需要此数据用于新卡检查，发卡行认证通过后，需要设置该值"),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
-                //new RequirementData("9F17",0,TipLevel.Failed,"如果支持脱机PIN,需要此PIN尝试计数器"),  //如果支持脱机PIN,需要此PIN尝试计数器
-                //new RequirementData("DF4F",0,TipLevel.Warn,""),
-                //new RequirementData("DF62",0,TipLevel.Failed,""),
-            };
-            for (int i = 0; i < tagStandards.Length; i++)
-            {
-                var resp = APDU.GetDataCmd(tagStandards[i].Tag);
-                if (resp.SW != 0x9000)
-                {
-                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, "无法获取tag[{0}],返回码:[{1:X}]", tagStandards[i].Tag, resp.SW);
-                }
-                else
-                {
-                    var tlvs = DataParse.ParseTLV(resp.Response);
-                    var tlv = from tmp in tlvs where tmp.Tag == tagStandards[i].Tag select tmp;
-
-                    if (tagStandards[i].Len != 0)
-                    {
-                        if (tlv.First().Len != tagStandards[i].Len)
-                        {
-                            caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
-                        }
-                    }
-                    transTags.SetTag(TransactionStep.GetData, tlv.First().Tag, tlv.First().Value); //保存
-                }
-            }
+            IExcuteCase getDataCase = new GetDataCase();
+            getDataCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GetData, null);
         }
+
 
         public void ProcessRestriction()
         {
@@ -271,13 +227,13 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "VISA不应支持SDA脱机数据认证");
                 if (!SDA())
                 {
-                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败");
+                    caseObj.TraceInfo(TipLevel.Failed, caseNo, "SDA脱机数据认证失败[卡片不支持SDA数据认证]");
                     return 1;
                 }
             }
             if (!aipHelper.IsSupportDDA())
             {
-                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败");
+                caseObj.TraceInfo(TipLevel.Failed, caseNo, "DDA脱机数据认证失败[卡片不支持DDA数据认证]");
                 return 1;
             }
 

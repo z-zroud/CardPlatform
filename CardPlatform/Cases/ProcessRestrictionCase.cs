@@ -125,29 +125,5 @@ namespace CardPlatform.Cases
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
         }
-
-        /// <summary>
-        /// 应用版本信息比较
-        /// </summary>
-        /// <returns></returns>
-        public TipLevel ProcessRestriction_005()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-            string tag9F08 = TransactionTag.GetInstance().GetTag("9F08");
-            if (string.IsNullOrEmpty(tag9F08))
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag9F08]");
-            }
-            var tag9F09 = locator.Terminal.GetTag("9F09");
-            caseItem.Description += "【tag9F08=" + tag9F08 + "】";
-            log.TraceLog("卡片版本号:tag9F08=【{0}】", tag9F08);
-            log.TraceLog("终端版本号:【{0}】", tag9F09);
-            if(tag9F09 != tag9F08)
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-        }
     }
 }

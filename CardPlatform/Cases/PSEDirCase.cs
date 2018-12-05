@@ -26,7 +26,6 @@ namespace CardPlatform.Cases
             response = (ApduResponse)srcData;
             tlvs = DataParse.ParseTLV(response.Response);
             base.Excute(batchNo,app,step, srcData);           
-            CheckTemplateTag(tlvs);
         }
 
         /// <summary>
@@ -252,6 +251,7 @@ namespace CardPlatform.Cases
                 var tag4F = CaseUtil.GetTag("4F", template61);
                 var tag50 = CaseUtil.GetTag("50", template61);
                 var value = Utils.BcdToStr(tag50);
+                var lowerValue = value.ToLower();
                 if(tag4F == "A000000333010101")
                 {
                     if (tag50 != "556E696F6E506179204465626974")
@@ -262,7 +262,29 @@ namespace CardPlatform.Cases
                         return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50={0}]", value);
                 }else if(tag4F == "A0000000031010")
                 {
-                    //if(value.Contains("Visa"))
+                    if(lowerValue != "visa credit" && lowerValue != "visa debit" && lowerValue != "visa business")
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50={0}]", value);
+                    }
+                }else if(tag4F == "A0000000032010")
+                {
+                    if(lowerValue != "visa" && lowerValue!= "visa electron")
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50={0}]", value);
+                    }
+                }else if(tag4F == "A0000000033010")
+                {
+                    if (lowerValue != "interlink" && lowerValue != "visa interlink")
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50={0}]", value);
+                    }
+                }
+                else if(tag4F == "A0000000038010")
+                {
+                    if (lowerValue != "plus" && lowerValue != "plus atm")
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag50={0}]", value);
+                    }
                 }
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);

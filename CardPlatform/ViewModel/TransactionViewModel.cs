@@ -13,6 +13,7 @@ using CardPlatform.Business;
 using System.Threading;
 using GalaSoft.MvvmLight.Threading;
 using CardPlatform.Helper.EnumToListHelper;
+using CardPlatform.Cases;
 
 namespace CardPlatform.ViewModel
 {
@@ -258,7 +259,8 @@ namespace CardPlatform.ViewModel
             
             Aids.Clear();
             CaseInfos.Clear();
-            
+            ErrorCaseInfos.Clear();
+
             ApduResponse response = new ApduResponse();
             List<string> aids = new List<string>();
             ViewModelLocator locator = new ViewModelLocator();
@@ -352,6 +354,7 @@ namespace CardPlatform.ViewModel
             {
                 case AppType.qVSDC_offline:
                 case AppType.qVSDC_online:
+                case AppType.qVSDC_online_without_ODA:
                     trans = new BusinessqVSDC();                   
                     break;
                 case AppType.UICS:
@@ -378,6 +381,7 @@ namespace CardPlatform.ViewModel
                     break;
             }
             trans.DoTransaction(CurrentAid);
+            CaseBase.CheckTemplateTag();
         }
 
     }

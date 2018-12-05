@@ -56,15 +56,6 @@ namespace CardPlatform.Cases
             return tlvs;
         }
 
-        public void CheckTagLen(string tag, string value,int len)
-        {
-            if(value.Length % 2 != 0 ||
-                value.Length / 2 != len)
-            {
-                TraceInfo(TipLevel.Failed, "CheckLen", "{0}长度与规范不一致", tag);
-            }
-        }
-
         public TipLevel GetData_9F36()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
@@ -75,7 +66,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F36", tag9F36, 2);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -89,7 +79,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F13", tag9F13, 2);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -103,7 +92,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F17", tag9F17, 2);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -119,7 +107,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F52", tag9F52, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -133,7 +120,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F53", tag9F53, 1);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -147,7 +133,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F54", tag9F54, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -161,7 +146,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F51", tag9F51, 2);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -175,7 +159,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F56", tag9F56, 1);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -189,7 +172,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F57", tag9F57, 2);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -203,7 +185,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F58", tag9F58, 1);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -217,7 +198,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F59", tag9F59, 1);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -231,7 +211,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F5C", tag9F5C, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -245,7 +224,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F5D", tag9F5D, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -259,7 +237,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F5E", tag9F5E, 1);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -273,7 +250,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F72", tag9F72, 1);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -287,7 +263,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F73", tag9F73, 2);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -301,7 +276,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F75", tag9F75, 4);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -315,7 +289,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F76", tag9F76, 4);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -329,7 +302,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F77", tag9F77, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -343,7 +315,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F78", tag9F78, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -359,9 +330,8 @@ namespace CardPlatform.Cases
             }
             if(tag9F79 != "000000000000")
             {
-                return TraceInfo(TipLevel.Warn, caseNo, "卡片余额不为0,tag9F79-{0}",tag9F79);
+                return TraceInfo(TipLevel.Warn, caseNo, "卡片余额不为0,tag9F79为{0}",tag9F79);
             }
-            CheckTagLen("9F79", tag9F79, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -375,7 +345,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            //CheckTagLen("9F4F", tag9F4F, 4);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -389,7 +358,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F68", tag9F68, 4);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -403,7 +371,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F6B", tag9F6B, 6);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -417,7 +384,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F6C", tag9F6C, 2);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -431,7 +397,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F6D", tag9F6D, 4);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -445,7 +410,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F6E", tag9F6E, 4);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -459,7 +423,6 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法通过取命令获取数据]");
             }
-            CheckTagLen("9F7C", tag9F7C, 4);
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -540,6 +503,12 @@ namespace CardPlatform.Cases
             var tag9F79 = GetData("9F79");
             var tag9F78 = GetData("9F78");
             var tag9F77 = GetData("9F77");
+            if(!string.IsNullOrEmpty(tag9F77) ||
+                !string.IsNullOrEmpty(tag9F78) ||
+                !string.IsNullOrEmpty(tag9F79))
+            {
+                return TipLevel.Sucess;
+            }
             int nTag9F79 = Convert.ToInt32(tag9F79);
             int nTag9F78 = Convert.ToInt32(tag9F78);
             int nTag9F77 = Convert.ToInt32(tag9F77);
@@ -599,11 +568,12 @@ namespace CardPlatform.Cases
             var tag9F57 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F57");
             if (string.IsNullOrEmpty(tag9F57))
             {
-                return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "卡片缺少tag9F57，如果支持卡片频度检测，该数据必须存在");
+                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "卡片缺少tag9F57，如果支持卡片频度检测，该数据必须存在");
             }
+
             if (tag5F28 != tag9F57)
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "tag5F28值为:{0},tag9F57值为:{1}",tag5F28,tag9F57);
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
@@ -620,15 +590,18 @@ namespace CardPlatform.Cases
             var tag9F51 = TransactionTag.GetInstance().GetTag(TransactionStep.GetData, "9F51");
             if (string.IsNullOrEmpty(tag9F42))
             {
-                return TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少tag9F42,如果8E中X,Y金额不为0，该数据必须存在");
+                var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
+                if(!string.IsNullOrEmpty(tag8E) && tag8E.Substring(0,16) != "00000000000000000")
+                    return TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少tag9F42,如果8E中X,Y金额不为0，该数据必须存在");
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             
             if (string.IsNullOrEmpty(tag9F51))
             {
                 return TraceInfo(caseItem.Level, caseNo, "卡片缺少tag9F51,如果只选频度检测，该数据必须存在");
             }
-            caseItem.Description += "【tag9F42=" + tag9F42 + "】";
-            caseItem.Description += "【tag9F51=" + tag9F51 + "】";
+            caseItem.Description += "[tag9F42=" + tag9F42 + "]";
+            caseItem.Description += "[tag9F51=" + tag9F51 + "]";
             if (tag9F42 != tag9F51)
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);

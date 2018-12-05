@@ -91,7 +91,7 @@ namespace CardPlatform.Config
                     if (appNode == null)
                         continue;   //表明没有此应用的模板
                     string appName = appNode.Name.LocalName;
-                    var steps = appNode.Element("TagTemplate").Elements("Step");
+                    var steps = appNode.Elements("Step");
                     var appTags = new List<ProcssStep>();
                     foreach(var step in steps)
                     {

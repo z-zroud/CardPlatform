@@ -27,8 +27,7 @@ namespace CardPlatform.Cases
         {
             response = (ApduResponse)srcData;
             tlvs = DataParse.ParseTLV(response.Response);
-            base.Excute(batchNo, app, step, srcData);
-            CheckTemplateTag(tlvs);            
+            base.Excute(batchNo, app, step, srcData);          
         }
 
         #region 通用检测case
@@ -59,21 +58,25 @@ namespace CardPlatform.Cases
         /// </summary>
         public TipLevel GPO_002()
         {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
+            if(transConfig.CurrentApp != AppType.qVSDC_online_without_ODA)
+            {
+                var caseNo = MethodBase.GetCurrentMethod().Name;
+                var caseItem = GetCaseItem(caseNo);
 
-            var tag94Value = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
-            caseItem.Description += "【tag94=" + tag94Value + "】";
-            log.TraceLog("tag94=【{0}】", tag94Value);
-            log.TraceLog("长度为:【{0}】", tag94Value.Length / 2);
-            if (tag94Value.Length % 4 != 0)
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                var tag94Value = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
+                caseItem.Description += "【tag94=" + tag94Value + "】";
+                log.TraceLog("tag94=【{0}】", tag94Value);
+                log.TraceLog("长度为:【{0}】", tag94Value.Length / 2);
+                if (tag94Value.Length % 4 != 0)
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+                else
+                {
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                }
             }
-            else
-            {
-                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-            }
+            return TipLevel.Sucess;
         }
 
         /// <summary>
@@ -81,29 +84,33 @@ namespace CardPlatform.Cases
         /// </summary>
         public TipLevel GPO_003()
         {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
+            if(transConfig.CurrentApp != AppType.qVSDC_online_without_ODA)
+            {
+                var caseNo = MethodBase.GetCurrentMethod().Name;
+                var caseItem = GetCaseItem(caseNo);
 
-            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
-            var afls = DataParse.ParseAFL(tag94);
-            string sfi = "";
-            foreach(var afl in afls)
-            {
-                sfi += "【" + UtilLib.Utils.IntToHexStr(afl.SFI,2) + UtilLib.Utils.IntToHexStr(afl.RecordNo,2) + "】";
-            }
-            log.TraceLog("94包含如下DGI:{0}", sfi);
-            for (int i = 0; i < afls.Count; i++)
-            {
-                for (int j = i + 1; j < afls.Count; j++)
+                var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
+                var afls = DataParse.ParseAFL(tag94);
+                string sfi = "";
+                foreach (var afl in afls)
                 {
-                    if (afls[i].SFI == afls[j].SFI &&
-                        afls[i].RecordNo == afls[j].RecordNo)
+                    sfi += "【" + UtilLib.Utils.IntToHexStr(afl.SFI, 2) + UtilLib.Utils.IntToHexStr(afl.RecordNo, 2) + "】";
+                }
+                log.TraceLog("94包含如下DGI:{0}", sfi);
+                for (int i = 0; i < afls.Count; i++)
+                {
+                    for (int j = i + 1; j < afls.Count; j++)
                     {
-                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[重复的记录号为:" + afls[i].RecordNo + "]");
+                        if (afls[i].SFI == afls[j].SFI &&
+                            afls[i].RecordNo == afls[j].RecordNo)
+                        {
+                            return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[重复的记录号为:" + afls[i].RecordNo + "]");
+                        }
                     }
                 }
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TipLevel.Sucess;
         }
 
         /// <summary>
@@ -111,22 +118,26 @@ namespace CardPlatform.Cases
         /// </summary>
         public TipLevel GPO_004()
         {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-
-            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
-            int count = tag94.Length / 8;
-            for (int i = 0; i < count; i++)
+            if(transConfig.CurrentApp != AppType.qVSDC_online_without_ODA)
             {
-                var firstRecord = Convert.ToInt16(tag94.Substring(2 + i * 8, 2), 16);
-                var secondRecord = Convert.ToInt16(tag94.Substring(4 + i * 8, 2), 16);
+                var caseNo = MethodBase.GetCurrentMethod().Name;
+                var caseItem = GetCaseItem(caseNo);
 
-                if (firstRecord > secondRecord)
+                var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
+                int count = tag94.Length / 8;
+                for (int i = 0; i < count; i++)
                 {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[请检查tag94是否按序排列]");
+                    var firstRecord = Convert.ToInt16(tag94.Substring(2 + i * 8, 2), 16);
+                    var secondRecord = Convert.ToInt16(tag94.Substring(4 + i * 8, 2), 16);
+
+                    if (firstRecord > secondRecord)
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[请检查tag94是否按序排列]");
+                    }
                 }
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+            return TipLevel.Sucess;
         }
 
         /// <summary>
@@ -229,20 +240,28 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             var tag82 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
+            if (tag82 == "2000")
+            {
+                return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[请确认是否为visa1.5版本，visa1.6版本请设置该值为2020]");
+            }
+            else if (tag82 != "2020")
+            {
+                return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[请确认该值是否正确，visa1.6版本须设置该值为2020]");
+            }
             var intTag82 = Convert.ToInt32(tag82, 16);
             if ((intTag82 & 0x9F1F) != 0)
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[AIP保留位需置零]");
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[AIP保留位须置零]");
             }
             if ((intTag82 & 0x0020) != 0x0020)
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[非接交易位需置1]");
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[非接交易位须置1]");
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
-        /// 检测GPO响应数据的规范性(只能出现指定范围内的tag)
+        /// 检测GPO响应数据的规范性(只能出现指定范围内的tag"82", "94", "57", "5F20", "5F34", "9F10", "9F26", "9F27", "9F36", "9F4B", "9F5D", "9F6C", "9F6E", "9F7C")
         /// </summary>
         public TipLevel GPO_022()
         {
@@ -265,62 +284,38 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测GPO 响应数据的合规性(必须出现的tag,可能出现的tag,一定条件出现的tag)
+        /// 检测GPO 响应数据的合规性("82", "94", "9F10","9F26","9F27","9F36","9F6C")
         /// </summary>
         public TipLevel GPO_018()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            var tagMustIncludeWithODA = new List<string>() { "82", "94", "9F10", "9F26", "9F27", "9F36" };
-            var tagMustIncludeWithoutODA = new List<string>() { "82", "9F10", "9F26", "9F27", "9F36" };
-            var tagNeedAppearWithODA = new List<string>() { "57", "5F20", "5F34", "9F4B", "9F6C", "9F6E" };
-            var tag9F27 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "9F27");
-            var tag94 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "94");
-            var gpoTags = from tag in tlvs select tag.Tag;
 
-            bool isSucess = true;
-            if (string.IsNullOrEmpty(tag94))
+            var gpoTags = TransactionTag.GetInstance().GetTags(TransactionStep.GPO);
+            if (transConfig.CurrentApp == AppType.qVSDC_offline ||
+                transConfig.CurrentApp == AppType.qVSDC_online)
             {
-                //说明不走ODA流程，GPO Online and Decline without ODA返回数据
-                foreach (var tag in tagMustIncludeWithoutODA)
+                var tagsMustReturn = new List<string> { "82", "94", "9F10","9F26","9F27","9F36","9F6C" };
+                foreach (var tag in tagsMustReturn)
                 {
-                    if (!gpoTags.Contains(tag))
+                    if (!CaseUtil.HasTag(tag, gpoTags))
                     {
-                        isSucess = false;
-                        return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[响应数据缺失必要tag{0}]", tag);
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[qVSDC缺少必备tag{0}]", tag);
                     }
                 }
             }
-            else
+            else if (transConfig.CurrentApp == AppType.qVSDC_online_without_ODA)
             {
-                if (tag9F27 == "80" || tag9F27 == "40")
+                var tagsNeedReturn = new List<string> { "82", "9F10", "9F26", "9F27", "9F36", "9F6C" };
+                foreach (var tag in tagsNeedReturn)
                 {
-                    foreach (var tag in tagMustIncludeWithODA)
+                    if (!CaseUtil.HasTag(tag, gpoTags))
                     {
-                        if (!gpoTags.Contains(tag))
-                        {
-                            isSucess = false;
-                            return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[响应数据缺失必要tag{0}]", tag);
-                        }
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[qVSDC缺少必备tag{0}]", tag);
                     }
-                    foreach (var tag in tagNeedAppearWithODA)
-                    {
-                        if (!gpoTags.Contains(tag))
-                        {
-                            return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[响应数据缺失必要tag{0}],请在读记录数据中查找该值，该值务必存在", tag);
-                        }
-                    }
-                }
-                else
-                {
-                    //数据有问题
-                    isSucess = false;
-                    return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[请检查tag94的值是否符合规范tag9F27={0}]", tag9F27);
                 }
             }
-            if (isSucess)
-                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-            return TipLevel.Unknown;
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
         #endregion
 
@@ -339,52 +334,63 @@ namespace CardPlatform.Cases
             }
             return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
-        /// <summary>
-        /// 检测GPO响应数据是否以77开头,格式是否正确
-        /// </summary>
-        public TipLevel GPO_011()
-        {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-            var caseItem = GetCaseItem(caseNo);
-
-            if (!CaseUtil.RespStartWith(response.Response, "77"))
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
-        }
 
         /// <summary>
-        /// 检测tag9F10的规范性(密文版本号01/17)(算法标识01/04)(IDD取值范围01~06)
+        /// 检测tag9F10的规范性(密文版本号)(算法标识)(IDD取值范围01~06)
         /// </summary>
         public TipLevel GPO_013()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            var tag9F10 = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "9F10");
-            if(tag9F10.Length < 16)
+            var tag9F10 = CaseUtil.GetTag("9F10",tlvs);
+            if(transConfig.CurrentApp == AppType.qUICS)
             {
-                return TraceInfo(TipLevel.Failed, caseNo, "9F10长度过小");
-            }
-            string cvn = tag9F10.Substring(4, 2);
-            string algorithmFlag = tag9F10.Substring(14, 2);
-            if(cvn != "01" && cvn != "17")
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            if(algorithmFlag != "01" && algorithmFlag != "04")
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
-            }
-            if(tag9F10.Length > 16)
-            {
-                string idd = tag9F10.Substring(18, 2);
-                int nIDD = Convert.ToInt32(idd, 16);
-                if(nIDD < 1 || nIDD > 6)
+                if (tag9F10.Length < 16)
+                {
+                    return TraceInfo(TipLevel.Failed, caseNo, "9F10长度过小");
+                }
+                string cvn = tag9F10.Substring(4, 2);
+                string algorithmFlag = tag9F10.Substring(14, 2);
+                if (cvn != "01" && cvn != "17")
                 {
                     return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }
+                if (algorithmFlag != "01" && algorithmFlag != "04")
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                }
+                if (tag9F10.Length > 16)
+                {
+                    string idd = tag9F10.Substring(18, 2);
+                    int nIDD = Convert.ToInt32(idd, 16);
+                    if (nIDD < 1 || nIDD > 6)
+                    {
+                        return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                    }
+                }
+            }else if(transConfig.CurrentApp == AppType.qVSDC_offline ||
+                transConfig.CurrentApp == AppType.qVSDC_online ||
+                transConfig.CurrentApp == AppType.qVSDC_online_without_ODA)
+            {
+                if (string.IsNullOrEmpty(tag9F10))
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO返回数据缺少tag9F10]");
+                }
+                if (tag9F10.Length > 64 || tag9F10.Length < 8)
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO返回数据tag9F10长度错误]");
+                }
+                if (tag9F10.Substring(0, 2) != "06")
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO返回数据tag9F10第一字节长度错误]");
+                }
+                var cvn = Convert.ToInt32(tag9F10.Substring(4, 2), 16);
+                if (cvn != 0x0A && cvn != 0x12 && cvn != 0x16)
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO返回数据tag9F10 CVN 不正确]");
+                }
             }
+            
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
@@ -409,8 +415,9 @@ namespace CardPlatform.Cases
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            if(TransactionConfig.GetInstance().CurrentApp == AppType.qVSDC_offline ||
-                TransactionConfig.GetInstance().CurrentApp == AppType.qVSDC_online)
+            if(transConfig.CurrentApp == AppType.qVSDC_offline ||
+                transConfig.CurrentApp == AppType.qVSDC_online ||
+                transConfig.CurrentApp == AppType.qVSDC_online_without_ODA)
             {
                 if (CheckVisaAc())
                 {
@@ -429,7 +436,7 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// Tag57的合规性检查（卡号不以62开头则警告）
+        /// Tag57的格式是否正确以及中国区卡号是否以62开头
         /// </summary>
         public TipLevel GPO_016()
         {
@@ -445,11 +452,11 @@ namespace CardPlatform.Cases
             }
             if (string.IsNullOrEmpty(tag57Value))
             {
-                return TraceInfo(TipLevel.Failed, caseNo, "读记录缺少tag57");
+                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[GPO中缺少tag57,请检查读记录是否有该值]");
             }
             if (!CaseUtil.RespStartWith(tag57Value, "62"))
             {
-                return TraceInfo(TipLevel.Warn, caseNo, "银联卡号一般以62开头");
+                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[中国区银联卡号一般以62开头]");
             }
             if (!CaseUtil.IsCorrectTag57Format(tag57Value))
             {
@@ -487,26 +494,21 @@ namespace CardPlatform.Cases
         }
 
         /// <summary>
-        /// 检测GPO响应数据是否以77开头,格式是否正确
+        /// 检测GPO响应数据是否以77模板开头,能否正常TLV分解
         /// </summary>
         public TipLevel GPO_019()
         {
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            caseItem.Description += "【GPO响应数据:" + response.Response + "】";
-            log.TraceLog("响应数据:【{0}】", response.Response);
+            caseItem.Description += "[GPO响应数据:" + response.Response.Substring(0,20) + "...]";
+            log.TraceLog("响应数据:[{0}]", response.Response);
             if (!CaseUtil.RespStartWith(response.Response, "77"))
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
             }
-            var tlvs = DataParse.ParseTLV(response.Response);
-            if (tlvs.Count != 3)
+            if(!DataParse.IsTLV(response.Response))
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO数据无法TLV分解]");
-            }
-            if(tlvs[1].Tag != "82" || tlvs[2].Tag != "94")
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GPO数据存在异常Tag]");
             }
 
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
@@ -529,5 +531,25 @@ namespace CardPlatform.Cases
             return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
         }
 
+        /// <summary>
+        /// 检测tag9F5D是否在DGP中返回
+        /// </summary>
+        /// <returns></returns>
+        public TipLevel GPO_026()
+        {
+            var caseNo = MethodBase.GetCurrentMethod().Name;
+            var caseItem = GetCaseItem(caseNo);
+            var tag9F5D = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "9F5D");
+            if (string.IsNullOrEmpty(tag9F5D))
+            {
+                return TraceInfo(caseItem.Level, caseNo, "GPO没有返回必要的数据tag9F5D,请确认CAP是否支持AOSA,交易货币代码是否匹配");
+            }
+            caseItem.Description += "tag9F5D=" + tag9F5D;
+            if (tag9F5D.Length != 12)
+            {
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            }
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+        }
     }
 }

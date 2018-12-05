@@ -934,14 +934,14 @@ int GenSSDA(
     string hashInput = "0301" + string(dac);
     hashInput.append(fillBCount, 'B');
     hashInput += data2bSig;
-
+    printf("ssda hash input: %s\n", hashInput.c_str());
     char hash[128] = { 0 };
     GenHash(hashInput.c_str(), hash, 128);
 
     string ssdaInput = "6A0301" + string(dac);
     ssdaInput.append(fillBCount, 'B');
     ssdaInput += hash + string("BC");
-
+    printf("ssda input: %s", ssdaInput.c_str());
     char ssda[2048] = { 0 };
     RSA_Encrypt((char*)p_N, (char*)p_D, (char*)ssdaInput.c_str(), ssdaInput.length(), ssda);
     strncpy_s(tag93, strlen(ssda) + 1, ssda, strlen(ssda));

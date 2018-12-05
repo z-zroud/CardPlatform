@@ -21,6 +21,7 @@ namespace CardPlatform.Helper
                     case TipLevel.Failed:   return "失败";
                     case TipLevel.Warn:     return "警告";
                     case TipLevel.Sucess:   return "成功";
+                    case TipLevel.Tip:      return "提示";
                     case TipLevel.Unknown:  return "未校验";
                 }
             }
