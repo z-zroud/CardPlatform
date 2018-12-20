@@ -176,52 +176,8 @@ namespace CardPlatform.Business
 
         public void GetRequirementData()
         {
-            var caseNo = MethodBase.GetCurrentMethod().Name;
-
-            RequirementData[] tagStandards =
-            {
-                new RequirementData("C4",3,TipLevel.Failed,""),  //如果执行频度检查，需要此应用货币代码
-                new RequirementData("C5",3,TipLevel.Failed,""),  //如果支持发卡行认证，需要ADA应用缺省行为
-                new RequirementData("C3",3,TipLevel.Failed,""),  //如果执行国际货币频度检查，需要此连续脱机交易限制数(国际-货币)
-                new RequirementData("D1",25,TipLevel.Failed,""),  //如果执行国际国际频度检查，需要此连续脱机交易限制数(国际-国家)
-                new RequirementData("D3",18,TipLevel.Failed,""),  //如果支持发卡行认证，需要此发卡行认证指示位
-                new RequirementData("D5",6,TipLevel.Failed,""),  //如果支持卡片频度检查，需要此发卡行国家代码
-                new RequirementData("D6",2,TipLevel.Failed,""),  //如果执行卡片频度检查，需要此连续脱机交易下限
-                new RequirementData("9F17",1,TipLevel.Failed,""),  //如果无法联机，卡片风险管理需要此连续脱机交易上限做出拒绝交易
-                new RequirementData("9F14",1,TipLevel.Failed,""),  //累计脱机交易金额上限
-                new RequirementData("9F23",1,TipLevel.Failed,""),  //连续脱机交易限制数
-                new RequirementData("CA",6,TipLevel.Failed,""),  //累计脱机交易金额(双货币)
-                new RequirementData("CB",6,TipLevel.Failed,""),  //第二应用货币代码
-                new RequirementData("C7",1,TipLevel.Failed,""),  //交易日志格式
-                new RequirementData("C8",2,TipLevel.Failed,""),
-                new RequirementData("C9",2,TipLevel.Failed,""),  //应用交易计数器
-                new RequirementData("9F4F",26,TipLevel.Failed,""),  //如果卡片或终端执行频度检查，或新卡检查，需要此上次联机应用交易计数器
-                new RequirementData("9F7E",48,TipLevel.Failed,""),  //如果支持脱机PIN,需要此PIN尝试计数器
-                new RequirementData("C6",1,TipLevel.Failed,""),  //如果支持脱机PIN,需要此PIN尝试计数器
-               
-            };
-            for (int i = 0; i < tagStandards.Length; i++)
-            {
-                var resp = APDU.GetDataCmd(tagStandards[i].Tag);
-                if (resp.SW != 0x9000)
-                {
-                    caseObj.TraceInfo(tagStandards[i].Level, caseNo, "{0},缺少Tag{1},", tagStandards[i].Desc, tagStandards[i].Tag);
-                }
-                else
-                {
-                    var tlvs = DataParse.ParseTLV(resp.Response);
-                    var tlv = from tmp in tlvs where tmp.Tag == tagStandards[i].Tag select tmp;
-
-                    if (tagStandards[i].Len != 0)
-                    {
-                        if (tlv.First().Len != tagStandards[i].Len)
-                        {
-                            caseObj.TraceInfo(tagStandards[i].Level, caseNo, "tag[{0}]长度不匹配，标准规范为[{1}],实际长度为[{2}]", tagStandards[i].Tag, tagStandards[i].Len, tlv.First().Len);
-                        }
-                    }
-                    transTags.SetTag(TransactionStep.GetData, tlv.First().Tag, tlv.First().Value); //保存
-                }
-            }
+            IExcuteCase getDataCase = new GetDataCase();
+            getDataCase.Excute(BatchNo, transCfg.CurrentApp, TransactionStep.GetData, null);
         }
 
         /// <summary>

@@ -301,16 +301,19 @@ int GenCAPublicKey(const char* caIndex, const char* rid, char* caPublicKey)
 	string temp = appPath;
 	int pos = temp.find_last_of('\\');
 	string dbPath = temp.substr(0, pos) + "/Configuration/pcsc.db";
+    //MessageBox(NULL, dbPath.c_str(), "SHIT", MB_OK);
     //printf("DB PATH=%s", dbPath.c_str());
 	//打开数据库
 	if(!db.Open(dbPath.c_str()))
 	{
+        //MessageBox(NULL, "SHIT", "SHIT", MB_OK);
 		db.Close();
 		return 1;
 	}
 	//构建查询语句
 	char sql[128] = { 0 };
 	sprintf_s(sql, sizeof(sql), "select * from CA where ridList = \"%s\" and ridIndex = \"%s\";", rid, caIndex);
+    //MessageBox(NULL, rid, caIndex, MB_OK);
 	SQLiteDataReader dbReader = db.ExcuteQuery(sql);
 	
 	while (dbReader.Read())

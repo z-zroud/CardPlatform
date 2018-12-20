@@ -81,10 +81,14 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GAC1返回数据tag9F27长度错误]");
             }
-            if (tag9F27 != "80")
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GAC1返回数据tag9F27应为80]");
+            if(transConfig.CurrentApp == AppType.UICS)
+            {//UICS 交易总是走联机交易
+                if (tag9F27 != "80")
+                {
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[GAC1返回数据tag9F27应为80]");
+                }
             }
+
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 

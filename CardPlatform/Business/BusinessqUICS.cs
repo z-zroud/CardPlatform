@@ -15,9 +15,9 @@ namespace CardPlatform.Business
 {
 
     /*************************************************************
-     * 该类描述了QPBOC交易流程
+     * 该类描述了qUICS交易流程
      *************************************************************/
-    public class BusinessQPBOC : BusinessBase
+    public class BusinessqUICS : BusinessBase
     {
         private bool isQPBOCTranction = false;
 
@@ -32,7 +32,18 @@ namespace CardPlatform.Business
             base.DoTransaction(aid);
             locator.Terminal.SetTag("DF60", "00", "扩展交易指示位");
             locator.Terminal.SetTag("9C", "00", "交易类型");
-            locator.Terminal.SetTag("9F66", "2A000080", "终端交易属性");
+            if (transCfg.CurrentApp == AppType.qUICS_offline)
+            {
+                locator.Terminal.SetTag("9F66", "28000000", "终端交易属性");
+            }
+            else if (transCfg.CurrentApp == AppType.qUICS_online)
+            {
+                locator.Terminal.SetTag("9F66", "27800000", "终端交易属性");
+            }
+            else
+            {
+                locator.Terminal.SetTag("9F66", "26800000", "终端交易属性");
+            }
             DoTransaction(DoTransactionEx);
         }
 

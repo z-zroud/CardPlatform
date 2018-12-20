@@ -93,7 +93,7 @@
     <Compile Include="Business\BusinessVISA.cs" />
     <Compile Include="Business\BusinessPPSE.cs" />
     <Compile Include="Business\BusinessPSE.cs" />
-    <Compile Include="Business\BusinessQPBOC.cs" />
+    <Compile Include="Business\BusinessqUICS.cs" />
     <Compile Include="Business\BusinessUICS.cs" />
     <Compile Include="Cases\CardHolderVerifyCase.cs" />
     <Compile Include="Cases\GetDataCase.cs" />

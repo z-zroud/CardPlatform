@@ -238,7 +238,8 @@ namespace CardPlatform.Business
                 caseObj.TraceInfo(TipLevel.Sucess, caseNo, "检测恢复数据中的hash值与签名数据生成的hash比对是否一致");
             }
             string bin = recoveryData.Substring(4, 8);
-            bin = bin.Substring(0, bin.IndexOf('F'));
+            int indexF = bin.IndexOf('F');
+            bin = bin.Substring(0, indexF == -1 ? bin.Length : indexF);
             if (tag5A.Substring(0,bin.Length) != bin || bin.Length < 3)
                 caseObj.TraceInfo(TipLevel.Failed, caseNo, "检测恢复得到的主账号和从IC卡读出的应用主账号是否一致");
             else

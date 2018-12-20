@@ -320,8 +320,9 @@ namespace CardPlatform.Cases
             var tag9F38 = CaseUtil.GetTag("9F38",tlvs);
             if (string.IsNullOrEmpty(tag9F38))
             {
-                if(transConfig.CurrentApp == AppType.qPBOC ||
-                    transConfig.CurrentApp == AppType.qUICS ||
+                if(transConfig.CurrentApp == AppType.qUICS_offline ||
+                    transConfig.CurrentApp == AppType.qUICS_online ||
+                    transConfig.CurrentApp == AppType.qUICS_online_without_ODA||
                     transConfig.CurrentApp == AppType.qVSDC_offline ||
                     transConfig.CurrentApp == AppType.qVSDC_online ||
                     transConfig.CurrentApp == AppType.Paypass)
@@ -384,7 +385,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[缺少tag9F4D, 没有记录交易日志入口]");
+                return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[缺少tag9F4D, 没有记录交易日志入口]");
             }
         }
 
@@ -399,9 +400,9 @@ namespace CardPlatform.Cases
             var tagDF4D = tags.FirstOrDefault(tag => tag.Tag == "DF4D");
             if (tagDF4D != null)
             {
-                caseItem.Description += "【tagDF4D=" + tagDF4D.Value + "】";
-                log.TraceLog("tagDF4D=【" + tagDF4D.Value + "】");
-                log.TraceLog("长度为:【{0}】", tagDF4D.Len);
+                caseItem.Description += "[tagDF4D=" + tagDF4D.Value + "]";
+                log.TraceLog("tagDF4D=[" + tagDF4D.Value + "]");
+                log.TraceLog("长度为:[{0}]", tagDF4D.Len);
                 if (tagDF4D.Len == 2 && tagDF4D.Value == "0C0A")
                     return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
                 else
@@ -409,7 +410,7 @@ namespace CardPlatform.Cases
             }
             else
             {
-                return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[缺少tagDF4D, 没有ECC/qUICS交易日志入口]");
+                return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[缺少tagDF4D, 没有ECC/qUICS交易日志入口]");
             }
         }
 

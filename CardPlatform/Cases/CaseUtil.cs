@@ -38,81 +38,86 @@ namespace CardPlatform.Cases
         public static Dictionary<string, TagLenAttribute> tagLenInfoDict = new Dictionary<string, TagLenAttribute>();
         static TagLenInfo()
         {
-            tagLenInfoDict.Add("9F26", new TagLenAttribute(LenType.Fixed,0,0,8));
-            tagLenInfoDict.Add("9F36", new TagLenAttribute(LenType.Fixed,0,0,2));
-            tagLenInfoDict.Add("9F27", new TagLenAttribute(LenType.Fixed,0,0,1));
-            tagLenInfoDict.Add("9F10", new TagLenAttribute(LenType.Range,7,32,0));
-            tagLenInfoDict.Add("9F6C", new TagLenAttribute(LenType.Fixed,0,0,2));
-            tagLenInfoDict.Add("9F6E", new TagLenAttribute(LenType.Fixed,0,0,4));
-            tagLenInfoDict.Add("9F7C", new TagLenAttribute(LenType.Range,0,32,0));
-            tagLenInfoDict.Add("82", new TagLenAttribute(LenType.Fixed,0,0,2));
-            tagLenInfoDict.Add("94", new TagLenAttribute(LenType.Range,4,32,0));
-            tagLenInfoDict.Add("84", new TagLenAttribute(LenType.Range,5,16,0));
             tagLenInfoDict.Add("4F", new TagLenAttribute(LenType.Range, 5, 16, 0));
             tagLenInfoDict.Add("50", new TagLenAttribute(LenType.Range, 1, 16, 0));
-            tagLenInfoDict.Add("9F12", new TagLenAttribute(LenType.Range, 1, 16, 0));
-            tagLenInfoDict.Add("9F38", new TagLenAttribute(LenType.Range, 1, 100, 0));
-            tagLenInfoDict.Add("5F2D", new TagLenAttribute(LenType.Range, 2, 8, 0));
             tagLenInfoDict.Add("57", new TagLenAttribute(LenType.Range, 1, 19, 0));
-            tagLenInfoDict.Add("9F4B", new TagLenAttribute(LenType.Range, 1, 2048, 0));
-            tagLenInfoDict.Add("90", new TagLenAttribute(LenType.Range, 1, 2048, 0));
-            tagLenInfoDict.Add("92", new TagLenAttribute(LenType.Range, 1, 2048, 0));
-            tagLenInfoDict.Add("9F46", new TagLenAttribute(LenType.Range, 1, 2048, 0));
-            tagLenInfoDict.Add("5F20", new TagLenAttribute(LenType.Range, 2, 26, 0));
-            tagLenInfoDict.Add("9F48", new TagLenAttribute(LenType.Range, 1, 2048, 0));
             tagLenInfoDict.Add("5A", new TagLenAttribute(LenType.Range, 8, 10, 0));
-            tagLenInfoDict.Add("9F1F", new TagLenAttribute(LenType.Range, 0, 100, 0));
-            tagLenInfoDict.Add("8E", new TagLenAttribute(LenType.Range, 0, 252, 0));
+            tagLenInfoDict.Add("82", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("84", new TagLenAttribute(LenType.Range, 5, 16, 0));
+            tagLenInfoDict.Add("87", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("88", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
             tagLenInfoDict.Add("8C", new TagLenAttribute(LenType.Range, 0, 252, 0));
             tagLenInfoDict.Add("8D", new TagLenAttribute(LenType.Range, 0, 252, 0));
-            tagLenInfoDict.Add("87", new TagLenAttribute(LenType.Fixed,0,0,1));
-            tagLenInfoDict.Add("9F32", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("8E", new TagLenAttribute(LenType.Range, 0, 252, 0));
             tagLenInfoDict.Add("8F", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("9F69", new TagLenAttribute(LenType.Fixed, 0, 0, 7));
+            tagLenInfoDict.Add("90", new TagLenAttribute(LenType.Range, 1, 2048, 0));
+            tagLenInfoDict.Add("92", new TagLenAttribute(LenType.Range, 1, 2048, 0));
+            tagLenInfoDict.Add("93", new TagLenAttribute(LenType.Range, 1, 1024, 0));
+            tagLenInfoDict.Add("94", new TagLenAttribute(LenType.Range, 4, 32, 0));
+            tagLenInfoDict.Add("5F20", new TagLenAttribute(LenType.Range, 2, 26, 0));
             tagLenInfoDict.Add("5F24", new TagLenAttribute(LenType.Fixed, 0, 0, 3));
             tagLenInfoDict.Add("5F25", new TagLenAttribute(LenType.Fixed, 0, 0, 3));
-            tagLenInfoDict.Add("5F34", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
             tagLenInfoDict.Add("5F28", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("5F2D", new TagLenAttribute(LenType.Range, 2, 8, 0));
+            tagLenInfoDict.Add("5F30", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("5F34", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("5F55", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
             tagLenInfoDict.Add("9F07", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
-            tagLenInfoDict.Add("9F5A", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
+            tagLenInfoDict.Add("9F08", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("9F0D", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
+            tagLenInfoDict.Add("9F0E", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
+            tagLenInfoDict.Add("9F0F", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
+            tagLenInfoDict.Add("9F10", new TagLenAttribute(LenType.Range, 7, 32, 0));
+            tagLenInfoDict.Add("9F11", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F12", new TagLenAttribute(LenType.Range, 1, 16, 0));
+            tagLenInfoDict.Add("9F13", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("9F14", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F23", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F1F", new TagLenAttribute(LenType.Range, 0, 100, 0));
+            tagLenInfoDict.Add("9F26", new TagLenAttribute(LenType.Fixed,0,0,8));
+            tagLenInfoDict.Add("9F27", new TagLenAttribute(LenType.Fixed,0,0,1));
+            tagLenInfoDict.Add("9F32", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F36", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("9F38", new TagLenAttribute(LenType.Range, 1, 100, 0));
+            tagLenInfoDict.Add("9F42", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("9F44", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F46", new TagLenAttribute(LenType.Range, 1, 2048, 0));
             tagLenInfoDict.Add("9F47", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F48", new TagLenAttribute(LenType.Range, 1, 2048, 0));
             tagLenInfoDict.Add("9F49", new TagLenAttribute(LenType.Fixed, 0, 0, 3));
             tagLenInfoDict.Add("9F4A", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F4B", new TagLenAttribute(LenType.Range, 1, 2048, 0));
+            tagLenInfoDict.Add("9F4D", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
             tagLenInfoDict.Add("9F51", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
             tagLenInfoDict.Add("9F52", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("9F53", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
             tagLenInfoDict.Add("9F54", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
+            tagLenInfoDict.Add("9F56", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
             tagLenInfoDict.Add("9F57", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
             tagLenInfoDict.Add("9F58", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
             tagLenInfoDict.Add("9F59", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F5A", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
             tagLenInfoDict.Add("9F5C", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
+            tagLenInfoDict.Add("9F5E", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F63", new TagLenAttribute(LenType.Fixed, 0, 0, 16));
+            tagLenInfoDict.Add("9F68", new TagLenAttribute(LenType.Fixed, 0, 0, 4));
+            tagLenInfoDict.Add("9F69", new TagLenAttribute(LenType.Fixed, 0, 0, 7));
+            tagLenInfoDict.Add("9F6C", new TagLenAttribute(LenType.Fixed,0,0,2));
+            tagLenInfoDict.Add("9F6E", new TagLenAttribute(LenType.Fixed,0,0,4));
+            tagLenInfoDict.Add("9F72", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
             tagLenInfoDict.Add("9F77", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("9F78", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("9F79", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
+            tagLenInfoDict.Add("9F7C", new TagLenAttribute(LenType.Range,0,32,0));
+            tagLenInfoDict.Add("DF01", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
             tagLenInfoDict.Add("DF11", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
-            tagLenInfoDict.Add("DF41", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
-            tagLenInfoDict.Add("DF51", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("DF71", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("DF21", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("DF31", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
-            tagLenInfoDict.Add("DF01", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
-            tagLenInfoDict.Add("9F68", new TagLenAttribute(LenType.Fixed, 0, 0, 4));
-            tagLenInfoDict.Add("9F5E", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("88", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("9F0D", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
-            tagLenInfoDict.Add("9F0E", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
-            tagLenInfoDict.Add("9F0F", new TagLenAttribute(LenType.Fixed, 0, 0, 5));
-            tagLenInfoDict.Add("5F30", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
-            tagLenInfoDict.Add("9F08", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
-            tagLenInfoDict.Add("9F42", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
-            tagLenInfoDict.Add("9F44", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("9F56", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("9F13", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
-            tagLenInfoDict.Add("9F72", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("9F63", new TagLenAttribute(LenType.Fixed, 0, 0, 16));
+            tagLenInfoDict.Add("DF41", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
+            tagLenInfoDict.Add("DF4D", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("DF51", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
             tagLenInfoDict.Add("DF61", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("9F11", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
-            tagLenInfoDict.Add("5F55", new TagLenAttribute(LenType.Fixed, 0, 0, 2));
+            tagLenInfoDict.Add("DF71", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
         }
         public static TagLenAttribute GetLenInfo(string tag)
         {
@@ -360,7 +365,7 @@ namespace CardPlatform.Cases
         /// <returns></returns>
         public static bool IsExpectedLen(string tag, int min, int max)
         {
-            if(tag.Length >= min && tag.Length < max)
+            if(tag.Length >= min && tag.Length <= max)
             {
                 return true;
             }

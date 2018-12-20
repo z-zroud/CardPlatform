@@ -343,7 +343,9 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var tag9F10 = CaseUtil.GetTag("9F10",tlvs);
-            if(transConfig.CurrentApp == AppType.qUICS)
+            if(transConfig.CurrentApp == AppType.qUICS_offline ||
+                transConfig.CurrentApp == AppType.qUICS_online ||
+                transConfig.CurrentApp == AppType.qUICS_online_without_ODA)
             {
                 if (tag9F10.Length < 16)
                 {

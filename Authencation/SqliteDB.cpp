@@ -12,13 +12,26 @@ SQLite::~SQLite(void)
     Close();
 }
 
+wstring AsciiToUnicode(const string& str) {
+    // 预算-缓冲区中宽字节的长度    
+    int unicodeLen = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, nullptr, 0);
+    // 给指向缓冲区的指针变量分配内存    
+    wchar_t *pUnicode = (wchar_t*)malloc(sizeof(wchar_t)*unicodeLen);
+    // 开始向缓冲区转换字节    
+    MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, unicodeLen);
+    wstring ret_str = pUnicode;
+    free(pUnicode);
+    return ret_str;
+}
+
 BOOL SQLite::Open(LPCTSTR lpDbFlie)
 {
     if (lpDbFlie == NULL)
     {
         return FALSE;
     } 
-    if (sqlite3_open(lpDbFlie, &m_db) != SQLITE_OK) 
+    wstring dpPath = AsciiToUnicode(lpDbFlie);
+    if (sqlite3_open16(dpPath.c_str(), &m_db) != SQLITE_OK)
     {
         return FALSE;
     }

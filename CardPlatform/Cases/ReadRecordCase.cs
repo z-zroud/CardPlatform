@@ -751,7 +751,7 @@ namespace CardPlatform.Cases
                 return TraceInfo(caseItem.Level, caseNo, "读数据中缺少tag5F24或者tag57");
             }
             Tag57Helper tag57Helper = new Tag57Helper(tag57);
-            caseItem.Description += "【tag5F24=" + readRecordTags["5F24"].Value + "】";
+            caseItem.Description += "[tag5F24=" + readRecordTags["5F24"].Value + "]";
             if (readRecordTags["5F24"].Value.Substring(0, 4) != tag57Helper.GetExpiredDate())
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag57中的失效日期为:{0}]", tag57Helper.GetExpiredDate());
@@ -794,7 +794,7 @@ namespace CardPlatform.Cases
             var tag9F42 = TransactionTag.GetInstance().GetTag("9F42");
             if (!string.IsNullOrEmpty(tag9F42))
             {
-                caseItem.Description += "【tag9F42=" + tag9F42 + "】";
+                caseItem.Description += "[tag9F42=" + tag9F42 + "]";
                 return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
             var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
@@ -802,7 +802,7 @@ namespace CardPlatform.Cases
             {
                 if (tag8E.Substring(0, 16) == "0000000000000000")
                 {
-                    return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description);
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "[tag9F42不存在]");
                 }
                 else
                 {

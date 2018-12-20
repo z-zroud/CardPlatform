@@ -8,8 +8,12 @@ namespace CardPlatform.Models
 
         [DescriptionEx("UICS")]
         UICS,
-        [DescriptionEx("qUICS")]
-        qUICS,
+        [DescriptionEx("qUICS online ODA")]
+        qUICS_online,
+        [DescriptionEx("qUICS offline ODA")]
+        qUICS_offline,
+        [DescriptionEx("qUICS online without ODA")]
+        qUICS_online_without_ODA,
         [DescriptionEx("PBOC")]
         PBOC,
         [DescriptionEx("qPBOC")]

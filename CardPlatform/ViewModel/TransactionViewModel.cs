@@ -361,8 +361,10 @@ namespace CardPlatform.ViewModel
                     trans = new BusinessUICS();
                     break;
                 case AppType.qPBOC:
-                case AppType.qUICS:
-                    trans = new BusinessQPBOC();
+                case AppType.qUICS_offline:
+                case AppType.qUICS_online:
+                case AppType.qUICS_online_without_ODA:
+                    trans = new BusinessqUICS();
                     break;
                 case AppType.ECC:
                     trans = new BusinessECC();
