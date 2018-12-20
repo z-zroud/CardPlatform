@@ -207,6 +207,11 @@ namespace CardPlatform.Cases
             string atc = TransactionTag.GetInstance().GetTag("9F36");
             string data = string.Empty;
 
+            if(tag9F10.Length <= 16)
+            {
+                return true;    //表示9F10不带MAC
+            }
+
             if (tag9F10.Substring(18, 2) == "01" ||
                 tag9F10.Substring(18, 2) == "06") //暂时只支持IDD为01,06类型
             {
@@ -313,14 +318,13 @@ namespace CardPlatform.Cases
             string tag9F36  = TransactionTag.GetInstance().GetTag("9F36");
             string tag9F10  = TransactionTag.GetInstance().GetTag("9F10");
             var cvr = tag9F10.Substring(6, 8);   //卡片验证结果
-            var plaintextCounters = tag9F10.Substring(20, 16);
 
             string input = tag9F02 + tag9F03 + tag9F1A + tag95 + tag5A + tag9A + tag9C + tag9F37 + tag82 + tag9F36 + cvr;
-            int zeroCount = input.Length % 16;
-            if (zeroCount != 0)
-            {
-                input.PadRight(zeroCount, '0');
-            }
+            //int zeroCount = input.Length % 16;
+            //if (zeroCount != 0)
+            //{
+            //    input.PadRight(zeroCount, '0');
+            //}
             string acSessionKey = string.Empty;
             if (transConfig.Algorithm == AlgorithmType.DES)
             {

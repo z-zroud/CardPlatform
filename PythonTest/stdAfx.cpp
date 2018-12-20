@@ -1,2 +1,0 @@
-#include "stdAfx.h"
-
