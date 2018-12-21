@@ -102,7 +102,7 @@ int main()
  //   GenDesKcv(desKey, kcv, 6);
 
  //   GenSmKcv(smKey, kcv, 6);
-    char udk[33] = { 0 };
+    //char udk[33] = { 0 };
     char udkSessionKey[33] = { 0 };
     GenUdk("8302B99758F276B98A51B340584C20AD", "5402900100130602", "00", udk);
     GenUdk("6142CD7233762A2293D34A74F763BC28", "6270420226000000014F", "00", udk,1);

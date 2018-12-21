@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfCardCheckConfig>
+  <CardCheckConfig>
+    <ConfigName>xxx</ConfigName>
+    <AlgorithmFlag>0</AlgorithmFlag>
+    <KeyType>0</KeyType>
+  </CardCheckConfig>
+  <CardCheckConfig>
+    <ConfigName>AUB贷记项目</ConfigName>
+    <AlgorithmFlag>0</AlgorithmFlag>
+    <KeyType>0</KeyType>
+  </CardCheckConfig>
+</ArrayOfCardCheckConfig>

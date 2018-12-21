@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application>
+	<VISA>
+        <Step name="SelectApp">
+
+        </Step>
+        <Step name="GPO">
+            <Tag name="82" checkMode="fixed" value="1C00" level="failed"/>
+        </Step>
+        <Step name="ReadRecord">
+            <Tag name="9F07" checkMode="fixed" value="FF00" level="failed" />
+            <Tag name="9F08" checkMode="fixed" value="00A0" level="failed" />
+            <Tag name="8C" checkMode="fixed" value="9F02069F03069F1A0295055F2A029A039C019F3704" level="failed" />
+            <Tag name="8D" checkMode="fixed" value="8A029F02069F03069F1A0295055F2A029A03" level="failed" />
+            <Tag name="9F6E" checkMode="fixed" value="20700000" level="failed" />
+            <Tag name="9F0E" checkMode="fixed" value="0010000000" level="failed" />
+            <Tag name="9F0F" checkMode="fixed" value="B860FC9800" level="failed" />
+            <Tag name="9F0D" checkMode="fixed" value="B860BC8800" level="failed" />
+            <Tag name="9F10" checkMode="fixed" value="06010A03000000" level="failed" />
+        </Step>
+        <Step name="GetData">
+            <Tag name="9F52" checkMode="fixed" value="C3380000" level="failed" />
+            <Tag name="9F56" checkMode="fixed" value="80" level="failed" />
+        </Step>
+	</VISA>
+</Application>

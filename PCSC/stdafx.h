@@ -11,13 +11,11 @@
 // Windows Header Files:
 #include <windows.h>
 
-#ifdef _DEBUG
-#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
-#pragma comment(lib,"..\\lib\\Debug\\Log.lib")
+#pragma comment(lib,"..\\lib\\Log.lib")
+
+#if _DEBUG
+#pragma comment(lib,"..\\lib\\Util_d.lib")
 #else
-#pragma comment(lib,"..\\lib\\Release\\Util.lib")
-#pragma comment(lib,"..\\lib\\Release\\Log.lib")
+#pragma comment(lib,"..\\lib\\Util.lib")
 #endif
-
-
 // TODO: reference additional headers your program requires here

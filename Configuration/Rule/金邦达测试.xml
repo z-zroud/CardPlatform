@@ -1,0 +1,84 @@
+<Rule>
+	<Encrypt DGI="8000" type="DES" key="FDE9C7013B23B6163120F8BAC183F446"/>   
+	<Encrypt DGI="RSA" type="DES" key="FDE9C7013B23B6163120F8BAC183F446"/>
+	<Encrypt DGI="RSAsecond" type="DES" key="FDE9C7013B23B6163120F8BAC183F446"/>
+	<GoldMap EMVTag="9104" SDDFTag="1010N101" EMVDataName="DGI9104" ValueFormat="TLV"/>
+	<GoldMap EMVTag="9204" SDDFTag="1010N102" EMVDataName="DGI9204" ValueFormat="TLV"/>
+	<GoldMap EMVTag="9206" SDDFTag="1010N103" EMVDataName="DGI9206" ValueFormat="TLV"/>
+	<GoldMap EMVTag="9207" SDDFTag="1010N104" EMVDataName="DGI9207" ValueFormat="TLV"/>
+	<GoldMap EMVTag="9102" SDDFTag="1010N105" EMVDataName="DGI9102" ValueFormat="TLV"/>
+	<GoldMap EMVTag="9103" SDDFTag="1010N106" EMVDataName="DGI9103" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0101" SDDFTag="1010N107" EMVDataName="DGI0101" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0102" SDDFTag="1010N401" EMVDataName="DGI0102" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0201" SDDFTag="1010N108" EMVDataName="DGI0201" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0202" SDDFTag="1010N109" EMVDataName="DGI0202" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0203" SDDFTag="1010N10A" EMVDataName="DGI0203" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0204" SDDFTag="1010N10B" EMVDataName="DGI0204" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0205" SDDFTag="1010N10C" EMVDataName="DGI0205" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0301" SDDFTag="1010N10D" EMVDataName="DGI0301" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0302" SDDFTag="1010N10E" EMVDataName="DGI0302" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0D01" SDDFTag="1010N10F" EMVDataName="DGI0D01" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0E01" SDDFTag="1010N301" EMVDataName="DGI0E01" ValueFormat="TLV"/>
+	<GoldMap EMVTag="9200" SDDFTag="1010N302" EMVDataName="DGI9200" ValueFormat="TLV"/>
+	<GoldMap EMVTag="7FF1" SDDFTag="1010N303" EMVDataName="DGI7FF1" ValueFormat="TLV"/>
+	<GoldMap EMVTag="7FF2" SDDFTag="1010N304" EMVDataName="DGI7FF2" ValueFormat="TLV"/>
+	<GoldMap EMVTag="A022" SDDFTag="1010N305" EMVDataName="DGIA022" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0206" SDDFTag="1010N306" EMVDataName="DGI0206" ValueFormat="TLV"/>
+	<GoldMap EMVTag="0207" SDDFTag="1010N307" EMVDataName="DGI0207" ValueFormat="TLV"/>										
+	<GoldMap EMVTag="DF18" SDDFTag="1010N201" EMVDataName="" ValueFormat="V"/>
+	<GoldMap EMVTag="DF19" SDDFTag="1010N202" EMVDataName="" ValueFormat="V"/>
+	<GoldMap EMVTag="DF20" SDDFTag="1010N203" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF21" SDDFTag="1010N204" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF22" SDDFTag="1010N205" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF23" SDDFTag="1010N206" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF25" SDDFTag="1010N207" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF26" SDDFTag="1010N208" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF27" SDDFTag="1010N209" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF50" SDDFTag="1010N20A" EMVDataName="" ValueFormat="TLV"/>
+
+	<GoldMap EMVTag="A5" SDDFTag="1010N20B" EMVDataName="ADF1" ValueFormat="TLV"/>
+	<GoldMap EMVTag="70" SDDFTag="1010N20C" EMVDataName="ADF2" ValueFormat="TLV"/>
+	<GoldMap EMVTag="4F" SDDFTag="1010N20D" EMVDataName="" ValueFormat="TLV"/>
+	<GoldMap EMVTag="DF16" SDDFTag="1010N20E" EMVDataName="" ValueFormat="V"/>
+	<GoldMap EMVTag="DF17" SDDFTag="1010N20F" EMVDataName="" ValueFormat="V"/>
+
+	<!-- IMKI -->
+	<GoldMap EMVTag="8000_1" SDDFTag="1010N501" EMVDataName="Ksmi" ValueFormat="V"/>
+	<GoldMap EMVTag="9000_1" SDDFTag="1010N508" EMVDataName="Checksum Ksmi" ValueFormat="V"/>
+	<!-- IMKC -->
+	<GoldMap EMVTag="8000_2" SDDFTag="1010N502" EMVDataName="Ksmc" ValueFormat="V"/>
+	<GoldMap EMVTag="9000_2" SDDFTag="1010N509" EMVDataName="Checksum Ksmc" ValueFormat="V"/>
+	<!-- IMKAC -->
+	<GoldMap EMVTag="8000_3" SDDFTag="1010N503" EMVDataName="Kac" ValueFormat="V"/>
+	<GoldMap EMVTag="9000_3" SDDFTag="1010N50A" EMVDataName="Checksum Kac" ValueFormat="V"/>
+	<!-- ICC -->
+	<GoldMap EMVTag="RSA" SDDFTag="1010N504" EMVDataName="Icc_KeyPair" ValueFormat="V"/>
+	<GoldMap EMVTag="DF71" SDDFTag="1010N50B" EMVDataName="Icc_KeyPair_Kcv" ValueFormat="V"/>
+	<GoldMap EMVTag="5A" SDDFTag="1010N50C" EMVDataName="5APayWave" ValueFormat="V"/>
+
+	<GoldMap EMVTag="3000" SDDFTag="1010N50D" EMVDataName="DGI3000" ValueFormat="TLV"/>
+	<GoldMap EMVTag="3001" SDDFTag="1010N50E" EMVDataName="DGI3001" ValueFormat="TLV"/>
+	<MergeTag srcDGI="8000" srcTag="8000" dstDGI="8000_1" dstTag="8000_1"/>
+	<MergeTag srcDGI="8000" srcTag="8000" dstDGI="8000_2" dstTag="8000_2"/>
+	<MergeTag srcDGI="8000" srcTag="8000" dstDGI="8000_3" dstTag="8000_3"/>
+	<SpliteGoldpacRsa tag="RSA"/>
+	<SpliteGoldpacRsa tag="RSAsecond"/>
+	<AddKcv srcDGI="9000" dstDGI="8000" keyType="DES"/>
+	<AddKcv srcDGI="9000_sec" dstDGI="8000_sec" keyType="DES"/>
+	<DeletedDGI DGI="8000_1"/>
+	<DeletedDGI DGI="8000_2"/>
+	<DeletedDGI DGI="8000_3"/>
+	<DeletedDGI DGI="9000_1"/>
+	<DeletedDGI DGI="9000_2"/>
+	<DeletedDGI DGI="9000_3"/>	
+	<DeletedDGI DGI="RSA"/>
+	<DeletedDGI DGI="8000_1_sec"/>
+	<DeletedDGI DGI="8000_2_sec"/>
+	<DeletedDGI DGI="8000_3_sec"/>
+	<DeletedDGI DGI="9000_1_sec"/>
+	<DeletedDGI DGI="9000_2_sec"/>
+	<DeletedDGI DGI="9000_3_sec"/>	
+	<DeletedDGI DGI="RSA_sec"/>
+	<SDDFElement SDDFTag="10101100" Value="1111011302110411051106110711081109110A110B110C13061307110D110E150D150E"/>
+	<SDDFElement SDDFTag="10102100" Value="0E21012105210721082109210A210B210D210E210F2301230223032304"/>	
+</Rule>

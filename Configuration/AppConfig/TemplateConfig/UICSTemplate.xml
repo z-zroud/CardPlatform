@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application>
+      <PSE>
+            <TagTemplate>
+                  <Step name="SelectPSE">
+                        <Tag name="84" checkMode="fixed" value="315041592E5359532E4444463031" level="failed"/>
+                        <Tag name="9F4D" checkMode="fixed" value="0B0A" level="failed"/>
+                        <Tag name="DF4D" checkMode="fixed" value="0C0A" level="failed"/>
+                        <Tag name="5F2D" checkMode="fixed" value="7A68" level="warn"/>
+                  </Step>
+            </TagTemplate>
+      </PSE>
+	<UICS>
+		<TagTemplate>
+			<Step name="SelectApp">
+
+			</Step>
+			<Step name="GPO">
+			      <Tag name="82" checkMode="fixed" value="7C00" level="failed"/>
+			</Step>
+		</TagTemplate>
+	</UICS>
+	<ECC>
+	      <TagTemplate>
+	            <Step name="GPO">
+	                  <Tag name="82" checkMode="fixed" value="7D00" level="failed"/>
+	            </Step>
+	      </TagTemplate>
+	</ECC>
+</Application>

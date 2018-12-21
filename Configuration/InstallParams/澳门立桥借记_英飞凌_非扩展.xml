@@ -1,9 +1,5 @@
 <PersonlizeConfiguration>      
-      <App type="PSE" packageAid="315041592E" appletAid="315041592E5359532E4444463031" instanceAid="315041592E5359532E4444463031" priviliage="00" installParam="C900" token="00" />
-      <App type="PPSE" packageAid="315041592E" appletAid="315041592E5359532E4444463031" instanceAid="325041592E5359532E4444463031" priviliage="00" installParam="C900" token="00" />     
-      <App type="UICS" packageAid="A000000333010130" appletAid="A0000003330101" instanceAid="A000000333010101" priviliage="10" installParam="C9022A03" token="00" />
       <Encrypt DGI="8000" padding80="false"/>
-      <!--Encrypt DGI="8020" padding80="false"/-->
       <Encrypt DGI="8201" padding80="true"/>
       <Encrypt DGI="8202" padding80="true"/>
       <Encrypt DGI="8203" padding80="true"/>

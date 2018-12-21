@@ -11,9 +11,9 @@
 #include <tchar.h>
 
 #ifdef _DEBUG
-#pragma comment(lib,"..\\lib\\Debug\\Authencation.lib")
+#pragma comment(lib,"..\\lib\\Authencation.lib")
 #else
-#pragma comment(lib,"..\\lib\\Release\\Authencation.lib")
+#pragma comment(lib,"..\\lib\\Authencation.lib")
 #endif
 
 // TODO: reference additional headers your program requires here

@@ -11,10 +11,10 @@
 
 // Windows Header Files:
 #include <windows.h>
-#ifdef _DEBUG
-#pragma comment(lib,"..//lib//Debug//Util.lib")
+#if _DEBUG
+#pragma comment(lib,"..\\lib\\Util_d.lib")
 #else
-#pragma comment(lib,"..//lib//Release//Util.lib")
+#pragma comment(lib,"..\\lib\\Util.lib")
 #endif
 
 

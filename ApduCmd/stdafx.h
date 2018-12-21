@@ -11,17 +11,18 @@
 // Windows Header Files:
 #include <windows.h>
 
-#ifdef _DEBUG
-#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
-#pragma comment(lib,"..\\lib\\Debug\\PCSC.lib")
-#pragma comment(lib,"..\\lib\\Debug\\Authencation.lib")
-#pragma comment(lib,"..\\lib\\Debug\\Des0.lib")
+
+#pragma comment(lib,"..\\lib\\PCSC.lib")
+#pragma comment(lib,"..\\lib\\Authencation.lib")
+#pragma comment(lib,"..\\lib\\Des0.lib")
+
+
+#if _DEBUG
+#pragma comment(lib,"..\\lib\\Util_d.lib")
 #else
-#pragma comment(lib,"..\\lib\\Release\\Util.lib")
-#pragma comment(lib,"..\\lib\\Release\\PCSC.lib")
-#pragma comment(lib,"..\\lib\\Release\\Authencation.lib")
-#pragma comment(lib,"..\\lib\\Release\\Des0.lib")
+#pragma comment(lib,"..\\lib\\Util.lib")
 #endif
+
 
 
 

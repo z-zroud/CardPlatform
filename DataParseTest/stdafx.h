@@ -10,12 +10,14 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#ifdef _DEBUG
-#pragma comment(lib,"..\\lib\\Debug\\DataParse.lib")
-#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+
+#pragma comment(lib,"..\\lib\\DataParse.lib")
+
+#if _DEBUG
+#pragma comment(lib,"..\\lib\\Util_d.lib")
 #else
-#pragma comment(lib,"..\\lib\\Release\\DataParse.lib")
-#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#pragma comment(lib,"..\\lib\\Util.lib")
 #endif
+
 
 // TODO: reference additional headers your program requires here

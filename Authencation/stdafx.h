@@ -12,14 +12,14 @@
 // Windows Header Files:
 #include <windows.h>
 
-#ifdef _DEBUG
-#pragma comment(lib,"..\\lib\\Debug\\Des0.lib")
-#pragma comment(lib,"..\\lib\\Debug\\sqlite3.lib")
-#pragma comment(lib,"..\\lib\\Debug\\Util.lib")
+
+#pragma comment(lib,"..\\lib\\Des0.lib")
+#pragma comment(lib,"..\\lib\\sqlite3.lib")
+
+#if _DEBUG
+#pragma comment(lib,"..\\lib\\Util_d.lib")
 #else
-#pragma comment(lib,"..\\lib\\Release\\Des0.lib")
-#pragma comment(lib,"..\\lib\\Release\\sqlite3.lib")
-#pragma comment(lib,"..\\lib\\Release\\Util.lib")
+#pragma comment(lib,"..\\lib\\Util.lib")
 #endif
 
 // TODO: reference additional headers your program requires here

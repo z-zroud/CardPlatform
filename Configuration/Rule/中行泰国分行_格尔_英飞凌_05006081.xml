@@ -1,0 +1,136 @@
+<Rule>
+      <TagEncrypt tag="90" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="92" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="93" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="9F48" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="9F46" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="EF11" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8205" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8204" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8203" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8202" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8201" type="BASE64" isWholeDecrypted="true"/>
+      <TagEncrypt tag="57" type="DES" key="0123456789ABCDEF0123456789ABCDEF" delete80="true" isWholeDecrypted="true"/>
+      <TagEncrypt tag="9F1F" type="DES" key="0123456789ABCDEF0123456789ABCDEF" delete80="true" isWholeDecrypted="true"/>
+      <TagEncrypt tag="9F61" type="DES" key="0123456789ABCDEF0123456789ABCDEF" delete80="true" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8000" type="DES" key="0123456789ABCDEF0123456789ABCDEF" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8201" type="DES" key="0123456789ABCDEF0123456789ABCDEF" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8202" type="DES" key="0123456789ABCDEF0123456789ABCDEF" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8203" type="DES" key="0123456789ABCDEF0123456789ABCDEF" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8204" type="DES" key="0123456789ABCDEF0123456789ABCDEF" isWholeDecrypted="true"/>
+      <TagEncrypt tag="8205" type="DES" key="0123456789ABCDEF0123456789ABCDEF" isWholeDecrypted="true"/>       
+      <TagEncrypt tag="5F2D" type="BCD"/>
+      <TagEncrypt tag="50" type="BCD"/>
+      <TagEncrypt tag="5F20" type="BCD"/>
+      
+      <!--磁条数据信息-->
+      <AddTagFromDGI srcDGI="0101" dstDGI="01" dstTag="57"/>
+      <AddTagFromDGI srcDGI="0101" dstDGI="01" dstTag="9F1F"/>
+      <AddTagToValue DGI="0101"/>
+      
+      <!--持卡人基本信息-->
+      <AddTagFromDGI srcDGI="0102" dstDGI="01" dstTag="9F61"/>
+      <AddTagFromDGI srcDGI="0102" dstDGI="01" dstTag="9F62"/>
+      <AddTagFromDGI srcDGI="0102" dstDGI="01" dstTag="5F20"/>
+      <!--AddTagFromDGI srcDGI="0102" dstDGI="01" dstTag="9F0B"/-->  
+      <AddTagToValue DGI="0102"/>
+           
+      <!--PBOC签名的静态应用数据-->
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="5F24"/>  
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="5A"/>
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="9F07"/>  
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="8E"/>  
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="9F0D"/>  
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="9F0E"/>  
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="9F0F"/>  
+      <AddTagFromDGI srcDGI="0201" dstDGI="01" dstTag="5F28"/>    
+      <AddTagToValue DGI="0201"/>
+      
+      <!--PBOC IC卡公钥数据-->
+      <AddTagFromDGI srcDGI="0202" dstDGI="01" dstTag="9F46"/>
+      <AddTagFromDGI srcDGI="0202" dstDGI="01" dstTag="9F47"/>
+      <AddTagFromDGI srcDGI="0202" dstDGI="01" dstTag="9F48"/>
+      <AddTagToValue DGI="0202"/>
+      
+      <!--PBOC 包含发卡行签名的静态应用数据-->
+      <AddTagFromDGI srcDGI="0203" dstDGI="01" dstTag="93"/>
+      <AddTagFromDGI srcDGI="0203" dstDGI="01" dstTag="5F25"/>
+      <AddTagFromDGI srcDGI="0203" dstDGI="01" dstTag="9F4A"/>
+      <!--AddTagFromDGI srcDGI="0203" dstDGI="01" dstTag="9F63"/-->
+      <AddTagToValue DGI="0203"/>      
+
+      <!--卡片管理数据-->
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="5F30"/>
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="9F42"/>
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="8C"/>
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="8D"/>
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="9F08"/>
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="9F49"/>
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="5F34"/>     
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="9F14"/>
+      <AddTagFromDGI srcDGI="0204" dstDGI="01" dstTag="9F23"/>
+      <AddTagToValue DGI="0204"/>      
+      
+      <!--发卡行公钥证书-->
+      <AddTagFromDGI srcDGI="0301" dstDGI="01" dstTag="90"/>
+       <AddTagToValue DGI="0301"/>
+           
+      <!--发卡行公钥数据-->
+      <AddTagFromDGI srcDGI="0302" dstDGI="01" dstTag="9F32"/>
+      <AddTagFromDGI srcDGI="0302" dstDGI="01" dstTag="92"/>
+      <AddTagFromDGI srcDGI="0302" dstDGI="01" dstTag="8F"/>
+      <AddTagToValue DGI="0302"/>
+          
+      <!--卡片内部风险管理数据-->
+      <AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F53"/>
+      <AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F54"/>
+      <AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F58"/>
+      <AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F59"/> 
+      <AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F5C"/>     
+      <AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F72"/>
+      <!--AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F75"/-->
+      <AddTagFromDGI srcDGI="0D01" dstDGI="01" dstTag="9F36"/>      
+      <AddTagToValue DGI="0D01"/>
+      
+      <!--卡片内部风险管理数据-->
+      <AddTagFromDGI srcDGI="0E01" dstDGI="01" dstTag="57"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="01" dstTag="5F20"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="01" dstTag="5F34"/>  
+      <AddTagFromDGI srcDGI="0E01" dstDGI="01" dstTag="9F56"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="01" dstTag="9F4F"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="01" dstTag="9F51"/>
+      <AddTagFromDGI srcDGI="0E01" dstDGI="01" dstTag="9F52"/>      
+      <AddTagToValue DGI="0E01"/>
+      
+      <!--应用密钥-->
+      <MergeTag srcDGI="8000" srcTag="8000" dstDGI="01" dstTag="EF04"/>
+      <MergeTag srcDGI="8000" srcTag="8000" dstDGI="01" dstTag="EF08"/>
+      <MergeTag srcDGI="8000" srcTag="8000" dstDGI="01" dstTag="EF06"/>
+      
+      <!--KCV-->
+      <MergeTag srcDGI="9000" srcTag="9000" dstDGI="01" dstTag="EF24"/>
+      <MergeTag srcDGI="9000" srcTag="9000" dstDGI="01" dstTag="EF28"/>
+      <MergeTag srcDGI="9000" srcTag="9000" dstDGI="01" dstTag="EF26"/>
+      
+      <!--RSA密钥-->
+      <AddTagFromDGI srcDGI="8201" srcTag="8201" dstDGI="01" dstTag="EF16"/>
+      <AddTagFromDGI srcDGI="8202" srcTag="8202" dstDGI="01" dstTag="EF15"/>
+      <AddTagFromDGI srcDGI="8203" srcTag="8203" dstDGI="01" dstTag="EF14"/>
+      <AddTagFromDGI srcDGI="8204" srcTag="8204" dstDGI="01" dstTag="EF13"/>
+      <AddTagFromDGI srcDGI="8205" srcTag="8205" dstDGI="01" dstTag="EF12"/>
+      
+      <AddTagFromDGI srcDGI="9104" dstDGI="01" dstTag="82"/>
+      <AddTagToValue DGI="9104"/>
+      
+      <!--发卡行自定义数据-->    
+      <AddTagFromDGI srcDGI="9200" dstDGI="01" dstTag="9F10"/>
+      <AddTagToValue DGI="9200"/>  
+	  <!--AddPSEAndPPSE value="DGI0201-50,Fix-ABCD,DGI0301-57"/-->
+      <AddFixedTag srcDGI="9104" tag="94" tagValue="080102001001040118010200"/>
+      <AddFixedTag srcDGI="9102" tag="9102" tagValue="A51D500B55494343204352454449548701015F2D027A68BF0C059F4D020B0A"/>           
+      <AddFixedTag srcDGI="PSE" tag="0101" tagValue="01011E701C611A4F08A000000333010102500B5549434320435245444954870101"/>
+      <AddFixedTag srcDGI="PSE" tag="9102" tagValue="91020AA5088801015F2D027A68"/>      
+      
+      
+      <DeletedDGI DGI="01"/>
+</Rule>

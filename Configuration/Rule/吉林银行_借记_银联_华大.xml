@@ -1,15 +1,24 @@
 <Rule>
       <Encrypt DGI="8000" type="DES" key="0123456789ABCDEF1111111111111111" />
-      <Encrypt DGI="MCDA8000" type="DES" key="0123456789ABCDEF1111111111111111" />
+      <!--Encrypt DGI="8020" type="DES" key="0123456789ABCDEF1111111111111111" /-->
       <Encrypt DGI="8201" type="DES" key="0123456789ABCDEF1111111111111111" />
       <Encrypt DGI="8202" type="DES" key="0123456789ABCDEF1111111111111111" />
       <Encrypt DGI="8203" type="DES" key="0123456789ABCDEF1111111111111111" />
       <Encrypt DGI="8204" type="DES" key="0123456789ABCDEF1111111111111111" />         
       <Encrypt DGI="8205" type="DES" key="0123456789ABCDEF1111111111111111" />
+      <Encrypt DGI="8030" type="SM" key="0123456789ABCDEF1111111111111111" />
+      <Encrypt DGI="8100" type="SM" key="0123456789ABCDEF1111111111111111" />
       <Exchange srcDGI="8202" exchangedDGI="8203"/>
       <Exchange srcDGI="8204" exchangedDGI="8205"/>
+      <Map srcDGI="9002" dstDGI="9030"/>
+      <Map srcDGI="9211" dstDGI="9217"/>
+      <Map srcDGI="8002" dstDGI="8030"/>
+      <Map srcDGI="9204" dstDGI="9213"/>
+      <Map srcDGI="9105" dstDGI="9114"/>
+      <Map srcDGI="8302" dstDGI="8100"/>
       <DeletedDGI DGI="8010"/>
       <DeletedDGI DGI="9010"/>
       <DeletedDGI DGI="F001"/>
+      <DeletedDGI DGI="8301"/>
       <DeletedTag DGI="0E01" tag="9F1F"/>
 </Rule>

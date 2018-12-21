@@ -10,12 +10,9 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <windows.h>
-#ifdef _DEBUG
-#pragma comment(lib,"..//lib//Debug//ApduCmd.lib")
-#pragma comment(lib,"..//lib//Debug//PCSC.lib")
-#else
-#pragma comment(lib,"..//lib//Release//ApduCmd.lib")
-#pragma comment(lib,"..//lib//Release//PCSC.lib")
-#endif
+
+#pragma comment(lib,"..//lib//ApduCmd.lib")
+#pragma comment(lib,"..//lib//PCSC.lib")
+
 
 // TODO: reference additional headers your program requires here

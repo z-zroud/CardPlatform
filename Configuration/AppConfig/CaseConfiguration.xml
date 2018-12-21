@@ -1,37 +1,624 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CaseConfig>
-      <PSE>
-            <StepCase name="SelectPSE">
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_001" desc="数据是否以6F开头"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_003" desc="6F模板下只能包含Tag84和A5模板，顺序不能颠倒"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_005" desc="84的长度是否正确且在5～16字节之间，其值是否为银联规范规定的值"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_006" desc="A5模板下只能包含必选数据tag88和可选数据5F2D、9F11和BF0C，其他Tag不能存在"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_009" desc="5F2D的长度必须是2字节的倍数，2～8字节之间"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_010" desc="5F2D转换成BCD码后，是否合规"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_011" desc="9F11的长度必须是1字节，值在01～10之间"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_SJHGX_012" desc="Tag长度为00的要提示"/>
-                  <CaseItem level="failed" num="PBOC_sPSE_CFX_001" desc="每个Tag只能存在一个，包括6F，A5，BF0C模板"/>
-            </StepCase>
-            <StepCase name="ReadPSEDir">
-                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_001" desc="是否以70开头"/>
-                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_003" desc="70后是否仅包含61模板"/>
-                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_005" desc="61中是否包含4F（必选包含）4F的长度是否在5～16字节之间"/>
-                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_007" desc="50必须包含在61模板内，50的长度是否在1～16字节之间"/>
-                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_008" desc="61中可包含的其他Tag有 50.9F12、87、73，其他Tag不能出现"/>
-                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_009" desc="9F12的长度应在1～16字节之间,BCD码显示"/>
-                  <CaseItem level="failed" num="PBOC_rPSEDIR_SJHGX_010" desc="87的长度是否为1字节"/>
-            </StepCase>
-      </PSE>
-      <PPSE>
-            <StepCase name="SelectAID">
-                  <CaseItem level="failed" num="" desc=""/>
-            </StepCase>           
-      </PPSE>
-      <UICS>
+		<PSE>
+			<StepCase name="SelectPSE">
+				<CaseItem level="failed" num="PSE_001" desc="检测数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="PSE_002" desc="检测6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒"/>
+				<CaseItem level="failed" num="PSE_003" desc="检测tag84是否为银联规范规定的值315041592E5359532E4444463031"/>
+				<CaseItem level="failed" num="PSE_004" desc="检测A5模板下只能包含必选数据tag88和可选数据5F2D、9F11和BF0C，其他Tag不能存在"/>
+				<CaseItem level="failed" num="PSE_005" desc="检测A5模板下tag88是否符合规范(必须存在，长度01，值1-1F)"/>
+				<CaseItem level="failed" num="PSE_006" desc="检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读字符串)"/>
+				<CaseItem level="failed" num="PSE_007" desc="检测9F11是否符合规范(长度必须是1字节，值在01～10之间)"/>
+				<CaseItem level="failed" num="PSE_008" desc="检测PSE模板的唯一性,PSE FCI 只能包含唯一的模板(6F，A5，BF0C)"/>
+			</StepCase>
+			<StepCase name="ReadPSEDir">
+				<CaseItem level="failed" num="PSEDIR_001" desc="检测数据是否以70模板开头"/>
+				<CaseItem level="failed" num="PSEDIR_002" desc="检测70模板是否仅包含61模板"/>
+				<CaseItem level="failed" num="PSEDIR_003" desc="检测61模板中4F模板的规范性(必须存在且4F的长度是在5～16字节之间)"/>
+				<CaseItem level="failed" num="PSEDIR_004" desc="检测tag50是否符合规范(必须存在，长度1-16字节，ASCII字符)"/>
+				<CaseItem level="failed" num="PSEDIR_005" desc="检测61模板中可包含Tag 除4F,50,9F12、87、73，其他Tag不能出现"/>
+				<CaseItem level="failed" num="PSEDIR_006" desc="检测9F12的长度应在1～16字节之间,BCD码显示"/>
+				<CaseItem level="failed" num="PSEDIR_007" desc="检测87的合规性(多应用下必须存在，长度是否为1字节，正确的值范围为00-0F，80-8F)"/>	
+				<CaseItem level="failed" num="PSEDIR_008" desc="检测tag9F12存在的情况下，则tag9F11必须存在"/>	
+				<CaseItem level="warn" num="PSEDIR_009" desc="检测tag4F和tag50关联的一致性，例如4F为借记，则50显示Debit"/>
+				<CaseItem level="failed" num="PSEDIR_010" desc="检测是否有重复性tag出现"/>
+				<CaseItem level="failed" num="PSEDIR_011" desc="检测模板73是否只包含9F0A"/>
+				<!--CaseItem level="failed" num="PSEDIR_012" desc="检测DIR文件中的AID是否都能选择成功"/-->
+			</StepCase>
+		</PSE>
+		<PPSE>
+			<StepCase name="SelectPPSE">
+				<CaseItem level="failed" num="PPSE_001" desc="检测PPSE响应数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="PPSE_002" desc="检测PPSE响应数据6F模板下依次、仅包含Tag84和A5模板"/>
+				<CaseItem level="failed" num="PPSE_003" desc="检测PPSE响应数据tag6F下的tag84是否为银联规范规定的值325041592E5359532E4444463031"/>
+				<CaseItem level="failed" num="PPSE_004" desc="检测PPSE响应数据A5模板下仅包含BF0C模板"/>
+				<CaseItem level="failed" num="PPSE_005" desc="检测PPSE响应数据61模板中仅包含4F,50和87，其中4F、50必备，多应用下tag87必备"/>
+				<CaseItem level="failed" num="PPSE_006" desc="检测PPSE响应数据61模板中4F的长度是否在(5~16)字节之间"/>
+				<CaseItem level="failed" num="PPSE_008" desc="检测PPSE响应数据tag87的长度是否为1字节，正确的值范围为00-0F，80-8F"/>
+				<CaseItem level="failed" num="PPSE_009" desc="检测PPSE响应数据tag4F和tag50关联性，例如4F为借记，则50显示Debit"/>
+				<CaseItem level="failed" num="PPSE_010" desc="检测PPSE响应数据是否包含有重复的tag或模板"/>
+			</StepCase>           
+		</PPSE>
+		<UICS>
+			<StepCase name="SelectApp">
+				<CaseItem level="failed" num="SelectAid_001" desc="检测数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="SelectAid_002" desc="检测6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒"/>
+				<CaseItem level="failed" num="SelectAid_003" desc="检测tag84长度的合规性(长度在5-16字节之间)"/>
+				<CaseItem level="failed" num="SelectAid_004" desc="检测tag50是否符合规范(必须存在，长度1-16字节，ASCII字符)"/>
+				<CaseItem level="failed" num="SelectAid_005" desc="检测A5模板下可包含的tag包括50，87，9F38,5F2D,9F11，9F12，BF0C"/>
+				<CaseItem level="failed" num="SelectAid_006" desc="检测87的合规性(长度是否为1字节，多个应用时，tag87必须存在)"/>
+				<CaseItem level="failed" num="SelectAid_007" desc="检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读小写字符串)"/>				
+				<CaseItem level="failed" num="SelectAid_008" desc="检测9F11是否符合规范(与PSE中9F11一致，长度必须是1字节，值在01～10之间)"/>				
+				<CaseItem level="failed" num="SelectAid_009" desc="检测9F12的规范性(长度必须在1～16之间,ASCII字符)"/>	
+				<CaseItem level="failed" num="SelectAid_010" desc="检测BF0C模板下是否包含9F4D借贷记交易日志入口，长度为2字节"/>	
+				<CaseItem level="failed" num="SelectAid_011" desc="检测BF0C模板下是否包含DF4D电子现金交易日志入口，长度为2字节"/>
+				<CaseItem level="failed" num="SelectAid_012" desc="检测Select Application响应数据tag的唯一性"/>
+                <CaseItem level="failed" num="SelectAid_013" desc="检测tag9F38是否存在,是否能正常分解,长度是否符合规范"/>
+                <CaseItem level="failed" num="SelectAid_026" desc="检测AID FCI中的tag9F11和PSE FCI中的9F11是否相同"/>
+			</StepCase>
             <StepCase name="GPO">
-                  <CaseItem level="failed" num="PBOC_GPO_SJHGX_001" desc="响应数据是否以80开头"/>
-                  <CaseItem level="failed" num="PBOC_GPO_SJHGX_003" desc="去除AIP后检查AFL是否为4字节的倍数"/>
-                  <CaseItem level="failed" num="PBOC_GPO_SJHGX_004" desc="AFL中记录没有重复/AIP重复"/>
+				<CaseItem level="failed" num="GPO_001" desc="检测GPO响应数据是否以80开头,格式是否正确"/>
+				<CaseItem level="failed" num="GPO_002" desc="检测tag94是否为4字节的倍数"/>
+				<CaseItem level="failed" num="GPO_003" desc="检测GPO相应数据中没有重复的AFL记录"/>
+				<CaseItem level="failed" num="GPO_004" desc="检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于第3个字节)"/>
+				<CaseItem level="failed" num="GPO_005" desc="检测卡片是否支持SDA功能"/>
+				<CaseItem level="failed" num="GPO_006" desc="检测卡片是否支持DDA功能"/>
+				<CaseItem level="failed" num="GPO_007" desc="检测卡片是否支持持卡人认证功能"/>
+				<CaseItem level="failed" num="GPO_008" desc="检测卡片是否支持执行终端风险管理功能"/>
+				<CaseItem level="failed" num="GPO_009" desc="检测卡片是否支持发卡行认证功能"/>
+				<!--CaseItem level="failed" num="GPO_010" desc="检测卡片是否支持CDA功能"/-->
             </StepCase>
-      </UICS>
+			<StepCase name="ReadRecord">
+				<CaseItem level="failed" num="ReadRecord_001" desc="检测读记录是否以70模板开头"/>
+				<CaseItem level="failed" num="ReadRecord_002" desc="检测tag57的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_003" desc="检测tag8E的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_004" desc="检测tag5F20和tag9F0B的互斥性(不能同时存在，只能存在一个)"/>
+				<CaseItem level="failed" num="ReadRecord_005" desc="检测tag5F20的规范性(英文字符、包含/,建议值、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_006" desc="检测tag9F0B的规范性(英文字符、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_007" desc="检测tag5F30的规范性(借记/贷记使用的服务码需在规范范围内)"/>
+				<CaseItem level="failed" num="ReadRecord_008" desc="检测tag9F62证件类型的规范性(取值范围、长度等)"/>
+				<CaseItem level="warn" num="ReadRecord_009" desc="检测tag9F61证件号的规范性(转字符串、证件类型对应的证件长度、规范长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_011" desc="检测Tag9F0D/9F0E/9F0F（长度必须是5个字节)"/>
+				<CaseItem level="failed" num="ReadRecord_012" desc="检测Tag8C/8D能否分解"/>
+				<CaseItem level="failed" num="ReadRecord_013" desc="检测Tag5A的规范性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_014" desc="检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)"/>
+				<CaseItem level="failed" num="ReadRecord_015" desc="检测Tag5F34长度是否为固定1字节"/>
+				<CaseItem level="failed" num="ReadRecord_016" desc="检测Tag9F4A值是否为82"/>
+				<CaseItem level="failed" num="ReadRecord_017" desc="检测Tag9F49值是否为9F3704"/>
+				<CaseItem level="failed" num="ReadRecord_018" desc="检测Tag9F47/9F32值是否为03或010001"/>
+				<CaseItem level="failed" num="ReadRecord_019" desc="检测Tag9F1F(转换为字符串)"/>
+				<CaseItem level="failed" num="ReadRecord_020" desc="检测Tag8F长度等于1"/>
+				<CaseItem level="failed" num="ReadRecord_021" desc="检测Tag9F28长度等于3"/>
+				<CaseItem level="failed" num="ReadRecord_022" desc="检测Tag14长度等于2"/>
+				<CaseItem level="failed" num="ReadRecord_023" desc="检测Tag23长度等于2"/>
+				<CaseItem level="failed" num="ReadRecord_024" desc="检测Tag9F08的值是否为0030.PBOC3.0和UICS要求的应用版本号为0030"/>
+				<CaseItem level="failed" num="ReadRecord_025" desc="检测Tag9F69,9F79，不能出现在读记录中"/>
+				<CaseItem level="failed" num="ReadRecord_026" desc="检测Tag5F30中的服务码与57中的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_027" desc="检测Tag5F24与57中的失效期的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_028" desc="检测Tag5A与57中卡号的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_029" desc="检测Tag5F28与9F57发卡行国家代码的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_030" desc="检测Tag9F42与9F51应用货币代码的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_035" desc="检测Tag9F42应用货币代码，如果CVM中要求金额检查(X,Y金额不为零)，该数据必须存在"/>
+			</StepCase>
+			<StepCase name="ProcessRestriction">
+				<CaseItem level="warn" num="HandleLimitation_001" desc="检测Tag5F24应用失效日期,应用是否失效"/>
+				<CaseItem level="warn" num="HandleLimitation_002" desc="检测Tag5F25应用生效日期，应用是否生效"/>
+				<CaseItem level="failed" num="HandleLimitation_003" desc="检测Tag5F24和Tag5F25时间顺序关系是否正确"/>
+				<CaseItem level="failed" num="ProcessRestriction_005" desc="检测tag9F08应用版本号是否符合规范"/>
+			</StepCase>
+			<StepCase name="CardHolderVerify">
+				<CaseItem level="failed" num="CardHolderVerfiy_001" desc="检测8E格式是否符合规范"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_002" desc="检测8E中X金额、Y金额是否为全零"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_003" desc="检测8E中CVM是否符合银联规范值(42031E031F00)"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_004" desc="检测8E是否存在脱机PIN入口，若有是否有相应的tag存在卡片中"/>
+			</StepCase>
+			<StepCase name="TerminalRiskManagement">
+				<CaseItem level="warn" num="TerminalRiskManagement_001" desc="检测发卡行支持终端频度检测必要的数据(tag9F14,tag9F23)"/>
+			</StepCase>
+			<StepCase name="TerminalActionAnalyze">
+				<CaseItem level="failed" num="TerminalActionAnalyze_001" desc="检测第一个GAC卡片返回结果是否为80"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_007" desc="检测tag9F10中MAC的正确性"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_008" desc="检测tag9F26的值与终端计算的mac一致性"/>
+			</StepCase>
+			<StepCase name="TransactionEnd">
+				<CaseItem level="failed" num="TransactionEnd_001" desc="检测第一个GAC卡片返回结果是否为80"/>
+				<CaseItem level="failed" num="TransactionEnd_007" desc="检测tag9F10中MAC的正确性"/>
+				<CaseItem level="failed" num="TransactionEnd_008" desc="检测tag9F26的值与终端计算的mac一致性"/>
+			</StepCase>
+		</UICS>
+		<qUICS>
+			<StepCase name="SelectApp">
+				<CaseItem level="failed" num="SelectAid_001" desc="检测数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="SelectAid_002" desc="检测tag6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒"/>
+				<CaseItem level="failed" num="SelectAid_003" desc="检测tag84是否存在且长度是否正确且在5～16字节之间"/>
+				<CaseItem level="failed" num="SelectAid_004" desc="检测tag50是否符合规范(必须存在，长度1-16字节，ASCII字符)"/>
+				<CaseItem level="failed" num="SelectAid_005" desc="检测tagA5模板下可包含的tag包括50，87，9F38,5F2D,9F11，9F12，BF0C"/>
+				<CaseItem level="failed" num="SelectAid_006" desc="检测tag87的合规性(长度是否为1字节)"/>
+				<CaseItem level="failed" num="SelectAid_007" desc="检测tag5F2D的合规性(长度应在1～16字节之间,BCD码显示)"/>				
+				<CaseItem level="failed" num="SelectAid_008" desc="检测tag9F11是否符合规范(与PSE中9F11一致，长度必须是1字节，值在01～10之间)"/>				
+				<CaseItem level="failed" num="SelectAid_009" desc="检测tag9F12的规范性(长度必须在1～16之间,Tag9F12转成BCD显示)"/>	
+				<CaseItem level="failed" num="SelectAid_010" desc="检测tag9F4D,DF4D的规范性(长度必须为2字节)"/>	
+				<CaseItem level="failed" num="SelectAid_011" desc="检测PPSE的FCI中有9F11的话在PSE的DIR文件中是否存在9F12"/>
+				<CaseItem level="failed" num="SelectAid_012" desc="检测每个Tag只能存在一个，包括6F，A5，BF0C模板"/>
+				<CaseItem level="failed" num="SelectAid_013" desc="检测tag9F38是否存在,是否能正常分解"/>
+				<CaseItem level="failed" num="SelectAid_014" desc="检测tag9F38每个tag长度是否符合规范"/>
+				<CaseItem level="failed" num="SelectAid_016" desc="检测采用密文版本01的QPBOC最基本的PDOL包含的标签是否存在(tag9F66/9F02/9F03/9F1A/95/5F2A/9A/9C/9F37)"/>
+				<CaseItem level="failed" num="SelectAid_017" desc="检测AID返回的FCI模板中tag84的值和PPSE FCI中的4F是否一致"/>
+			</StepCase>
+            <StepCase name="GPO">		
+				<CaseItem level="failed" num="GPO_002" desc="检测tag94是否为4字节的倍数"/>
+				<CaseItem level="failed" num="GPO_003" desc="检测GPO相应数据中没有重复的AFL记录"/>
+				<CaseItem level="failed" num="GPO_004" desc="检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于第3个字节)"/>
+				<CaseItem level="failed" num="GPO_005" desc="检测卡片是否支持SDA功能"/>
+				<CaseItem level="failed" num="GPO_006" desc="检测卡片是否支持DDA功能"/>
+				<CaseItem level="failed" num="GPO_007" desc="检测卡片是否支持持卡人认证功能"/>
+				<CaseItem level="failed" num="GPO_008" desc="检测卡片是否支持执行终端风险管理功能"/>
+				<CaseItem level="failed" num="GPO_009" desc="检测卡片是否支持发卡行认证功能"/>
+				<CaseItem level="failed" num="GPO_010" desc="检测卡片是否支持CDA功能"/>
+				<CaseItem level="failed" num="GPO_011" desc="检测GPO响应数据是否以77开头,格式是否正确"/>
+				<CaseItem level="failed" num="GPO_012" desc="检测GPO响应数据，联机/拒绝交易包含数据(tag82/9F36/57/9F10/9F26/9F63/9F34/9F6C/9F5D/5F20),脱机批准(tag82/94/9F36/9F26/9F10/57/5F34/9F4B/9F6C/9F5D)"/>
+				<CaseItem level="failed" num="GPO_013" desc="检测tag9F10的规范性(密文版本号01/17)(算法标识01/04)(IDD取值范围01~06)"/>
+				<CaseItem level="failed" num="GPO_014" desc="检测tag9F10中MAC的正确性"/>
+				<CaseItem level="failed" num="GPO_015" desc="检测tag9F26的值与终端计算的mac一致性"/>
+				<CaseItem level="failed" num="GPO_016" desc="检测Tag57的合规性检查（卡号不以62开头则警告）"/>
+				<CaseItem level="failed" num="GPO_017" desc="检测Tag5F34的长度是否为1字节"/>
+            </StepCase>
+			<StepCase name="ReadRecord">
+				<CaseItem level="failed" num="ReadRecord_001" desc="检测读记录是否以70模板开头"/>
+				<CaseItem level="failed" num="ReadRecord_003" desc="检测tag8E的合规性(格式、长度等)"/>		
+				<CaseItem level="failed" num="ReadRecord_011" desc="检测Tag9F0D/9F0E/9F0F（长度必须是5个字节)"/>
+				<CaseItem level="failed" num="ReadRecord_013" desc="检测Tag5A的规范性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_014" desc="检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)"/>
+				<CaseItem level="failed" num="ReadRecord_016" desc="检测Tag9F4A值是否为82"/>
+				<CaseItem level="failed" num="ReadRecord_018" desc="检测Tag9F47/9F32值是否为03或010001"/>
+				<CaseItem level="failed" num="ReadRecord_019" desc="检测Tag9F1F(转换为字符串)"/>
+				<CaseItem level="failed" num="ReadRecord_020" desc="检测Tag8F长度等于1"/>
+				<CaseItem level="failed" num="ReadRecord_024" desc="检测Tag9F08的值是否为0030"/>
+				<CaseItem level="failed" num="ReadRecord_027" desc="检测Tag5F24与57中的失效期的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_028" desc="检测Tag5A与57中卡号的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_031" desc="检测QPBOC/QUICS交易中，tag9F74是否正确，且作为最后一个读记录命令中返回"/>
+				<CaseItem level="failed" num="ReadRecord_032" desc="检测fDDA01版本，卡片最后一个读记录应返回tag9F69"/>
+				<CaseItem level="failed" num="ReadRecord_033" desc="检测fDDA01下tag9F69与DF61和9F6C的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_034" desc="检测fDDA00版本下，卡片不应该返回tag9F69"/>
+			</StepCase>
+		</qUICS>
+		<VISA>
+			<StepCase name="SelectApp">
+				<CaseItem level="failed" num="SelectAid_001" desc="检测响应数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="SelectAid_002" desc="检测6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒"/>
+				<CaseItem level="failed" num="SelectAid_003" desc="检测tag84的规范性(长度在5-16字节之间)"/>
+				<CaseItem level="failed" num="SelectAid_004" desc="检测tag50的规范性(必须存在，长度1-16字节，ASCII字符)"/>
+				<CaseItem level="failed" num="SelectAid_005" desc="检测A5模板的规范性(仅可包含tag50，87，9F38,5F2D,9F11，9F12，及BF0C模板)"/>
+				<CaseItem level="failed" num="SelectAid_006" desc="检测87的合规性(长度是否为1字节，多个应用时，tag87必须存在)"/>
+				<CaseItem level="failed" num="SelectAid_007" desc="检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读小写字符串)"/>				
+				<CaseItem level="failed" num="SelectAid_008" desc="检测9F11是否符合规范(tag9F12存在，则tag9F11必须存在，长度必须是1字节，值在01～10之间)"/>				
+				<CaseItem level="failed" num="SelectAid_009" desc="检测9F12的规范性(长度必须在1～16之间,ASCII字符)"/>	
+				<CaseItem level="failed" num="SelectAid_012" desc="检测Select Application响应数据tag的唯一性"/>
+				<CaseItem level="failed" num="SelectAid_013" desc="检测tag9F38是否存在,是否能正常分解,长度是否符合规范"/>
+				<CaseItem level="failed" num="SelectAid_021" desc="检测BF0C模板是否存在9F4D,Visa应用已废弃日志的使用"/>
+				<CaseItem level="failed" num="SelectAid_022" desc="检测BF0C模板是否存在DF4D,Visa应用已废弃日志的使用"/>
+				<CaseItem level="failed" num="SelectAid_023" desc="检测BF0C模板下是否仅包含可选的tag9F0A,5F55,9F5A"/>
+				<!--CaseItem level="failed" num="SelectAid_024" desc="检测tag9F5A的长度是否为5字节"/-->
+				<CaseItem level="failed" num="SelectAid_025" desc="检测tag5F55长度是否为2字节，并能转BCD显示"/>
+				<CaseItem level="failed" num="SelectAid_026" desc="检测AID FCI中的tag9F11和PSE FCI中的9F11是否相同"/>
+			</StepCase>
+            <StepCase name="GPO">
+				<CaseItem level="failed" num="GPO_001" desc="检测GPO响应数据是否以80开头,是否能TLV分解"/>
+				<CaseItem level="failed" num="GPO_002" desc="检测tag94是否为4字节的整数倍"/>
+				<CaseItem level="failed" num="GPO_003" desc="检测tag94是否包含重复的AFL记录"/>
+				<CaseItem level="failed" num="GPO_004" desc="检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于等于第3个字节)"/>
+				<CaseItem level="tip" num="GPO_006" desc="检测卡片是否支持DDA功能"/>
+				<CaseItem level="tip" num="GPO_007" desc="检测卡片是否支持持卡人认证功能"/>
+				<CaseItem level="warn" num="GPO_008" desc="检测卡片是否支持执行终端风险管理功能"/>
+				<CaseItem level="failed" num="GPO_009" desc="检测卡片是否支持发卡行认证功能"/>
+            </StepCase>
+			<StepCase name="ReadRecord">
+				<CaseItem level="failed" num="ReadRecord_001" desc="检测读记录是否以70模板开头"/>
+				<CaseItem level="failed" num="ReadRecord_002" desc="检测tag57的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_003" desc="检测tag8E的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_004" desc="检测tag5F20和tag9F0B的互斥性(不能同时存在，只能存在一个)"/>
+				<CaseItem level="failed" num="ReadRecord_005" desc="检测tag5F20的规范性(英文字符、包含/,建议值、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_006" desc="检测tag9F0B的规范性(英文字符、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_011" desc="检测Tag9F0D/9F0E/9F0F（长度必须是5个字节)"/>
+				<CaseItem level="failed" num="ReadRecord_012" desc="检测Tag8C是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_036" desc="检测Tag8D是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_013" desc="检测Tag5A的规范性(格式、长度在16~19位之间等)"/>
+				<CaseItem level="failed" num="ReadRecord_014" desc="检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)"/>
+				<CaseItem level="failed" num="ReadRecord_015" desc="检测Tag5F34的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_016" desc="检测Tag9F4A的规范性(值是否为82)"/>
+				<CaseItem level="failed" num="ReadRecord_017" desc="检测Tag9F49的规范性(值是否为9F3704)"/>
+				<CaseItem level="failed" num="ReadRecord_018" desc="检测Tag9F47/9F32的规范性(值是否为03或010001)"/>
+				<CaseItem level="failed" num="ReadRecord_019" desc="检测Tag9F1F的规范性(转换为字符串)"/>
+				<CaseItem level="failed" num="ReadRecord_020" desc="检测Tag8F的规范性(长度等于1)"/>
+				<CaseItem level="failed" num="ReadRecord_021" desc="检测Tag9F28的规范性(长度等于2)"/>
+				<CaseItem level="failed" num="ReadRecord_024" desc="检测Tag9F08的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_025" desc="检测Tag9F69,9F79，不能出现在读记录中"/>
+				<CaseItem level="failed" num="ReadRecord_026" desc="检测Tag5F30中的服务码与57中的一致性,是否以02或06开头，长度为2字节"/>
+				<CaseItem level="failed" num="ReadRecord_027" desc="检测Tag5F24与57中的失效期的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_028" desc="检测Tag5A与57中卡号的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_035" desc="检测Tag9F42应用货币代码，如果CVM中要求金额检查(X,Y金额不为零)，该数据必须存在"/>
+			</StepCase>
+			<StepCase name="GetData">
+				<CaseItem level="tip" num="GetData_9F36" desc="检测tag9F36是否存在" />
+				<CaseItem level="tip" num="GetData_9F13" desc="检测tag9F13是否存在" />
+				<CaseItem level="tip" num="GetData_9F17" desc="检测tag9F17是否存在" />
+				<CaseItem level="tip" num="GetData_9F51" desc="检测tag9F51是否存在" />
+				<CaseItem level="tip" num="GetData_9F52" desc="检测tag9F52是否存在" />
+				<CaseItem level="tip" num="GetData_9F53" desc="检测tag9F53是否存在" />
+				<CaseItem level="tip" num="GetData_9F54" desc="检测tag9F54是否存在" />
+				<CaseItem level="tip" num="GetData_9F56" desc="检测tag9F56是否存在" />
+				<CaseItem level="tip" num="GetData_9F57" desc="检测tag9F57是否存在" />
+				<CaseItem level="tip" num="GetData_9F58" desc="检测tag9F58是否存在" />
+				<CaseItem level="tip" num="GetData_9F59" desc="检测tag9F59是否存在" />
+				<CaseItem level="tip" num="GetData_9F5C" desc="检测tag9F5C是否存在" />
+				<CaseItem level="tip" num="GetData_9F5D" desc="检测tag9F5D是否存在" />
+				<CaseItem level="tip" num="GetData_9F5E" desc="检测tag9F5E是否存在" />
+				<CaseItem level="tip" num="GetData_9F72" desc="检测tag9F72是否存在" />
+				<CaseItem level="tip" num="GetData_9F73" desc="检测tag9F73是否存在" />
+				<CaseItem level="tip" num="GetData_9F75" desc="检测tag9F75是否存在" />
+				<CaseItem level="tip" num="GetData_9F76" desc="检测tag9F76是否存在" />
+				<CaseItem level="tip" num="GetData_9F77" desc="检测tag9F77是否存在" />
+				<CaseItem level="tip" num="GetData_9F78" desc="检测tag9F78是否存在" />
+				<CaseItem level="tip" num="GetData_9F79" desc="检测tag9F79是否存在" />
+				<CaseItem level="tip" num="GetData_9F4F" desc="检测tag9F4F是否存在" />
+				<CaseItem level="tip" num="GetData_9F68" desc="检测tag9F68是否存在" />
+				<CaseItem level="tip" num="GetData_9F6B" desc="检测tag9F6B是否存在" />
+				<CaseItem level="tip" num="GetData_9F6C" desc="检测tag9F6C是否存在" />
+				<CaseItem level="tip" num="GetData_9F6D" desc="检测tag9F6D是否存在" />
+				<CaseItem level="warn" num="GetData_9F6E" desc="检测tag9F6E是否存在" />
+				<CaseItem level="tip" num="GetData_9F7C" desc="检测tag9F7C是否存在" />
+				<CaseItem level="tip" num="GetData_BF55" desc="检测tagBF55是否存在" />
+				<CaseItem level="tip" num="GetData_BF56" desc="检测tagBF56是否存在" />
+				<CaseItem level="tip" num="GetData_BF57" desc="检测tagBF57是否存在" />
+				<CaseItem level="tip" num="GetData_BF58" desc="检测tagBF58是否存在" />
+				<CaseItem level="tip" num="GetData_BF5B" desc="检测tagBF5B是否存在" />
+				<CaseItem level="failed" num="GetData_001" desc="检测Tag9F79小于等于tag9F77, tag9F78小于等于tag9F77" />
+				<!--CaseItem level="failed" num="GetData_002" desc="检测tag9F6D设置的合理性，数值不宜过大，一般默认为0" /-->
+				<CaseItem level="failed" num="GetData_003" desc="检测tag9F68卡片附加处理选项的规范性" />
+				<CaseItem level="failed" num="GetData_004" desc="检测Tag5F28与9F57发卡行国家代码的一致性" />
+				<CaseItem level="failed" num="GetData_005" desc="检测Tag9F42与9F51应用货币代码的一致性" />
+				<CaseItem level="failed" num="GetData_006" desc="检测tag9F54存在或卡片支持国际频度检测时，tag9F51必须存在" />
+				<!--CaseItem level="failed" num="GetData_007" desc="检测tag9F5A，卡片所属区域，货币代码、国家代码与tag9F42,tag5F28的一致性" /-->
+			</StepCase>
+			<StepCase name="ProcessRestriction">
+				<CaseItem level="failed" num="ProcessRestriction_001" desc="检测Tag5F24应用失效日期,应用是否失效"/>
+				<CaseItem level="failed" num="ProcessRestriction_002" desc="检测Tag5F25应用生效日期，应用是否生效"/>
+				<CaseItem level="failed" num="ProcessRestriction_003" desc="检测Tag5F24和Tag5F25时间顺序关系是否正确"/>
+				<CaseItem level="failed" num="ProcessRestriction_004" desc="检测tag9F07是否符合规范"/>
+				<!--CaseItem level="failed" num="ProcessRestriction_005" desc="检测tag9F08应用版本号是否符合规范"/-->
+			</StepCase>
+			<StepCase name="CardHolderVerify">
+				<CaseItem level="failed" num="CardHolderVerfiy_001" desc="检测8E格式是否符合规范"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_002" desc="检测8E中X金额、Y金额是否为全零"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_004" desc="检测8E持卡人认证方法列表"/>
+			</StepCase>
+			<StepCase name="TerminalRiskManagement">
+				<!--CaseItem level="warn" num="TerminalRiskManagement_001" desc="检测发卡行支持终端频度检测必要的数据(tag9F14,tag9F23)"/-->
+				<!--CaseItem level="warn" num="TerminalRiskManagement_002" desc="检测tag9F13的规范性"/-->
+			</StepCase>
+			<StepCase name="TerminalActionAnalyze">
+				<CaseItem level="failed" num="TerminalActionAnalyze_001" desc="检测指令返回数据是否以80模板开头"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_003" desc="检测返回数据tag9F27的规范性"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_004" desc="检测返回数据tag9F36的规范性"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_005" desc="检测返回数据tag9F26的规范性"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_006" desc="检测返回数据tag9F10的规范性"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_008" desc="检测tag9F26的值与终端计算的mac一致性"/>
+			</StepCase>
+			<StepCase name="TransactionEnd">
+				<CaseItem level="failed" num="TransactionEnd_001" desc="检测指令返回数据是否以80模板开头"/>
+				<CaseItem level="failed" num="TransactionEnd_003" desc="检测返回数据tag9F27的规范性"/>
+				<CaseItem level="failed" num="TransactionEnd_004" desc="检测返回数据tag9F36的规范性"/>
+				<CaseItem level="failed" num="TransactionEnd_005" desc="检测返回数据tag9F26的规范性"/>
+				<CaseItem level="failed" num="TransactionEnd_006" desc="检测返回数据tag9F10的规范性"/>
+				<CaseItem level="failed" num="TransactionEnd_008" desc="检测tag9F26的值与终端计算的mac一致性"/>
+			</StepCase>
+		</VISA>
+		<qVSDC>
+			<StepCase name="SelectApp">
+				<CaseItem level="failed" num="SelectAid_001" desc="检测选择应用响应数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="SelectAid_002" desc="检测选择应用响应数据6F模板下依次、仅包含Tag84和A5模板"/>
+				<CaseItem level="failed" num="SelectAid_003" desc="检测选择应用响应数据tag6F下的tag84长度是否符合规范"/>
+				<CaseItem level="failed" num="SelectAid_004" desc="检测选择应用A5模板下的必备的tag50长度、转字符串是否规范"/>
+				<CaseItem level="failed" num="SelectAid_005" desc="检测选择应用A5模板仅可包含tag50，87，9F38,5F2D,9F11，9F12，及BF0C模板"/>
+				<CaseItem level="failed" num="SelectAid_006" desc="检测选择应用A5模板下的tag84在多个应用下是否存在、长度是否为1字节"/>
+				<CaseItem level="failed" num="SelectAid_007" desc="检测选择应用A5模板下5F2D长度为2～8字节之间,能转英文小写字符串"/>				
+				<CaseItem level="failed" num="SelectAid_008" desc="检测选择应用A5模板下9F11是否符合规范，如果tag9F12存在，那么tag9F11必须存在"/>				
+				<CaseItem level="failed" num="SelectAid_009" desc="检测选择应用A5模板下9F12长度为1～16之间,ASCII字符"/>	
+				<CaseItem level="failed" num="SelectAid_012" desc="检测选择应用响应数据是否包含有重复的tag"/>
+                <CaseItem level="failed" num="SelectAid_013" desc="检测选择应用响应数据tag9F38是否存在,是否能正常分解,分解的tag长度是否符合规范"/>
+                <CaseItem level="failed" num="SelectAid_020" desc="检测选择应用响应数据tag9F38中必须包含如下tags:9F66,9F02,9F03,9F1A,5F2A,9A,9C,9F37,95"/>
+				<CaseItem level="failed" num="SelectAid_021" desc="检测选择应用响应数据BF0C模板是否存在9F4D,Visa应用已废弃日志的使用"/>
+				<CaseItem level="failed" num="SelectAid_022" desc="检测选择应用响应数据BF0C模板是否存在DF4D,Visa应用已废弃日志的使用"/>	
+                <CaseItem level="failed" num="SelectAid_023" desc="检测选择应用响应数据BF0C模板下是否仅包含可选的tag9F0A,5F55,9F5A，其中visa应用应包含9F5A"/>
+                <CaseItem level="failed" num="SelectAid_024" desc="检测选择应用响应数据BF0C模板下tag9F5A的长度是否为5字节,是否为亚洲区域发卡"/>
+				<CaseItem level="failed" num="SelectAid_017" desc="检测选择应用响应数据FCI模板中tag84的值和PPSE FCI中的4F是否一致"/>
+                <CaseItem level="failed" num="SelectAid_018" desc="检测选择应用响应数据FCI模板中tag50，87的值和PPSE FCI中的tag50，87是否一致"/>
+			</StepCase>
+            <StepCase name="GPO">	
+                <CaseItem level="failed" num="GPO_019" desc="检测GPO响应数据是否以77模板开头,能否正常TLV分解"/>            
+				<CaseItem level="failed" num="GPO_002" desc="检测GPO响应数据tag94是否为4字节的倍数"/>
+				<CaseItem level="failed" num="GPO_003" desc="检测GPO响应数据tag94是否包含有重复的记录"/>
+				<CaseItem level="failed" num="GPO_004" desc="检测GPO响应数据tag94第2个字节是否小于第3个字节"/>
+                <CaseItem level="failed" num="GPO_021" desc="检测GPO响应数据AIP的规范性,AIP保留位须置0，非接位须置1，是否为推荐值"/>
+                <CaseItem level="failed" num="GPO_013" desc="检测tag9F10的规范性(密文版本号)(算法标识)(IDD取值范围01~06)"/>
+                <CaseItem level="failed" num="GPO_022" desc="检测GPO响应数据的规范性(只能出现指定范围内的tag82, 94, 57, 5F20, 5F34, 9F10, 9F26, 9F27, 9F36, 9F4B, 9F5D, 9F6C, 9F6E, 9F7C"/>
+                <CaseItem level="warn" num="GPO_026" desc="检测GPO响应数据tag9F5D是否在"/>
+                <CaseItem level="failed" num="GPO_006" desc="检测卡片是否支持DDA功能"/>
+				<CaseItem level="failed" num="GPO_015" desc="检测GPO响应数据tag9F26的值与终端计算的mac一致性"/>
+				<CaseItem level="failed" num="GPO_016" desc="检测GPO响应数据Tag57的格式是否正确以及中国区卡号是否以62开头"/>
+				<CaseItem level="failed" num="GPO_018" desc="检测qVSDC GPO 响应数据必备tag是否存在(82,94,9F10,9F26,9F27,9F36,9F6C)"/>
+				
+            </StepCase>
+			<StepCase name="ReadRecord">
+				<CaseItem level="failed" num="ReadRecord_001" desc="检测读记录是否以70模板开头"/>
+				<CaseItem level="failed" num="ReadRecord_002" desc="检测tag57的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_004" desc="检测tag5F20和tag9F0B的互斥性(不能同时存在，只能存在一个)"/>
+				<CaseItem level="failed" num="ReadRecord_005" desc="检测tag5F20的规范性(英文字符、包含/,建议值、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_006" desc="检测tag9F0B的规范性(英文字符、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_013" desc="检测Tag5A的规范性(格式、长度在16~19位之间等)"/>
+				<CaseItem level="failed" num="ReadRecord_014" desc="检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)"/>
+				<CaseItem level="failed" num="ReadRecord_015" desc="检测Tag5F34的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_016" desc="检测Tag9F4A的规范性(值是否为82)"/>
+				<CaseItem level="failed" num="ReadRecord_018" desc="检测Tag9F47/9F32的规范性(值是否为03或010001)"/>
+				<CaseItem level="failed" num="ReadRecord_020" desc="检测Tag8F的规范性(长度等于1)"/>
+				<CaseItem level="failed" num="ReadRecord_021" desc="检测Tag9F28的规范性(长度等于2)"/>
+				<!--CaseItem level="failed" num="ReadRecord_024" desc="检测Tag9F08的规范性"/-->
+				<CaseItem level="failed" num="ReadRecord_026" desc="检测Tag5F30中的服务码与57中的一致性,是否以02或06开头，长度为2字节"/>
+				<CaseItem level="failed" num="ReadRecord_027" desc="检测Tag5F24与57中的失效期的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_028" desc="检测Tag5A与57中卡号的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_032" desc="检测fDDA01版本，卡片最后一个读记录应返回tag9F69"/>
+				<CaseItem level="failed" num="ReadRecord_033" desc="检测fDDA01下tag9F69与DF61和9F6C的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_037" desc="检测qVSDC 读记录最后一条数据必须是tag9F69"/>
+                <CaseItem level="failed" num="ReadRecord_038" desc="检测qVSDC 必须在GPO或读记录中返回的数据是否存在"/>
+                <CaseItem level="failed" num="ReadRecord_039" desc="检测qVSDC交易，tag9F07是否存在,若存在，则qVSDC所有路径都需返回该值(联机ODA,脱机ODA,联机without ODA)"/>
+			</StepCase>
+            <StepCase name="GetData">
+				<CaseItem level="tip" num="GetData_9F36" desc="检测tag9F36是否存在" />
+				<CaseItem level="tip" num="GetData_9F13" desc="检测tag9F13是否存在" />
+				<CaseItem level="tip" num="GetData_9F17" desc="检测tag9F17是否存在" />
+				<CaseItem level="tip" num="GetData_9F51" desc="检测tag9F51是否存在" />
+				<CaseItem level="tip" num="GetData_9F52" desc="检测tag9F52是否存在" />
+				<CaseItem level="tip" num="GetData_9F53" desc="检测tag9F53是否存在" />
+				<CaseItem level="tip" num="GetData_9F54" desc="检测tag9F54是否存在" />
+				<CaseItem level="tip" num="GetData_9F56" desc="检测tag9F56是否存在" />
+				<CaseItem level="tip" num="GetData_9F57" desc="检测tag9F57是否存在" />
+				<CaseItem level="tip" num="GetData_9F58" desc="检测tag9F58是否存在" />
+				<CaseItem level="tip" num="GetData_9F59" desc="检测tag9F59是否存在" />
+				<CaseItem level="tip" num="GetData_9F5C" desc="检测tag9F5C是否存在" />
+				<CaseItem level="tip" num="GetData_9F5D" desc="检测tag9F5D是否存在" />
+				<CaseItem level="tip" num="GetData_9F5E" desc="检测tag9F5E是否存在" />
+				<CaseItem level="tip" num="GetData_9F72" desc="检测tag9F72是否存在" />
+				<CaseItem level="tip" num="GetData_9F73" desc="检测tag9F73是否存在" />
+				<CaseItem level="tip" num="GetData_9F75" desc="检测tag9F75是否存在" />
+				<CaseItem level="tip" num="GetData_9F76" desc="检测tag9F76是否存在" />
+				<CaseItem level="tip" num="GetData_9F77" desc="检测tag9F77是否存在" />
+				<CaseItem level="tip" num="GetData_9F78" desc="检测tag9F78是否存在" />
+				<CaseItem level="tip" num="GetData_9F79" desc="检测tag9F79是否存在" />
+				<CaseItem level="tip" num="GetData_9F4F" desc="检测tag9F4F是否存在" />
+				<CaseItem level="tip" num="GetData_9F68" desc="检测tag9F68是否存在" />
+				<CaseItem level="tip" num="GetData_9F6B" desc="检测tag9F6B是否存在" />
+				<CaseItem level="tip" num="GetData_9F6C" desc="检测tag9F6C是否存在" />
+				<CaseItem level="tip" num="GetData_9F6D" desc="检测tag9F6D是否存在" />
+				<CaseItem level="warn" num="GetData_9F6E" desc="检测tag9F6E是否存在" />
+				<CaseItem level="tip" num="GetData_9F7C" desc="检测tag9F7C是否存在" />
+				<CaseItem level="tip" num="GetData_BF55" desc="检测tagBF55是否存在" />
+				<CaseItem level="tip" num="GetData_BF56" desc="检测tagBF56是否存在" />
+				<CaseItem level="tip" num="GetData_BF57" desc="检测tagBF57是否存在" />
+				<CaseItem level="tip" num="GetData_BF58" desc="检测tagBF58是否存在" />
+				<CaseItem level="tip" num="GetData_BF5B" desc="检测tagBF5B是否存在" />
+				<CaseItem level="failed" num="GetData_001" desc="检测Tag9F79小于等于tag9F77, tag9F78小于等于tag9F77" />
+				<CaseItem level="failed" num="GetData_003" desc="检测tag9F68卡片附加处理选项的规范性" />
+				<CaseItem level="failed" num="GetData_004" desc="检测Tag5F28与9F57发卡行国家代码的一致性" />
+				<CaseItem level="failed" num="GetData_005" desc="检测Tag9F42与9F51应用货币代码的一致性" />
+				<CaseItem level="failed" num="GetData_006" desc="检测tag9F54存在或卡片支持国际频度检测时，tag9F51必须存在" />
+				<CaseItem level="failed" num="GetData_007" desc="检测tag9F5A，卡片所属区域，货币代码、国家代码与tag9F42,tag5F28的一致性" />
+			</StepCase>
+		</qVSDC>
+		<MC>
+			<StepCase name="SelectApp">
+				<CaseItem level="failed" num="SelectAid_001" desc="检测响应数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="SelectAid_002" desc="检测6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒"/>
+				<CaseItem level="failed" num="SelectAid_003" desc="检测tag84的规范性(长度在5-16字节之间)"/>
+				<CaseItem level="failed" num="SelectAid_004" desc="检测tag50的规范性(必须存在，长度1-16字节，ASCII字符)"/>
+				<CaseItem level="failed" num="SelectAid_005" desc="检测A5模板的规范性(仅可包含tag50，87，9F38,5F2D,9F11，9F12，及BF0C模板)"/>
+				<CaseItem level="failed" num="SelectAid_006" desc="检测87的合规性(长度是否为1字节)"/>
+				<CaseItem level="failed" num="SelectAid_007" desc="检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读小写字符串)"/>				
+				<CaseItem level="failed" num="SelectAid_008" desc="检测9F11是否符合规范(tag9F12存在，则tag9F11必须存在，长度必须是1字节，值在01～10之间)"/>				
+				<CaseItem level="failed" num="SelectAid_009" desc="检测9F12的规范性(长度必须在1～16之间,ASCII字符)"/>	
+				<CaseItem level="failed" num="SelectAid_010" desc="检测BF0C模板下是否包含9F4D借贷记交易日志入口，长度为2字节"/>
+				<CaseItem level="failed" num="SelectAid_012" desc="检测Select Application响应数据tag的唯一性"/>
+			</StepCase>
+            <StepCase name="GPO">
+				<CaseItem level="failed" num="GPO_019" desc="检测GPO响应数据是否以77开头,是否能TLV分解"/>
+				<CaseItem level="failed" num="GPO_002" desc="检测tag94是否为4字节的整数倍"/>
+				<CaseItem level="failed" num="GPO_003" desc="检测tag94是否包含重复的AFL记录"/>
+				<CaseItem level="failed" num="GPO_004" desc="检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于等于第3个字节)"/>
+				<CaseItem level="failed" num="GPO_006" desc="检测卡片是否支持DDA功能"/>
+				<CaseItem level="failed" num="GPO_007" desc="检测卡片是否支持持卡人认证功能"/>
+				<CaseItem level="failed" num="GPO_008" desc="检测卡片是否支持执行终端风险管理功能"/>
+				<CaseItem level="failed" num="GPO_020" desc="检测卡片是否支持发卡行认证，MC应用一般不应支持发卡行认证"/>
+            </StepCase>
+			<StepCase name="ReadRecord">
+				<CaseItem level="failed" num="ReadRecord_001" desc="检测读记录是否以70模板开头"/>
+				<CaseItem level="failed" num="ReadRecord_002" desc="检测tag57的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_003" desc="检测tag8E的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_004" desc="检测tag5F20和tag9F0B的互斥性(不能同时存在，只能存在一个)"/>
+				<CaseItem level="failed" num="ReadRecord_005" desc="检测tag5F20的规范性(英文字符、包含/,建议值、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_006" desc="检测tag9F0B的规范性(英文字符、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_011" desc="检测Tag9F0D/9F0E/9F0F（长度必须是5个字节)"/>
+				<CaseItem level="failed" num="ReadRecord_012" desc="检测Tag8C是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_036" desc="检测Tag8D是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_013" desc="检测Tag5A的规范性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_014" desc="检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)"/>
+				<CaseItem level="failed" num="ReadRecord_015" desc="检测Tag5F34的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_016" desc="检测Tag9F4A的规范性(值是否为82)"/>
+				<CaseItem level="failed" num="ReadRecord_017" desc="检测Tag9F49的规范性(值是否为9F3704)"/>
+				<CaseItem level="failed" num="ReadRecord_018" desc="检测Tag9F47/9F32的规范性(值是否为03或010001)"/>
+				<CaseItem level="failed" num="ReadRecord_019" desc="检测Tag9F1F的规范性(转换为字符串)"/>
+				<CaseItem level="failed" num="ReadRecord_020" desc="检测Tag8F的规范性(长度等于1)"/>
+				<CaseItem level="failed" num="ReadRecord_021" desc="检测Tag9F28的规范性(长度等于2)"/>
+				<!--CaseItem level="failed" num="ReadRecord_022" desc="检测Tag14的规范性(长度等于2)"/-->
+				<!--CaseItem level="failed" num="ReadRecord_023" desc="检测Tag23的规范性(长度等于2)"/-->
+				<CaseItem level="failed" num="ReadRecord_024" desc="检测Tag9F08的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_025" desc="检测Tag9F69,9F79，不能出现在读记录中"/>
+				<CaseItem level="failed" num="ReadRecord_026" desc="检测Tag5F30中的服务码与57中的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_027" desc="检测Tag5F24与57中的失效期的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_028" desc="检测Tag5A与57中卡号的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_035" desc="检测Tag9F42应用货币代码，如果CVM中要求金额检查(X,Y金额不为零)，该数据必须存在"/>
+			</StepCase>
+			<StepCase name="ProcessRestriction">
+				<CaseItem level="failed" num="ProcessRestriction_001" desc="检测Tag5F24应用失效日期,应用是否失效"/>
+				<CaseItem level="failed" num="ProcessRestriction_002" desc="检测Tag5F25应用生效日期，应用是否生效"/>
+				<CaseItem level="failed" num="ProcessRestriction_003" desc="检测Tag5F24和Tag5F25时间顺序关系是否正确"/>
+				<CaseItem level="failed" num="ProcessRestriction_004" desc="检测tag9F07是否符合规范"/>
+				<CaseItem level="failed" num="ProcessRestriction_005" desc="检测tag9F08应用版本号是否符合规范"/>
+			</StepCase>
+			<StepCase name="CardHolderVerify">
+				<CaseItem level="failed" num="CardHolderVerfiy_001" desc="检测8E格式是否符合规范"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_002" desc="检测8E中X金额、Y金额是否为全零"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_003" desc="检测8E中CVM是否符合银联规范值(42031E031F00)"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_004" desc="检测8E是否存在脱机PIN入口，若有是否有相应的tag存在卡片中"/>
+			</StepCase>
+			<StepCase name="TerminalRiskManagement">
+				<!--CaseItem level="warn" num="TerminalRiskManagement_001" desc="检测发卡行支持终端频度检测必要的数据(tag9F14,tag9F23)"/-->
+				<!--CaseItem level="warn" num="TerminalRiskManagement_002" desc="检测tag9F13的规范性"/-->
+			</StepCase>
+			<StepCase name="TerminalActionAnalyze">
+				<CaseItem level="failed" num="TerminalActionAnalyze_005" desc="检测第一个GAC卡片返回结果是否为77"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_003" desc="检测tag9F26的值与终端计算的mac一致性"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_004" desc="检测tag9F4C的值与终端计算的IC卡动态数据的一致性"/>
+			</StepCase>
+			<StepCase name="TransactionEnd">
+				<CaseItem level="failed" num="TransactionEnd_004" desc="检测第二个GAC卡片返回结果是否为77"/>
+				<CaseItem level="failed" num="TransactionEnd_003" desc="检测tag9F26的值与终端计算的mac一致性"/>
+			</StepCase>
+		</MC>
+		<Paypass>
+			<StepCase name="SelectApp">
+				<CaseItem level="failed" num="SelectAid_001" desc="检测响应数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="SelectAid_002" desc="检测6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒"/>
+				<CaseItem level="failed" num="SelectAid_003" desc="检测tag84的规范性(长度在5-16字节之间)"/>
+				<CaseItem level="failed" num="SelectAid_004" desc="检测tag50的规范性(必须存在，长度1-16字节，ASCII字符)"/>
+				<CaseItem level="failed" num="SelectAid_005" desc="检测A5模板的规范性(仅可包含tag50，87，9F38,5F2D,9F11，9F12，及BF0C模板)"/>
+				<CaseItem level="failed" num="SelectAid_006" desc="检测87的合规性(长度是否为1字节)"/>
+				<CaseItem level="failed" num="SelectAid_007" desc="检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读小写字符串)"/>				
+				<CaseItem level="failed" num="SelectAid_008" desc="检测9F11是否符合规范(tag9F12存在，则tag9F11必须存在，长度必须是1字节，值在01～10之间)"/>				
+				<CaseItem level="failed" num="SelectAid_009" desc="检测9F12的规范性(长度必须在1～16之间,ASCII字符)"/>	
+				<CaseItem level="failed" num="SelectAid_012" desc="检测Select Application响应数据tag的唯一性"/>
+				<CaseItem level="failed" num="SelectAid_021" desc="检测Select Application BF0C模板是否存在9F4D,Visa应用已废弃日志的使用"/>
+				<CaseItem level="failed" num="SelectAid_022" desc="检测Select Application BF0C模板是否存在DF4D,Visa应用已废弃日志的使用"/>
+			</StepCase>
+            <StepCase name="GPO">
+				<CaseItem level="failed" num="GPO_001" desc="检测GPO响应数据是否以80开头,是否能TLV分解"/>
+				<CaseItem level="failed" num="GPO_002" desc="检测tag94是否为4字节的整数倍"/>
+				<CaseItem level="failed" num="GPO_003" desc="检测tag94是否包含重复的AFL记录"/>
+				<CaseItem level="failed" num="GPO_004" desc="检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于等于第3个字节)"/>
+				<CaseItem level="failed" num="GPO_006" desc="检测卡片是否支持DDA功能"/>
+				<CaseItem level="failed" num="GPO_007" desc="检测卡片是否支持持卡人认证功能"/>
+				<CaseItem level="failed" num="GPO_008" desc="检测卡片是否支持执行终端风险管理功能"/>
+				<CaseItem level="failed" num="GPO_009" desc="检测卡片是否支持发卡行认证功能"/>
+            </StepCase>
+			<StepCase name="ReadRecord">
+				<CaseItem level="failed" num="ReadRecord_001" desc="检测读记录是否以70模板开头"/>
+				<CaseItem level="failed" num="ReadRecord_002" desc="检测tag57的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_003" desc="检测tag8E的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_004" desc="检测tag5F20和tag9F0B的互斥性(不能同时存在，只能存在一个)"/>
+				<CaseItem level="failed" num="ReadRecord_005" desc="检测tag5F20的规范性(英文字符、包含/,建议值、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_006" desc="检测tag9F0B的规范性(英文字符、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_011" desc="检测Tag9F0D/9F0E/9F0F（长度必须是5个字节)"/>
+				<CaseItem level="failed" num="ReadRecord_012" desc="检测Tag8C是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_036" desc="检测Tag8D是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_013" desc="检测Tag5A的规范性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_014" desc="检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)"/>
+				<CaseItem level="failed" num="ReadRecord_015" desc="检测Tag5F34的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_016" desc="检测Tag9F4A的规范性(值是否为82)"/>
+				<CaseItem level="failed" num="ReadRecord_017" desc="检测Tag9F49的规范性(值是否为9F3704)"/>
+				<CaseItem level="failed" num="ReadRecord_018" desc="检测Tag9F47/9F32的规范性(值是否为03或010001)"/>
+				<CaseItem level="failed" num="ReadRecord_019" desc="检测Tag9F1F的规范性(转换为字符串)"/>
+				<CaseItem level="failed" num="ReadRecord_020" desc="检测Tag8F的规范性(长度等于1)"/>
+				<CaseItem level="failed" num="ReadRecord_021" desc="检测Tag9F28的规范性(长度等于2)"/>
+				<CaseItem level="failed" num="ReadRecord_024" desc="检测Tag9F08的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_025" desc="检测Tag9F69,9F79，不能出现在读记录中"/>
+				<CaseItem level="failed" num="ReadRecord_026" desc="检测Tag5F30中的服务码与57中的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_027" desc="检测Tag5F24与57中的失效期的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_028" desc="检测Tag5A与57中卡号的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_035" desc="检测Tag9F42应用货币代码，如果CVM中要求金额检查(X,Y金额不为零)，该数据必须存在"/>
+			</StepCase>
+			<StepCase name="ProcessRestriction">
+				<CaseItem level="failed" num="ProcessRestriction_001" desc="检测Tag5F24应用失效日期,应用是否失效"/>
+				<CaseItem level="warn" num="ProcessRestriction_002" desc="检测Tag5F25应用生效日期，应用是否生效"/>
+				<CaseItem level="failed" num="ProcessRestriction_003" desc="检测Tag5F24和Tag5F25时间顺序关系是否正确"/>
+				<CaseItem level="failed" num="ProcessRestriction_004" desc="检测tag9F07是否符合规范"/>
+				<CaseItem level="failed" num="ProcessRestriction_005" desc="检测tag9F08应用版本号是否符合规范"/>
+			</StepCase>
+			<StepCase name="CardHolderVerify">
+				<CaseItem level="failed" num="CardHolderVerfiy_001" desc="检测8E格式是否符合规范"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_002" desc="检测8E中X金额、Y金额是否为全零"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_003" desc="检测8E中CVM是否符合银联规范值(42031E031F00)"/>
+				<CaseItem level="failed" num="CardHolderVerfiy_004" desc="检测8E是否存在脱机PIN入口，若有是否有相应的tag存在卡片中"/>
+			</StepCase>
+			<StepCase name="TerminalRiskManagement">
+			</StepCase>
+			<StepCase name="TerminalActionAnalyze">
+				<CaseItem level="failed" num="TerminalActionAnalyze_005" desc="检测第一个GAC卡片返回结果是否为77格式"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_003" desc="检测tag9F26的值与终端计算的mac一致性"/>
+				<CaseItem level="failed" num="TerminalActionAnalyze_004" desc="检测tag9F4C的值与终端计算的IC卡动态数据的一致性"/>
+			</StepCase>
+			<StepCase name="TransactionEnd">
+				<CaseItem level="failed" num="TransactionEnd_004" desc="检测第二个GAC卡片返回结果是否为77格式"/>
+				<CaseItem level="failed" num="TransactionEnd_003" desc="检测tag9F26的值与终端计算的mac一致性"/>
+			</StepCase>
+	  </Paypass>
+	  <MSD>
+			<StepCase name="SelectApp">
+				<CaseItem level="failed" num="SelectAid_001" desc="检测响应数据是否以6F模板开头"/>
+				<CaseItem level="failed" num="SelectAid_002" desc="检测6F模板下包含且只包含Tag84和A5模板，顺序不能颠倒"/>
+				<CaseItem level="failed" num="SelectAid_003" desc="检测tag84的规范性(长度在5-16字节之间)"/>
+				<CaseItem level="failed" num="SelectAid_004" desc="检测tag50的规范性(必须存在，长度1-16字节，ASCII字符)"/>
+				<CaseItem level="failed" num="SelectAid_005" desc="检测A5模板的规范性(仅可包含tag50，87，9F38,5F2D,9F11，9F12，及BF0C模板)"/>
+				<CaseItem level="failed" num="SelectAid_006" desc="检测87的合规性(长度是否为1字节)"/>
+				<CaseItem level="failed" num="SelectAid_007" desc="检测5F2D是否符合规范(长度必须是2字节的倍数，2～8字节之间,能转可读小写字符串)"/>				
+				<CaseItem level="failed" num="SelectAid_008" desc="检测9F11是否符合规范(tag9F12存在，则tag9F11必须存在，长度必须是1字节，值在01～10之间)"/>				
+				<CaseItem level="failed" num="SelectAid_009" desc="检测9F12的规范性(长度必须在1～16之间,ASCII字符)"/>	
+				<CaseItem level="failed" num="SelectAid_012" desc="检测Select Application响应数据tag的唯一性"/>
+				<CaseItem level="failed" num="SelectAid_021" desc="检测Select Application BF0C模板是否存在9F4D,Visa应用已废弃日志的使用"/>
+				<CaseItem level="failed" num="SelectAid_022" desc="检测Select Application BF0C模板是否存在DF4D,Visa应用已废弃日志的使用"/>
+			</StepCase>
+            <StepCase name="GPO">
+				<CaseItem level="failed" num="GPO_001" desc="检测GPO响应数据是否以80开头,是否能TLV分解"/>
+				<CaseItem level="failed" num="GPO_002" desc="检测tag94是否为4字节的整数倍"/>
+				<CaseItem level="failed" num="GPO_003" desc="检测tag94是否包含重复的AFL记录"/>
+				<CaseItem level="failed" num="GPO_004" desc="检测tag94的合规性(按4字节分组后的AFL，第2个字节应该小于等于第3个字节)"/>
+				<CaseItem level="failed" num="GPO_006" desc="检测卡片是否支持DDA功能"/>
+				<CaseItem level="failed" num="GPO_007" desc="检测卡片是否支持持卡人认证功能"/>
+				<CaseItem level="failed" num="GPO_008" desc="检测卡片是否支持执行终端风险管理功能"/>
+				<CaseItem level="failed" num="GPO_009" desc="检测卡片是否支持发卡行认证功能"/>
+            </StepCase>
+			<StepCase name="ReadRecord">
+				<CaseItem level="failed" num="ReadRecord_001" desc="检测读记录是否以70模板开头"/>
+				<CaseItem level="failed" num="ReadRecord_002" desc="检测tag57的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_003" desc="检测tag8E的合规性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_004" desc="检测tag5F20和tag9F0B的互斥性(不能同时存在，只能存在一个)"/>
+				<CaseItem level="failed" num="ReadRecord_005" desc="检测tag5F20的规范性(英文字符、包含/,建议值、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_006" desc="检测tag9F0B的规范性(英文字符、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_011" desc="检测Tag9F0D/9F0E/9F0F（长度必须是5个字节)"/>
+				<CaseItem level="failed" num="ReadRecord_012" desc="检测Tag8C是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_036" desc="检测Tag8D是否符合规范，能否分解，长度是否符合规范"/>
+				<CaseItem level="failed" num="ReadRecord_013" desc="检测Tag5A的规范性(格式、长度等)"/>
+				<CaseItem level="failed" num="ReadRecord_014" desc="检测Tag5F24/5F25的规范性(必须存在，格式、长度、先后顺序等)"/>
+				<CaseItem level="failed" num="ReadRecord_015" desc="检测Tag5F34的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_016" desc="检测Tag9F4A的规范性(值是否为82)"/>
+				<CaseItem level="failed" num="ReadRecord_017" desc="检测Tag9F49的规范性(值是否为9F3704)"/>
+				<CaseItem level="failed" num="ReadRecord_018" desc="检测Tag9F47/9F32的规范性(值是否为03或010001)"/>
+				<CaseItem level="failed" num="ReadRecord_019" desc="检测Tag9F1F的规范性(转换为字符串)"/>
+				<CaseItem level="failed" num="ReadRecord_020" desc="检测Tag8F的规范性(长度等于1)"/>
+				<CaseItem level="failed" num="ReadRecord_021" desc="检测Tag9F28的规范性(长度等于2)"/>
+				<CaseItem level="failed" num="ReadRecord_024" desc="检测Tag9F08的规范性"/>
+				<CaseItem level="failed" num="ReadRecord_025" desc="检测Tag9F69,9F79，不能出现在读记录中"/>
+				<CaseItem level="failed" num="ReadRecord_026" desc="检测Tag5F30中的服务码与57中的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_027" desc="检测Tag5F24与57中的失效期的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_028" desc="检测Tag5A与57中卡号的一致性"/>
+				<CaseItem level="failed" num="ReadRecord_035" desc="检测Tag9F42应用货币代码，如果CVM中要求金额检查(X,Y金额不为零)，该数据必须存在"/>
+			</StepCase>
+		</MSD>
 </CaseConfig>

@@ -4,9 +4,9 @@
             <Type name="银联" dllName="DpParse_YL.dll" funcName="HandleDp" />
             <Type name="华腾" dllName="DpParse_HT.dll" funcName="HandleDp" />
             <Type name="神码" dllName="DpParse_SZSM.dll" funcName="HandleDp"  />
-			<Type name="格尔" dllName="DpParse_GEER.dll" funcName="HandleDp"  />
             <Type name="中信" dllName="DpParse_ZJ_TL.dll" funcName="HandleDp"  />
             <Type name="深圳华信" dllName="DpParse_DXT.dll" funcName="HandleDp"  />
+			<Type name="xxx" dllName="DpParse_DXT.dll" funcName="HandleDp"  />
       </DpType>
       <AIDs>
             <AID>A000000003000000</AID>

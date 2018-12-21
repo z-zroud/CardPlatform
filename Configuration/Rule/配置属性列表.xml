@@ -1,59 +1,60 @@
-<!-- -->
+<!--XML文档描述了如何解析数据准备文件-->
 <Rule>
-	<Encrypt>
-		<Attribute name="DGI" comment=""/>
-		<Attribute name="type" comment="(DES,SM)"/>
-		<Attribute name="key" comment=""/>
-		<Attribute name="delete80" comment="(false, true)/>
+	<Encrypt comment="对文件中的加密数据解密">
+		<Attribute name="DGI" comment="数据中的DGI分组"/>
+		<Attribute name="type" comment="解密方式(DES,SM)"/>
+		<Attribute name="key" comment="解密密钥"/>
+		<Attribute name="delete80" comment="若解密后，数据填充了80...是否要删除(false, true)/>
 	</Encrypt>
 	<AddTagToValue>
-	      <Attribute name="DGI" comment=""/>
+	      <Attribute name="DGI" comment="将DGI的值添加到所有子tag的value中,例如:DGI0101下有tag57=xxxx,转换后的结果未tag57=0101_len_xxxx"/>
 	</AddTagToValue>
-	<SpliteEF02> <!--->	  
+	<SpliteEF02 comment="针对神码数据，将EF02拆分为8201~8205">
 	</SpliteEF02>
-	<AddKcv>
-	      <Attribute name="srcDGI" comment=">
-	      <Attribute name="dstDGI" comment=">
-	      <Attribute name="keyType" comment="(DES,SM)"/>
+	<AddKcv comment="添加KCV DGI">
+	      <Attribute name="srcDGI" comment="指定KCV所在的DGI分组">
+	      <Attribute name="dstDGI" comment="指定密钥所在的DGI分组">
+	      <Attribute name="keyType" comment="计算KCV的方式(DES,SM)"/>
 	</AddKcv>
-	<TagEncrypt>
-	      <Attribute name="tag" comment=""/>
-	      <Attribute name="type" comment="(DES,SM)"/>
-	      <Attribute name="key" comment=""/>
-	      <Attribute name="startPos" comment=""/>
-	      <Attribute name="len" comment="?/>
+	<TagEncrypt comment="需要解密的tag">
+	      <Attribute name="tag" comment="指定需解密的tag值"/>
+	      <Attribute name="type" comment="解密方式(DES,SM，BCD，BASE64)"/>
+	      <Attribute name="key" comment="密钥(可选)"/>
+	      <Attribute name="startPos" comment="指定解密的起始位置(可选)"/>
+	      <Attribute name="len" comment="指定解密的数据长度(可选)"/>
+	      <Attribute name="delete80" comment="若解密后，数据填充了80...是否要删除(false, true)(可选)/>
 	</TagEncrypt>
-	<Map>
-	      <Attribute name="srcDGI" comment=""/>
-	      <Attribute name="dstDGI" comment=""/>
+	<Map comment="对数据中现有的DGI替换成指定的DGI值">
+	      <Attribute name="srcDGI" comment="源DGI值"/>
+	      <Attribute name="dstDGI" comment="替换后的DGI值"/>
 	</Map>
-	<MergeTag>
-	      <Attribute name="srcDGI" comment=""/>
-	      <Attribute name="srcTag" comment=""/>
-	      <Attribute name="dstDGI" comment=""/>
-	      <Attribute name="dstTag" comment=""/>
+	<MergeTag commnet="将目标DGI分组中的某个tag与指定的DGI分组中的tag值合并(dstTag添加到srcTag值的末尾)">
+	      <Attribute name="srcDGI" comment="合并到指定的DGI"/>
+	      <Attribute name="srcTag" comment="指定合并后的tag值"/>
+	      <Attribute name="dstDGI" comment="从哪个DGI分组合并"/>
+	      <Attribute name="dstTag" comment="从哪个tag合并"/>
 	</MergeTag>
-	<Exchange>
-	      <Attribute name="srcDGI" comment=""/>
-	      <Attribute name="exchangedDGI" comment=""/>
+	<Exchange comment="交换两个DGI分组的内容">
+	      <Attribute name="srcDGI" comment="源DGI"/>
+	      <Attribute name="exchangedDGI" comment="被交换的DGI值"/>
 	</Exchange>
-	<AddTagFromDGI>
-	      <Attribute name="srcDGI" comment=""/>
-	      <Attribute name="srcTag" comment=""/>
-	      <Attribute name="dstDGI" comment=""/>
-	      <Attribute name="dstTag" comment=""/>
+	<AddTagFromDGI comment="将目标DGI分组中的tag添加到指定的DGI分组中">
+	      <Attribute name="srcDGI" comment="添加到指定的DGI"/>
+	      <Attribute name="srcTag" comment="添加到指定的tag"/>
+	      <Attribute name="dstDGI" comment="从哪个DGI分组中取tag"/>
+	      <Attribute name="dstTag" comment="从哪个tag中取值"/>
 	</AddTagFromDGI>
-	<AddFixedTag>
-	      <Attribute name="srcDGI" comment=""/>
-	      <Attribute name="tag" comment=""/>
-	      <Attribute name="tagValue" comment=""/>
+	<AddFixedTag comment="对指定的DGI分组添加固定的tag值">
+	      <Attribute name="srcDGI" comment="DGI分组"/>
+	      <Attribute name="tag" comment="添加的tag"/>
+	      <Attribute name="tagValue" comment="tag值(不需要添加DGI)"/>
 	</AddFixedTag>
-	<DeletedDGI>
-	      <Attribute name="DGI" comment=""/>
+	<DeletedDGI comment="删除DGI">
+	      <Attribute name="DGI" comment="被删除的DGI分组"/>
 	</DeletedDGI>
-	<DeletedTag>
-	      <Attribute name="DGI" comment=""/>
-	      <Attribute name="tag" comment=""/>
+	<DeletedTag comment="删除tag">
+	      <Attribute name="DGI" comment="被删除的tag所在的DGI分组"/>
+	      <Attribute name="tag" comment="被删除的tag"/>
 	</DeletedTag>
 </Rule>
 	
