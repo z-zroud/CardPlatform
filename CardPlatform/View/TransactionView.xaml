@@ -6,6 +6,7 @@
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:helper="clr-namespace:CardPlatform.Helper"
              xmlns:local="clr-namespace:CardPlatform.View"
+             xmlns:localCmd="clr-namespace:CardPlatform.Helper.CommandBehavior"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1100"
              DataContext="{Binding Source={StaticResource Locator}, Path=Transaction}">
@@ -23,6 +24,13 @@
                     </MultiBinding>
                 </Setter.Value>
             </Setter>
+        </Style>
+        <Style x:Key="ListViewItemStyle" TargetType="ListViewItem">
+            <Style.Setters>
+                <Setter Property="localCmd:CommandBehavior.Event" Value="MouseDoubleClick"></Setter>
+                <Setter Property="localCmd:CommandBehavior.Command" Value="{Binding DataContext.ShowLogCmd,RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:TransactionView}}}"></Setter>
+                <Setter Property="localCmd:CommandBehavior.CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}}"></Setter>
+            </Style.Setters>
         </Style>
     </UserControl.Resources>
     <Grid Background="AliceBlue">
@@ -178,7 +186,7 @@
                     </ListView>
                 </TabItem>
                 <TabItem Header="错误" Controls:ControlsHelper.HeaderFontSize="15">
-                    <ListView ItemsSource="{Binding ErrorCaseInfos}" helper:ListScrollHelper.IsEnabled="True">
+                    <ListView ItemsSource="{Binding ErrorCaseInfos}" helper:ListScrollHelper.IsEnabled="True" ItemContainerStyle="{StaticResource ResourceKey=ListViewItemStyle}">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="编号" DisplayMemberBinding="{Binding CaseNo}" Width="{Binding ElementName=col1,Path=ActualWidth}"/>

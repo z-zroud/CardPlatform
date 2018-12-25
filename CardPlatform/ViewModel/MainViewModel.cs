@@ -51,7 +51,7 @@ namespace CardPlatform.ViewModel
 
         private void OutputLog(string message)
         {
-            DispatcherHelper.CheckBeginInvokeOnUI(() => 
+            DispatcherHelper.UIDispatcher.Invoke(() => 
             {
                 message.Replace('\n', ' ');
 

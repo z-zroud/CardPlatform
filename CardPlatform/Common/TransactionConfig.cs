@@ -65,5 +65,79 @@ namespace CardPlatform.Common
             //TransSmMacKey   = ui.Transaction.TransKeys.SM_MAC;
             //TransSmEncKey   = ui.Transaction.TransKeys.SM_ENC;
         }
+
+        /// <summary>
+        /// 判断是否为visa非接交易
+        /// </summary>
+        /// <returns></returns>
+        public bool IsqVSDC()
+        {
+            if (CurrentApp == AppType.qVSDC_online ||
+                CurrentApp == AppType.qVSDC_offline ||
+                CurrentApp == AppType.qVSDC_online_without_ODA)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 判断是否为visa接触交易
+        /// </summary>
+        /// <returns></returns>
+        public bool IsVSDC()
+        {
+            if (CurrentApp == AppType.VISA)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 判断是否为visa交易
+        /// </summary>
+        /// <returns></returns>
+        public bool IsVisa()
+        {
+            return IsqVSDC() || IsVSDC();
+        }
+
+        /// <summary>
+        /// 判断是否为接触UICS交易
+        /// </summary>
+        /// <returns></returns>
+        public bool IsUICSContact()
+        {
+            if (CurrentApp == AppType.UICS &&
+                TransType == TransType.Contact)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 判断是否为非接UICS交易
+        /// </summary>
+        /// <returns></returns>
+        public bool IsUICSContactless()
+        {
+            if (CurrentApp == AppType.UICS &&
+                TransType == TransType.Contactless)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 判断是否为qUICS交易
+        /// </summary>
+        /// <returns></returns>
+        public bool IsqUICS()
+        {
+            if (CurrentApp == AppType.qUICS_offline ||
+                CurrentApp == AppType.qUICS_online ||
+                CurrentApp == AppType.qUICS_online_without_ODA)
+                return true;
+            return false;
+        }
+        /// <summary>
+        /// 判断是否为UICS交易
+        /// </summary>
+        /// <returns></returns>
+        public bool IsUICS()
+        {
+            return IsqUICS() || IsUICSContact() || IsUICSContactless();
+        }
     }
 }

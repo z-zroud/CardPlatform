@@ -148,13 +148,13 @@ namespace CardPlatform.Cases
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
             var aip = TransactionTag.GetInstance().GetTag(TransactionStep.GPO, "82");
-            caseItem.Description += "【tag82=" + aip + "】";
+            caseItem.Description += "[tag82=" + aip + "]";
             var aipHelper = new AipHelper(aip);
             if (aipHelper.IsSupportDDA())
             {
                 return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }
-            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "==>[tag82值为{0},不支持DDA功能]", aip);
         }
 
         /// <summary>

@@ -139,6 +139,9 @@
     <Compile Include="Helper\AppKeyTypeToVisibility.cs" />
     <Compile Include="Helper\CaseLevelToColorConverter.cs" />
     <Compile Include="Helper\CaseLevelToStringConverter.cs" />
+    <Compile Include="Helper\CommandBehavior\CommandBehavior.cs" />
+    <Compile Include="Helper\CommandBehavior\CommandBehaviorBinding.cs" />
+    <Compile Include="Helper\CommandBehavior\EventHandlerGenerator.cs" />
     <Compile Include="Helper\ControlTreeHelper.cs" />
     <Compile Include="Helper\DescriptionExAttribute.cs" />
     <Compile Include="Helper\DialogCloseHelper.cs" />

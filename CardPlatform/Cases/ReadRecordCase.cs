@@ -645,7 +645,7 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[读记录中缺少tag9F08]");
             }
-            caseItem.Description += "【tag9F08=" + readRecordTags["9F08"].Value + "】";
+            caseItem.Description += "[tag9F08=" + readRecordTags["9F08"].Value + "]";
             if (transCfg.CurrentApp == AppType.UICS)
             {
                 if (readRecordTags["9F08"].Value != "0030")
@@ -658,7 +658,7 @@ namespace CardPlatform.Cases
                 if (readRecordTags["9F08"].Value != "00A0")
                 {
                     if(readRecordTags["9F08"].Value == "0096")
-                        return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[VISA版本为1.5，请确认是否正确]");
+                        return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "==>[VISA版本为1.5，请确认是否正确]");
                     else
                         return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
                 }

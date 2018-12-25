@@ -15,6 +15,14 @@ namespace CardPlatform.Models
         {
         }
 
+        /// <summary>
+        /// 当前消息在日志中显示的行号
+        /// </summary>
+        public int CurLine { get; set; }
+
+        /// <summary>
+        /// case的编号
+        /// </summary>
         private string _caseNo;
         public string CaseNo
         {
@@ -25,6 +33,9 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// case内容
+        /// </summary>
         private string _caseInfo;
         public string CaseInfo
         {
@@ -35,6 +46,9 @@ namespace CardPlatform.Models
             }
         }
 
+        /// <summary>
+        /// 日志等级
+        /// </summary>
         private TipLevel _tipLevel;
         public TipLevel Level
         {

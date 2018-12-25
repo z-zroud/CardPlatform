@@ -14,12 +14,14 @@ using System.Threading;
 using GalaSoft.MvvmLight.Threading;
 using CardPlatform.Helper.EnumToListHelper;
 using CardPlatform.Cases;
+using System.Windows.Controls;
+using System.Windows;
 
 namespace CardPlatform.ViewModel
 {
     public class TransactionViewModel : ViewModelBase
     {
-        
+        protected static Log log = Log.CreateLog(Constant.LogPath);
         public TransactionViewModel()
         {
             Aids                        = new ObservableCollection<string>();
@@ -251,6 +253,26 @@ namespace CardPlatform.ViewModel
                 return _openTagInfoFileCmd;
             }
         }
+
+        private ICommand showLogCmd;
+        public ICommand ShowLogCmd
+        {
+            get
+            {
+                if(showLogCmd == null)
+                {
+                    showLogCmd = new RelayCommand<ListViewItem>(item =>
+                    {
+                        TransInfoModel transItem = item.Content as TransInfoModel;
+                        if(transItem != null)
+                        {
+                            log.ShowLogPos(transItem.CurLine);
+                        }
+                    });
+                }
+                return showLogCmd;
+            }
+        }
         #endregion
 
         private void LoadApp()
@@ -260,7 +282,7 @@ namespace CardPlatform.ViewModel
             Aids.Clear();
             CaseInfos.Clear();
             ErrorCaseInfos.Clear();
-
+            log.ClearLog();
             ApduResponse response = new ApduResponse();
             List<string> aids = new List<string>();
             ViewModelLocator locator = new ViewModelLocator();
@@ -283,7 +305,7 @@ namespace CardPlatform.ViewModel
                         aids = businessPPSE.SelectPPSE();
                         break;
                 }
-                DispatcherHelper.CheckBeginInvokeOnUI(() =>
+                DispatcherHelper.UIDispatcher.Invoke(() =>
                 {
                     if(aids != null)
                     {
@@ -345,7 +367,7 @@ namespace CardPlatform.ViewModel
             transConfig.TransCvcKey     = string.IsNullOrEmpty(CvcKey) ? string.Empty : CvcKey;
             transConfig.TransIdnKey     = string.IsNullOrEmpty(IdnKey) ? string.Empty : IdnKey;
             
-            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            DispatcherHelper.UIDispatcher.Invoke(() =>
             {
                 TransResult.Clear();
             });

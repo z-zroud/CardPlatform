@@ -225,23 +225,23 @@ namespace CardPlatform.Cases
             if (!string.IsNullOrEmpty(tag9F12) && string.IsNullOrEmpty(tag9F11)) //如果tag9F12存在，则tag9F11必须存在
             {
                 log.TraceLog("tag9F12=" + tag9F12);
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag9F12存在，但tag9F11不存在]");
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "==>[tag9F12存在，但tag9F11不存在]");
             }
             if (string.IsNullOrEmpty(tag9F11))
             {
                 log.TraceLog("tag9F11不存在");
-                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[tag9F11不存在]");
+                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "==>[tag9F11不存在]");
             }
             caseItem.Description += "tag9F11=" + tag9F11;
             log.TraceLog("tag9F11=" + tag9F11);
             log.TraceLog("长度为:{0}", tag9F11.Length / 2);
             var value = Convert.ToInt16(tag9F11, 16);
             log.TraceLog("值为:{0}", value);
-            if (tag9F11.Length / 2 == 1 && value >= 1 && value <= 0x10)
+            if (value > 0x10)
             {
-                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "==>[tag9F11={0},不在规范范围内(1-0x10)]",value);
             }
-            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -256,26 +256,25 @@ namespace CardPlatform.Cases
             if(string.IsNullOrEmpty(tag9F12))
             {
                 log.TraceLog("tag9F12不存在");
-                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "[tag9F12不存在]");
+                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description + "==>[tag9F12不存在]");
             }
             string value = UtilLib.Utils.BcdToStr(tag9F12);
 
             string tag50 = CaseUtil.GetTag("50", templateA5);
             if(tag50 != tag9F12)
             {
-                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[推荐tag50和tag9F12值一致]");
+                TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "==>[推荐tag50和tag9F12值一致]");
             }
             caseItem.Description += "[tag9F12=" + tag9F12 + "[转为字符串显示:" + value;
             log.TraceLog("tag9F12:{0}", tag9F12);
             log.TraceLog("转码为:{0}", value);
             log.TraceLog("长度为:{0}", tag9F12.Length / 2);
-            if (tag9F12.Length / 2 >= 1 &&
-                tag9F12.Length / 2 <= 16 &&
-                CaseUtil.IsAlphaAndBlank(value))
+
+            if (!CaseUtil.IsAlphaAndBlank(value))
             {
-                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "==>[tag9F12值为{0},存在非法字符]",value);
             }
-            return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -320,26 +319,22 @@ namespace CardPlatform.Cases
             var tag9F38 = CaseUtil.GetTag("9F38",tlvs);
             if (string.IsNullOrEmpty(tag9F38))
             {
-                if(transConfig.CurrentApp == AppType.qUICS_offline ||
-                    transConfig.CurrentApp == AppType.qUICS_online ||
-                    transConfig.CurrentApp == AppType.qUICS_online_without_ODA||
-                    transConfig.CurrentApp == AppType.qVSDC_offline ||
-                    transConfig.CurrentApp == AppType.qVSDC_online ||
-                    transConfig.CurrentApp == AppType.Paypass)
+                if(transConfig.IsUICSContactless() ||
+                    transConfig.IsqVSDC() ||
+                    transConfig.IsqUICS())
                 {
-                    return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[非接触式交易条件下tag9F38必备]");
+                    return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "==>[tag9F38不存在，非接触式交易条件下tag9F38必备]");
                 }
                 else
                 {
-                    return TraceInfo(TipLevel.Warn, caseNo, caseItem.Description + "[tag9F38不存在]");
-                }
-                
+                    return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "==>[tag9F38不存在]");
+                }    
             }
             var tls = DataParse.ParseTL(tag9F38);
-            caseItem.Description += "【tag9F38=" + tag9F38 + "】";
+            caseItem.Description += "[tag9F38=" + tag9F38 + "]";
             if (tls.Count == 0)  //分解不正确
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "无法分解tag9F38");
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "==>[tag9F38无法分解成TL格式]");
             }
             string tlList = "";
             foreach(var tl in tls)
@@ -352,11 +347,11 @@ namespace CardPlatform.Cases
                 var terminalData = locator.Terminal.GetTag(tl.Tag);
                 if (string.IsNullOrEmpty(terminalData))
                 {
-                    return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "终端数据[tag{0}]不存在，请联系开发人员添加该tag", tl.Tag);
+                    return TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "==>[终端数据[tag{0}]不存在，请联系开发人员添加该tag]", tl.Tag);
                 }
                 if (tl.Len * 2 != terminalData.Length)
                 {
-                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "tag" + tl.Tag + "长度为" + tl.Len + "终端规范长度为:" + terminalData.Length / 2);
+                    return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "==>[tag" + tl.Tag + "长度为" + tl.Len + "终端规范长度为:" + terminalData.Length / 2 + "]");
                 }
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
@@ -560,21 +555,17 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
 
             var templateBF0C = CaseUtil.GetSubTags("BF0C", tlvs);
-            var tag5F55 = templateBF0C.FirstOrDefault(tlv => tlv.Tag == "5F55");
-            if (tag5F55 == null)
+            var tag5F55 = CaseUtil.GetTag("5F55", templateBF0C);
+            if (string.IsNullOrEmpty(tag5F55))
             {
-                return TraceInfo(TipLevel.Warn, caseNo, "BF0C模板缺少tag5F55");
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "==>[选择应用BF0C模板无tag5F55]");
             }
-            if (tag5F55.Len != 2)
+            string value = UtilLib.Utils.BcdToStr(tag5F55);
+            if(!CaseUtil.IsLowerCaseAlpha(value))
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[tag5F55值为{0},存在非法字符,规范要求为小写英文字符",value);
             }
-            string value = UtilLib.Utils.BcdToStr(tag5F55.Value);
-            if(!CaseUtil.IsAlpha(value))
-            {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[不识别的ASCII码]");
-            }
-            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "[tag5F55值为:{0}]",value);
+            return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }
 
         /// <summary>
@@ -589,16 +580,16 @@ namespace CardPlatform.Cases
             var tag9F11 = CaseUtil.GetTag("9F11", tlvs);
             if(string.IsNullOrEmpty(tag9F11))
             {
-                return TraceInfo(TipLevel.Warn, caseNo, "选择应用A5模板下缺少9F11");
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "==>[选择应用A5模板下无tag9F11]");
             }
             var pse9F11 = TransactionTag.GetInstance().GetTag(TransactionStep.SelectPSE, "9F11");
             if(string.IsNullOrEmpty(pse9F11))
             {
-                return TraceInfo(TipLevel.Warn, caseNo, "PSE FCI中缺少9F11");
+                return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description + "==>[PSE FCI中无tag9F11]");
             }
             if(tag9F11 != pse9F11)
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[选择应用A5模板下tag9F11值为:{0},PSE FCI中tag9F11值为:{1}]",tag9F11,pse9F11);
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
         }

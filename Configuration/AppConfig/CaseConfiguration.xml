@@ -277,14 +277,14 @@
 				<CaseItem level="failed" num="GetData_003" desc="检测tag9F68卡片附加处理选项的规范性" />
 				<CaseItem level="failed" num="GetData_004" desc="检测Tag5F28与9F57发卡行国家代码的一致性" />
 				<CaseItem level="failed" num="GetData_005" desc="检测Tag9F42与9F51应用货币代码的一致性" />
-				<CaseItem level="failed" num="GetData_006" desc="检测tag9F54存在或卡片支持国际频度检测时，tag9F51必须存在" />
+				<CaseItem level="warn" num="GetData_006" desc="检测tag9F54存在或卡片支持国际频度检测时，tag9F51必须存在" />
 				<!--CaseItem level="failed" num="GetData_007" desc="检测tag9F5A，卡片所属区域，货币代码、国家代码与tag9F42,tag5F28的一致性" /-->
 			</StepCase>
 			<StepCase name="ProcessRestriction">
 				<CaseItem level="failed" num="ProcessRestriction_001" desc="检测Tag5F24应用失效日期,应用是否失效"/>
-				<CaseItem level="failed" num="ProcessRestriction_002" desc="检测Tag5F25应用生效日期，应用是否生效"/>
+				<CaseItem level="warn" num="ProcessRestriction_002" desc="检测Tag5F25应用生效日期，应用是否生效"/>
 				<CaseItem level="failed" num="ProcessRestriction_003" desc="检测Tag5F24和Tag5F25时间顺序关系是否正确"/>
-				<CaseItem level="failed" num="ProcessRestriction_004" desc="检测tag9F07是否符合规范"/>
+				<CaseItem level="tip" num="ProcessRestriction_004" desc="检测tag9F07是否符合规范"/>
 				<!--CaseItem level="failed" num="ProcessRestriction_005" desc="检测tag9F08应用版本号是否符合规范"/-->
 			</StepCase>
 			<StepCase name="CardHolderVerify">

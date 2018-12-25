@@ -102,7 +102,7 @@ namespace CardPlatform.Cases
         /// <param name="args"></param>
         public virtual TipLevel TraceInfo(TipLevel level, string caseNo, string format, params object[] args)
         {
-            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            DispatcherHelper.UIDispatcher.Invoke(() =>
             {
                 string description = string.Format(format, args);
                 string caseLevel = string.Empty;
@@ -111,6 +111,7 @@ namespace CardPlatform.Cases
                 caseInfo.CaseNo = caseNo;
                 caseInfo.CaseInfo = description;
                 caseInfo.Level = level;
+                caseInfo.CurLine = log.GetCurrentLine();
                 ViewModelLocator locator = new ViewModelLocator();
                 locator.Transaction.CaseInfos.Add(caseInfo);
 

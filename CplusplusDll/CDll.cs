@@ -192,6 +192,12 @@ namespace CplusplusDll
 
         [DllImport(@"Log.dll", EntryPoint = "TraceLog", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public extern static void TraceLog(int handle, string info);
+
+        [DllImport(@"Log.dll", EntryPoint = "ClearLog", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void ClearLog(int handle);
+
+        [DllImport(@"Log.dll", EntryPoint = "GetCurLine", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int GetCurLine();
         #endregion
     }
 }

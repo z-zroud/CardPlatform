@@ -106,7 +106,7 @@ namespace CardPlatform.Business
             bool isSucess = DoActualTransaction();  //开始执行交易流程检测
             WriteTagToSongJianFile();   //填写个人化信息表
             //将交易结果显示到UI中
-            DispatcherHelper.CheckBeginInvokeOnUI(() =>
+            DispatcherHelper.UIDispatcher.Invoke(() =>
             {
                 locator.Transaction.TransResult.Tag5A = transTags.GetTag("5A");
                 locator.Transaction.TransResult.Tag50 = Utils.BcdToStr(transTags.GetTag("50"));
@@ -365,8 +365,8 @@ namespace CardPlatform.Business
             if (transCfg.Algorithm == AlgorithmType.DES) //DES算法
             {
                 //获取发卡行公钥
-                string issuerPublicKeyRemainder = transTags.GetTag("92");
-                string issuerExp = transTags.GetTag("9F32");
+                string issuerPublicKeyRemainder = transTags.GetTag(TransactionStep.ReadRecord, "92");
+                string issuerExp = transTags.GetTag(TransactionStep.ReadRecord,"9F32");
                 issuerPublicKey = businessUtil.GenDesIssuerPublicKey(CAPublicKey, issuerPublicCert, issuerPublicKeyRemainder, issuerExp, tag5A, tag5F24);
                 if (string.IsNullOrWhiteSpace(issuerPublicKey))
                 {

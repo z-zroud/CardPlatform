@@ -591,7 +591,7 @@ namespace CardPlatform.Cases
             if (string.IsNullOrEmpty(tag9F42))
             {
                 var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
-                if(!string.IsNullOrEmpty(tag8E) && tag8E.Substring(0,16) != "00000000000000000")
+                if (!string.IsNullOrEmpty(tag8E) && tag8E.Substring(0,16) != "0000000000000000")
                     return TraceInfo(TipLevel.Warn, caseNo, "读数据中缺少tag9F42,如果8E中X,Y金额不为0，该数据必须存在");
                 return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
             }

@@ -23,3 +23,5 @@ extern "C" LOG_API void TraceWarn(log_t, const char* formatString, ...);
 extern "C" LOG_API void TraceDebug(log_t, const char* formatString, ...);
 extern "C" LOG_API void TraceError(log_t, const char* foramtString, ...);
 extern "C" LOG_API void TraceLog(log_t, const char* info);
+extern "C" LOG_API void ClearLog(log_t);
+extern "C" LOG_API int GetCurLine();

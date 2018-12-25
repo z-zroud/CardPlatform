@@ -80,15 +80,7 @@ namespace CardPlatform.Cases
 
             var tag8E = TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "8E");
             caseItem.Description += "tag8E=" + tag8E.Substring(16);
-            if(!tag8E.EndsWith("1F00"))
-            {
-                TraceInfo(TipLevel.Failed, caseNo, caseItem.Description + "[请确认最后验证方法1F00]");
-                tag8E = tag8E.Substring(16);
-            }
-            else
-            {
-                tag8E = tag8E.Substring(16, tag8E.Length - 20);
-            }
+            tag8E = tag8E.Substring(16, tag8E.Length - 20);
             string methodList = string.Empty;
             for (int i = 0; i < tag8E.Length; i += 4)
             {

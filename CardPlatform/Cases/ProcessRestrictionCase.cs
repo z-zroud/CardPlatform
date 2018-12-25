@@ -56,14 +56,14 @@ namespace CardPlatform.Cases
             var caseItem = GetCaseItem(caseNo);
             if(string.IsNullOrEmpty(tag5F25))
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag5F25]");
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "==>[IC卡缺少tag5F25]");
             }
-            log.TraceLog("tag5F25生效日期为:【{0}】", tag5F25);
-            log.TraceLog("当前日期为:【{0}】", DateTime.Now.ToString("yyMMdd"));
-            caseItem.Description += "【tag5F25=" + tag5F25 + "】";
+            log.TraceLog("tag5F25生效日期为:[{0}]", tag5F25);
+            log.TraceLog("当前日期为:[{0}]", DateTime.Now.ToString("yyMMdd"));
+            caseItem.Description += "==>[tag5F25=" + tag5F25 + "]";
             if (effectiveDate >= currentDate) // 应用未生效
             {
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "==>[tag5F25值为:{0},应用未生效]",tag5F25);
             }
             return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
 
@@ -82,8 +82,8 @@ namespace CardPlatform.Cases
             int.TryParse(DateTime.Now.ToString("yyMMdd"), out currentDate);
             var caseNo = MethodBase.GetCurrentMethod().Name;
             var caseItem = GetCaseItem(caseNo);
-            log.TraceLog("tag5F24失效日期为:【{0}】", TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F24"));
-            log.TraceLog("tag5F25生效日期为:【{0}】", TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F25"));
+            log.TraceLog("tag5F24失效日期为:[{0}]", TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F24"));
+            log.TraceLog("tag5F25生效日期为:[{0}]", TransactionTag.GetInstance().GetTag(TransactionStep.ReadRecord, "5F25"));
             if (expiryDate <= effectiveDate) //应用失效日期 大于生效日期
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
@@ -103,8 +103,8 @@ namespace CardPlatform.Cases
             {
                 return TraceInfo(caseItem.Level, caseNo, caseItem.Description + "[无法获取tag9F07]");
             }
-            caseItem.Description += "【tag9F07" + tag9F07 + "】";
-            log.TraceLog("tag9F07=【{0}】", tag9F07);
+            caseItem.Description += "[tag9F07值为:" + tag9F07 + "]";
+            log.TraceLog("tag9F07=[{0}]", tag9F07);
             if (tag9F07 == "FF00")
             {
                 return TraceInfo(TipLevel.Sucess, caseNo, caseItem.Description);
@@ -120,9 +120,9 @@ namespace CardPlatform.Cases
                 if ((auc & 0x0400) == 0) caseItem.Description += "[国际服务有效检测失败]";
                 if ((auc & 0x0200) == 0) caseItem.Description += "[ATM有效检测失败]";
                 if ((auc & 0x0100) == 0) caseItem.Description += "[除ATM外的终端有效检测失败]";
-                //if ((auc & 0x0080) == 0) caseItem.Description += "[允许国内返现检测失败]";
-                //if ((auc & 0x0040) == 0) caseItem.Description += "[允许国际返现检测失败]";
-                return TraceInfo(caseItem.Level, caseNo, caseItem.Description);
+                if ((auc & 0x0080) == 0) caseItem.Description += "[允许国内返现检测失败]";
+                if ((auc & 0x0040) == 0) caseItem.Description += "[允许国际返现检测失败]";
+                return TraceInfo(TipLevel.Tip, caseNo, caseItem.Description);
             }
         }
     }

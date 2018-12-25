@@ -105,6 +105,7 @@ namespace CardPlatform.Cases
             tagLenInfoDict.Add("9F6C", new TagLenAttribute(LenType.Fixed,0,0,2));
             tagLenInfoDict.Add("9F6E", new TagLenAttribute(LenType.Fixed,0,0,4));
             tagLenInfoDict.Add("9F72", new TagLenAttribute(LenType.Fixed, 0, 0, 1));
+            tagLenInfoDict.Add("9F73", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("9F77", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("9F78", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
             tagLenInfoDict.Add("9F79", new TagLenAttribute(LenType.Fixed, 0, 0, 6));
